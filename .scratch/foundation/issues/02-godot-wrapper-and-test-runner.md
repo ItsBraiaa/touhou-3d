@@ -1,6 +1,6 @@
 # F0-02 Godot wrapper and test runner
 
-Status: todo
+Status: done
 Type: core
 parallel-safe: no
 Depends on: F0-01
@@ -80,3 +80,9 @@ GUT, gdUnit, JUnit output, coverage, CI.
 ```
 Read CLAUDE.md, docs/engineering/ROADMAP.md and .scratch/foundation/issues/02-godot-wrapper-and-test-runner.md, then implement that ticket. Finish with its Definition of Done and commit.
 ```
+
+## Outcome (2026-09-21)
+
+- Delivered as specified, with three additions. `tools/test.ps1` refreshes the Godot class cache with a headless import (about three seconds) when a `.gd` file is newer than its last import stamp, because `class_name` resolution only works through `.godot/global_script_class_cache.cfg` and a fresh checkout would otherwise fail to load `extends TestCase`. The runner fails a test that makes no assertions and ends the run when one test exceeds a 30 s watchdog (`--timeout=<seconds>`). `signal_recorder()` returns a `SignalRecorder` object (`emissions`, `count()`, `last()`, `clear()`, `stop()`) instead of a bare Callable, held weakly on both sides so no reference cycle leaks.
+- `assert_eq` and `assert_ne` treat values of unrelated types as unequal; in Godot 4.7.2 `1 == "1"` is a runtime operand error, not `false`.
+- Verified: 14 self-check tests green with exit 0; exit 1 with a deliberately failing file and with a non-compiling file (both removed afterwards); `-Filter` through `tools/test.ps1` and `--` through `tools/godot.cmd`; no re-import on a plain rerun; no leaked ObjectDB instances; a clean run with every GDScript warning treated as an error via a temporary `project.godot` that was restored. Details in `docs/engineering/testing.md`.

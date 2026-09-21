@@ -15,6 +15,13 @@ Action required by <other agent>: <what they must do, or "none">
 
 ---
 
+## 2026-09-21 00:25 — Claude — Godot wrapper and headless test runner (F0-02)
+State: CODE_READY
+Files: `tools/godot.ps1`, `tools/godot.cmd`, `tools/test.ps1`, `tests/run_tests.gd`, `tests/framework/test_case.gd`, `tests/unit/framework/test_self_check.gd` and their `.uid` files, `docs/engineering/testing.md`, `docs/engineering/ROADMAP.md` (row F0-02 only), `.scratch/foundation/issues/02-godot-wrapper-and-test-runner.md`.
+Change: One command runs Godot (`tools/godot.ps1`, resolving `$env:GODOT_BIN` then the verified Downloads path) and one runs the tests (`tools/test.ps1`, exit 0 only when every test passed). `TestCase` provides the `assert_*` helpers, `before_each`/`after_each`, and `signal_recorder()`; the runner discovers `tests/unit/**` and `tests/scene/**`, awaits coroutine tests, honours `-Filter`, and fails on load errors, assertion-free tests, and hangs over 30 seconds. Because `class_name` resolution needs Godot's class cache in `.godot/`, `tools/test.ps1` runs a headless editor import (about three seconds) whenever a `.gd` file is newer than its last import. Self-check: 14 tests green; the exit-1 path and a warnings-as-errors run were verified.
+Why: Every Rules Core from ADR-0001 is tested headless from now on; a session needs one green/red command.
+Action required by Astra: none. `tools/godot.ps1` replaces "set `$godotExe` first" in the validation docs: `tools/godot.ps1 --headless --path . --script res://tools/validate_scene_handoff.gd`. The existing `tools/validate_*.gd` scripts keep working unchanged. Note that `tools/test.ps1` may create `.uid` files next to new scripts and import new assets, exactly as opening the editor does; commit `.uid` files with their scripts.
+
 ## 2026-09-21 — Astra — Stage 1 enemy visual variants
 State: SCENE_READY
 Files: `assets/models/enemies/`, `assets/licenses/quaternius-ultimate-monsters.txt`, `scenes/enemies/visuals/`, `scenes/tests/enemy_variants_preview.tscn`, `tools/build_enemy_visuals.gd`, `tools/validate_enemy_visuals.gd`, `docs/ENEMY_VISUAL_HANDOFF.md`, credits, roadmap, validation outputs.

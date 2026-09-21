@@ -18,7 +18,7 @@ Status values: `todo`, `doing`, `done`, `blocked`. Tickets live in `.scratch/<fe
 | # | Feature | Folder | Ticket | Type | Parallel-safe | Status |
 | --- | --- | --- | --- | --- | --- | --- |
 | F0 | Foundation | `foundation` | 01 git-init-and-ignores | docs | no | done |
-| | | | 02 godot-wrapper-and-test-runner | core | no | todo |
+| | | | 02 godot-wrapper-and-test-runner | core | no | done |
 | | | | 03 project-config-main-scene-buses-export | integration | no | todo |
 | | | | 04 guide-ownership-and-protocol-docs | docs | no | todo |
 | F1 | Player flight | `player-flight` | 01 flight-model-core | core | yes | todo |
