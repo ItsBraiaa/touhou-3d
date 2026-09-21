@@ -191,7 +191,7 @@ For shared scenes or project settings, announce the files being edited to the co
 | Lantern Guardian | Astra | Claude | PLANNED | Ghost selected; animation metadata inspected |
 | Storm Guardian | Astra | Claude | PLANNED | Dragon_Evolved selected; animation metadata inspected |
 | Stage 1 progression | Astra | Claude | SCENE_READY | Initial area, markers and collision authored; runtime progression pending; see [STAGE_01_HANDOFF.md](STAGE_01_HANDOFF.md) |
-| Stage 2 progression | Astra | Claude | PLANNED | S2-01 through S2-07 specified |
+| Stage 2 progression | Astra | Claude | SCENE_READY_STATIC | Seven encounters, three guarded seals, two checkpoints; [STAGE_02_HANDOFF.md](STAGE_02_HANDOFF.md) |
 | Checkpoints/gates/seals | Astra | Claude | PLANNED | Restore and objective rules specified |
 | Menus/options | Astra | Claude | SCENE_READY | Eight menu scenes rendered and checked; Section 14; navigation logic pending |
 | Combat HUD | Astra | Claude | SCENE_READY | Normal and synthetic boss states rendered at 1280 × 720; Section 15; gameplay binding pending |

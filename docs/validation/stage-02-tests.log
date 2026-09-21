@@ -1,0 +1,19 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+PASS res://tests/scene/test_stage_02_contract.gd::test_stage_02_spatial_contract
+PASS res://tests/unit/framework/test_self_check.gd::test_before_each_ran
+PASS res://tests/unit/framework/test_self_check.gd::test_assert_true_and_false
+PASS res://tests/unit/framework/test_self_check.gd::test_assert_eq_and_ne
+PASS res://tests/unit/framework/test_self_check.gd::test_assert_almost_eq
+PASS res://tests/unit/framework/test_self_check.gd::test_assert_null_and_not_null
+PASS res://tests/unit/framework/test_self_check.gd::test_assert_in
+PASS res://tests/unit/framework/test_self_check.gd::test_fail_records_and_returns_false
+PASS res://tests/unit/framework/test_self_check.gd::test_begin_test_resets_state
+PASS res://tests/unit/framework/test_self_check.gd::test_coroutine_is_awaited
+PASS res://tests/unit/framework/test_self_check.gd::test_tree_root_accepts_nodes
+PASS res://tests/unit/framework/test_self_check.gd::test_signal_recorder_records_arguments
+PASS res://tests/unit/framework/test_self_check.gd::test_signal_recorder_handles_zero_and_two_arguments
+PASS res://tests/unit/framework/test_self_check.gd::test_signal_recorder_reports_missing_signal
+PASS res://tests/unit/framework/test_self_check.gd::test_signal_recorder_survives_without_a_local_reference
+TESTS_PASSED 15
+TESTS_FAILED 0

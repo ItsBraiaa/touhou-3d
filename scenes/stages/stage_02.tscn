@@ -1,0 +1,2838 @@
+[gd_scene format=3]
+
+[sub_resource type="StandardMaterial3D" id="CheckpointTeal"]
+albedo_color = Color(0.12, 0.9, 0.73, 1)
+roughness = 0.9
+emission_enabled = true
+emission = Color(0.12, 0.9, 0.73, 1)
+emission_energy_multiplier = 1.8
+
+[sub_resource type="StandardMaterial3D" id="MountainRock"]
+albedo_color = Color(0.20, 0.25, 0.36, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="PaleSummit"]
+albedo_color = Color(0.55, 0.64, 0.73, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="Cloud"]
+albedo_color = Color(0.30, 0.38, 0.52, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="WindCyan"]
+albedo_color = Color(0.25, 0.75, 1.0, 1)
+roughness = 0.9
+emission_enabled = true
+emission = Color(0.25, 0.75, 1.0, 1)
+emission_energy_multiplier = 1.8
+
+[sub_resource type="StandardMaterial3D" id="StormViolet"]
+albedo_color = Color(0.70, 0.31, 1.0, 1)
+roughness = 0.9
+emission_enabled = true
+emission = Color(0.70, 0.31, 1.0, 1)
+emission_energy_multiplier = 1.8
+
+[sub_resource type="StandardMaterial3D" id="StormVeil"]
+albedo_color = Color(0.37, 0.25, 0.65, 0.025)
+roughness = 0.9
+transparency = 1
+cull_mode = 2
+shading_mode = 0
+
+[sub_resource type="ProceduralSkyMaterial" id="MountainSkyMaterial"]
+sky_top_color = Color(0.045, 0.055, 0.12, 1)
+sky_horizon_color = Color(0.31, 0.39, 0.54, 1)
+ground_bottom_color = Color(0.07, 0.09, 0.18, 1)
+ground_horizon_color = Color(0.31, 0.39, 0.54, 1)
+
+[sub_resource type="Sky" id="MountainSky"]
+sky_material = SubResource("MountainSkyMaterial")
+
+[sub_resource type="Environment" id="MountainEnvironment"]
+background_mode = 2
+sky = SubResource("MountainSky")
+ambient_light_source = 3
+ambient_light_color = Color(0.60, 0.70, 0.95, 1)
+ambient_light_energy = 0.7
+tonemap_mode = 2
+fog_enabled = true
+fog_density = 0.0015
+fog_light_color = Color(0.21, 0.26, 0.40, 1)
+glow_enabled = true
+
+[sub_resource type="BoxShape3D" id="Shape10"]
+size = Vector3(110, 10, 130)
+
+[sub_resource type="BoxMesh" id="Box11"]
+size = Vector3(110, 10, 130)
+material = SubResource("MountainRock")
+
+[sub_resource type="BoxShape3D" id="Shape12"]
+size = Vector3(110, 10, 105)
+
+[sub_resource type="BoxMesh" id="Box13"]
+size = Vector3(110, 10, 105)
+material = SubResource("MountainRock")
+
+[sub_resource type="BoxShape3D" id="Shape14"]
+size = Vector3(110, 10, 150)
+
+[sub_resource type="BoxMesh" id="Box15"]
+size = Vector3(110, 10, 150)
+material = SubResource("MountainRock")
+
+[sub_resource type="BoxShape3D" id="Shape16"]
+size = Vector3(110, 10, 105)
+
+[sub_resource type="BoxMesh" id="Box17"]
+size = Vector3(110, 10, 105)
+material = SubResource("MountainRock")
+
+[sub_resource type="BoxShape3D" id="Shape18"]
+size = Vector3(110, 10, 120)
+
+[sub_resource type="BoxMesh" id="Box19"]
+size = Vector3(110, 10, 120)
+material = SubResource("PaleSummit")
+
+[sub_resource type="BoxShape3D" id="Shape20"]
+size = Vector3(110, 10, 190)
+
+[sub_resource type="BoxMesh" id="Box21"]
+size = Vector3(110, 10, 190)
+material = SubResource("PaleSummit")
+
+[sub_resource type="BoxShape3D" id="Shape22"]
+size = Vector3(4, 160, 808)
+
+[sub_resource type="BoxShape3D" id="Shape23"]
+size = Vector3(4, 160, 808)
+
+[sub_resource type="BoxShape3D" id="Shape24"]
+size = Vector3(110, 160, 4)
+
+[sub_resource type="BoxShape3D" id="Shape25"]
+size = Vector3(110, 160, 4)
+
+[sub_resource type="BoxShape3D" id="Shape26"]
+size = Vector3(118, 4, 808)
+
+[sub_resource type="BoxShape3D" id="Shape27"]
+size = Vector3(110, 4, 800)
+
+[sub_resource type="CylinderMesh" id="Peak"]
+bottom_radius = 29
+top_radius = 2
+height = 110
+radial_segments = 5
+material = SubResource("MountainRock")
+
+[sub_resource type="CylinderMesh" id="SnowCap"]
+bottom_radius = 11
+top_radius = 0
+height = 42
+radial_segments = 5
+material = SubResource("PaleSummit")
+
+[sub_resource type="SphereMesh" id="CloudMesh"]
+radius = 32.0
+height = 12.0
+radial_segments = 12
+rings = 6
+material = SubResource("Cloud")
+
+[sub_resource type="CylinderMesh" id="WindShard"]
+bottom_radius = 0.4
+top_radius = 0
+height = 2.2
+radial_segments = 4
+material = SubResource("WindCyan")
+
+[sub_resource type="BoxShape3D" id="Shape32"]
+size = Vector3(110, 160, 1)
+
+[sub_resource type="BoxMesh" id="GateVeil1"]
+size = Vector3(110, 160, 0.1)
+material = SubResource("StormVeil")
+
+[sub_resource type="BoxShape3D" id="Shape34"]
+size = Vector3(2, 26, 3)
+
+[sub_resource type="BoxMesh" id="Box35"]
+size = Vector3(2, 26, 3)
+material = SubResource("MountainRock")
+
+[sub_resource type="BoxMesh" id="ArchLeftTrim"]
+size = Vector3(0.35, 14, 0.3)
+material = SubResource("StormViolet")
+
+[sub_resource type="BoxShape3D" id="Shape37"]
+size = Vector3(2, 26, 3)
+
+[sub_resource type="BoxMesh" id="Box38"]
+size = Vector3(2, 26, 3)
+material = SubResource("MountainRock")
+
+[sub_resource type="BoxMesh" id="ArchRightTrim"]
+size = Vector3(0.35, 14, 0.3)
+material = SubResource("StormViolet")
+
+[sub_resource type="BoxShape3D" id="Shape40"]
+size = Vector3(44, 2, 4)
+
+[sub_resource type="BoxMesh" id="Box41"]
+size = Vector3(44, 2, 4)
+material = SubResource("PaleSummit")
+
+[sub_resource type="BoxShape3D" id="Shape42"]
+size = Vector3(110, 160, 1)
+
+[sub_resource type="BoxMesh" id="GateVeil2"]
+size = Vector3(110, 160, 0.1)
+material = SubResource("StormVeil")
+
+[sub_resource type="BoxShape3D" id="Shape44"]
+size = Vector3(2, 26, 3)
+
+[sub_resource type="BoxMesh" id="Box45"]
+size = Vector3(2, 26, 3)
+material = SubResource("MountainRock")
+
+[sub_resource type="BoxMesh" id="ArchLeftTrim"]
+size = Vector3(0.35, 14, 0.3)
+material = SubResource("StormViolet")
+
+[sub_resource type="BoxShape3D" id="Shape47"]
+size = Vector3(2, 26, 3)
+
+[sub_resource type="BoxMesh" id="Box48"]
+size = Vector3(2, 26, 3)
+material = SubResource("MountainRock")
+
+[sub_resource type="BoxMesh" id="ArchRightTrim"]
+size = Vector3(0.35, 14, 0.3)
+material = SubResource("StormViolet")
+
+[sub_resource type="BoxShape3D" id="Shape50"]
+size = Vector3(44, 2, 4)
+
+[sub_resource type="BoxMesh" id="Box51"]
+size = Vector3(44, 2, 4)
+material = SubResource("PaleSummit")
+
+[sub_resource type="BoxShape3D" id="Shape52"]
+size = Vector3(110, 160, 1)
+
+[sub_resource type="BoxMesh" id="GateVeil3"]
+size = Vector3(110, 160, 0.1)
+material = SubResource("StormVeil")
+
+[sub_resource type="BoxShape3D" id="Shape54"]
+size = Vector3(2, 26, 3)
+
+[sub_resource type="BoxMesh" id="Box55"]
+size = Vector3(2, 26, 3)
+material = SubResource("MountainRock")
+
+[sub_resource type="BoxMesh" id="ArchLeftTrim"]
+size = Vector3(0.35, 14, 0.3)
+material = SubResource("StormViolet")
+
+[sub_resource type="BoxShape3D" id="Shape57"]
+size = Vector3(2, 26, 3)
+
+[sub_resource type="BoxMesh" id="Box58"]
+size = Vector3(2, 26, 3)
+material = SubResource("MountainRock")
+
+[sub_resource type="BoxMesh" id="ArchRightTrim"]
+size = Vector3(0.35, 14, 0.3)
+material = SubResource("StormViolet")
+
+[sub_resource type="BoxShape3D" id="Shape60"]
+size = Vector3(44, 2, 4)
+
+[sub_resource type="BoxMesh" id="Box61"]
+size = Vector3(44, 2, 4)
+material = SubResource("PaleSummit")
+
+[sub_resource type="BoxShape3D" id="Shape62"]
+size = Vector3(110, 160, 1)
+
+[sub_resource type="BoxMesh" id="GateVeil4"]
+size = Vector3(110, 160, 0.1)
+material = SubResource("StormVeil")
+
+[sub_resource type="BoxShape3D" id="Shape64"]
+size = Vector3(2, 26, 3)
+
+[sub_resource type="BoxMesh" id="Box65"]
+size = Vector3(2, 26, 3)
+material = SubResource("MountainRock")
+
+[sub_resource type="BoxMesh" id="ArchLeftTrim"]
+size = Vector3(0.35, 14, 0.3)
+material = SubResource("StormViolet")
+
+[sub_resource type="BoxShape3D" id="Shape67"]
+size = Vector3(2, 26, 3)
+
+[sub_resource type="BoxMesh" id="Box68"]
+size = Vector3(2, 26, 3)
+material = SubResource("MountainRock")
+
+[sub_resource type="BoxMesh" id="ArchRightTrim"]
+size = Vector3(0.35, 14, 0.3)
+material = SubResource("StormViolet")
+
+[sub_resource type="BoxShape3D" id="Shape70"]
+size = Vector3(44, 2, 4)
+
+[sub_resource type="BoxMesh" id="Box71"]
+size = Vector3(44, 2, 4)
+material = SubResource("PaleSummit")
+
+[sub_resource type="BoxShape3D" id="Shape72"]
+size = Vector3(110, 160, 1)
+
+[sub_resource type="BoxMesh" id="GateVeil5"]
+size = Vector3(110, 160, 0.1)
+material = SubResource("StormVeil")
+
+[sub_resource type="BoxShape3D" id="Shape74"]
+size = Vector3(2, 26, 3)
+
+[sub_resource type="BoxMesh" id="Box75"]
+size = Vector3(2, 26, 3)
+material = SubResource("MountainRock")
+
+[sub_resource type="BoxMesh" id="ArchLeftTrim"]
+size = Vector3(0.35, 14, 0.3)
+material = SubResource("StormViolet")
+
+[sub_resource type="BoxShape3D" id="Shape77"]
+size = Vector3(2, 26, 3)
+
+[sub_resource type="BoxMesh" id="Box78"]
+size = Vector3(2, 26, 3)
+material = SubResource("MountainRock")
+
+[sub_resource type="BoxMesh" id="ArchRightTrim"]
+size = Vector3(0.35, 14, 0.3)
+material = SubResource("StormViolet")
+
+[sub_resource type="BoxShape3D" id="Shape80"]
+size = Vector3(44, 2, 4)
+
+[sub_resource type="BoxMesh" id="Box81"]
+size = Vector3(44, 2, 4)
+material = SubResource("PaleSummit")
+
+[sub_resource type="BoxShape3D" id="AreaShape82"]
+size = Vector3(110, 160, 4)
+
+[sub_resource type="BoxShape3D" id="AreaShape83"]
+size = Vector3(110, 160, 4)
+
+[sub_resource type="BoxShape3D" id="AreaShape84"]
+size = Vector3(110, 160, 4)
+
+[sub_resource type="BoxShape3D" id="AreaShape85"]
+size = Vector3(110, 160, 4)
+
+[sub_resource type="BoxShape3D" id="AreaShape86"]
+size = Vector3(110, 160, 4)
+
+[sub_resource type="BoxShape3D" id="AreaShape87"]
+size = Vector3(110, 160, 4)
+
+[sub_resource type="BoxShape3D" id="AreaShape88"]
+size = Vector3(110, 160, 4)
+
+[sub_resource type="BoxShape3D" id="AreaShape89"]
+size = Vector3(110, 160, 4)
+
+[sub_resource type="BoxShape3D" id="AreaShape90"]
+size = Vector3(110, 160, 4)
+
+[sub_resource type="BoxShape3D" id="AreaShape91"]
+size = Vector3(110, 160, 4)
+
+[sub_resource type="BoxShape3D" id="AreaShape92"]
+size = Vector3(110, 160, 4)
+
+[sub_resource type="BoxShape3D" id="AreaShape93"]
+size = Vector3(110, 160, 4)
+
+[sub_resource type="BoxShape3D" id="AreaShape94"]
+size = Vector3(110, 160, 4)
+
+[sub_resource type="BoxShape3D" id="AreaShape95"]
+size = Vector3(110, 160, 4)
+
+[sub_resource type="CylinderMesh" id="SealCrystal"]
+bottom_radius = 1.7
+top_radius = 0
+height = 5
+radial_segments = 6
+material = SubResource("StormViolet")
+
+[sub_resource type="SphereMesh" id="SealShield"]
+radius = 3.4
+height = 6.8
+material = SubResource("StormVeil")
+
+[sub_resource type="TorusMesh" id="SealRing"]
+inner_radius = 3.6
+outer_radius = 4.0
+rings = 32
+ring_segments = 6
+material = SubResource("WindCyan")
+
+[sub_resource type="BoxShape3D" id="AreaShape99"]
+size = Vector3(24, 22, 30)
+
+[sub_resource type="SphereShape3D" id="SealHit1"]
+radius = 1.7
+
+[sub_resource type="BoxMesh" id="GuardLink11"]
+size = Vector3(0.12, 0.12, 9.8995)
+material = SubResource("StormViolet")
+
+[sub_resource type="BoxMesh" id="GuardLink12"]
+size = Vector3(0.12, 0.12, 9.8995)
+material = SubResource("StormViolet")
+
+[sub_resource type="BoxShape3D" id="AreaShape103"]
+size = Vector3(24, 22, 30)
+
+[sub_resource type="SphereShape3D" id="SealHit2"]
+radius = 1.7
+
+[sub_resource type="BoxMesh" id="GuardLink21"]
+size = Vector3(0.12, 0.12, 9.8995)
+material = SubResource("StormViolet")
+
+[sub_resource type="BoxMesh" id="GuardLink22"]
+size = Vector3(0.12, 0.12, 9.8995)
+material = SubResource("StormViolet")
+
+[sub_resource type="BoxShape3D" id="AreaShape107"]
+size = Vector3(24, 22, 30)
+
+[sub_resource type="SphereShape3D" id="SealHit3"]
+radius = 1.7
+
+[sub_resource type="BoxMesh" id="GuardLink31"]
+size = Vector3(0.12, 0.12, 9.8995)
+material = SubResource("StormViolet")
+
+[sub_resource type="BoxMesh" id="GuardLink32"]
+size = Vector3(0.12, 0.12, 9.8995)
+material = SubResource("StormViolet")
+
+[sub_resource type="BoxShape3D" id="AreaShape111"]
+size = Vector3(38, 26, 6)
+
+[sub_resource type="BoxShape3D" id="Shape112"]
+size = Vector3(2, 26, 3)
+
+[sub_resource type="BoxMesh" id="Box113"]
+size = Vector3(2, 26, 3)
+material = SubResource("MountainRock")
+
+[sub_resource type="BoxMesh" id="CP2_AArchLeftTrim"]
+size = Vector3(0.35, 14, 0.3)
+material = SubResource("CheckpointTeal")
+
+[sub_resource type="BoxShape3D" id="Shape115"]
+size = Vector3(2, 26, 3)
+
+[sub_resource type="BoxMesh" id="Box116"]
+size = Vector3(2, 26, 3)
+material = SubResource("MountainRock")
+
+[sub_resource type="BoxMesh" id="CP2_AArchRightTrim"]
+size = Vector3(0.35, 14, 0.3)
+material = SubResource("CheckpointTeal")
+
+[sub_resource type="BoxShape3D" id="Shape118"]
+size = Vector3(44, 2, 4)
+
+[sub_resource type="BoxMesh" id="Box119"]
+size = Vector3(44, 2, 4)
+material = SubResource("PaleSummit")
+
+[sub_resource type="BoxShape3D" id="AreaShape120"]
+size = Vector3(38, 26, 6)
+
+[sub_resource type="BoxShape3D" id="Shape121"]
+size = Vector3(2, 26, 3)
+
+[sub_resource type="BoxMesh" id="Box122"]
+size = Vector3(2, 26, 3)
+material = SubResource("MountainRock")
+
+[sub_resource type="BoxMesh" id="CP2_BArchLeftTrim"]
+size = Vector3(0.35, 14, 0.3)
+material = SubResource("CheckpointTeal")
+
+[sub_resource type="BoxShape3D" id="Shape124"]
+size = Vector3(2, 26, 3)
+
+[sub_resource type="BoxMesh" id="Box125"]
+size = Vector3(2, 26, 3)
+material = SubResource("MountainRock")
+
+[sub_resource type="BoxMesh" id="CP2_BArchRightTrim"]
+size = Vector3(0.35, 14, 0.3)
+material = SubResource("CheckpointTeal")
+
+[sub_resource type="BoxShape3D" id="Shape127"]
+size = Vector3(44, 2, 4)
+
+[sub_resource type="BoxMesh" id="Box128"]
+size = Vector3(44, 2, 4)
+material = SubResource("PaleSummit")
+
+[sub_resource type="CylinderMesh" id="DuelPlatform"]
+bottom_radius = 35
+top_radius = 35
+height = 2
+radial_segments = 48
+material = SubResource("MountainRock")
+
+[sub_resource type="CylinderShape3D" id="DuelPlatformShape"]
+radius = 35
+height = 2.0
+
+[sub_resource type="TorusMesh" id="DuelRim"]
+inner_radius = 34
+outer_radius = 34.5
+rings = 64
+ring_segments = 6
+material = SubResource("WindCyan")
+
+[sub_resource type="CylinderMesh" id="SummitPlatform"]
+bottom_radius = 48
+top_radius = 48
+height = 2
+radial_segments = 48
+material = SubResource("MountainRock")
+
+[sub_resource type="CylinderShape3D" id="SummitPlatformShape"]
+radius = 48
+height = 2.0
+
+[sub_resource type="TorusMesh" id="SummitRim"]
+inner_radius = 47
+outer_radius = 47.5
+rings = 64
+ring_segments = 6
+material = SubResource("WindCyan")
+
+[sub_resource type="BoxShape3D" id="Shape135"]
+size = Vector3(2, 26, 3)
+
+[sub_resource type="BoxMesh" id="Box136"]
+size = Vector3(2, 26, 3)
+material = SubResource("MountainRock")
+
+[sub_resource type="BoxMesh" id="SummitThresholdLeftTrim"]
+size = Vector3(0.35, 14, 0.3)
+material = SubResource("WindCyan")
+
+[sub_resource type="BoxShape3D" id="Shape138"]
+size = Vector3(2, 26, 3)
+
+[sub_resource type="BoxMesh" id="Box139"]
+size = Vector3(2, 26, 3)
+material = SubResource("MountainRock")
+
+[sub_resource type="BoxMesh" id="SummitThresholdRightTrim"]
+size = Vector3(0.35, 14, 0.3)
+material = SubResource("WindCyan")
+
+[sub_resource type="BoxShape3D" id="Shape141"]
+size = Vector3(44, 2, 4)
+
+[sub_resource type="BoxMesh" id="Box142"]
+size = Vector3(44, 2, 4)
+material = SubResource("PaleSummit")
+
+[node name="Stage" type="Node3D"]
+metadata/stage_id = "stage_02"
+metadata/handoff_state = "SCENE_READY_STATIC"
+
+[node name="Environment" type="Node3D" parent="."]
+
+
+[node name="Geometry" type="Node3D" parent="."]
+
+
+[node name="Encounters" type="Node3D" parent="."]
+
+
+[node name="Checkpoints" type="Node3D" parent="."]
+
+
+[node name="Gates" type="Node3D" parent="."]
+
+
+[node name="RuntimeActors" type="Node3D" parent="."]
+
+
+[node name="FlightBounds" type="Node3D" parent="."]
+
+
+[node name="Limits" type="Marker3D" parent="FlightBounds"]
+metadata/min = Vector3(-55, 0, -760)
+metadata/max = Vector3(55, 160, 40)
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="Environment"]
+environment = SubResource("MountainEnvironment")
+
+[node name="StormLight" type="DirectionalLight3D" parent="Environment"]
+rotation_degrees = Vector3(-42, -32, 0)
+light_color = Color(0.72, 0.82, 1, 1)
+light_energy = 1.5
+shadow_enabled = true
+
+[node name="Approach" type="StaticBody3D" parent="Geometry"]
+position = Vector3(0, -5, -25.0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Geometry/Approach"]
+shape = SubResource("Shape10")
+
+[node name="Mesh" type="MeshInstance3D" parent="Geometry/Approach"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box11")
+
+
+[node name="Ledges" type="StaticBody3D" parent="Geometry"]
+position = Vector3(0, 9, -142.5)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Geometry/Ledges"]
+shape = SubResource("Shape12")
+
+[node name="Mesh" type="MeshInstance3D" parent="Geometry/Ledges"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box13")
+
+
+[node name="Basin" type="StaticBody3D" parent="Geometry"]
+position = Vector3(0, 20, -270.0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Geometry/Basin"]
+shape = SubResource("Shape14")
+
+[node name="Mesh" type="MeshInstance3D" parent="Geometry/Basin"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box15")
+
+
+[node name="Duel" type="StaticBody3D" parent="Geometry"]
+position = Vector3(0, 43, -397.5)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Geometry/Duel"]
+shape = SubResource("Shape16")
+
+[node name="Mesh" type="MeshInstance3D" parent="Geometry/Duel"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box17")
+
+
+[node name="Ascent" type="StaticBody3D" parent="Geometry"]
+position = Vector3(0, 60, -510.0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Geometry/Ascent"]
+shape = SubResource("Shape18")
+
+[node name="Mesh" type="MeshInstance3D" parent="Geometry/Ascent"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box19")
+
+
+[node name="Summit" type="StaticBody3D" parent="Geometry"]
+position = Vector3(0, 78, -665.0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Geometry/Summit"]
+shape = SubResource("Shape20")
+
+[node name="Mesh" type="MeshInstance3D" parent="Geometry/Summit"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box21")
+
+
+[node name="West" type="StaticBody3D" parent="FlightBounds"]
+position = Vector3(-57, 80, -360)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="FlightBounds/West"]
+shape = SubResource("Shape22")
+
+[node name="East" type="StaticBody3D" parent="FlightBounds"]
+position = Vector3(57, 80, -360)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="FlightBounds/East"]
+shape = SubResource("Shape23")
+
+[node name="Entrance" type="StaticBody3D" parent="FlightBounds"]
+position = Vector3(0, 80, 42)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="FlightBounds/Entrance"]
+shape = SubResource("Shape24")
+
+[node name="End" type="StaticBody3D" parent="FlightBounds"]
+position = Vector3(0, 80, -762)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="FlightBounds/End"]
+shape = SubResource("Shape25")
+
+[node name="Ceiling" type="StaticBody3D" parent="FlightBounds"]
+position = Vector3(0, 162, -360)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="FlightBounds/Ceiling"]
+shape = SubResource("Shape26")
+
+[node name="Floor" type="StaticBody3D" parent="FlightBounds"]
+position = Vector3(0, -2, -360)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="FlightBounds/Floor"]
+shape = SubResource("Shape27")
+
+[node name="PlayerStart" type="Marker3D" parent="."]
+position = Vector3(0, 10, 25)
+
+
+[node name="Peaks" type="Node3D" parent="Environment"]
+
+
+[node name="Peak0" type="Node3D" parent="Environment/Peaks"]
+position = Vector3(-90, 0, 25)
+rotation_degrees = Vector3(0, 0, 0)
+
+[node name="Rock" type="MeshInstance3D" parent="Environment/Peaks/Peak0"]
+position = Vector3(0, 28, 0)
+mesh = SubResource("Peak")
+
+
+[node name="Snow" type="MeshInstance3D" parent="Environment/Peaks/Peak0"]
+position = Vector3(0, 82, 0)
+mesh = SubResource("SnowCap")
+
+
+[node name="Peak1" type="Node3D" parent="Environment/Peaks"]
+position = Vector3(99, 0, 25)
+rotation_degrees = Vector3(0, 37, 0)
+
+[node name="Rock" type="MeshInstance3D" parent="Environment/Peaks/Peak1"]
+position = Vector3(0, 28, 0)
+mesh = SubResource("Peak")
+
+
+[node name="Snow" type="MeshInstance3D" parent="Environment/Peaks/Peak1"]
+position = Vector3(0, 82, 0)
+mesh = SubResource("SnowCap")
+
+
+[node name="Peak2" type="Node3D" parent="Environment/Peaks"]
+position = Vector3(-108, 0, -29)
+rotation_degrees = Vector3(0, 74, 0)
+
+[node name="Rock" type="MeshInstance3D" parent="Environment/Peaks/Peak2"]
+position = Vector3(0, 28, 0)
+mesh = SubResource("Peak")
+
+
+[node name="Snow" type="MeshInstance3D" parent="Environment/Peaks/Peak2"]
+position = Vector3(0, 82, 0)
+mesh = SubResource("SnowCap")
+
+
+[node name="Peak3" type="Node3D" parent="Environment/Peaks"]
+position = Vector3(90, 0, -29)
+rotation_degrees = Vector3(0, 111, 0)
+
+[node name="Rock" type="MeshInstance3D" parent="Environment/Peaks/Peak3"]
+position = Vector3(0, 28, 0)
+mesh = SubResource("Peak")
+
+
+[node name="Snow" type="MeshInstance3D" parent="Environment/Peaks/Peak3"]
+position = Vector3(0, 82, 0)
+mesh = SubResource("SnowCap")
+
+
+[node name="Peak4" type="Node3D" parent="Environment/Peaks"]
+position = Vector3(-99, 0, -83)
+rotation_degrees = Vector3(0, 148, 0)
+
+[node name="Rock" type="MeshInstance3D" parent="Environment/Peaks/Peak4"]
+position = Vector3(0, 28, 0)
+mesh = SubResource("Peak")
+
+
+[node name="Snow" type="MeshInstance3D" parent="Environment/Peaks/Peak4"]
+position = Vector3(0, 82, 0)
+mesh = SubResource("SnowCap")
+
+
+[node name="Peak5" type="Node3D" parent="Environment/Peaks"]
+position = Vector3(108, 0, -83)
+rotation_degrees = Vector3(0, 185, 0)
+
+[node name="Rock" type="MeshInstance3D" parent="Environment/Peaks/Peak5"]
+position = Vector3(0, 28, 0)
+mesh = SubResource("Peak")
+
+
+[node name="Snow" type="MeshInstance3D" parent="Environment/Peaks/Peak5"]
+position = Vector3(0, 82, 0)
+mesh = SubResource("SnowCap")
+
+
+[node name="Peak6" type="Node3D" parent="Environment/Peaks"]
+position = Vector3(-90, 14, -137)
+rotation_degrees = Vector3(0, 222, 0)
+
+[node name="Rock" type="MeshInstance3D" parent="Environment/Peaks/Peak6"]
+position = Vector3(0, 28, 0)
+mesh = SubResource("Peak")
+
+
+[node name="Snow" type="MeshInstance3D" parent="Environment/Peaks/Peak6"]
+position = Vector3(0, 82, 0)
+mesh = SubResource("SnowCap")
+
+
+[node name="Peak7" type="Node3D" parent="Environment/Peaks"]
+position = Vector3(99, 14, -137)
+rotation_degrees = Vector3(0, 259, 0)
+
+[node name="Rock" type="MeshInstance3D" parent="Environment/Peaks/Peak7"]
+position = Vector3(0, 28, 0)
+mesh = SubResource("Peak")
+
+
+[node name="Snow" type="MeshInstance3D" parent="Environment/Peaks/Peak7"]
+position = Vector3(0, 82, 0)
+mesh = SubResource("SnowCap")
+
+
+[node name="Peak8" type="Node3D" parent="Environment/Peaks"]
+position = Vector3(-108, 14, -191)
+rotation_degrees = Vector3(0, 296, 0)
+
+[node name="Rock" type="MeshInstance3D" parent="Environment/Peaks/Peak8"]
+position = Vector3(0, 28, 0)
+mesh = SubResource("Peak")
+
+
+[node name="Snow" type="MeshInstance3D" parent="Environment/Peaks/Peak8"]
+position = Vector3(0, 82, 0)
+mesh = SubResource("SnowCap")
+
+
+[node name="Peak9" type="Node3D" parent="Environment/Peaks"]
+position = Vector3(90, 14, -191)
+rotation_degrees = Vector3(0, 333, 0)
+
+[node name="Rock" type="MeshInstance3D" parent="Environment/Peaks/Peak9"]
+position = Vector3(0, 28, 0)
+mesh = SubResource("Peak")
+
+
+[node name="Snow" type="MeshInstance3D" parent="Environment/Peaks/Peak9"]
+position = Vector3(0, 82, 0)
+mesh = SubResource("SnowCap")
+
+
+[node name="Peak10" type="Node3D" parent="Environment/Peaks"]
+position = Vector3(-99, 25, -245)
+rotation_degrees = Vector3(0, 10, 0)
+
+[node name="Rock" type="MeshInstance3D" parent="Environment/Peaks/Peak10"]
+position = Vector3(0, 28, 0)
+mesh = SubResource("Peak")
+
+
+[node name="Snow" type="MeshInstance3D" parent="Environment/Peaks/Peak10"]
+position = Vector3(0, 82, 0)
+mesh = SubResource("SnowCap")
+
+
+[node name="Peak11" type="Node3D" parent="Environment/Peaks"]
+position = Vector3(108, 25, -245)
+rotation_degrees = Vector3(0, 47, 0)
+
+[node name="Rock" type="MeshInstance3D" parent="Environment/Peaks/Peak11"]
+position = Vector3(0, 28, 0)
+mesh = SubResource("Peak")
+
+
+[node name="Snow" type="MeshInstance3D" parent="Environment/Peaks/Peak11"]
+position = Vector3(0, 82, 0)
+mesh = SubResource("SnowCap")
+
+
+[node name="Peak12" type="Node3D" parent="Environment/Peaks"]
+position = Vector3(-90, 25, -299)
+rotation_degrees = Vector3(0, 84, 0)
+
+[node name="Rock" type="MeshInstance3D" parent="Environment/Peaks/Peak12"]
+position = Vector3(0, 28, 0)
+mesh = SubResource("Peak")
+
+
+[node name="Snow" type="MeshInstance3D" parent="Environment/Peaks/Peak12"]
+position = Vector3(0, 82, 0)
+mesh = SubResource("SnowCap")
+
+
+[node name="Peak13" type="Node3D" parent="Environment/Peaks"]
+position = Vector3(99, 25, -299)
+rotation_degrees = Vector3(0, 121, 0)
+
+[node name="Rock" type="MeshInstance3D" parent="Environment/Peaks/Peak13"]
+position = Vector3(0, 28, 0)
+mesh = SubResource("Peak")
+
+
+[node name="Snow" type="MeshInstance3D" parent="Environment/Peaks/Peak13"]
+position = Vector3(0, 82, 0)
+mesh = SubResource("SnowCap")
+
+
+[node name="Peak14" type="Node3D" parent="Environment/Peaks"]
+position = Vector3(-108, 48, -353)
+rotation_degrees = Vector3(0, 158, 0)
+
+[node name="Rock" type="MeshInstance3D" parent="Environment/Peaks/Peak14"]
+position = Vector3(0, 28, 0)
+mesh = SubResource("Peak")
+
+
+[node name="Snow" type="MeshInstance3D" parent="Environment/Peaks/Peak14"]
+position = Vector3(0, 82, 0)
+mesh = SubResource("SnowCap")
+
+
+[node name="Peak15" type="Node3D" parent="Environment/Peaks"]
+position = Vector3(90, 48, -353)
+rotation_degrees = Vector3(0, 195, 0)
+
+[node name="Rock" type="MeshInstance3D" parent="Environment/Peaks/Peak15"]
+position = Vector3(0, 28, 0)
+mesh = SubResource("Peak")
+
+
+[node name="Snow" type="MeshInstance3D" parent="Environment/Peaks/Peak15"]
+position = Vector3(0, 82, 0)
+mesh = SubResource("SnowCap")
+
+
+[node name="Peak16" type="Node3D" parent="Environment/Peaks"]
+position = Vector3(-99, 48, -407)
+rotation_degrees = Vector3(0, 232, 0)
+
+[node name="Rock" type="MeshInstance3D" parent="Environment/Peaks/Peak16"]
+position = Vector3(0, 28, 0)
+mesh = SubResource("Peak")
+
+
+[node name="Snow" type="MeshInstance3D" parent="Environment/Peaks/Peak16"]
+position = Vector3(0, 82, 0)
+mesh = SubResource("SnowCap")
+
+
+[node name="Peak17" type="Node3D" parent="Environment/Peaks"]
+position = Vector3(108, 48, -407)
+rotation_degrees = Vector3(0, 269, 0)
+
+[node name="Rock" type="MeshInstance3D" parent="Environment/Peaks/Peak17"]
+position = Vector3(0, 28, 0)
+mesh = SubResource("Peak")
+
+
+[node name="Snow" type="MeshInstance3D" parent="Environment/Peaks/Peak17"]
+position = Vector3(0, 82, 0)
+mesh = SubResource("SnowCap")
+
+
+[node name="Peak18" type="Node3D" parent="Environment/Peaks"]
+position = Vector3(-90, 65, -461)
+rotation_degrees = Vector3(0, 306, 0)
+
+[node name="Rock" type="MeshInstance3D" parent="Environment/Peaks/Peak18"]
+position = Vector3(0, 28, 0)
+mesh = SubResource("Peak")
+
+
+[node name="Snow" type="MeshInstance3D" parent="Environment/Peaks/Peak18"]
+position = Vector3(0, 82, 0)
+mesh = SubResource("SnowCap")
+
+
+[node name="Peak19" type="Node3D" parent="Environment/Peaks"]
+position = Vector3(99, 65, -461)
+rotation_degrees = Vector3(0, 343, 0)
+
+[node name="Rock" type="MeshInstance3D" parent="Environment/Peaks/Peak19"]
+position = Vector3(0, 28, 0)
+mesh = SubResource("Peak")
+
+
+[node name="Snow" type="MeshInstance3D" parent="Environment/Peaks/Peak19"]
+position = Vector3(0, 82, 0)
+mesh = SubResource("SnowCap")
+
+
+[node name="Peak20" type="Node3D" parent="Environment/Peaks"]
+position = Vector3(-108, 65, -515)
+rotation_degrees = Vector3(0, 20, 0)
+
+[node name="Rock" type="MeshInstance3D" parent="Environment/Peaks/Peak20"]
+position = Vector3(0, 28, 0)
+mesh = SubResource("Peak")
+
+
+[node name="Snow" type="MeshInstance3D" parent="Environment/Peaks/Peak20"]
+position = Vector3(0, 82, 0)
+mesh = SubResource("SnowCap")
+
+
+[node name="Peak21" type="Node3D" parent="Environment/Peaks"]
+position = Vector3(90, 65, -515)
+rotation_degrees = Vector3(0, 57, 0)
+
+[node name="Rock" type="MeshInstance3D" parent="Environment/Peaks/Peak21"]
+position = Vector3(0, 28, 0)
+mesh = SubResource("Peak")
+
+
+[node name="Snow" type="MeshInstance3D" parent="Environment/Peaks/Peak21"]
+position = Vector3(0, 82, 0)
+mesh = SubResource("SnowCap")
+
+
+[node name="Peak22" type="Node3D" parent="Environment/Peaks"]
+position = Vector3(-99, 65, -569)
+rotation_degrees = Vector3(0, 94, 0)
+
+[node name="Rock" type="MeshInstance3D" parent="Environment/Peaks/Peak22"]
+position = Vector3(0, 28, 0)
+mesh = SubResource("Peak")
+
+
+[node name="Snow" type="MeshInstance3D" parent="Environment/Peaks/Peak22"]
+position = Vector3(0, 82, 0)
+mesh = SubResource("SnowCap")
+
+
+[node name="Peak23" type="Node3D" parent="Environment/Peaks"]
+position = Vector3(108, 65, -569)
+rotation_degrees = Vector3(0, 131, 0)
+
+[node name="Rock" type="MeshInstance3D" parent="Environment/Peaks/Peak23"]
+position = Vector3(0, 28, 0)
+mesh = SubResource("Peak")
+
+
+[node name="Snow" type="MeshInstance3D" parent="Environment/Peaks/Peak23"]
+position = Vector3(0, 82, 0)
+mesh = SubResource("SnowCap")
+
+
+[node name="Peak24" type="Node3D" parent="Environment/Peaks"]
+position = Vector3(-90, 83, -623)
+rotation_degrees = Vector3(0, 168, 0)
+
+[node name="Rock" type="MeshInstance3D" parent="Environment/Peaks/Peak24"]
+position = Vector3(0, 28, 0)
+mesh = SubResource("Peak")
+
+
+[node name="Snow" type="MeshInstance3D" parent="Environment/Peaks/Peak24"]
+position = Vector3(0, 82, 0)
+mesh = SubResource("SnowCap")
+
+
+[node name="Peak25" type="Node3D" parent="Environment/Peaks"]
+position = Vector3(99, 83, -623)
+rotation_degrees = Vector3(0, 205, 0)
+
+[node name="Rock" type="MeshInstance3D" parent="Environment/Peaks/Peak25"]
+position = Vector3(0, 28, 0)
+mesh = SubResource("Peak")
+
+
+[node name="Snow" type="MeshInstance3D" parent="Environment/Peaks/Peak25"]
+position = Vector3(0, 82, 0)
+mesh = SubResource("SnowCap")
+
+
+[node name="Peak26" type="Node3D" parent="Environment/Peaks"]
+position = Vector3(-108, 83, -677)
+rotation_degrees = Vector3(0, 242, 0)
+
+[node name="Rock" type="MeshInstance3D" parent="Environment/Peaks/Peak26"]
+position = Vector3(0, 28, 0)
+mesh = SubResource("Peak")
+
+
+[node name="Snow" type="MeshInstance3D" parent="Environment/Peaks/Peak26"]
+position = Vector3(0, 82, 0)
+mesh = SubResource("SnowCap")
+
+
+[node name="Peak27" type="Node3D" parent="Environment/Peaks"]
+position = Vector3(90, 83, -677)
+rotation_degrees = Vector3(0, 279, 0)
+
+[node name="Rock" type="MeshInstance3D" parent="Environment/Peaks/Peak27"]
+position = Vector3(0, 28, 0)
+mesh = SubResource("Peak")
+
+
+[node name="Snow" type="MeshInstance3D" parent="Environment/Peaks/Peak27"]
+position = Vector3(0, 82, 0)
+mesh = SubResource("SnowCap")
+
+
+[node name="Peak28" type="Node3D" parent="Environment/Peaks"]
+position = Vector3(-99, 83, -731)
+rotation_degrees = Vector3(0, 316, 0)
+
+[node name="Rock" type="MeshInstance3D" parent="Environment/Peaks/Peak28"]
+position = Vector3(0, 28, 0)
+mesh = SubResource("Peak")
+
+
+[node name="Snow" type="MeshInstance3D" parent="Environment/Peaks/Peak28"]
+position = Vector3(0, 82, 0)
+mesh = SubResource("SnowCap")
+
+
+[node name="Peak29" type="Node3D" parent="Environment/Peaks"]
+position = Vector3(108, 83, -731)
+rotation_degrees = Vector3(0, 353, 0)
+
+[node name="Rock" type="MeshInstance3D" parent="Environment/Peaks/Peak29"]
+position = Vector3(0, 28, 0)
+mesh = SubResource("Peak")
+
+
+[node name="Snow" type="MeshInstance3D" parent="Environment/Peaks/Peak29"]
+position = Vector3(0, 82, 0)
+mesh = SubResource("SnowCap")
+
+
+[node name="Clouds" type="Node3D" parent="Environment"]
+
+
+[node name="Cloud0" type="MeshInstance3D" parent="Environment/Clouds"]
+position = Vector3(95, -12, 10)
+mesh = SubResource("CloudMesh")
+
+
+[node name="Cloud1" type="MeshInstance3D" parent="Environment/Clouds"]
+position = Vector3(-95, -12, -33)
+mesh = SubResource("CloudMesh")
+
+
+[node name="Cloud2" type="MeshInstance3D" parent="Environment/Clouds"]
+position = Vector3(95, -12, -76)
+mesh = SubResource("CloudMesh")
+
+
+[node name="Cloud3" type="MeshInstance3D" parent="Environment/Clouds"]
+position = Vector3(-95, 2, -119)
+mesh = SubResource("CloudMesh")
+
+
+[node name="Cloud4" type="MeshInstance3D" parent="Environment/Clouds"]
+position = Vector3(95, 2, -162)
+mesh = SubResource("CloudMesh")
+
+
+[node name="Cloud5" type="MeshInstance3D" parent="Environment/Clouds"]
+position = Vector3(-95, 13, -205)
+mesh = SubResource("CloudMesh")
+
+
+[node name="Cloud6" type="MeshInstance3D" parent="Environment/Clouds"]
+position = Vector3(95, 13, -248)
+mesh = SubResource("CloudMesh")
+
+
+[node name="Cloud7" type="MeshInstance3D" parent="Environment/Clouds"]
+position = Vector3(-95, 13, -291)
+mesh = SubResource("CloudMesh")
+
+
+[node name="Cloud8" type="MeshInstance3D" parent="Environment/Clouds"]
+position = Vector3(95, 13, -334)
+mesh = SubResource("CloudMesh")
+
+
+[node name="Cloud9" type="MeshInstance3D" parent="Environment/Clouds"]
+position = Vector3(-95, 36, -377)
+mesh = SubResource("CloudMesh")
+
+
+[node name="Cloud10" type="MeshInstance3D" parent="Environment/Clouds"]
+position = Vector3(95, 36, -420)
+mesh = SubResource("CloudMesh")
+
+
+[node name="Cloud11" type="MeshInstance3D" parent="Environment/Clouds"]
+position = Vector3(-95, 53, -463)
+mesh = SubResource("CloudMesh")
+
+
+[node name="Cloud12" type="MeshInstance3D" parent="Environment/Clouds"]
+position = Vector3(95, 53, -506)
+mesh = SubResource("CloudMesh")
+
+
+[node name="Cloud13" type="MeshInstance3D" parent="Environment/Clouds"]
+position = Vector3(-95, 53, -549)
+mesh = SubResource("CloudMesh")
+
+
+[node name="Cloud14" type="MeshInstance3D" parent="Environment/Clouds"]
+position = Vector3(95, 71, -592)
+mesh = SubResource("CloudMesh")
+
+
+[node name="Cloud15" type="MeshInstance3D" parent="Environment/Clouds"]
+position = Vector3(-95, 71, -635)
+mesh = SubResource("CloudMesh")
+
+
+[node name="Cloud16" type="MeshInstance3D" parent="Environment/Clouds"]
+position = Vector3(95, 71, -678)
+mesh = SubResource("CloudMesh")
+
+
+[node name="Cloud17" type="MeshInstance3D" parent="Environment/Clouds"]
+position = Vector3(-95, 71, -721)
+mesh = SubResource("CloudMesh")
+
+
+[node name="WindTrail" type="Node3D" parent="Environment"]
+
+
+[node name="Beacon0_0" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(-41, 9, 22)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon0_2" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(41, 9, 22)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon1_0" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(-41, 9, 7)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon1_2" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(41, 9, 7)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon2_0" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(-41, 9, -8)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon2_2" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(41, 9, -8)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon3_0" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(-41, 9, -23)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon3_2" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(41, 9, -23)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon4_0" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(-41, 9, -38)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon4_2" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(41, 9, -38)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon5_0" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(-41, 9, -53)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon5_2" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(41, 9, -53)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon6_0" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(-41, 9, -68)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon6_2" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(41, 9, -68)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon7_0" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(-41, 9, -83)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon7_2" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(41, 9, -83)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon8_0" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(-41, 23, -98)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon8_2" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(41, 23, -98)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon9_0" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(-41, 23, -113)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon9_2" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(41, 23, -113)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon10_0" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(-41, 23, -128)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon10_2" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(41, 23, -128)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon11_0" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(-41, 23, -143)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon11_2" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(41, 23, -143)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon12_0" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(-41, 23, -158)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon12_2" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(41, 23, -158)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon13_0" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(-41, 23, -173)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon13_2" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(41, 23, -173)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon14_0" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(-41, 23, -188)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon14_2" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(41, 23, -188)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon15_0" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(-41, 34, -203)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon15_2" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(41, 34, -203)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon16_0" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(-41, 34, -218)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon16_2" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(41, 34, -218)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon17_0" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(-41, 34, -233)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon17_2" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(41, 34, -233)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon18_0" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(-41, 34, -248)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon18_2" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(41, 34, -248)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon19_0" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(-41, 34, -263)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon19_2" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(41, 34, -263)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon20_0" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(-41, 34, -278)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon20_2" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(41, 34, -278)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon21_0" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(-41, 34, -293)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon21_2" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(41, 34, -293)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon22_0" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(-41, 34, -308)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon22_2" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(41, 34, -308)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon23_0" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(-41, 34, -323)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon23_2" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(41, 34, -323)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon24_0" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(-41, 34, -338)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon24_2" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(41, 34, -338)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon25_0" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(-41, 57, -353)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon25_2" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(41, 57, -353)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon26_0" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(-41, 57, -368)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon26_2" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(41, 57, -368)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon27_0" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(-41, 57, -383)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon27_2" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(41, 57, -383)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon28_0" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(-41, 57, -398)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon28_2" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(41, 57, -398)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon29_0" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(-41, 57, -413)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon29_2" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(41, 57, -413)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon30_0" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(-41, 57, -428)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon30_2" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(41, 57, -428)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon31_0" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(-41, 57, -443)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon31_2" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(41, 57, -443)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon32_0" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(-41, 74, -458)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon32_2" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(41, 74, -458)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon33_0" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(-41, 74, -473)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon33_2" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(41, 74, -473)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon34_0" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(-41, 74, -488)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon34_2" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(41, 74, -488)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon35_0" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(-41, 74, -503)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon35_2" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(41, 74, -503)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon36_0" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(-41, 74, -518)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon36_2" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(41, 74, -518)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon37_0" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(-41, 74, -533)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon37_2" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(41, 74, -533)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon38_0" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(-41, 74, -548)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon38_2" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(41, 74, -548)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon39_0" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(-41, 74, -563)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon39_2" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(41, 74, -563)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon40_0" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(-41, 92, -578)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon40_2" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(41, 92, -578)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon41_0" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(-41, 92, -593)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon41_2" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(41, 92, -593)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon42_0" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(-41, 92, -608)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon42_2" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(41, 92, -608)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon43_0" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(-41, 92, -623)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon43_2" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(41, 92, -623)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon44_0" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(-41, 92, -638)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon44_2" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(41, 92, -638)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon45_0" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(-41, 92, -653)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon45_2" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(41, 92, -653)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon46_0" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(-41, 92, -668)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon46_2" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(41, 92, -668)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon47_0" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(-41, 92, -683)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon47_2" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(41, 92, -683)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon48_0" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(-41, 92, -698)
+mesh = SubResource("WindShard")
+
+
+[node name="Beacon48_2" type="MeshInstance3D" parent="Environment/WindTrail"]
+position = Vector3(41, 92, -698)
+mesh = SubResource("WindShard")
+
+
+[node name="Gate_S2_01" type="Node3D" parent="Gates"]
+metadata/encounter_id = "S2-01"
+
+[node name="BarrierBody" type="StaticBody3D" parent="Gates/Gate_S2_01"]
+position = Vector3(0, 80, -90)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Gates/Gate_S2_01/BarrierBody"]
+shape = SubResource("Shape32")
+
+[node name="ClosedVisual" type="MeshInstance3D" parent="Gates/Gate_S2_01"]
+position = Vector3(0, 80, -90)
+mesh = SubResource("GateVeil1")
+
+
+[node name="Arch" type="Node3D" parent="Gates/Gate_S2_01"]
+position = Vector3(0, 0, -90)
+
+[node name="Left" type="StaticBody3D" parent="Gates/Gate_S2_01/Arch"]
+position = Vector3(-20, 13, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Gates/Gate_S2_01/Arch/Left"]
+shape = SubResource("Shape34")
+
+[node name="Mesh" type="MeshInstance3D" parent="Gates/Gate_S2_01/Arch/Left"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box35")
+
+
+[node name="LeftGlow" type="MeshInstance3D" parent="Gates/Gate_S2_01/Arch"]
+position = Vector3(-18.8, 16, 1.6)
+mesh = SubResource("ArchLeftTrim")
+
+
+[node name="Right" type="StaticBody3D" parent="Gates/Gate_S2_01/Arch"]
+position = Vector3(20, 13, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Gates/Gate_S2_01/Arch/Right"]
+shape = SubResource("Shape37")
+
+[node name="Mesh" type="MeshInstance3D" parent="Gates/Gate_S2_01/Arch/Right"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box38")
+
+
+[node name="RightGlow" type="MeshInstance3D" parent="Gates/Gate_S2_01/Arch"]
+position = Vector3(18.8, 16, 1.6)
+mesh = SubResource("ArchRightTrim")
+
+
+[node name="Lintel" type="StaticBody3D" parent="Gates/Gate_S2_01/Arch"]
+position = Vector3(0, 27, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Gates/Gate_S2_01/Arch/Lintel"]
+shape = SubResource("Shape40")
+
+[node name="Mesh" type="MeshInstance3D" parent="Gates/Gate_S2_01/Arch/Lintel"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box41")
+
+
+[node name="OpenVisual" type="Node3D" parent="Gates/Gate_S2_01"]
+visible = false
+
+[node name="ClearBeacon" type="MeshInstance3D" parent="Gates/Gate_S2_01/OpenVisual"]
+position = Vector3(0, 27, -90)
+mesh = SubResource("WindShard")
+
+
+[node name="Gate_S2_02" type="Node3D" parent="Gates"]
+metadata/encounter_id = "S2-02"
+
+[node name="BarrierBody" type="StaticBody3D" parent="Gates/Gate_S2_02"]
+position = Vector3(0, 80, -195)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Gates/Gate_S2_02/BarrierBody"]
+shape = SubResource("Shape42")
+
+[node name="ClosedVisual" type="MeshInstance3D" parent="Gates/Gate_S2_02"]
+position = Vector3(0, 80, -195)
+mesh = SubResource("GateVeil2")
+
+
+[node name="Arch" type="Node3D" parent="Gates/Gate_S2_02"]
+position = Vector3(0, 14, -195)
+
+[node name="Left" type="StaticBody3D" parent="Gates/Gate_S2_02/Arch"]
+position = Vector3(-20, 13, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Gates/Gate_S2_02/Arch/Left"]
+shape = SubResource("Shape44")
+
+[node name="Mesh" type="MeshInstance3D" parent="Gates/Gate_S2_02/Arch/Left"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box45")
+
+
+[node name="LeftGlow" type="MeshInstance3D" parent="Gates/Gate_S2_02/Arch"]
+position = Vector3(-18.8, 16, 1.6)
+mesh = SubResource("ArchLeftTrim")
+
+
+[node name="Right" type="StaticBody3D" parent="Gates/Gate_S2_02/Arch"]
+position = Vector3(20, 13, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Gates/Gate_S2_02/Arch/Right"]
+shape = SubResource("Shape47")
+
+[node name="Mesh" type="MeshInstance3D" parent="Gates/Gate_S2_02/Arch/Right"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box48")
+
+
+[node name="RightGlow" type="MeshInstance3D" parent="Gates/Gate_S2_02/Arch"]
+position = Vector3(18.8, 16, 1.6)
+mesh = SubResource("ArchRightTrim")
+
+
+[node name="Lintel" type="StaticBody3D" parent="Gates/Gate_S2_02/Arch"]
+position = Vector3(0, 27, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Gates/Gate_S2_02/Arch/Lintel"]
+shape = SubResource("Shape50")
+
+[node name="Mesh" type="MeshInstance3D" parent="Gates/Gate_S2_02/Arch/Lintel"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box51")
+
+
+[node name="OpenVisual" type="Node3D" parent="Gates/Gate_S2_02"]
+visible = false
+
+[node name="ClearBeacon" type="MeshInstance3D" parent="Gates/Gate_S2_02/OpenVisual"]
+position = Vector3(0, 41, -195)
+mesh = SubResource("WindShard")
+
+
+[node name="Gate_S2_03" type="Node3D" parent="Gates"]
+metadata/encounter_id = "S2-03"
+
+[node name="BarrierBody" type="StaticBody3D" parent="Gates/Gate_S2_03"]
+position = Vector3(0, 80, -330)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Gates/Gate_S2_03/BarrierBody"]
+shape = SubResource("Shape52")
+
+[node name="ClosedVisual" type="MeshInstance3D" parent="Gates/Gate_S2_03"]
+position = Vector3(0, 80, -330)
+mesh = SubResource("GateVeil3")
+
+
+[node name="Arch" type="Node3D" parent="Gates/Gate_S2_03"]
+position = Vector3(0, 25, -330)
+
+[node name="Left" type="StaticBody3D" parent="Gates/Gate_S2_03/Arch"]
+position = Vector3(-20, 13, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Gates/Gate_S2_03/Arch/Left"]
+shape = SubResource("Shape54")
+
+[node name="Mesh" type="MeshInstance3D" parent="Gates/Gate_S2_03/Arch/Left"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box55")
+
+
+[node name="LeftGlow" type="MeshInstance3D" parent="Gates/Gate_S2_03/Arch"]
+position = Vector3(-18.8, 16, 1.6)
+mesh = SubResource("ArchLeftTrim")
+
+
+[node name="Right" type="StaticBody3D" parent="Gates/Gate_S2_03/Arch"]
+position = Vector3(20, 13, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Gates/Gate_S2_03/Arch/Right"]
+shape = SubResource("Shape57")
+
+[node name="Mesh" type="MeshInstance3D" parent="Gates/Gate_S2_03/Arch/Right"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box58")
+
+
+[node name="RightGlow" type="MeshInstance3D" parent="Gates/Gate_S2_03/Arch"]
+position = Vector3(18.8, 16, 1.6)
+mesh = SubResource("ArchRightTrim")
+
+
+[node name="Lintel" type="StaticBody3D" parent="Gates/Gate_S2_03/Arch"]
+position = Vector3(0, 27, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Gates/Gate_S2_03/Arch/Lintel"]
+shape = SubResource("Shape60")
+
+[node name="Mesh" type="MeshInstance3D" parent="Gates/Gate_S2_03/Arch/Lintel"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box61")
+
+
+[node name="OpenVisual" type="Node3D" parent="Gates/Gate_S2_03"]
+visible = false
+
+[node name="ClearBeacon" type="MeshInstance3D" parent="Gates/Gate_S2_03/OpenVisual"]
+position = Vector3(0, 52, -330)
+mesh = SubResource("WindShard")
+
+
+[node name="Gate_S2_04" type="Node3D" parent="Gates"]
+metadata/encounter_id = "S2-04"
+
+[node name="BarrierBody" type="StaticBody3D" parent="Gates/Gate_S2_04"]
+position = Vector3(0, 80, -450)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Gates/Gate_S2_04/BarrierBody"]
+shape = SubResource("Shape62")
+
+[node name="ClosedVisual" type="MeshInstance3D" parent="Gates/Gate_S2_04"]
+position = Vector3(0, 80, -450)
+mesh = SubResource("GateVeil4")
+
+
+[node name="Arch" type="Node3D" parent="Gates/Gate_S2_04"]
+position = Vector3(0, 48, -450)
+
+[node name="Left" type="StaticBody3D" parent="Gates/Gate_S2_04/Arch"]
+position = Vector3(-20, 13, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Gates/Gate_S2_04/Arch/Left"]
+shape = SubResource("Shape64")
+
+[node name="Mesh" type="MeshInstance3D" parent="Gates/Gate_S2_04/Arch/Left"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box65")
+
+
+[node name="LeftGlow" type="MeshInstance3D" parent="Gates/Gate_S2_04/Arch"]
+position = Vector3(-18.8, 16, 1.6)
+mesh = SubResource("ArchLeftTrim")
+
+
+[node name="Right" type="StaticBody3D" parent="Gates/Gate_S2_04/Arch"]
+position = Vector3(20, 13, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Gates/Gate_S2_04/Arch/Right"]
+shape = SubResource("Shape67")
+
+[node name="Mesh" type="MeshInstance3D" parent="Gates/Gate_S2_04/Arch/Right"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box68")
+
+
+[node name="RightGlow" type="MeshInstance3D" parent="Gates/Gate_S2_04/Arch"]
+position = Vector3(18.8, 16, 1.6)
+mesh = SubResource("ArchRightTrim")
+
+
+[node name="Lintel" type="StaticBody3D" parent="Gates/Gate_S2_04/Arch"]
+position = Vector3(0, 27, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Gates/Gate_S2_04/Arch/Lintel"]
+shape = SubResource("Shape70")
+
+[node name="Mesh" type="MeshInstance3D" parent="Gates/Gate_S2_04/Arch/Lintel"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box71")
+
+
+[node name="OpenVisual" type="Node3D" parent="Gates/Gate_S2_04"]
+visible = false
+
+[node name="ClearBeacon" type="MeshInstance3D" parent="Gates/Gate_S2_04/OpenVisual"]
+position = Vector3(0, 75, -450)
+mesh = SubResource("WindShard")
+
+
+[node name="Gate_S2_05" type="Node3D" parent="Gates"]
+metadata/encounter_id = "S2-05"
+
+[node name="BarrierBody" type="StaticBody3D" parent="Gates/Gate_S2_05"]
+position = Vector3(0, 80, -570)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Gates/Gate_S2_05/BarrierBody"]
+shape = SubResource("Shape72")
+
+[node name="ClosedVisual" type="MeshInstance3D" parent="Gates/Gate_S2_05"]
+position = Vector3(0, 80, -570)
+mesh = SubResource("GateVeil5")
+
+
+[node name="Arch" type="Node3D" parent="Gates/Gate_S2_05"]
+position = Vector3(0, 65, -570)
+
+[node name="Left" type="StaticBody3D" parent="Gates/Gate_S2_05/Arch"]
+position = Vector3(-20, 13, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Gates/Gate_S2_05/Arch/Left"]
+shape = SubResource("Shape74")
+
+[node name="Mesh" type="MeshInstance3D" parent="Gates/Gate_S2_05/Arch/Left"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box75")
+
+
+[node name="LeftGlow" type="MeshInstance3D" parent="Gates/Gate_S2_05/Arch"]
+position = Vector3(-18.8, 16, 1.6)
+mesh = SubResource("ArchLeftTrim")
+
+
+[node name="Right" type="StaticBody3D" parent="Gates/Gate_S2_05/Arch"]
+position = Vector3(20, 13, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Gates/Gate_S2_05/Arch/Right"]
+shape = SubResource("Shape77")
+
+[node name="Mesh" type="MeshInstance3D" parent="Gates/Gate_S2_05/Arch/Right"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box78")
+
+
+[node name="RightGlow" type="MeshInstance3D" parent="Gates/Gate_S2_05/Arch"]
+position = Vector3(18.8, 16, 1.6)
+mesh = SubResource("ArchRightTrim")
+
+
+[node name="Lintel" type="StaticBody3D" parent="Gates/Gate_S2_05/Arch"]
+position = Vector3(0, 27, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Gates/Gate_S2_05/Arch/Lintel"]
+shape = SubResource("Shape80")
+
+[node name="Mesh" type="MeshInstance3D" parent="Gates/Gate_S2_05/Arch/Lintel"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box81")
+
+
+[node name="OpenVisual" type="Node3D" parent="Gates/Gate_S2_05"]
+visible = false
+
+[node name="ClearBeacon" type="MeshInstance3D" parent="Gates/Gate_S2_05/OpenVisual"]
+position = Vector3(0, 92, -570)
+mesh = SubResource("WindShard")
+
+
+[node name="S2-01" type="Node3D" parent="Encounters"]
+metadata/encounter_id = "S2-01"
+
+[node name="EntryVolume" type="Area3D" parent="Encounters/S2-01"]
+position = Vector3(0, 80, 25)
+collision_layer = 0
+collision_mask = 2
+monitoring = false
+
+
+[node name="Collision" type="CollisionShape3D" parent="Encounters/S2-01/EntryVolume"]
+shape = SubResource("AreaShape82")
+
+[node name="ExitVolume" type="Area3D" parent="Encounters/S2-01"]
+position = Vector3(0, 80, -86)
+collision_layer = 0
+collision_mask = 2
+monitoring = false
+
+
+[node name="Collision" type="CollisionShape3D" parent="Encounters/S2-01/ExitVolume"]
+shape = SubResource("AreaShape83")
+
+[node name="Spawns" type="Node3D" parent="Encounters/S2-01"]
+
+
+[node name="Wave1_Spirit1" type="Marker3D" parent="Encounters/S2-01/Spawns"]
+position = Vector3(-17, 16, -45)
+
+
+[node name="Wave1_Spirit2" type="Marker3D" parent="Encounters/S2-01/Spawns"]
+position = Vector3(18, 23, -68)
+
+
+[node name="RewardOrigin" type="Marker3D" parent="Encounters/S2-01"]
+position = Vector3(0, 13, -78)
+
+
+[node name="S2-02" type="Node3D" parent="Encounters"]
+metadata/encounter_id = "S2-02"
+
+[node name="EntryVolume" type="Area3D" parent="Encounters/S2-02"]
+position = Vector3(0, 80, -98)
+collision_layer = 0
+collision_mask = 2
+monitoring = false
+
+
+[node name="Collision" type="CollisionShape3D" parent="Encounters/S2-02/EntryVolume"]
+shape = SubResource("AreaShape84")
+
+[node name="ExitVolume" type="Area3D" parent="Encounters/S2-02"]
+position = Vector3(0, 80, -191)
+collision_layer = 0
+collision_mask = 2
+monitoring = false
+
+
+[node name="Collision" type="CollisionShape3D" parent="Encounters/S2-02/ExitVolume"]
+shape = SubResource("AreaShape85")
+
+[node name="Spawns" type="Node3D" parent="Encounters/S2-02"]
+
+
+[node name="Wave1_Spirit1" type="Marker3D" parent="Encounters/S2-02/Spawns"]
+position = Vector3(-23, 30, -124)
+
+
+[node name="Wave1_Spirit2" type="Marker3D" parent="Encounters/S2-02/Spawns"]
+position = Vector3(19, 42, -133)
+
+
+[node name="Wave1_Sentry1" type="Marker3D" parent="Encounters/S2-02/Spawns"]
+position = Vector3(0, 49, -150)
+
+
+[node name="Wave2_Spirit1" type="Marker3D" parent="Encounters/S2-02/Spawns"]
+position = Vector3(-20, 47, -167)
+
+
+[node name="Wave2_Spirit2" type="Marker3D" parent="Encounters/S2-02/Spawns"]
+position = Vector3(23, 33, -159)
+
+
+[node name="Wave2_Sentry1" type="Marker3D" parent="Encounters/S2-02/Spawns"]
+position = Vector3(0, 38, -177)
+
+
+[node name="RewardOrigin" type="Marker3D" parent="Encounters/S2-02"]
+position = Vector3(0, 27, -183)
+
+
+[node name="ShieldPickup" type="Marker3D" parent="Encounters/S2-02"]
+position = Vector3(12, 26, -183)
+
+
+[node name="S2-03" type="Node3D" parent="Encounters"]
+metadata/encounter_id = "S2-03"
+
+[node name="EntryVolume" type="Area3D" parent="Encounters/S2-03"]
+position = Vector3(0, 80, -203)
+collision_layer = 0
+collision_mask = 2
+monitoring = false
+
+
+[node name="Collision" type="CollisionShape3D" parent="Encounters/S2-03/EntryVolume"]
+shape = SubResource("AreaShape86")
+
+[node name="ExitVolume" type="Area3D" parent="Encounters/S2-03"]
+position = Vector3(0, 80, -326)
+collision_layer = 0
+collision_mask = 2
+monitoring = false
+
+
+[node name="Collision" type="CollisionShape3D" parent="Encounters/S2-03/ExitVolume"]
+shape = SubResource("AreaShape87")
+
+[node name="Spawns" type="Node3D" parent="Encounters/S2-03"]
+
+
+[node name="RewardOrigin" type="Marker3D" parent="Encounters/S2-03"]
+position = Vector3(0, 38, -318)
+
+
+[node name="S2-04" type="Node3D" parent="Encounters"]
+metadata/encounter_id = "S2-04"
+
+[node name="EntryVolume" type="Area3D" parent="Encounters/S2-04"]
+position = Vector3(0, 80, -376)
+collision_layer = 0
+collision_mask = 2
+monitoring = false
+
+
+[node name="Collision" type="CollisionShape3D" parent="Encounters/S2-04/EntryVolume"]
+shape = SubResource("AreaShape88")
+
+[node name="ExitVolume" type="Area3D" parent="Encounters/S2-04"]
+position = Vector3(0, 80, -446)
+collision_layer = 0
+collision_mask = 2
+monitoring = false
+
+
+[node name="Collision" type="CollisionShape3D" parent="Encounters/S2-04/ExitVolume"]
+shape = SubResource("AreaShape89")
+
+[node name="Spawns" type="Node3D" parent="Encounters/S2-04"]
+
+
+[node name="Wave1_Boss1" type="Marker3D" parent="Encounters/S2-04/Spawns"]
+position = Vector3(0, 76, -408)
+
+
+[node name="RewardOrigin" type="Marker3D" parent="Encounters/S2-04"]
+position = Vector3(0, 61, -438)
+
+
+[node name="ShieldPickup" type="Marker3D" parent="Encounters/S2-04"]
+position = Vector3(12, 60, -438)
+
+
+[node name="S2-05" type="Node3D" parent="Encounters"]
+metadata/encounter_id = "S2-05"
+
+[node name="EntryVolume" type="Area3D" parent="Encounters/S2-05"]
+position = Vector3(0, 80, -458)
+collision_layer = 0
+collision_mask = 2
+monitoring = false
+
+
+[node name="Collision" type="CollisionShape3D" parent="Encounters/S2-05/EntryVolume"]
+shape = SubResource("AreaShape90")
+
+[node name="ExitVolume" type="Area3D" parent="Encounters/S2-05"]
+position = Vector3(0, 80, -566)
+collision_layer = 0
+collision_mask = 2
+monitoring = false
+
+
+[node name="Collision" type="CollisionShape3D" parent="Encounters/S2-05/ExitVolume"]
+shape = SubResource("AreaShape91")
+
+[node name="Spawns" type="Node3D" parent="Encounters/S2-05"]
+
+
+[node name="Wave1_Spirit1" type="Marker3D" parent="Encounters/S2-05/Spawns"]
+position = Vector3(-23, 81, -482)
+
+
+[node name="Wave1_Spirit2" type="Marker3D" parent="Encounters/S2-05/Spawns"]
+position = Vector3(20, 92, -493)
+
+
+[node name="Wave1_Sentry1" type="Marker3D" parent="Encounters/S2-05/Spawns"]
+position = Vector3(0, 99, -503)
+
+
+[node name="Wave2_Spirit1" type="Marker3D" parent="Encounters/S2-05/Spawns"]
+position = Vector3(-22, 100, -533)
+
+
+[node name="Wave2_Spirit2" type="Marker3D" parent="Encounters/S2-05/Spawns"]
+position = Vector3(20, 83, -541)
+
+
+[node name="Wave2_Sentry1" type="Marker3D" parent="Encounters/S2-05/Spawns"]
+position = Vector3(0, 108, -548)
+
+
+[node name="RewardOrigin" type="Marker3D" parent="Encounters/S2-05"]
+position = Vector3(0, 78, -558)
+
+
+[node name="S2-06" type="Node3D" parent="Encounters"]
+metadata/encounter_id = "S2-06"
+
+[node name="EntryVolume" type="Area3D" parent="Encounters/S2-06"]
+position = Vector3(0, 80, -578)
+collision_layer = 0
+collision_mask = 2
+monitoring = false
+
+
+[node name="Collision" type="CollisionShape3D" parent="Encounters/S2-06/EntryVolume"]
+shape = SubResource("AreaShape92")
+
+[node name="ExitVolume" type="Area3D" parent="Encounters/S2-06"]
+position = Vector3(0, 80, -606)
+collision_layer = 0
+collision_mask = 2
+monitoring = false
+
+
+[node name="Collision" type="CollisionShape3D" parent="Encounters/S2-06/ExitVolume"]
+shape = SubResource("AreaShape93")
+
+[node name="Spawns" type="Node3D" parent="Encounters/S2-06"]
+
+
+[node name="RewardOrigin" type="Marker3D" parent="Encounters/S2-06"]
+position = Vector3(0, 96, -598)
+
+
+[node name="S2-07" type="Node3D" parent="Encounters"]
+metadata/encounter_id = "S2-07"
+
+[node name="EntryVolume" type="Area3D" parent="Encounters/S2-07"]
+position = Vector3(0, 80, -620)
+collision_layer = 0
+collision_mask = 2
+monitoring = false
+
+
+[node name="Collision" type="CollisionShape3D" parent="Encounters/S2-07/EntryVolume"]
+shape = SubResource("AreaShape94")
+
+[node name="ExitVolume" type="Area3D" parent="Encounters/S2-07"]
+position = Vector3(0, 80, -745)
+collision_layer = 0
+collision_mask = 2
+monitoring = false
+
+
+[node name="Collision" type="CollisionShape3D" parent="Encounters/S2-07/ExitVolume"]
+shape = SubResource("AreaShape95")
+
+[node name="Spawns" type="Node3D" parent="Encounters/S2-07"]
+
+
+[node name="Wave1_Boss1" type="Marker3D" parent="Encounters/S2-07/Spawns"]
+position = Vector3(0, 113, -690)
+
+
+[node name="RewardOrigin" type="Marker3D" parent="Encounters/S2-07"]
+position = Vector3(0, 96, -737)
+
+
+[node name="Seals" type="Node3D" parent="Encounters/S2-03"]
+
+
+[node name="PortalLights" type="Node3D" parent="Gates/Gate_S2_03"]
+
+
+[node name="Seal1" type="Node3D" parent="Encounters/S2-03/Seals"]
+position = Vector3(-29, 43, -256)
+metadata/seal_id = "S2-03-Seal1"
+
+[node name="Core" type="MeshInstance3D" parent="Encounters/S2-03/Seals/Seal1"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("SealCrystal")
+
+
+[node name="ShieldVisual" type="MeshInstance3D" parent="Encounters/S2-03/Seals/Seal1"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("SealShield")
+
+
+[node name="OrbitRing" type="MeshInstance3D" parent="Encounters/S2-03/Seals/Seal1"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("SealRing")
+
+
+[node name="ApproachVolume" type="Area3D" parent="Encounters/S2-03/Seals/Seal1"]
+position = Vector3(0, 0, 10)
+collision_layer = 0
+collision_mask = 2
+monitoring = false
+
+
+[node name="Collision" type="CollisionShape3D" parent="Encounters/S2-03/Seals/Seal1/ApproachVolume"]
+shape = SubResource("AreaShape99")
+
+[node name="HitVolume" type="Area3D" parent="Encounters/S2-03/Seals/Seal1"]
+collision_layer = 16
+collision_mask = 0
+monitoring = false
+monitorable = false
+
+[node name="Collision" type="CollisionShape3D" parent="Encounters/S2-03/Seals/Seal1/HitVolume"]
+shape = SubResource("SealHit1")
+
+[node name="RewardOrigin" type="Marker3D" parent="Encounters/S2-03/Seals/Seal1"]
+position = Vector3(0, -3, 3)
+
+
+[node name="GuardLinks" type="Node3D" parent="Encounters/S2-03/Seals/Seal1"]
+
+
+[node name="Seal1_Sentry1" type="Marker3D" parent="Encounters/S2-03/Spawns"]
+position = Vector3(-37, 46, -251)
+
+
+[node name="Guard1" type="MeshInstance3D" parent="Encounters/S2-03/Seals/Seal1/GuardLinks"]
+position = Vector3(-4.0, 1.5, 2.5)
+mesh = SubResource("GuardLink11")
+rotation = Vector3(0.3079, 2.1294, 0)
+metadata/guard_spawn = NodePath("Spawns/Seal1_Sentry1")
+
+[node name="Seal1_Sentry2" type="Marker3D" parent="Encounters/S2-03/Spawns"]
+position = Vector3(-21, 48, -259)
+
+
+[node name="Guard2" type="MeshInstance3D" parent="Encounters/S2-03/Seals/Seal1/GuardLinks"]
+position = Vector3(4.0, 2.5, -1.5)
+mesh = SubResource("GuardLink12")
+rotation = Vector3(0.5295, -1.212, 0)
+metadata/guard_spawn = NodePath("Spawns/Seal1_Sentry2")
+
+[node name="Seal1" type="MeshInstance3D" parent="Gates/Gate_S2_03/PortalLights"]
+position = Vector3(-8, 58, -329)
+mesh = SubResource("SealRing")
+rotation_degrees = Vector3(90, 0, 0)
+
+[node name="Seal2" type="Node3D" parent="Encounters/S2-03/Seals"]
+position = Vector3(0, 65, -285)
+metadata/seal_id = "S2-03-Seal2"
+
+[node name="Core" type="MeshInstance3D" parent="Encounters/S2-03/Seals/Seal2"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("SealCrystal")
+
+
+[node name="ShieldVisual" type="MeshInstance3D" parent="Encounters/S2-03/Seals/Seal2"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("SealShield")
+
+
+[node name="OrbitRing" type="MeshInstance3D" parent="Encounters/S2-03/Seals/Seal2"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("SealRing")
+
+
+[node name="ApproachVolume" type="Area3D" parent="Encounters/S2-03/Seals/Seal2"]
+position = Vector3(0, 0, 10)
+collision_layer = 0
+collision_mask = 2
+monitoring = false
+
+
+[node name="Collision" type="CollisionShape3D" parent="Encounters/S2-03/Seals/Seal2/ApproachVolume"]
+shape = SubResource("AreaShape103")
+
+[node name="HitVolume" type="Area3D" parent="Encounters/S2-03/Seals/Seal2"]
+collision_layer = 16
+collision_mask = 0
+monitoring = false
+monitorable = false
+
+[node name="Collision" type="CollisionShape3D" parent="Encounters/S2-03/Seals/Seal2/HitVolume"]
+shape = SubResource("SealHit2")
+
+[node name="RewardOrigin" type="Marker3D" parent="Encounters/S2-03/Seals/Seal2"]
+position = Vector3(0, -3, 3)
+
+
+[node name="GuardLinks" type="Node3D" parent="Encounters/S2-03/Seals/Seal2"]
+
+
+[node name="Seal2_Sentry1" type="Marker3D" parent="Encounters/S2-03/Spawns"]
+position = Vector3(-8, 68, -280)
+
+
+[node name="Guard1" type="MeshInstance3D" parent="Encounters/S2-03/Seals/Seal2/GuardLinks"]
+position = Vector3(-4.0, 1.5, 2.5)
+mesh = SubResource("GuardLink21")
+rotation = Vector3(0.3079, 2.1294, 0)
+metadata/guard_spawn = NodePath("Spawns/Seal2_Sentry1")
+
+[node name="Seal2_Sentry2" type="Marker3D" parent="Encounters/S2-03/Spawns"]
+position = Vector3(8, 70, -288)
+
+
+[node name="Guard2" type="MeshInstance3D" parent="Encounters/S2-03/Seals/Seal2/GuardLinks"]
+position = Vector3(4.0, 2.5, -1.5)
+mesh = SubResource("GuardLink22")
+rotation = Vector3(0.5295, -1.212, 0)
+metadata/guard_spawn = NodePath("Spawns/Seal2_Sentry2")
+
+[node name="Seal2" type="MeshInstance3D" parent="Gates/Gate_S2_03/PortalLights"]
+position = Vector3(0, 58, -329)
+mesh = SubResource("SealRing")
+rotation_degrees = Vector3(90, 0, 0)
+
+[node name="Seal3" type="Node3D" parent="Encounters/S2-03/Seals"]
+position = Vector3(29, 86, -267)
+metadata/seal_id = "S2-03-Seal3"
+
+[node name="Core" type="MeshInstance3D" parent="Encounters/S2-03/Seals/Seal3"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("SealCrystal")
+
+
+[node name="ShieldVisual" type="MeshInstance3D" parent="Encounters/S2-03/Seals/Seal3"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("SealShield")
+
+
+[node name="OrbitRing" type="MeshInstance3D" parent="Encounters/S2-03/Seals/Seal3"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("SealRing")
+
+
+[node name="ApproachVolume" type="Area3D" parent="Encounters/S2-03/Seals/Seal3"]
+position = Vector3(0, 0, 10)
+collision_layer = 0
+collision_mask = 2
+monitoring = false
+
+
+[node name="Collision" type="CollisionShape3D" parent="Encounters/S2-03/Seals/Seal3/ApproachVolume"]
+shape = SubResource("AreaShape107")
+
+[node name="HitVolume" type="Area3D" parent="Encounters/S2-03/Seals/Seal3"]
+collision_layer = 16
+collision_mask = 0
+monitoring = false
+monitorable = false
+
+[node name="Collision" type="CollisionShape3D" parent="Encounters/S2-03/Seals/Seal3/HitVolume"]
+shape = SubResource("SealHit3")
+
+[node name="RewardOrigin" type="Marker3D" parent="Encounters/S2-03/Seals/Seal3"]
+position = Vector3(0, -3, 3)
+
+
+[node name="GuardLinks" type="Node3D" parent="Encounters/S2-03/Seals/Seal3"]
+
+
+[node name="Seal3_Sentry1" type="Marker3D" parent="Encounters/S2-03/Spawns"]
+position = Vector3(21, 89, -262)
+
+
+[node name="Guard1" type="MeshInstance3D" parent="Encounters/S2-03/Seals/Seal3/GuardLinks"]
+position = Vector3(-4.0, 1.5, 2.5)
+mesh = SubResource("GuardLink31")
+rotation = Vector3(0.3079, 2.1294, 0)
+metadata/guard_spawn = NodePath("Spawns/Seal3_Sentry1")
+
+[node name="Seal3_Sentry2" type="Marker3D" parent="Encounters/S2-03/Spawns"]
+position = Vector3(37, 91, -270)
+
+
+[node name="Guard2" type="MeshInstance3D" parent="Encounters/S2-03/Seals/Seal3/GuardLinks"]
+position = Vector3(4.0, 2.5, -1.5)
+mesh = SubResource("GuardLink32")
+rotation = Vector3(0.5295, -1.212, 0)
+metadata/guard_spawn = NodePath("Spawns/Seal3_Sentry2")
+
+[node name="Seal3" type="MeshInstance3D" parent="Gates/Gate_S2_03/PortalLights"]
+position = Vector3(8, 58, -329)
+mesh = SubResource("SealRing")
+rotation_degrees = Vector3(90, 0, 0)
+
+[node name="CP2-A" type="Area3D" parent="Checkpoints"]
+position = Vector3(0, 62, -354)
+collision_layer = 0
+collision_mask = 2
+monitoring = false
+metadata/checkpoint_id = "CP2-A"
+metadata/resume_encounter_id = "S2-04"
+
+[node name="Collision" type="CollisionShape3D" parent="Checkpoints/CP2-A"]
+shape = SubResource("AreaShape111")
+
+[node name="Respawn" type="Marker3D" parent="Checkpoints/CP2-A"]
+position = Vector3(0, 0, -4)
+
+
+[node name="CP2-AArch" type="Node3D" parent="Geometry"]
+position = Vector3(0, 49, -354)
+
+[node name="Left" type="StaticBody3D" parent="Geometry/CP2-AArch"]
+position = Vector3(-20, 13, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Geometry/CP2-AArch/Left"]
+shape = SubResource("Shape112")
+
+[node name="Mesh" type="MeshInstance3D" parent="Geometry/CP2-AArch/Left"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box113")
+
+
+[node name="LeftGlow" type="MeshInstance3D" parent="Geometry/CP2-AArch"]
+position = Vector3(-18.8, 16, 1.6)
+mesh = SubResource("CP2_AArchLeftTrim")
+
+
+[node name="Right" type="StaticBody3D" parent="Geometry/CP2-AArch"]
+position = Vector3(20, 13, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Geometry/CP2-AArch/Right"]
+shape = SubResource("Shape115")
+
+[node name="Mesh" type="MeshInstance3D" parent="Geometry/CP2-AArch/Right"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box116")
+
+
+[node name="RightGlow" type="MeshInstance3D" parent="Geometry/CP2-AArch"]
+position = Vector3(18.8, 16, 1.6)
+mesh = SubResource("CP2_AArchRightTrim")
+
+
+[node name="Lintel" type="StaticBody3D" parent="Geometry/CP2-AArch"]
+position = Vector3(0, 27, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Geometry/CP2-AArch/Lintel"]
+shape = SubResource("Shape118")
+
+[node name="Mesh" type="MeshInstance3D" parent="Geometry/CP2-AArch/Lintel"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box119")
+
+
+[node name="CP2-B" type="Area3D" parent="Checkpoints"]
+position = Vector3(0, 98, -596)
+collision_layer = 0
+collision_mask = 2
+monitoring = false
+metadata/checkpoint_id = "CP2-B"
+metadata/resume_encounter_id = "S2-07"
+
+[node name="Collision" type="CollisionShape3D" parent="Checkpoints/CP2-B"]
+shape = SubResource("AreaShape120")
+
+[node name="Respawn" type="Marker3D" parent="Checkpoints/CP2-B"]
+position = Vector3(0, 0, -4)
+
+
+[node name="CP2-BArch" type="Node3D" parent="Geometry"]
+position = Vector3(0, 85, -596)
+
+[node name="Left" type="StaticBody3D" parent="Geometry/CP2-BArch"]
+position = Vector3(-20, 13, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Geometry/CP2-BArch/Left"]
+shape = SubResource("Shape121")
+
+[node name="Mesh" type="MeshInstance3D" parent="Geometry/CP2-BArch/Left"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box122")
+
+
+[node name="LeftGlow" type="MeshInstance3D" parent="Geometry/CP2-BArch"]
+position = Vector3(-18.8, 16, 1.6)
+mesh = SubResource("CP2_BArchLeftTrim")
+
+
+[node name="Right" type="StaticBody3D" parent="Geometry/CP2-BArch"]
+position = Vector3(20, 13, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Geometry/CP2-BArch/Right"]
+shape = SubResource("Shape124")
+
+[node name="Mesh" type="MeshInstance3D" parent="Geometry/CP2-BArch/Right"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box125")
+
+
+[node name="RightGlow" type="MeshInstance3D" parent="Geometry/CP2-BArch"]
+position = Vector3(18.8, 16, 1.6)
+mesh = SubResource("CP2_BArchRightTrim")
+
+
+[node name="Lintel" type="StaticBody3D" parent="Geometry/CP2-BArch"]
+position = Vector3(0, 27, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Geometry/CP2-BArch/Lintel"]
+shape = SubResource("Shape127")
+
+[node name="Mesh" type="MeshInstance3D" parent="Geometry/CP2-BArch/Lintel"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box128")
+
+
+[node name="DuelPlatform" type="MeshInstance3D" parent="Geometry"]
+position = Vector3(0, 49, -408)
+mesh = SubResource("DuelPlatform")
+
+
+[node name="DuelPlatformBody" type="StaticBody3D" parent="Geometry"]
+position = Vector3(0, 49, -408)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Geometry/DuelPlatformBody"]
+shape = SubResource("DuelPlatformShape")
+
+[node name="DuelRim" type="MeshInstance3D" parent="Geometry"]
+position = Vector3(0, 50.1, -408)
+mesh = SubResource("DuelRim")
+
+
+[node name="SummitPlatform" type="MeshInstance3D" parent="Geometry"]
+position = Vector3(0, 84, -690)
+mesh = SubResource("SummitPlatform")
+
+
+[node name="SummitPlatformBody" type="StaticBody3D" parent="Geometry"]
+position = Vector3(0, 84, -690)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Geometry/SummitPlatformBody"]
+shape = SubResource("SummitPlatformShape")
+
+[node name="SummitRim" type="MeshInstance3D" parent="Geometry"]
+position = Vector3(0, 85.1, -690)
+mesh = SubResource("SummitRim")
+
+
+[node name="SummitThreshold" type="Node3D" parent="Geometry"]
+position = Vector3(0, 83, -617)
+
+[node name="Left" type="StaticBody3D" parent="Geometry/SummitThreshold"]
+position = Vector3(-20, 13, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Geometry/SummitThreshold/Left"]
+shape = SubResource("Shape135")
+
+[node name="Mesh" type="MeshInstance3D" parent="Geometry/SummitThreshold/Left"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box136")
+
+
+[node name="LeftGlow" type="MeshInstance3D" parent="Geometry/SummitThreshold"]
+position = Vector3(-18.8, 16, 1.6)
+mesh = SubResource("SummitThresholdLeftTrim")
+
+
+[node name="Right" type="StaticBody3D" parent="Geometry/SummitThreshold"]
+position = Vector3(20, 13, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Geometry/SummitThreshold/Right"]
+shape = SubResource("Shape138")
+
+[node name="Mesh" type="MeshInstance3D" parent="Geometry/SummitThreshold/Right"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box139")
+
+
+[node name="RightGlow" type="MeshInstance3D" parent="Geometry/SummitThreshold"]
+position = Vector3(18.8, 16, 1.6)
+mesh = SubResource("SummitThresholdRightTrim")
+
+
+[node name="Lintel" type="StaticBody3D" parent="Geometry/SummitThreshold"]
+position = Vector3(0, 27, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Geometry/SummitThreshold/Lintel"]
+shape = SubResource("Shape141")
+
+[node name="Mesh" type="MeshInstance3D" parent="Geometry/SummitThreshold/Lintel"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box142")

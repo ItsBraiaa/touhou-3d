@@ -15,6 +15,20 @@ Action required by <other agent>: <what they must do, or "none">
 
 ---
 
+## 2026-09-21 — Astra — Stage 2 mountain spatial pass delivered
+State: SCENE_READY
+Files: `scenes/stages/stage_02.tscn`, `scenes/tests/stage_02_preview.tscn`, `tools/build_stage_02.py`, `tools/validate_stage_02.gd`, `tests/scene/test_stage_02_contract.gd` (and UIDs), `.scratch/stage-02-area/`, `docs/STAGE_02_HANDOFF.md`, `docs/GUIDE.md`, `docs/engineering/ROADMAP.md`, `docs/validation/stage-02*`.
+Change: Static route with seven encounters, 20 common-enemy and two boss markers, three seals with independent approach volumes and guard links, five full-volume gates, and CP2-A/CP2-B. Original mountain primitives, cyan route guidance, separate duel/summit platforms. Added an offline scene contract to Claude's test discovery tree; no production GDScript or existing scenes changed.
+Why: First Stage 2 ticket requested by user. Godot MCP confirmed 4.7.2; the direct Linux test entry point passed 15 tests with zero failures. Five Compatibility renders completed and were inspected. PowerShell is unavailable on this host.
+Action required by Claude: Read STAGE_02_HANDOFF.md for exact paths, seal/guard mapping, resource rewards, checkpoint prerequisites and remaining runtime checks. Author typed Definitions and attach runtime actors/director. Static scene completion does not claim gameplay or the five-minute requirement. Reconcile before rerunning the generator.
+
+## 2026-09-21 — Astra — Stage 2 spatial pass announced
+State: PLANNED
+Files: new `scenes/stages/stage_02.tscn`, `scenes/tests/stage_02_preview.tscn`, `tools/build_stage_02.py`, offline QA, `.scratch/stage-02-area/`, `docs/STAGE_02_HANDOFF.md`, `docs/GUIDE.md`, `docs/engineering/ROADMAP.md`.
+Change: Begin one static mountain-route ticket with seven encounters, three guarded seals, gates and two checkpoints. New scene collision defaults follow Stage 1; no integrated scenes or production scripts are edited. Offline contract QA will be added to the test discovery tree.
+Why: User requested starting Stage 2.
+Action required by Claude: preserve these new authored paths during subsequent integration; existing dirty project/theme/import files belong to other work.
+
 ## 2026-09-21 00:25 — Claude — Godot wrapper and headless test runner (F0-02)
 State: CODE_READY
 Files: `tools/godot.ps1`, `tools/godot.cmd`, `tools/test.ps1`, `tests/run_tests.gd`, `tests/framework/test_case.gd`, `tests/unit/framework/test_self_check.gd` and their `.uid` files, `docs/engineering/testing.md`, `docs/engineering/ROADMAP.md` (row F0-02 only), `.scratch/foundation/issues/02-godot-wrapper-and-test-runner.md`.
