@@ -1,6 +1,6 @@
 # F0-04 GUIDE ownership and protocol docs
 
-Status: todo
+Status: done
 Type: docs
 parallel-safe: no
 Depends on: F0-03

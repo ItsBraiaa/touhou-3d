@@ -2,7 +2,7 @@
 
 **Owners:** Astra — Lead Game Designer and Godot scene author. Claude — Lead Code Engineer and GDScript author.
 **Language:** English documentation and code identifiers; Portuguese player-facing UI.
-**Status:** Integration contract, version 4. The player/test arena, eight menu layouts, and combat HUD are SCENE_READY. Gameplay, menu, and HUD scripts remain explicit placeholders for Claude. See Sections 13–15 for actual files, node paths, and validation limits.
+**Status:** Integration contract, version 5. The player/test arena, eight menu layouts, and combat HUD are SCENE_READY; the Stage 1 and Stage 2 areas are SCENE_READY_STATIC. Claude owns the project configuration and `scenes/main.tscn` since F0-03. Gameplay, menu, and HUD scripts remain explicit placeholders for Claude. See Sections 13–15 for actual files, node paths, and validation limits.
 
 ## 1. Working agreement
 
@@ -20,6 +20,9 @@ This guide is the shared scene-to-code contract. Claude may improve internal arc
 - [STAGE_DESIGN.md](STAGE_DESIGN.md): encounter progression, rewards, and checkpoint behavior.
 - [MODEL_SELECTION.md](MODEL_SELECTION.md): approved models and visual direction.
 - [ENGINEERING_BRIEF.md](ENGINEERING_BRIEF.md): engineering risks, invariants, and refinement work.
+- [engineering/CONVENTIONS.md](engineering/CONVENTIONS.md): how code is written, tested, committed, and handed off.
+- [engineering/ROADMAP.md](engineering/ROADMAP.md): ticket order and status, requests to Astra, and deliverables received from Astra.
+- [HANDOFF_LOG.md](HANDOFF_LOG.md): every change to a file owned by the other agent, newest first.
 - This guide: ownership, attachment points, exported configuration, runtime messages, and handoff state.
 
 The old Superpowers implementation draft is non-authoritative. Prefer the current design documents and this guide over its candidate paths/signatures. Gameplay decisions remain owned by Astra and the user; technical refinements remain owned by Claude.
@@ -28,14 +31,18 @@ The old Superpowers implementation draft is non-authoritative. Prefer the curren
 
 | Area | Primary owner | Collaboration rule |
 | --- | --- | --- |
-| `scenes/`, scene-owned visual resources, layout and marker data | Astra | Claude requests structural changes or makes an explicitly coordinated integration fix |
+| `scenes/` geometry, visuals, layout, markers, materials, and scene-owned visual resources | Astra | Claude requests structural changes or makes an explicitly coordinated integration fix |
 | `scripts/`, code-defined resources, tests | Claude | Astra creates a placeholder only before code ownership starts; never overwrites implementation |
 | `assets/` selection, materials, VFX, animation presentation | Astra | Claude verifies import/runtime compatibility |
-| Stage encounter values and balance | Astra | Claude supplies validation and interprets the data |
-| `project.godot`, autoload registration, input actions, export presets | Shared | Assign one editor at a time and report exact changes |
+| Stage encounter values and balance, `content/*.tres` values | Astra | Claude supplies validation and interprets the data |
+| `project.godot`, `export_presets.cfg`, `default_bus_layout.tres`, autoload registration, input actions, export presets | Claude, since F0-03 | Astra asks for a setting instead of editing it; Claude reports the exact keys changed |
+| `scenes/main.tscn` and `scenes/dev/` | Claude | Astra reviews the composition and replaces `scenes/dev/` placeholders with real prefabs through a handoff. `scenes/dev/` does not exist yet; the first entry is the F1-02 arena harness, with spike and projectile placeholders from F6 |
+| Inside any `.tscn`: script attachment, exported values, collision layers, masks, monitoring flags, instancing of Claude's prefabs | Claude | Astra keeps geometry, visuals, layout, markers, materials, and content values in the same file |
 | `GUIDE.md` | Shared | Update attachment contracts with every intentional interface change |
 | Game design documents | Astra | Claude proposes gameplay changes with technical rationale |
 | Engineering/test documentation | Claude | Link results and unresolved issues back to this guide |
+
+Every change to a file owned by the other agent is announced in `docs/HANDOFF_LOG.md`.
 
 Preserve original downloads in `All models/`, `all-sounds/`, and `Music/`. Runtime assets should use selected copies with their texture/buffer dependencies. Never edit the same shared file concurrently.
 
@@ -47,7 +54,7 @@ A placeholder is an explicitly unfinished attachment point, not a fake implement
 - Attach a placeholder only when the scene remains valid and its purpose is listed here. Otherwise leave the node without a script and document the intended path.
 - Once Claude begins a script, Claude owns its contents. Astra edits scene values and presentation instead of replacing script files.
 - Do not connect scene signals to missing methods. Claude implements the contract first; then the designated owner wires it.
-- Mark each handoff as `PLANNED`, `SCENE_READY`, `CODE_READY`, or `INTEGRATED_VERIFIED` in the table below. These are project delivery states, not game runtime states.
+- Mark each handoff as `PLANNED`, `SCENE_READY`, `SCENE_READY_STATIC`, `CODE_READY`, or `INTEGRATED_VERIFIED` in the table below. `SCENE_READY_STATIC` is a `SCENE_READY` scene that is authored but has no runtime behavior yet. These are project delivery states, not game runtime states.
 
 ## 5. Scene composition targets
 
@@ -127,11 +134,15 @@ All fields below are public configuration intentions. Claude chooses safe GDScri
 | `scripts/progression/checkpoint.gd` | Checkpoint prefab root Area3D | Checkpoint ID, resume encounter ID, safe spawn and visual/audio cues | Activation request once; delegate resource/snapshot changes to director |
 | `scripts/progression/gate.gd` | Gate prefab root Node3D | Barrier collision and open/closed visuals | Apply opened state consistently and idempotently |
 | `scripts/progression/seal.gd` | Seal prefab root Node3D | Seal ID, guard links, shield/target visuals | Guard-dependent vulnerability and one-time destroyed event |
+| `scripts/ui/interface.gd` | `Main/Interface` | Nothing: the node lives in the Claude-owned `scenes/main.tscn` | Screen stack over the menu scenes: show/hide, focus handoff on entry and return, pause overlay (F2) |
 | `scripts/ui/menu_controller.gd` | Menu scene root Control | Button references, focus order, panel references | Navigation and session/settings action requests |
 | `scripts/ui/hud.gd` | HUD scene root Control | Bar/icon/label references and transient cue presentation | Render observed gameplay state without owning combat values |
+| `scripts/ui/strings.gd` | Optional, code-only: attached to nothing | Nothing | Shared Portuguese player-facing text, created only if menus and HUD start duplicating it |
 | `scripts/audio/audio_controller.gd` | Audio | Event-to-stream mapping, music tracks and audio buses | Sound limits, playback, transitions and volume application |
 
 Code-only helpers such as combat state, checkpoint storage, encounter resource schemas, and settings persistence are owned by Claude and do not need empty scene-attached scripts. Describe their contracts in engineering documentation and expose only the values needed by Astra in the Inspector.
+
+Rules Cores (ADR-0001) are code-only. They are never attached to a node and never appear in this registry; each one is documented in `docs/engineering/<module>.md`, and the Adapter listed above is what a scene attaches.
 
 ## 7. Runtime messages and ownership
 
@@ -171,6 +182,7 @@ Astra must provide open 3D space around each boss, clear limits, visible depth r
 
 ## 9. Per-scene handoff procedure
 
+0. Before rerunning any `tools/build_*.py` generator over an integrated scene, reconcile it with the scene's current wiring or retire it.
 1. Astra assembles a scene and records its actual node tree, referenced assets, placeholder paths, intended behavior, and editable parameters.
 2. Astra marks the scene `SCENE_READY` only if it opens with valid resources and no dangling script/signal references. A static scene is not marked playable.
 3. Claude reads this guide and the applicable design section, refines internal engineering, and writes the scripts and behavioral tests.
@@ -184,14 +196,17 @@ For shared scenes or project settings, announce the files being edited to the co
 
 | Deliverable | Scene owner | Code owner | State | Evidence |
 | --- | --- | --- | --- | --- |
+| Foundation and conventions | Claude | Claude | CODE_READY | F0 done: repository hygiene, `tools/godot.*` and `tools/test.*`, project configuration, input actions, audio buses, export preset, and this contract. The export run itself is blocked on missing export templates; [engineering/ROADMAP.md](engineering/ROADMAP.md) |
 | Main composition and session | Claude (`scenes/main.tscn`, F0-03) | Claude | CODE_READY | Composition root instanced headless by `tests/scene/test_main_contract.gd`; main menu shown at startup; navigation pending (F2) |
 | Player/camera test arena | Astra | Claude | SCENE_READY | Both scenes load and render in Godot 4.7.2; static camera only; Section 13 |
 | Player combat and projectiles | Astra: presentation | Claude | PLANNED | Product rules documented |
 | Common enemies and miniboss | Astra | Claude | PLANNED | Behavior and reuse strategy documented |
 | Lantern Guardian | Astra | Claude | PLANNED | Ghost selected; animation metadata inspected |
 | Storm Guardian | Astra | Claude | PLANNED | Dragon_Evolved selected; animation metadata inspected |
-| Stage 1 progression | Astra | Claude | SCENE_READY | Initial area, markers and collision authored; runtime progression pending; see [STAGE_01_HANDOFF.md](STAGE_01_HANDOFF.md) |
-| Stage 2 progression | Astra | Claude | SCENE_READY_STATIC | Seven encounters, three guarded seals, two checkpoints; [STAGE_02_HANDOFF.md](STAGE_02_HANDOFF.md) |
+| Stage 1 area | Astra | Claude | SCENE_READY_STATIC | Encounters, gates, checkpoints and spawn markers authored; no runtime behavior; [STAGE_01_HANDOFF.md](STAGE_01_HANDOFF.md) |
+| Stage 1 progression | Astra | Claude | PLANNED | Waves, gates, checkpoints and completion for the authored area above arrive with F10 |
+| Stage 2 area | Astra | Claude | SCENE_READY_STATIC | Seven encounters, three guarded seals, two checkpoints authored; no runtime behavior; [STAGE_02_HANDOFF.md](STAGE_02_HANDOFF.md) |
+| Stage 2 progression | Astra | Claude | PLANNED | No director ticket yet; scheduled after F10 |
 | Checkpoints/gates/seals | Astra | Claude | PLANNED | Restore and objective rules specified |
 | Menus/options | Astra | Claude | SCENE_READY | Eight menu scenes rendered and checked; Section 14; navigation logic pending |
 | Combat HUD | Astra | Claude | SCENE_READY | Normal and synthetic boss states rendered at 1280 × 720; Section 15; gameplay binding pending |
@@ -217,7 +232,7 @@ For shared scenes or project settings, announce the files being edited to the co
 ### Delivered files
 
 - `scenes/player/player_ship.tscn`: reusable player scene matching the player tree in Section 5.
-- `scenes/tests/combat_arena.tscn`: directly runnable static scene. The main scene is now `scenes/ui/main_menu.tscn`; open the arena directly for scene testing. `scenes/main.tscn` remains planned.
+- `scenes/tests/combat_arena.tscn`: directly runnable static scene; open it directly (F6) for scene testing. The project main scene is `scenes/main.tscn` since F0-03.
 - `assets/models/player/craft_speederA.glb`: selected copy of the approved ship, with embedded materials.
 - `scripts/player/player_controller.gd`, `camera_rig.gd`, `targeting.gd`, and `scripts/combat/player_weapon.gd`: base type and handoff comments only. No movement, aiming, firing, combat, or camera-follow logic is implemented.
 - `ASSET_CREDITS.md` and `assets/licenses/kenney-space-kit.txt`: selected asset provenance.
@@ -274,7 +289,7 @@ All eight menu scenes are SCENE_READY and share `assets/ui/menu_theme.tres`. God
 
 `scripts/ui/menu_controller.gd` contains only `extends Control` and handoff comments. Buttons have no application action connections. Native slider/dropdown/toggle widgets can change their displayed values, but no setting is applied or persisted. No initial focus, automatic device prompt changes, screen transitions, session starts, pause logic, retry, or application exit has been implemented. These are Claude's next menu engineering tasks.
 
-The project main scene is `scenes/ui/main_menu.tscn`. Running it currently previews that layout. Use F6 on another menu scene to inspect it independently. Menu art is original SVG composition, not a screenshot promising that the playable stages are finished.
+The project main scene is `scenes/main.tscn`; `GameSession` instances `scenes/ui/main_menu.tscn` under `Main/Interface` at startup, so running the project previews that layout. Use F6 on another menu scene to inspect it independently. Menu art is original SVG composition, not a screenshot promising that the playable stages are finished.
 
 ### Scene and action registry
 
@@ -347,7 +362,7 @@ Layout is authored on a centered 1280 × 720 canvas with a full-viewport backgro
 
 ## 15. Combat HUD scene handoff
 
-`scenes/ui/hud.tscn` has a Control root named `HUD`, attached to the placeholder `scripts/ui/hud.gd`. Instance it under the gameplay CanvasLayer. `scenes/tests/hud_preview.tscn` composes the static combat arena and HUD for F6 inspection; it is not a playable encounter. The project startup scene remains the main menu.
+`scenes/ui/hud.tscn` has a Control root named `HUD`, attached to the placeholder `scripts/ui/hud.gd`. Instance it under the gameplay CanvasLayer. `scenes/tests/hud_preview.tscn` composes the static combat arena and HUD for F6 inspection; it is not a playable encounter. The project still starts at `scenes/main.tscn`, which shows the main menu.
 
 All HUD controls ignore mouse input. The player panel anchors to the bottom-left; boss presentation anchors to the top-center. The center remains clear for flight and projectile reading. Only 1280 × 720 composition has been visually verified.
 
