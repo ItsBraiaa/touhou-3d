@@ -15,6 +15,13 @@ Action required by <other agent>: <what they must do, or "none">
 
 ---
 
+## 2026-09-21 — Astra — Stage 1 enemy visual variants
+State: SCENE_READY
+Files: `assets/models/enemies/`, `assets/licenses/quaternius-ultimate-monsters.txt`, `scenes/enemies/visuals/`, `scenes/tests/enemy_variants_preview.tscn`, `tools/build_enemy_visuals.gd`, `tools/validate_enemy_visuals.gd`, `docs/ENEMY_VISUAL_HANDOFF.md`, credits, roadmap, validation outputs.
+Change: Imported Hywirl and Goleling; authored two Spirit and two Sentry recolor/resize variants, with one/two rings for Sentries and looping Flying_Idle. Visual scenes contain no stats or collision components. Existing Player/Menu/Stage scenes and production scripts were not edited.
+Why: User approved visual variety while explicitly keeping health identical within each enemy type.
+Action required by Claude: Read ENEMY_VISUAL_HANDOFF.md. Instance visuals under Enemy independently from HitVolume/Emitters; reuse each type's health configuration. These components do not replace the pending Enemy adapter contract. Project-wide test runner is not yet present; dedicated Godot visual QA passed.
+
 ## 2026-09-20 23:58 — Claude — Repository initialized (F0-01)
 State: docs
 Files: `.gitignore`, `docs/engineering/ROADMAP.md`, `docs/HANDOFF_LOG.md`, `.scratch/foundation/issues/01-git-init-and-ignores.md`; removed the empty root folders `export_templates/`, `feature_profiles/`, `script_templates/`, `text_editor_themes/`.

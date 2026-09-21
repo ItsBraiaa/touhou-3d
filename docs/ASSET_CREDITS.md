@@ -1,5 +1,12 @@
 # Selected Runtime Asset Credits
 
+## Stage 1 common enemy visuals
+
+- Creator: Quaternius; downloaded Ultimate Monsters pack, Flying/glTF.
+- Selected files: Hywirl.gltf and Goleling.gltf; runtime copies under `assets/models/enemies/`.
+- Supplied license: CC0, preserved at `assets/licenses/quaternius-ultimate-monsters.txt`; source license heading reads Ultimate Platformer Pack.
+- Changes: scene-level material tint, visual normalization, and original magic-ring meshes. Source models preserved.
+
 ## Player ship
 
 - Creator: Kenney.

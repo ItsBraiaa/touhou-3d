@@ -1,0 +1,8 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+D3D12 12_0 - Forward+ - Using Device #0: AMD - AMD Radeon RX 9070 XT
+
+SpiritLume idle_playing=true animation_length=1.1666666
+SpiritTwilight idle_playing=true animation_length=1.1666666
+SentryLantern idle_playing=true animation_length=1.1666666
+SentrySeal idle_playing=true animation_length=1.1666666
+ENEMY_VISUAL_QA failures=0 variants=4; no health or collision components

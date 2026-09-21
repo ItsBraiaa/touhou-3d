@@ -1,0 +1,66 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/enemies/visuals/spirit_lume.tscn" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/visuals/spirit_twilight.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/visuals/sentry_lantern.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/visuals/sentry_seal.tscn" id="4"]
+
+[sub_resource type="Environment" id="Env"]
+background_mode = 1
+background_color = Color(0.035, 0.065, 0.08, 1)
+ambient_light_source = 3
+ambient_light_color = Color(0.75, 0.85, 1, 1)
+ambient_light_energy = 0.8
+tonemap_mode = 2
+glow_enabled = true
+
+[node name="EnemyVariantsPreview" type="Node3D"]
+
+[node name="Environment" type="WorldEnvironment" parent="."]
+environment = SubResource("Env")
+
+[node name="Light" type="DirectionalLight3D" parent="."]
+rotation_degrees = Vector3(-30, -25, 0)
+light_energy = 1.5
+
+[node name="Camera" type="Camera3D" parent="."]
+position = Vector3(0, 3, 19)
+rotation_degrees = Vector3(-4, 0, 0)
+current = true
+fov = 55.0
+
+[node name="SpiritLume" parent="." instance=ExtResource("1")]
+position = Vector3(-7, 2, 0)
+
+[node name="SpiritTwilight" parent="." instance=ExtResource("2")]
+position = Vector3(-2.5, 2, 0)
+
+[node name="SentryLantern" parent="." instance=ExtResource("3")]
+position = Vector3(2.5, 2, 0)
+
+[node name="SentrySeal" parent="." instance=ExtResource("4")]
+position = Vector3(7, 2, 0)
+
+[node name="LumeLabel" type="Label3D" parent="."]
+position = Vector3(-7, -0.7, 0)
+text = "ESPÍRITO-LUME"
+font_size = 38
+pixel_size = 0.009
+
+[node name="TwilightLabel" type="Label3D" parent="."]
+position = Vector3(-2.5, -0.7, 0)
+text = "ESPÍRITO DO CREPÚSCULO"
+font_size = 30
+pixel_size = 0.009
+
+[node name="LanternLabel" type="Label3D" parent="."]
+position = Vector3(2.5, -0.7, 0)
+text = "SENTINELA DE LANTERNA"
+font_size = 30
+pixel_size = 0.009
+
+[node name="SealLabel" type="Label3D" parent="."]
+position = Vector3(7, -0.7, 0)
+text = "SENTINELA DO SELO"
+font_size = 34
+pixel_size = 0.009

@@ -84,6 +84,8 @@ Dependencies Claude has on scene and content work. These are needs by Feature, n
 
 ## Received from Astra
 
+2026-09-21: Four Stage 1 visual variants are ready in `scenes/enemies/visuals/`; see [ENEMY_VISUAL_HANDOFF.md](../ENEMY_VISUAL_HANDOFF.md). These are visual components for F9, not complete enemy adapters/prefabs. No health changes; animation references and proposed wave assignment are documented.
+
 | Date | Deliverable | Where | State |
 | --- | --- | --- | --- |
 | 2026-09-20 | Player ship and static arena | `scenes/player/player_ship.tscn`, `scenes/tests/combat_arena.tscn`, GUIDE Section 13 | SCENE_READY |
