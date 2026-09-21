@@ -11,6 +11,7 @@ Claude's engineering documentation for this Godot 4.7.2 project: how the GDScrip
 | [TEMPLATE.md](TEMPLATE.md) | The skeleton copied to `docs/engineering/<module>.md` when a module reaches CODE_READY: purpose, files, public contract, dependencies, invariants and tests, setup for Astra, open issues. |
 | [testing.md](testing.md) | Module doc for the test framework: `TestCase`, the `SceneTree` runner, the PowerShell and POSIX wrappers, how to run and filter the suite, and how to write a test. |
 | [project.md](project.md) | Module doc for the project configuration and composition root: `project.godot`, `default_bus_layout.tres`, `export_presets.cfg`, `scenes/main.tscn`, and the `GameSession` adapter. |
+| [player-flight.md](player-flight.md) | Module doc for player flight: the `FlightModel` Rules Core — velocity from input axes and camera yaw, Flight Volume clamping, edge proximity, and the visual bank angle. The `PlayerController` adapter section is filled by F1-02. |
 
 ## Module docs
 

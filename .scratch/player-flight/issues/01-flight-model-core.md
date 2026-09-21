@@ -1,6 +1,6 @@
 # F1-01 FlightModel core
 
-Status: todo
+Status: done
 Type: core
 parallel-safe: yes
 Depends on: F0-02
