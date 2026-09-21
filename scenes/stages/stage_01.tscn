@@ -1,0 +1,6258 @@
+[gd_scene format=3]
+
+[sub_resource type="StandardMaterial3D" id="Stone"]
+albedo_color = Color(0.17, 0.25, 0.25, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="Moss"]
+albedo_color = Color(0.12, 0.23, 0.20, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="Wood"]
+albedo_color = Color(0.31, 0.105, 0.08, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="Bark"]
+albedo_color = Color(0.085, 0.12, 0.125, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="Leaves"]
+albedo_color = Color(0.06, 0.20, 0.18, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="LeavesLight"]
+albedo_color = Color(0.12, 0.29, 0.25, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="LanternGold"]
+albedo_color = Color(1, 0.61, 0.19, 1)
+roughness = 0.9
+emission_enabled = true
+emission = Color(1, 0.61, 0.19, 1)
+emission_energy_multiplier = 1.8
+
+[sub_resource type="StandardMaterial3D" id="CheckpointTeal"]
+albedo_color = Color(0.12, 0.9, 0.73, 1)
+roughness = 0.9
+emission_enabled = true
+emission = Color(0.12, 0.9, 0.73, 1)
+emission_energy_multiplier = 1.8
+
+[sub_resource type="StandardMaterial3D" id="Corrupted"]
+albedo_color = Color(0.66, 0.25, 0.68, 1)
+roughness = 0.9
+emission_enabled = true
+emission = Color(0.66, 0.25, 0.68, 1)
+emission_energy_multiplier = 1.8
+
+[sub_resource type="StandardMaterial3D" id="Barrier"]
+albedo_color = Color(0.48, 0.21, 0.59, 0.055)
+roughness = 0.9
+transparency = 1
+cull_mode = 2
+shading_mode = 0
+
+[sub_resource type="ProceduralSkyMaterial" id="SkyMaterial"]
+sky_top_color = Color(0.035, 0.075, 0.14, 1)
+sky_horizon_color = Color(0.31, 0.39, 0.40, 1)
+ground_bottom_color = Color(0.04, 0.08, 0.09, 1)
+ground_horizon_color = Color(0.31, 0.39, 0.40, 1)
+
+[sub_resource type="Sky" id="Sky"]
+sky_material = SubResource("SkyMaterial")
+
+[sub_resource type="Environment" id="Env"]
+background_mode = 2
+sky = SubResource("Sky")
+ambient_light_source = 3
+ambient_light_color = Color(0.44, 0.66, 0.75, 1)
+ambient_light_energy = 0.8
+tonemap_mode = 2
+fog_enabled = true
+fog_density = 0.002
+fog_light_color = Color(0.13, 0.25, 0.28, 1)
+glow_enabled = true
+
+[sub_resource type="BoxShape3D" id="Shape13"]
+size = Vector3(90, 6, 175)
+
+[sub_resource type="BoxMesh" id="Box14"]
+size = Vector3(90, 6, 175)
+material = SubResource("Moss")
+
+[sub_resource type="BoxShape3D" id="Shape15"]
+size = Vector3(4, 14, 175)
+
+[sub_resource type="BoxMesh" id="Box16"]
+size = Vector3(4, 14, 175)
+material = SubResource("Stone")
+
+[sub_resource type="BoxShape3D" id="Shape17"]
+size = Vector3(4, 14, 175)
+
+[sub_resource type="BoxMesh" id="Box18"]
+size = Vector3(4, 14, 175)
+material = SubResource("Stone")
+
+[sub_resource type="BoxShape3D" id="Shape19"]
+size = Vector3(90, 6, 45)
+
+[sub_resource type="BoxMesh" id="Box20"]
+size = Vector3(90, 6, 45)
+material = SubResource("Moss")
+
+[sub_resource type="BoxShape3D" id="Shape21"]
+size = Vector3(4, 14, 45)
+
+[sub_resource type="BoxMesh" id="Box22"]
+size = Vector3(4, 14, 45)
+material = SubResource("Stone")
+
+[sub_resource type="BoxShape3D" id="Shape23"]
+size = Vector3(4, 14, 45)
+
+[sub_resource type="BoxMesh" id="Box24"]
+size = Vector3(4, 14, 45)
+material = SubResource("Stone")
+
+[sub_resource type="BoxShape3D" id="Shape25"]
+size = Vector3(90, 6, 40)
+
+[sub_resource type="BoxMesh" id="Box26"]
+size = Vector3(90, 6, 40)
+material = SubResource("Moss")
+
+[sub_resource type="BoxShape3D" id="Shape27"]
+size = Vector3(4, 14, 40)
+
+[sub_resource type="BoxMesh" id="Box28"]
+size = Vector3(4, 14, 40)
+material = SubResource("Stone")
+
+[sub_resource type="BoxShape3D" id="Shape29"]
+size = Vector3(4, 14, 40)
+
+[sub_resource type="BoxMesh" id="Box30"]
+size = Vector3(4, 14, 40)
+material = SubResource("Stone")
+
+[sub_resource type="BoxShape3D" id="Shape31"]
+size = Vector3(90, 6, 110)
+
+[sub_resource type="BoxMesh" id="Box32"]
+size = Vector3(90, 6, 110)
+material = SubResource("Moss")
+
+[sub_resource type="BoxShape3D" id="Shape33"]
+size = Vector3(4, 14, 110)
+
+[sub_resource type="BoxMesh" id="Box34"]
+size = Vector3(4, 14, 110)
+material = SubResource("Stone")
+
+[sub_resource type="BoxShape3D" id="Shape35"]
+size = Vector3(4, 14, 110)
+
+[sub_resource type="BoxMesh" id="Box36"]
+size = Vector3(4, 14, 110)
+material = SubResource("Stone")
+
+[sub_resource type="BoxShape3D" id="Shape37"]
+size = Vector3(90, 6, 110)
+
+[sub_resource type="BoxMesh" id="Box38"]
+size = Vector3(90, 6, 110)
+material = SubResource("Moss")
+
+[sub_resource type="BoxShape3D" id="Shape39"]
+size = Vector3(4, 14, 110)
+
+[sub_resource type="BoxMesh" id="Box40"]
+size = Vector3(4, 14, 110)
+material = SubResource("Stone")
+
+[sub_resource type="BoxShape3D" id="Shape41"]
+size = Vector3(4, 14, 110)
+
+[sub_resource type="BoxMesh" id="Box42"]
+size = Vector3(4, 14, 110)
+material = SubResource("Stone")
+
+[sub_resource type="BoxShape3D" id="Shape43"]
+size = Vector3(90, 6, 125)
+
+[sub_resource type="BoxMesh" id="Box44"]
+size = Vector3(90, 6, 125)
+material = SubResource("Moss")
+
+[sub_resource type="BoxShape3D" id="Shape45"]
+size = Vector3(4, 14, 125)
+
+[sub_resource type="BoxMesh" id="Box46"]
+size = Vector3(4, 14, 125)
+material = SubResource("Stone")
+
+[sub_resource type="BoxShape3D" id="Shape47"]
+size = Vector3(4, 14, 125)
+
+[sub_resource type="BoxMesh" id="Box48"]
+size = Vector3(4, 14, 125)
+material = SubResource("Stone")
+
+[sub_resource type="BoxShape3D" id="Shape49"]
+size = Vector3(4, 80, 605)
+
+[sub_resource type="BoxShape3D" id="Shape50"]
+size = Vector3(4, 80, 605)
+
+[sub_resource type="BoxShape3D" id="Shape51"]
+size = Vector3(98, 80, 4)
+
+[sub_resource type="BoxShape3D" id="Shape52"]
+size = Vector3(98, 80, 4)
+
+[sub_resource type="BoxShape3D" id="Shape53"]
+size = Vector3(98, 4, 613)
+
+[sub_resource type="CylinderMesh" id="Trunk"]
+bottom_radius = 1.1
+top_radius = 0.65
+height = 16
+radial_segments = 8
+material = SubResource("Bark")
+
+[sub_resource type="CylinderMesh" id="Canopy"]
+bottom_radius = 7
+top_radius = 0.7
+height = 15
+radial_segments = 8
+material = SubResource("Leaves")
+
+[sub_resource type="CylinderMesh" id="CanopyLight"]
+bottom_radius = 5.5
+top_radius = 0
+height = 12
+radial_segments = 8
+material = SubResource("LeavesLight")
+
+[sub_resource type="BoxMesh" id="Lantern"]
+size = Vector3(0.9, 1.3, 0.9)
+material = SubResource("LanternGold")
+
+[sub_resource type="BoxMesh" id="Cap"]
+size = Vector3(1.35, 0.2, 1.35)
+material = SubResource("Bark")
+
+[sub_resource type="CylinderMesh" id="Cord"]
+bottom_radius = 0.035
+top_radius = 0.035
+height = 4
+radial_segments = 6
+material = SubResource("Bark")
+
+[sub_resource type="BoxShape3D" id="Shape60"]
+size = Vector3(2.2, 16, 2.2)
+
+[sub_resource type="BoxShape3D" id="Shape61"]
+size = Vector3(2.2, 16, 2.2)
+
+[sub_resource type="BoxShape3D" id="Shape62"]
+size = Vector3(2.2, 16, 2.2)
+
+[sub_resource type="BoxShape3D" id="Shape63"]
+size = Vector3(2.2, 16, 2.2)
+
+[sub_resource type="BoxShape3D" id="Shape64"]
+size = Vector3(2.2, 16, 2.2)
+
+[sub_resource type="BoxShape3D" id="Shape65"]
+size = Vector3(2.2, 16, 2.2)
+
+[sub_resource type="BoxShape3D" id="Shape66"]
+size = Vector3(2.2, 16, 2.2)
+
+[sub_resource type="BoxShape3D" id="Shape67"]
+size = Vector3(2.2, 16, 2.2)
+
+[sub_resource type="BoxShape3D" id="Shape68"]
+size = Vector3(2.2, 16, 2.2)
+
+[sub_resource type="BoxShape3D" id="Shape69"]
+size = Vector3(2.2, 16, 2.2)
+
+[sub_resource type="BoxShape3D" id="Shape70"]
+size = Vector3(2.2, 16, 2.2)
+
+[sub_resource type="BoxShape3D" id="Shape71"]
+size = Vector3(2.2, 16, 2.2)
+
+[sub_resource type="BoxShape3D" id="Shape72"]
+size = Vector3(2.2, 16, 2.2)
+
+[sub_resource type="BoxShape3D" id="Shape73"]
+size = Vector3(2.2, 16, 2.2)
+
+[sub_resource type="BoxShape3D" id="Shape74"]
+size = Vector3(2.2, 16, 2.2)
+
+[sub_resource type="BoxShape3D" id="Shape75"]
+size = Vector3(2.2, 16, 2.2)
+
+[sub_resource type="BoxShape3D" id="Shape76"]
+size = Vector3(2.2, 16, 2.2)
+
+[sub_resource type="BoxShape3D" id="Shape77"]
+size = Vector3(2.2, 16, 2.2)
+
+[sub_resource type="BoxShape3D" id="Shape78"]
+size = Vector3(2.2, 16, 2.2)
+
+[sub_resource type="BoxShape3D" id="Shape79"]
+size = Vector3(2.2, 16, 2.2)
+
+[sub_resource type="BoxShape3D" id="Shape80"]
+size = Vector3(2.2, 16, 2.2)
+
+[sub_resource type="BoxShape3D" id="Shape81"]
+size = Vector3(2.2, 16, 2.2)
+
+[sub_resource type="BoxShape3D" id="Shape82"]
+size = Vector3(2.2, 16, 2.2)
+
+[sub_resource type="BoxShape3D" id="Shape83"]
+size = Vector3(2.2, 16, 2.2)
+
+[sub_resource type="BoxShape3D" id="Shape84"]
+size = Vector3(2.2, 16, 2.2)
+
+[sub_resource type="BoxShape3D" id="Shape85"]
+size = Vector3(2.2, 16, 2.2)
+
+[sub_resource type="BoxShape3D" id="Shape86"]
+size = Vector3(2.2, 16, 2.2)
+
+[sub_resource type="BoxShape3D" id="Shape87"]
+size = Vector3(2.2, 16, 2.2)
+
+[sub_resource type="BoxShape3D" id="Shape88"]
+size = Vector3(2.2, 16, 2.2)
+
+[sub_resource type="BoxShape3D" id="Shape89"]
+size = Vector3(2.2, 16, 2.2)
+
+[sub_resource type="BoxShape3D" id="Shape90"]
+size = Vector3(2.2, 16, 2.2)
+
+[sub_resource type="BoxShape3D" id="Shape91"]
+size = Vector3(2.2, 16, 2.2)
+
+[sub_resource type="BoxShape3D" id="Shape92"]
+size = Vector3(2.2, 16, 2.2)
+
+[sub_resource type="BoxShape3D" id="Shape93"]
+size = Vector3(2.2, 16, 2.2)
+
+[sub_resource type="BoxShape3D" id="Shape94"]
+size = Vector3(2.2, 16, 2.2)
+
+[sub_resource type="BoxShape3D" id="Shape95"]
+size = Vector3(2.2, 16, 2.2)
+
+[sub_resource type="BoxShape3D" id="Shape96"]
+size = Vector3(2.2, 16, 2.2)
+
+[sub_resource type="BoxShape3D" id="Shape97"]
+size = Vector3(2.2, 16, 2.2)
+
+[sub_resource type="BoxShape3D" id="Shape98"]
+size = Vector3(2.2, 16, 2.2)
+
+[sub_resource type="BoxShape3D" id="Shape99"]
+size = Vector3(90, 75, 1)
+
+[sub_resource type="BoxMesh" id="GateMesh2"]
+size = Vector3(90, 75, 0.1)
+material = SubResource("Barrier")
+
+[sub_resource type="BoxShape3D" id="Shape101"]
+size = Vector3(1.5, 20, 1.5)
+
+[sub_resource type="BoxMesh" id="Box102"]
+size = Vector3(1.5, 20, 1.5)
+material = SubResource("Wood")
+
+[sub_resource type="BoxShape3D" id="Shape103"]
+size = Vector3(1.5, 20, 1.5)
+
+[sub_resource type="BoxMesh" id="Box104"]
+size = Vector3(1.5, 20, 1.5)
+material = SubResource("Wood")
+
+[sub_resource type="BoxShape3D" id="Shape105"]
+size = Vector3(36, 1.5, 3)
+
+[sub_resource type="BoxMesh" id="Box106"]
+size = Vector3(36, 1.5, 3)
+material = SubResource("Bark")
+
+[sub_resource type="BoxMesh" id="Trim107"]
+size = Vector3(32, 0.45, 1.7)
+material = SubResource("Corrupted")
+
+[sub_resource type="BoxShape3D" id="Shape108"]
+size = Vector3(90, 75, 1)
+
+[sub_resource type="BoxMesh" id="GateMesh3"]
+size = Vector3(90, 75, 0.1)
+material = SubResource("Barrier")
+
+[sub_resource type="BoxShape3D" id="Shape110"]
+size = Vector3(1.5, 20, 1.5)
+
+[sub_resource type="BoxMesh" id="Box111"]
+size = Vector3(1.5, 20, 1.5)
+material = SubResource("Wood")
+
+[sub_resource type="BoxShape3D" id="Shape112"]
+size = Vector3(1.5, 20, 1.5)
+
+[sub_resource type="BoxMesh" id="Box113"]
+size = Vector3(1.5, 20, 1.5)
+material = SubResource("Wood")
+
+[sub_resource type="BoxShape3D" id="Shape114"]
+size = Vector3(36, 1.5, 3)
+
+[sub_resource type="BoxMesh" id="Box115"]
+size = Vector3(36, 1.5, 3)
+material = SubResource("Bark")
+
+[sub_resource type="BoxMesh" id="Trim116"]
+size = Vector3(32, 0.45, 1.7)
+material = SubResource("Corrupted")
+
+[sub_resource type="BoxShape3D" id="Shape117"]
+size = Vector3(90, 75, 1)
+
+[sub_resource type="BoxMesh" id="GateMesh4"]
+size = Vector3(90, 75, 0.1)
+material = SubResource("Barrier")
+
+[sub_resource type="BoxShape3D" id="Shape119"]
+size = Vector3(1.5, 20, 1.5)
+
+[sub_resource type="BoxMesh" id="Box120"]
+size = Vector3(1.5, 20, 1.5)
+material = SubResource("Wood")
+
+[sub_resource type="BoxShape3D" id="Shape121"]
+size = Vector3(1.5, 20, 1.5)
+
+[sub_resource type="BoxMesh" id="Box122"]
+size = Vector3(1.5, 20, 1.5)
+material = SubResource("Wood")
+
+[sub_resource type="BoxShape3D" id="Shape123"]
+size = Vector3(36, 1.5, 3)
+
+[sub_resource type="BoxMesh" id="Box124"]
+size = Vector3(36, 1.5, 3)
+material = SubResource("Bark")
+
+[sub_resource type="BoxMesh" id="Trim125"]
+size = Vector3(32, 0.45, 1.7)
+material = SubResource("Corrupted")
+
+[sub_resource type="BoxShape3D" id="Shape126"]
+size = Vector3(90, 75, 1)
+
+[sub_resource type="BoxMesh" id="GateMesh5"]
+size = Vector3(90, 75, 0.1)
+material = SubResource("Barrier")
+
+[sub_resource type="BoxShape3D" id="Shape128"]
+size = Vector3(1.5, 20, 1.5)
+
+[sub_resource type="BoxMesh" id="Box129"]
+size = Vector3(1.5, 20, 1.5)
+material = SubResource("Wood")
+
+[sub_resource type="BoxShape3D" id="Shape130"]
+size = Vector3(1.5, 20, 1.5)
+
+[sub_resource type="BoxMesh" id="Box131"]
+size = Vector3(1.5, 20, 1.5)
+material = SubResource("Wood")
+
+[sub_resource type="BoxShape3D" id="Shape132"]
+size = Vector3(36, 1.5, 3)
+
+[sub_resource type="BoxMesh" id="Box133"]
+size = Vector3(36, 1.5, 3)
+material = SubResource("Bark")
+
+[sub_resource type="BoxMesh" id="Trim134"]
+size = Vector3(32, 0.45, 1.7)
+material = SubResource("Corrupted")
+
+[sub_resource type="BoxShape3D" id="AreaShape135"]
+size = Vector3(90, 75, 4)
+
+[sub_resource type="BoxShape3D" id="AreaShape136"]
+size = Vector3(90, 75, 4)
+
+[sub_resource type="BoxShape3D" id="AreaShape137"]
+size = Vector3(90, 75, 4)
+
+[sub_resource type="BoxShape3D" id="AreaShape138"]
+size = Vector3(90, 75, 4)
+
+[sub_resource type="BoxShape3D" id="AreaShape139"]
+size = Vector3(90, 75, 4)
+
+[sub_resource type="BoxShape3D" id="AreaShape140"]
+size = Vector3(90, 75, 4)
+
+[sub_resource type="BoxShape3D" id="AreaShape141"]
+size = Vector3(90, 75, 4)
+
+[sub_resource type="BoxShape3D" id="AreaShape142"]
+size = Vector3(90, 75, 4)
+
+[sub_resource type="BoxShape3D" id="AreaShape143"]
+size = Vector3(90, 75, 4)
+
+[sub_resource type="BoxShape3D" id="AreaShape144"]
+size = Vector3(90, 75, 4)
+
+[sub_resource type="BoxShape3D" id="AreaShape145"]
+size = Vector3(90, 75, 4)
+
+[sub_resource type="BoxShape3D" id="AreaShape146"]
+size = Vector3(90, 75, 4)
+
+[sub_resource type="BoxShape3D" id="AreaShape147"]
+size = Vector3(90, 75, 4)
+
+[sub_resource type="BoxShape3D" id="AreaShape148"]
+size = Vector3(90, 75, 4)
+
+[sub_resource type="BoxShape3D" id="AreaShape149"]
+size = Vector3(30, 20, 5)
+
+[sub_resource type="BoxShape3D" id="Shape150"]
+size = Vector3(1.5, 20, 1.5)
+
+[sub_resource type="BoxMesh" id="Box151"]
+size = Vector3(1.5, 20, 1.5)
+material = SubResource("Wood")
+
+[sub_resource type="BoxShape3D" id="Shape152"]
+size = Vector3(1.5, 20, 1.5)
+
+[sub_resource type="BoxMesh" id="Box153"]
+size = Vector3(1.5, 20, 1.5)
+material = SubResource("Wood")
+
+[sub_resource type="BoxShape3D" id="Shape154"]
+size = Vector3(36, 1.5, 3)
+
+[sub_resource type="BoxMesh" id="Box155"]
+size = Vector3(36, 1.5, 3)
+material = SubResource("Bark")
+
+[sub_resource type="BoxMesh" id="Trim156"]
+size = Vector3(32, 0.45, 1.7)
+material = SubResource("CheckpointTeal")
+
+[sub_resource type="BoxShape3D" id="AreaShape157"]
+size = Vector3(30, 20, 5)
+
+[sub_resource type="BoxShape3D" id="Shape158"]
+size = Vector3(1.5, 20, 1.5)
+
+[sub_resource type="BoxMesh" id="Box159"]
+size = Vector3(1.5, 20, 1.5)
+material = SubResource("Wood")
+
+[sub_resource type="BoxShape3D" id="Shape160"]
+size = Vector3(1.5, 20, 1.5)
+
+[sub_resource type="BoxMesh" id="Box161"]
+size = Vector3(1.5, 20, 1.5)
+material = SubResource("Wood")
+
+[sub_resource type="BoxShape3D" id="Shape162"]
+size = Vector3(36, 1.5, 3)
+
+[sub_resource type="BoxMesh" id="Box163"]
+size = Vector3(36, 1.5, 3)
+material = SubResource("Bark")
+
+[sub_resource type="BoxMesh" id="Trim164"]
+size = Vector3(32, 0.45, 1.7)
+material = SubResource("CheckpointTeal")
+
+[sub_resource type="BoxMesh" id="Link0"]
+size = Vector3(0.12, 0.12, 50.4777)
+material = SubResource("Corrupted")
+
+[sub_resource type="BoxMesh" id="Link1"]
+size = Vector3(0.12, 0.12, 30.3645)
+material = SubResource("Corrupted")
+
+[sub_resource type="BoxMesh" id="Link2"]
+size = Vector3(0.12, 0.12, 50.1298)
+material = SubResource("Corrupted")
+
+[sub_resource type="CylinderMesh" id="ArenaPlatform"]
+bottom_radius = 37
+top_radius = 37
+height = 2
+radial_segments = 48
+material = SubResource("Stone")
+
+[sub_resource type="CylinderShape3D" id="ArenaShape"]
+radius = 37.0
+height = 2.0
+
+[sub_resource type="BoxShape3D" id="Shape170"]
+size = Vector3(14, 4, 10)
+
+[sub_resource type="BoxMesh" id="Box171"]
+size = Vector3(14, 4, 10)
+material = SubResource("Stone")
+
+[sub_resource type="BoxShape3D" id="Shape172"]
+size = Vector3(9, 6, 6)
+
+[sub_resource type="BoxMesh" id="Box173"]
+size = Vector3(9, 6, 6)
+material = SubResource("Wood")
+
+[sub_resource type="PrismMesh" id="ShrineRoof"]
+size = Vector3(18, 5, 13)
+material = SubResource("Bark")
+
+[sub_resource type="TorusMesh" id="ArenaRing"]
+inner_radius = 35.5
+outer_radius = 35.8
+rings = 64
+ring_segments = 6
+material = SubResource("LanternGold")
+
+[sub_resource type="BoxShape3D" id="Shape176"]
+size = Vector3(1.5, 20, 1.5)
+
+[sub_resource type="BoxMesh" id="Box177"]
+size = Vector3(1.5, 20, 1.5)
+material = SubResource("Wood")
+
+[sub_resource type="BoxShape3D" id="Shape178"]
+size = Vector3(1.5, 20, 1.5)
+
+[sub_resource type="BoxMesh" id="Box179"]
+size = Vector3(1.5, 20, 1.5)
+material = SubResource("Wood")
+
+[sub_resource type="BoxShape3D" id="Shape180"]
+size = Vector3(36, 1.5, 3)
+
+[sub_resource type="BoxMesh" id="Box181"]
+size = Vector3(36, 1.5, 3)
+material = SubResource("Bark")
+
+[sub_resource type="BoxMesh" id="Trim182"]
+size = Vector3(32, 0.45, 1.7)
+material = SubResource("LanternGold")
+
+[node name="Stage" type="Node3D"]
+metadata/stage_id = "stage_01"
+metadata/handoff_state = "SCENE_READY_STATIC"
+
+[node name="Environment" type="Node3D" parent="."]
+
+
+[node name="Geometry" type="Node3D" parent="."]
+
+
+[node name="Encounters" type="Node3D" parent="."]
+
+
+[node name="Checkpoints" type="Node3D" parent="."]
+
+
+[node name="Gates" type="Node3D" parent="."]
+
+
+[node name="RuntimeActors" type="Node3D" parent="."]
+
+
+[node name="FlightBounds" type="Node3D" parent="."]
+
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="Environment"]
+environment = SubResource("Env")
+
+[node name="Moonlight" type="DirectionalLight3D" parent="Environment"]
+rotation_degrees = Vector3(-48, -25, 0)
+light_color = Color(0.65, 0.81, 1, 1)
+light_energy = 1.3
+shadow_enabled = true
+directional_shadow_max_distance = 160.0
+
+[node name="Entry" type="StaticBody3D" parent="Geometry"]
+position = Vector3(0, -3, -52.5)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Geometry/Entry"]
+shape = SubResource("Shape13")
+
+[node name="Mesh" type="MeshInstance3D" parent="Geometry/Entry"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box14")
+
+
+[node name="EntryWestBank" type="StaticBody3D" parent="Geometry"]
+position = Vector3(-46, 4, -52.5)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Geometry/EntryWestBank"]
+shape = SubResource("Shape15")
+
+[node name="Mesh" type="MeshInstance3D" parent="Geometry/EntryWestBank"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box16")
+
+
+[node name="EntryEastBank" type="StaticBody3D" parent="Geometry"]
+position = Vector3(46, 4, -52.5)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Geometry/EntryEastBank"]
+shape = SubResource("Shape17")
+
+[node name="Mesh" type="MeshInstance3D" parent="Geometry/EntryEastBank"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box18")
+
+
+[node name="AscentLower" type="StaticBody3D" parent="Geometry"]
+position = Vector3(0, 2, -162.5)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Geometry/AscentLower"]
+shape = SubResource("Shape19")
+
+[node name="Mesh" type="MeshInstance3D" parent="Geometry/AscentLower"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box20")
+
+
+[node name="AscentLowerWestBank" type="StaticBody3D" parent="Geometry"]
+position = Vector3(-46, 9, -162.5)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Geometry/AscentLowerWestBank"]
+shape = SubResource("Shape21")
+
+[node name="Mesh" type="MeshInstance3D" parent="Geometry/AscentLowerWestBank"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box22")
+
+
+[node name="AscentLowerEastBank" type="StaticBody3D" parent="Geometry"]
+position = Vector3(46, 9, -162.5)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Geometry/AscentLowerEastBank"]
+shape = SubResource("Shape23")
+
+[node name="Mesh" type="MeshInstance3D" parent="Geometry/AscentLowerEastBank"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box24")
+
+
+[node name="AscentUpper" type="StaticBody3D" parent="Geometry"]
+position = Vector3(0, 9, -205.0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Geometry/AscentUpper"]
+shape = SubResource("Shape25")
+
+[node name="Mesh" type="MeshInstance3D" parent="Geometry/AscentUpper"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box26")
+
+
+[node name="AscentUpperWestBank" type="StaticBody3D" parent="Geometry"]
+position = Vector3(-46, 16, -205.0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Geometry/AscentUpperWestBank"]
+shape = SubResource("Shape27")
+
+[node name="Mesh" type="MeshInstance3D" parent="Geometry/AscentUpperWestBank"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box28")
+
+
+[node name="AscentUpperEastBank" type="StaticBody3D" parent="Geometry"]
+position = Vector3(46, 16, -205.0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Geometry/AscentUpperEastBank"]
+shape = SubResource("Shape29")
+
+[node name="Mesh" type="MeshInstance3D" parent="Geometry/AscentUpperEastBank"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box30")
+
+
+[node name="Portal" type="StaticBody3D" parent="Geometry"]
+position = Vector3(0, 15, -280.0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Geometry/Portal"]
+shape = SubResource("Shape31")
+
+[node name="Mesh" type="MeshInstance3D" parent="Geometry/Portal"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box32")
+
+
+[node name="PortalWestBank" type="StaticBody3D" parent="Geometry"]
+position = Vector3(-46, 22, -280.0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Geometry/PortalWestBank"]
+shape = SubResource("Shape33")
+
+[node name="Mesh" type="MeshInstance3D" parent="Geometry/PortalWestBank"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box34")
+
+
+[node name="PortalEastBank" type="StaticBody3D" parent="Geometry"]
+position = Vector3(46, 22, -280.0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Geometry/PortalEastBank"]
+shape = SubResource("Shape35")
+
+[node name="Mesh" type="MeshInstance3D" parent="Geometry/PortalEastBank"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box36")
+
+
+[node name="ShrineApproach" type="StaticBody3D" parent="Geometry"]
+position = Vector3(0, 20, -390.0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Geometry/ShrineApproach"]
+shape = SubResource("Shape37")
+
+[node name="Mesh" type="MeshInstance3D" parent="Geometry/ShrineApproach"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box38")
+
+
+[node name="ShrineApproachWestBank" type="StaticBody3D" parent="Geometry"]
+position = Vector3(-46, 27, -390.0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Geometry/ShrineApproachWestBank"]
+shape = SubResource("Shape39")
+
+[node name="Mesh" type="MeshInstance3D" parent="Geometry/ShrineApproachWestBank"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box40")
+
+
+[node name="ShrineApproachEastBank" type="StaticBody3D" parent="Geometry"]
+position = Vector3(46, 27, -390.0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Geometry/ShrineApproachEastBank"]
+shape = SubResource("Shape41")
+
+[node name="Mesh" type="MeshInstance3D" parent="Geometry/ShrineApproachEastBank"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box42")
+
+
+[node name="Sanctuary" type="StaticBody3D" parent="Geometry"]
+position = Vector3(0, 25, -507.5)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Geometry/Sanctuary"]
+shape = SubResource("Shape43")
+
+[node name="Mesh" type="MeshInstance3D" parent="Geometry/Sanctuary"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box44")
+
+
+[node name="SanctuaryWestBank" type="StaticBody3D" parent="Geometry"]
+position = Vector3(-46, 32, -507.5)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Geometry/SanctuaryWestBank"]
+shape = SubResource("Shape45")
+
+[node name="Mesh" type="MeshInstance3D" parent="Geometry/SanctuaryWestBank"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box46")
+
+
+[node name="SanctuaryEastBank" type="StaticBody3D" parent="Geometry"]
+position = Vector3(46, 32, -507.5)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Geometry/SanctuaryEastBank"]
+shape = SubResource("Shape47")
+
+[node name="Mesh" type="MeshInstance3D" parent="Geometry/SanctuaryEastBank"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box48")
+
+
+[node name="West" type="StaticBody3D" parent="FlightBounds"]
+position = Vector3(-47, 38, -267.5)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="FlightBounds/West"]
+shape = SubResource("Shape49")
+
+[node name="East" type="StaticBody3D" parent="FlightBounds"]
+position = Vector3(47, 38, -267.5)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="FlightBounds/East"]
+shape = SubResource("Shape50")
+
+[node name="Entrance" type="StaticBody3D" parent="FlightBounds"]
+position = Vector3(0, 38, 37)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="FlightBounds/Entrance"]
+shape = SubResource("Shape51")
+
+[node name="End" type="StaticBody3D" parent="FlightBounds"]
+position = Vector3(0, 38, -572)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="FlightBounds/End"]
+shape = SubResource("Shape52")
+
+[node name="Ceiling" type="StaticBody3D" parent="FlightBounds"]
+position = Vector3(0, 77, -267.5)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="FlightBounds/Ceiling"]
+shape = SubResource("Shape53")
+
+[node name="PlayerStart" type="Marker3D" parent="."]
+position = Vector3(0, 7, 20)
+
+
+[node name="Forest" type="Node3D" parent="Environment"]
+
+
+[node name="Tree0" type="Node3D" parent="Environment/Forest"]
+position = Vector3(46.9105, 18, -295.8342)
+scale = Vector3(1, 1.4058, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree0"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree0"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree0"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree1" type="Node3D" parent="Environment/Forest"]
+position = Vector3(52.7861, 28, -452.0083)
+scale = Vector3(1, 1.3654, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree1"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree1"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree1"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree2" type="Node3D" parent="Environment/Forest"]
+position = Vector3(46.9777, 28, -508.9965)
+scale = Vector3(1, 1.2002, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree2"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree2"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree2"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree3" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-51.6494, 0, -35.2236)
+scale = Vector3(1, 1.1075, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree3"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree3"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree3"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree4" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-52.5632, 18, -295.4681)
+scale = Vector3(1, 1.3906, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree4"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree4"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree4"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree5" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-47.9944, 28, -527.4169)
+scale = Vector3(1, 1.0073, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree5"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree5"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree5"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree6" type="Node3D" parent="Environment/Forest"]
+position = Vector3(50.8522, 28, -547.1009)
+scale = Vector3(1, 1.2341, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree6"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree6"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree6"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree7" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-53.1296, 28, -448.7838)
+scale = Vector3(1, 1.1749, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree7"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree7"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree7"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree8" type="Node3D" parent="Environment/Forest"]
+position = Vector3(53.6085, 5, -170.8425)
+scale = Vector3(1, 1.1144, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree8"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree8"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree8"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree9" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-55.3577, 18, -236.9957)
+scale = Vector3(1, 1.0549, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree9"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree9"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree9"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree10" type="Node3D" parent="Environment/Forest"]
+position = Vector3(32.9818, 23, -428.3488)
+scale = Vector3(1, 1.216, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree10"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree10"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree10"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="TrunkBody" type="StaticBody3D" parent="Environment/Forest/Tree10"]
+position = Vector3(0, 8, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Environment/Forest/Tree10/TrunkBody"]
+shape = SubResource("Shape60")
+
+[node name="Tree11" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-61.7783, 28, -500.7835)
+scale = Vector3(1, 1.1012, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree11"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree11"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree11"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree12" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-39.0456, 0, 5.0352)
+scale = Vector3(1, 1.4526, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree12"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree12"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree12"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="TrunkBody" type="StaticBody3D" parent="Environment/Forest/Tree12"]
+position = Vector3(0, 8, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Environment/Forest/Tree12/TrunkBody"]
+shape = SubResource("Shape61")
+
+[node name="Tree13" type="Node3D" parent="Environment/Forest"]
+position = Vector3(64.5875, 28, -533.8681)
+scale = Vector3(1, 1.1083, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree13"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree13"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree13"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree14" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-60.3487, 28, -521.5422)
+scale = Vector3(1, 1.0254, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree14"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree14"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree14"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree15" type="Node3D" parent="Environment/Forest"]
+position = Vector3(44.3181, 28, -513.1492)
+scale = Vector3(1, 1.1165, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree15"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree15"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree15"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree16" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-40.1308, 0, -15.9056)
+scale = Vector3(1, 0.9157, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree16"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree16"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree16"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="TrunkBody" type="StaticBody3D" parent="Environment/Forest/Tree16"]
+position = Vector3(0, 8, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Environment/Forest/Tree16/TrunkBody"]
+shape = SubResource("Shape62")
+
+[node name="Tree17" type="Node3D" parent="Environment/Forest"]
+position = Vector3(47.7312, 28, -529.3634)
+scale = Vector3(1, 1.2135, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree17"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree17"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree17"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree18" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-64.5143, 18, -298.7822)
+scale = Vector3(1, 1.3502, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree18"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree18"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree18"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree19" type="Node3D" parent="Environment/Forest"]
+position = Vector3(35.8448, 18, -315.5579)
+scale = Vector3(1, 1.1235, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree19"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree19"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree19"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="TrunkBody" type="StaticBody3D" parent="Environment/Forest/Tree19"]
+position = Vector3(0, 8, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Environment/Forest/Tree19/TrunkBody"]
+shape = SubResource("Shape63")
+
+[node name="Tree20" type="Node3D" parent="Environment/Forest"]
+position = Vector3(60.523, 23, -438.3449)
+scale = Vector3(1, 1.4837, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree20"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree20"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree20"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree21" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-38.9534, 12, -212.3193)
+scale = Vector3(1, 1.1063, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree21"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree21"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree21"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="TrunkBody" type="StaticBody3D" parent="Environment/Forest/Tree21"]
+position = Vector3(0, 8, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Environment/Forest/Tree21/TrunkBody"]
+shape = SubResource("Shape64")
+
+[node name="Tree22" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-33.3896, 0, -56.6457)
+scale = Vector3(1, 0.9451, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree22"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree22"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree22"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="TrunkBody" type="StaticBody3D" parent="Environment/Forest/Tree22"]
+position = Vector3(0, 8, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Environment/Forest/Tree22/TrunkBody"]
+shape = SubResource("Shape65")
+
+[node name="Tree23" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-57.4988, 18, -302.2827)
+scale = Vector3(1, 1.0638, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree23"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree23"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree23"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree24" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-34.4513, 23, -388.6868)
+scale = Vector3(1, 0.9857, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree24"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree24"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree24"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="TrunkBody" type="StaticBody3D" parent="Environment/Forest/Tree24"]
+position = Vector3(0, 8, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Environment/Forest/Tree24/TrunkBody"]
+shape = SubResource("Shape66")
+
+[node name="Tree25" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-51.8424, 12, -186.2305)
+scale = Vector3(1, 1.0916, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree25"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree25"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree25"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree26" type="Node3D" parent="Environment/Forest"]
+position = Vector3(59.4679, 18, -295.3412)
+scale = Vector3(1, 0.9382, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree26"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree26"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree26"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree27" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-42.2568, 23, -335.2723)
+scale = Vector3(1, 0.9984, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree27"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree27"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree27"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="TrunkBody" type="StaticBody3D" parent="Environment/Forest/Tree27"]
+position = Vector3(0, 8, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Environment/Forest/Tree27/TrunkBody"]
+shape = SubResource("Shape67")
+
+[node name="Tree28" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-37.2297, 12, -201.7853)
+scale = Vector3(1, 1.2588, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree28"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree28"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree28"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="TrunkBody" type="StaticBody3D" parent="Environment/Forest/Tree28"]
+position = Vector3(0, 8, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Environment/Forest/Tree28/TrunkBody"]
+shape = SubResource("Shape68")
+
+[node name="Tree29" type="Node3D" parent="Environment/Forest"]
+position = Vector3(61.1123, 18, -235.4109)
+scale = Vector3(1, 1.2423, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree29"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree29"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree29"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree30" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-35.5986, 18, -314.233)
+scale = Vector3(1, 1.183, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree30"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree30"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree30"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="TrunkBody" type="StaticBody3D" parent="Environment/Forest/Tree30"]
+position = Vector3(0, 8, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Environment/Forest/Tree30/TrunkBody"]
+shape = SubResource("Shape69")
+
+[node name="Tree31" type="Node3D" parent="Environment/Forest"]
+position = Vector3(40.4804, 23, -413.1687)
+scale = Vector3(1, 1.3854, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree31"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree31"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree31"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="TrunkBody" type="StaticBody3D" parent="Environment/Forest/Tree31"]
+position = Vector3(0, 8, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Environment/Forest/Tree31/TrunkBody"]
+shape = SubResource("Shape70")
+
+[node name="Tree32" type="Node3D" parent="Environment/Forest"]
+position = Vector3(49.1624, 12, -210.1025)
+scale = Vector3(1, 1.454, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree32"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree32"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree32"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree33" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-39.5371, 0, 16.421)
+scale = Vector3(1, 1.2136, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree33"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree33"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree33"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="TrunkBody" type="StaticBody3D" parent="Environment/Forest/Tree33"]
+position = Vector3(0, 8, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Environment/Forest/Tree33/TrunkBody"]
+shape = SubResource("Shape71")
+
+[node name="Tree34" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-41.2472, 0, -57.8221)
+scale = Vector3(1, 1.4463, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree34"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree34"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree34"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="TrunkBody" type="StaticBody3D" parent="Environment/Forest/Tree34"]
+position = Vector3(0, 8, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Environment/Forest/Tree34/TrunkBody"]
+shape = SubResource("Shape72")
+
+[node name="Tree35" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-34.2821, 23, -443.6326)
+scale = Vector3(1, 1.1174, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree35"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree35"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree35"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="TrunkBody" type="StaticBody3D" parent="Environment/Forest/Tree35"]
+position = Vector3(0, 8, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Environment/Forest/Tree35/TrunkBody"]
+shape = SubResource("Shape73")
+
+[node name="Tree36" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-37.8164, 23, -416.8069)
+scale = Vector3(1, 1.0897, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree36"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree36"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree36"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="TrunkBody" type="StaticBody3D" parent="Environment/Forest/Tree36"]
+position = Vector3(0, 8, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Environment/Forest/Tree36/TrunkBody"]
+shape = SubResource("Shape74")
+
+[node name="Tree37" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-35.0423, 12, -224.5592)
+scale = Vector3(1, 0.94, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree37"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree37"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree37"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="TrunkBody" type="StaticBody3D" parent="Environment/Forest/Tree37"]
+position = Vector3(0, 8, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Environment/Forest/Tree37/TrunkBody"]
+shape = SubResource("Shape75")
+
+[node name="Tree38" type="Node3D" parent="Environment/Forest"]
+position = Vector3(53.6788, 18, -297.0443)
+scale = Vector3(1, 1.2993, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree38"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree38"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree38"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree39" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-51.4659, 12, -217.258)
+scale = Vector3(1, 1.4503, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree39"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree39"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree39"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree40" type="Node3D" parent="Environment/Forest"]
+position = Vector3(55.132, 18, -282.4982)
+scale = Vector3(1, 1.4758, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree40"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree40"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree40"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree41" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-54.127, 28, -552.3508)
+scale = Vector3(1, 1.3248, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree41"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree41"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree41"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree42" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-34.4837, 23, -375.2518)
+scale = Vector3(1, 1.205, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree42"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree42"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree42"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="TrunkBody" type="StaticBody3D" parent="Environment/Forest/Tree42"]
+position = Vector3(0, 8, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Environment/Forest/Tree42/TrunkBody"]
+shape = SubResource("Shape76")
+
+[node name="Tree43" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-58.1778, 0, -126.4817)
+scale = Vector3(1, 1.4448, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree43"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree43"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree43"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree44" type="Node3D" parent="Environment/Forest"]
+position = Vector3(61.7276, 23, -355.6587)
+scale = Vector3(1, 1.4162, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree44"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree44"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree44"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree45" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-60.4946, 18, -316.7939)
+scale = Vector3(1, 1.2223, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree45"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree45"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree45"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree46" type="Node3D" parent="Environment/Forest"]
+position = Vector3(44.5128, 12, -193.1485)
+scale = Vector3(1, 0.8581, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree46"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree46"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree46"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree47" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-57.4275, 28, -522.0118)
+scale = Vector3(1, 1.4957, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree47"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree47"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree47"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree48" type="Node3D" parent="Environment/Forest"]
+position = Vector3(44.8184, 0, -41.5239)
+scale = Vector3(1, 1.3278, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree48"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree48"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree48"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree49" type="Node3D" parent="Environment/Forest"]
+position = Vector3(47.2665, 12, -219.333)
+scale = Vector3(1, 1.2018, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree49"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree49"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree49"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree50" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-42.2378, 18, -256.3752)
+scale = Vector3(1, 0.907, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree50"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree50"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree50"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="TrunkBody" type="StaticBody3D" parent="Environment/Forest/Tree50"]
+position = Vector3(0, 8, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Environment/Forest/Tree50/TrunkBody"]
+shape = SubResource("Shape77")
+
+[node name="Tree51" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-54.4423, 28, -551.7371)
+scale = Vector3(1, 1.2494, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree51"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree51"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree51"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree52" type="Node3D" parent="Environment/Forest"]
+position = Vector3(61.5818, 0, -17.3238)
+scale = Vector3(1, 1.0892, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree52"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree52"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree52"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree53" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-54.8863, 28, -479.7839)
+scale = Vector3(1, 1.34, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree53"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree53"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree53"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree54" type="Node3D" parent="Environment/Forest"]
+position = Vector3(48.4443, 23, -361.1981)
+scale = Vector3(1, 1.007, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree54"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree54"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree54"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree55" type="Node3D" parent="Environment/Forest"]
+position = Vector3(38.5507, 18, -324.1695)
+scale = Vector3(1, 1.1301, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree55"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree55"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree55"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="TrunkBody" type="StaticBody3D" parent="Environment/Forest/Tree55"]
+position = Vector3(0, 8, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Environment/Forest/Tree55/TrunkBody"]
+shape = SubResource("Shape78")
+
+[node name="Tree56" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-61.0489, 0, -85.4369)
+scale = Vector3(1, 1.0999, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree56"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree56"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree56"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree57" type="Node3D" parent="Environment/Forest"]
+position = Vector3(38.9265, 12, -218.0512)
+scale = Vector3(1, 0.9375, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree57"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree57"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree57"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="TrunkBody" type="StaticBody3D" parent="Environment/Forest/Tree57"]
+position = Vector3(0, 8, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Environment/Forest/Tree57/TrunkBody"]
+shape = SubResource("Shape79")
+
+[node name="Tree58" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-55.4702, 23, -356.3066)
+scale = Vector3(1, 1.4675, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree58"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree58"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree58"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree59" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-35.7234, 23, -400.3064)
+scale = Vector3(1, 1.1564, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree59"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree59"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree59"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="TrunkBody" type="StaticBody3D" parent="Environment/Forest/Tree59"]
+position = Vector3(0, 8, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Environment/Forest/Tree59/TrunkBody"]
+shape = SubResource("Shape80")
+
+[node name="Tree60" type="Node3D" parent="Environment/Forest"]
+position = Vector3(44.6241, 0, -14.1895)
+scale = Vector3(1, 1.188, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree60"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree60"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree60"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree61" type="Node3D" parent="Environment/Forest"]
+position = Vector3(42.5714, 5, -165.0724)
+scale = Vector3(1, 1.3887, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree61"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree61"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree61"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="TrunkBody" type="StaticBody3D" parent="Environment/Forest/Tree61"]
+position = Vector3(0, 8, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Environment/Forest/Tree61/TrunkBody"]
+shape = SubResource("Shape81")
+
+[node name="Tree62" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-54.3824, 23, -399.5164)
+scale = Vector3(1, 1.0327, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree62"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree62"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree62"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree63" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-53.1525, 23, -354.2422)
+scale = Vector3(1, 1.1134, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree63"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree63"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree63"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree64" type="Node3D" parent="Environment/Forest"]
+position = Vector3(39.8345, 28, -451.9985)
+scale = Vector3(1, 0.9416, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree64"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree64"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree64"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="TrunkBody" type="StaticBody3D" parent="Environment/Forest/Tree64"]
+position = Vector3(0, 8, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Environment/Forest/Tree64/TrunkBody"]
+shape = SubResource("Shape82")
+
+[node name="Tree65" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-53.3761, 28, -537.0692)
+scale = Vector3(1, 1.2595, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree65"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree65"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree65"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree66" type="Node3D" parent="Environment/Forest"]
+position = Vector3(63.6292, 5, -175.2494)
+scale = Vector3(1, 1.2949, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree66"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree66"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree66"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree67" type="Node3D" parent="Environment/Forest"]
+position = Vector3(40.4494, 28, -446.3919)
+scale = Vector3(1, 1.3142, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree67"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree67"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree67"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="TrunkBody" type="StaticBody3D" parent="Environment/Forest/Tree67"]
+position = Vector3(0, 8, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Environment/Forest/Tree67/TrunkBody"]
+shape = SubResource("Shape83")
+
+[node name="Tree68" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-37.9103, 0, -115.7447)
+scale = Vector3(1, 1.027, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree68"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree68"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree68"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="TrunkBody" type="StaticBody3D" parent="Environment/Forest/Tree68"]
+position = Vector3(0, 8, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Environment/Forest/Tree68/TrunkBody"]
+shape = SubResource("Shape84")
+
+[node name="Tree69" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-44.986, 23, -359.285)
+scale = Vector3(1, 1.3648, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree69"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree69"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree69"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree70" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-45.5459, 0, -25.789)
+scale = Vector3(1, 1.4302, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree70"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree70"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree70"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree71" type="Node3D" parent="Environment/Forest"]
+position = Vector3(46.9667, 18, -334.1565)
+scale = Vector3(1, 1.2566, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree71"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree71"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree71"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree72" type="Node3D" parent="Environment/Forest"]
+position = Vector3(50.1504, 0, -23.5706)
+scale = Vector3(1, 1.2742, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree72"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree72"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree72"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree73" type="Node3D" parent="Environment/Forest"]
+position = Vector3(47.3024, 18, -265.923)
+scale = Vector3(1, 1.2734, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree73"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree73"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree73"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree74" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-39.0388, 23, -443.0879)
+scale = Vector3(1, 1.435, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree74"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree74"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree74"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="TrunkBody" type="StaticBody3D" parent="Environment/Forest/Tree74"]
+position = Vector3(0, 8, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Environment/Forest/Tree74/TrunkBody"]
+shape = SubResource("Shape85")
+
+[node name="Tree75" type="Node3D" parent="Environment/Forest"]
+position = Vector3(49.7196, 0, 18.3934)
+scale = Vector3(1, 1.364, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree75"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree75"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree75"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree76" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-43.5007, 23, -374.3651)
+scale = Vector3(1, 0.9038, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree76"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree76"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree76"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="TrunkBody" type="StaticBody3D" parent="Environment/Forest/Tree76"]
+position = Vector3(0, 8, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Environment/Forest/Tree76/TrunkBody"]
+shape = SubResource("Shape86")
+
+[node name="Tree77" type="Node3D" parent="Environment/Forest"]
+position = Vector3(57.3517, 18, -302.6638)
+scale = Vector3(1, 1.1668, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree77"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree77"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree77"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree78" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-53.0076, 28, -548.0958)
+scale = Vector3(1, 0.8728, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree78"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree78"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree78"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree79" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-47.5285, 18, -247.7924)
+scale = Vector3(1, 1.4999, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree79"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree79"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree79"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree80" type="Node3D" parent="Environment/Forest"]
+position = Vector3(63.2097, 0, -29.1625)
+scale = Vector3(1, 1.1702, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree80"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree80"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree80"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree81" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-57.0087, 0, -0.2531)
+scale = Vector3(1, 1.1356, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree81"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree81"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree81"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree82" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-49.2518, 18, -232.5289)
+scale = Vector3(1, 1.3984, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree82"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree82"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree82"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree83" type="Node3D" parent="Environment/Forest"]
+position = Vector3(54.1529, 18, -231.8172)
+scale = Vector3(1, 1.4706, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree83"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree83"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree83"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree84" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-42.047, 0, -47.3084)
+scale = Vector3(1, 0.9417, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree84"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree84"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree84"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="TrunkBody" type="StaticBody3D" parent="Environment/Forest/Tree84"]
+position = Vector3(0, 8, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Environment/Forest/Tree84/TrunkBody"]
+shape = SubResource("Shape87")
+
+[node name="Tree85" type="Node3D" parent="Environment/Forest"]
+position = Vector3(50.9086, 18, -240.8963)
+scale = Vector3(1, 0.9806, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree85"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree85"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree85"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree86" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-51.9725, 18, -246.1373)
+scale = Vector3(1, 0.868, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree86"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree86"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree86"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree87" type="Node3D" parent="Environment/Forest"]
+position = Vector3(49.9519, 0, 11.7959)
+scale = Vector3(1, 1.4931, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree87"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree87"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree87"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree88" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-58.5107, 28, -492.4511)
+scale = Vector3(1, 0.8928, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree88"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree88"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree88"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree89" type="Node3D" parent="Environment/Forest"]
+position = Vector3(62.3858, 18, -244.4643)
+scale = Vector3(1, 1.3703, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree89"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree89"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree89"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree90" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-47.6143, 18, -324.5252)
+scale = Vector3(1, 0.9325, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree90"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree90"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree90"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree91" type="Node3D" parent="Environment/Forest"]
+position = Vector3(49.3244, 18, -306.9618)
+scale = Vector3(1, 0.9206, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree91"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree91"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree91"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree92" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-62.5339, 18, -315.3741)
+scale = Vector3(1, 0.9341, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree92"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree92"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree92"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree93" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-33.1756, 0, -101.3231)
+scale = Vector3(1, 0.9511, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree93"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree93"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree93"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="TrunkBody" type="StaticBody3D" parent="Environment/Forest/Tree93"]
+position = Vector3(0, 8, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Environment/Forest/Tree93/TrunkBody"]
+shape = SubResource("Shape88")
+
+[node name="Tree94" type="Node3D" parent="Environment/Forest"]
+position = Vector3(50.7637, 28, -557.9595)
+scale = Vector3(1, 1.081, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree94"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree94"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree94"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree95" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-48.4893, 12, -196.239)
+scale = Vector3(1, 1.2285, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree95"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree95"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree95"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree96" type="Node3D" parent="Environment/Forest"]
+position = Vector3(55.684, 0, -58.1084)
+scale = Vector3(1, 1.3059, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree96"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree96"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree96"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree97" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-44.3993, 0, -42.1547)
+scale = Vector3(1, 1.1187, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree97"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree97"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree97"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree98" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-49.7601, 18, -250.0381)
+scale = Vector3(1, 1.4115, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree98"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree98"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree98"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree99" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-49.4774, 18, -247.2672)
+scale = Vector3(1, 1.4033, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree99"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree99"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree99"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree100" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-39.6777, 12, -201.0319)
+scale = Vector3(1, 1.3315, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree100"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree100"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree100"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="TrunkBody" type="StaticBody3D" parent="Environment/Forest/Tree100"]
+position = Vector3(0, 8, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Environment/Forest/Tree100/TrunkBody"]
+shape = SubResource("Shape89")
+
+[node name="Tree101" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-42.4238, 0, -82.7476)
+scale = Vector3(1, 1.0547, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree101"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree101"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree101"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="TrunkBody" type="StaticBody3D" parent="Environment/Forest/Tree101"]
+position = Vector3(0, 8, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Environment/Forest/Tree101/TrunkBody"]
+shape = SubResource("Shape90")
+
+[node name="Tree102" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-57.6844, 0, -15.9537)
+scale = Vector3(1, 0.9765, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree102"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree102"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree102"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree103" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-46.7834, 28, -507.3672)
+scale = Vector3(1, 0.9073, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree103"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree103"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree103"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree104" type="Node3D" parent="Environment/Forest"]
+position = Vector3(59.4616, 18, -334.2001)
+scale = Vector3(1, 1.1241, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree104"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree104"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree104"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree105" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-38.6213, 0, -94.9882)
+scale = Vector3(1, 1.2582, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree105"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree105"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree105"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="TrunkBody" type="StaticBody3D" parent="Environment/Forest/Tree105"]
+position = Vector3(0, 8, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Environment/Forest/Tree105/TrunkBody"]
+shape = SubResource("Shape91")
+
+[node name="Tree106" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-38.6308, 0, -89.6796)
+scale = Vector3(1, 1.2935, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree106"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree106"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree106"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="TrunkBody" type="StaticBody3D" parent="Environment/Forest/Tree106"]
+position = Vector3(0, 8, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Environment/Forest/Tree106/TrunkBody"]
+shape = SubResource("Shape92")
+
+[node name="Tree107" type="Node3D" parent="Environment/Forest"]
+position = Vector3(35.8085, 0, -22.7331)
+scale = Vector3(1, 1.1787, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree107"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree107"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree107"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="TrunkBody" type="StaticBody3D" parent="Environment/Forest/Tree107"]
+position = Vector3(0, 8, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Environment/Forest/Tree107/TrunkBody"]
+shape = SubResource("Shape93")
+
+[node name="Tree108" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-58.4938, 0, -113.8981)
+scale = Vector3(1, 1.1633, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree108"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree108"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree108"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree109" type="Node3D" parent="Environment/Forest"]
+position = Vector3(47.0777, 28, -550.5387)
+scale = Vector3(1, 0.9699, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree109"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree109"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree109"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree110" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-64.6799, 23, -443.6712)
+scale = Vector3(1, 1.4525, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree110"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree110"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree110"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree111" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-46.8235, 28, -508.3284)
+scale = Vector3(1, 1.2926, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree111"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree111"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree111"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree112" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-50.8634, 28, -518.8246)
+scale = Vector3(1, 1.1535, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree112"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree112"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree112"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree113" type="Node3D" parent="Environment/Forest"]
+position = Vector3(38.9328, 18, -258.4042)
+scale = Vector3(1, 1.0926, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree113"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree113"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree113"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="TrunkBody" type="StaticBody3D" parent="Environment/Forest/Tree113"]
+position = Vector3(0, 8, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Environment/Forest/Tree113/TrunkBody"]
+shape = SubResource("Shape94")
+
+[node name="Tree114" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-59.8607, 12, -187.7662)
+scale = Vector3(1, 0.9678, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree114"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree114"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree114"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree115" type="Node3D" parent="Environment/Forest"]
+position = Vector3(45.375, 18, -294.8992)
+scale = Vector3(1, 0.9768, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree115"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree115"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree115"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree116" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-42.682, 28, -466.7794)
+scale = Vector3(1, 0.9051, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree116"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree116"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree116"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="TrunkBody" type="StaticBody3D" parent="Environment/Forest/Tree116"]
+position = Vector3(0, 8, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Environment/Forest/Tree116/TrunkBody"]
+shape = SubResource("Shape95")
+
+[node name="Tree117" type="Node3D" parent="Environment/Forest"]
+position = Vector3(50.7996, 0, -64.0657)
+scale = Vector3(1, 0.9741, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree117"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree117"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree117"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree118" type="Node3D" parent="Environment/Forest"]
+position = Vector3(58.5591, 12, -217.1542)
+scale = Vector3(1, 1.0179, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree118"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree118"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree118"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree119" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-58.8832, 0, -22.7771)
+scale = Vector3(1, 1.1137, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree119"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree119"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree119"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree120" type="Node3D" parent="Environment/Forest"]
+position = Vector3(57.3199, 0, -31.5557)
+scale = Vector3(1, 1.3474, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree120"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree120"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree120"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree121" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-34.3282, 18, -323.5814)
+scale = Vector3(1, 1.0721, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree121"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree121"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree121"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="TrunkBody" type="StaticBody3D" parent="Environment/Forest/Tree121"]
+position = Vector3(0, 8, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Environment/Forest/Tree121/TrunkBody"]
+shape = SubResource("Shape96")
+
+[node name="Tree122" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-61.3056, 18, -286.04)
+scale = Vector3(1, 1.4939, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree122"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree122"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree122"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree123" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-39.6595, 0, -27.8907)
+scale = Vector3(1, 1.464, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree123"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree123"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree123"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="TrunkBody" type="StaticBody3D" parent="Environment/Forest/Tree123"]
+position = Vector3(0, 8, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Environment/Forest/Tree123/TrunkBody"]
+shape = SubResource("Shape97")
+
+[node name="Tree124" type="Node3D" parent="Environment/Forest"]
+position = Vector3(39.1296, 5, -168.6743)
+scale = Vector3(1, 1.114, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree124"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree124"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree124"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="TrunkBody" type="StaticBody3D" parent="Environment/Forest/Tree124"]
+position = Vector3(0, 8, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Environment/Forest/Tree124/TrunkBody"]
+shape = SubResource("Shape98")
+
+[node name="Tree125" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-44.8566, 28, -456.733)
+scale = Vector3(1, 1.4999, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree125"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree125"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree125"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree126" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-57.1374, 5, -182.8522)
+scale = Vector3(1, 1.4871, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree126"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree126"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree126"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree127" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-59.5147, 28, -551.4218)
+scale = Vector3(1, 1.0168, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree127"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree127"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree127"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree128" type="Node3D" parent="Environment/Forest"]
+position = Vector3(-57.1231, 18, -326.0744)
+scale = Vector3(1, 1.2712, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree128"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree128"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree128"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="Tree129" type="Node3D" parent="Environment/Forest"]
+position = Vector3(49.2686, 28, -558.5858)
+scale = Vector3(1, 1.4387, 1)
+
+[node name="Trunk" type="MeshInstance3D" parent="Environment/Forest/Tree129"]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Trunk")
+
+
+[node name="Crown" type="MeshInstance3D" parent="Environment/Forest/Tree129"]
+position = Vector3(0, 19, 0)
+mesh = SubResource("Canopy")
+
+
+[node name="Tip" type="MeshInstance3D" parent="Environment/Forest/Tree129"]
+position = Vector3(0, 26, 0)
+mesh = SubResource("CanopyLight")
+
+
+[node name="LanternTrail" type="Node3D" parent="Environment"]
+
+
+[node name="L0L" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(-15.0, 9.0, 20)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L0L"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L0L"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L0L"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="Light" type="OmniLight3D" parent="Environment/LanternTrail/L0L"]
+light_color = Color(1, 0.62, 0.24, 1)
+light_energy = 2.0
+omni_range = 10.0
+
+[node name="L0R" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(15.0, 9.0, 20)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L0R"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L0R"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L0R"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="Light" type="OmniLight3D" parent="Environment/LanternTrail/L0R"]
+light_color = Color(1, 0.62, 0.24, 1)
+light_energy = 2.0
+omni_range = 10.0
+
+[node name="L1L" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(-11.6617, 10.6, 8)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L1L"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L1L"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L1L"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L1R" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(18.3383, 10.6, 8)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L1R"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L1R"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L1R"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L2L" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(-8.7997, 12.2, -4)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L2L"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L2L"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L2L"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L2R" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(21.2003, 12.2, -4)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L2R"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L2R"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L2R"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L3L" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(-6.8223, 9.0, -16)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L3L"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L3L"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L3L"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L3R" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(23.1777, 9.0, -16)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L3R"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L3R"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L3R"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L4L" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(-6.0116, 10.6, -28)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L4L"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L4L"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L4L"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L4R" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(23.9884, 10.6, -28)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L4R"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L4R"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L4R"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L5L" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(-6.4833, 12.2, -40)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L5L"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L5L"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L5L"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="Light" type="OmniLight3D" parent="Environment/LanternTrail/L5L"]
+light_color = Color(1, 0.62, 0.24, 1)
+light_energy = 2.0
+omni_range = 10.0
+
+[node name="L5R" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(23.5167, 12.2, -40)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L5R"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L5R"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L5R"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="Light" type="OmniLight3D" parent="Environment/LanternTrail/L5R"]
+light_color = Color(1, 0.62, 0.24, 1)
+light_energy = 2.0
+omni_range = 10.0
+
+[node name="L6L" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(-8.1701, 9.0, -52)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L6L"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L6L"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L6L"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L6R" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(21.8299, 9.0, -52)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L6R"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L6R"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L6R"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L7L" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(-10.8313, 10.6, -64)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L7L"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L7L"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L7L"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L7R" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(19.1687, 10.6, -64)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L7R"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L7R"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L7R"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L8L" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(-14.0872, 12.2, -76)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L8L"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L8L"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L8L"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L8R" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(15.9128, 12.2, -76)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L8R"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L8R"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L8R"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L9L" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(-17.4734, 9.0, -88)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L9L"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L9L"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L9L"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L9R" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(12.5266, 9.0, -88)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L9R"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L9R"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L9R"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L10L" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(-20.5067, 10.6, -100)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L10L"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L10L"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L10L"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="Light" type="OmniLight3D" parent="Environment/LanternTrail/L10L"]
+light_color = Color(1, 0.62, 0.24, 1)
+light_energy = 2.0
+omni_range = 10.0
+
+[node name="L10R" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(9.4933, 10.6, -100)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L10R"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L10R"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L10R"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="Light" type="OmniLight3D" parent="Environment/LanternTrail/L10R"]
+light_color = Color(1, 0.62, 0.24, 1)
+light_energy = 2.0
+omni_range = 10.0
+
+[node name="L11L" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(-22.7544, 12.2, -112)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L11L"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L11L"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L11L"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L11R" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(7.2456, 12.2, -112)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L11R"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L11R"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L11R"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L12L" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(-23.8957, 9.0, -124)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L12L"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L12L"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L12L"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L12R" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(6.1043, 9.0, -124)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L12R"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L12R"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L12R"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L13L" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(-23.7679, 10.6, -136)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L13L"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L13L"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L13L"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L13R" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(6.2321, 10.6, -136)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L13R"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L13R"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L13R"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L14L" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(-22.3891, 17.2, -148)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L14L"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L14L"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L14L"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L14R" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(7.6109, 17.2, -148)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L14R"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L14R"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L14R"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L15L" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(-19.9562, 14.0, -160)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L15L"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L15L"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L15L"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="Light" type="OmniLight3D" parent="Environment/LanternTrail/L15L"]
+light_color = Color(1, 0.62, 0.24, 1)
+light_energy = 2.0
+omni_range = 10.0
+
+[node name="L15R" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(10.0438, 14.0, -160)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L15R"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L15R"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L15R"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="Light" type="OmniLight3D" parent="Environment/LanternTrail/L15R"]
+light_color = Color(1, 0.62, 0.24, 1)
+light_energy = 2.0
+omni_range = 10.0
+
+[node name="L16L" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(-16.8161, 15.6, -172)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L16L"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L16L"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L16L"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L16R" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(13.1839, 15.6, -172)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L16R"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L16R"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L16R"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L17L" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(-13.4169, 17.2, -184)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L17L"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L17L"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L17L"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L17R" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(16.5831, 17.2, -184)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L17R"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L17R"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L17R"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L18L" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(-10.2436, 21.0, -196)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L18L"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L18L"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L18L"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L18R" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(19.7564, 21.0, -196)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L18R"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L18R"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L18R"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L19L" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(-7.7489, 22.6, -208)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L19L"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L19L"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L19L"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L19R" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(22.2511, 22.6, -208)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L19R"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L19R"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L19R"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L20L" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(-6.2887, 24.2, -220)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L20L"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L20L"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L20L"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="Light" type="OmniLight3D" parent="Environment/LanternTrail/L20L"]
+light_color = Color(1, 0.62, 0.24, 1)
+light_energy = 2.0
+omni_range = 10.0
+
+[node name="L20R" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(23.7113, 24.2, -220)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L20R"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L20R"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L20R"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="Light" type="OmniLight3D" parent="Environment/LanternTrail/L20R"]
+light_color = Color(1, 0.62, 0.24, 1)
+light_energy = 2.0
+omni_range = 10.0
+
+[node name="L21L" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(-6.0714, 27.0, -232)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L21L"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L21L"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L21L"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L21R" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(23.9286, 27.0, -232)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L21R"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L21R"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L21R"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L22L" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(-7.1279, 28.6, -244)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L22L"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L22L"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L22L"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L22R" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(22.8721, 28.6, -244)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L22R"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L22R"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L22R"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L23L" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(-9.3075, 30.2, -256)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L23L"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L23L"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L23L"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L23R" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(20.6925, 30.2, -256)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L23R"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L23R"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L23R"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L24L" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(-12.2993, 27.0, -268)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L24L"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L24L"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L24L"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L24R" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(17.7007, 27.0, -268)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L24R"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L24R"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L24R"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L25L" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(-15.6764, 28.6, -280)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L25L"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L25L"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L25L"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="Light" type="OmniLight3D" parent="Environment/LanternTrail/L25L"]
+light_color = Color(1, 0.62, 0.24, 1)
+light_energy = 2.0
+omni_range = 10.0
+
+[node name="L25R" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(14.3236, 28.6, -280)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L25R"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L25R"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L25R"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="Light" type="OmniLight3D" parent="Environment/LanternTrail/L25R"]
+light_color = Color(1, 0.62, 0.24, 1)
+light_energy = 2.0
+omni_range = 10.0
+
+[node name="L26L" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(-18.957, 30.2, -292)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L26L"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L26L"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L26L"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L26R" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(11.043, 30.2, -292)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L26R"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L26R"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L26R"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L27L" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(-21.673, 27.0, -304)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L27L"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L27L"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L27L"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L27R" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(8.327, 27.0, -304)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L27R"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L27R"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L27R"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L28L" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(-23.437, 28.6, -316)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L28L"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L28L"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L28L"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L28R" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(6.563, 28.6, -316)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L28R"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L28R"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L28R"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L29L" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(-23.9973, 30.2, -328)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L29L"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L29L"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L29L"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L29R" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(6.0027, 30.2, -328)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L29R"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L29R"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L29R"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L30L" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(-23.274, 32.0, -340)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L30L"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L30L"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L30L"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="Light" type="OmniLight3D" parent="Environment/LanternTrail/L30L"]
+light_color = Color(1, 0.62, 0.24, 1)
+light_energy = 2.0
+omni_range = 10.0
+
+[node name="L30R" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(6.726, 32.0, -340)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L30R"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L30R"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L30R"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="Light" type="OmniLight3D" parent="Environment/LanternTrail/L30R"]
+light_color = Color(1, 0.62, 0.24, 1)
+light_energy = 2.0
+omni_range = 10.0
+
+[node name="L31L" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(-21.3701, 33.6, -352)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L31L"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L31L"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L31L"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L31R" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(8.6299, 33.6, -352)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L31R"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L31R"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L31R"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L32L" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(-18.5575, 35.2, -364)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L32L"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L32L"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L32L"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L32R" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(11.4425, 35.2, -364)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L32R"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L32R"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L32R"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L33L" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(-15.2373, 32.0, -376)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L33L"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L33L"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L33L"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L33R" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(14.7627, 32.0, -376)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L33R"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L33R"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L33R"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L34L" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(-11.8833, 33.6, -388)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L34L"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L34L"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L34L"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L34R" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(18.1167, 33.6, -388)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L34R"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L34R"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L34R"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L35L" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(-8.9739, 35.2, -400)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L35L"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L35L"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L35L"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="Light" type="OmniLight3D" parent="Environment/LanternTrail/L35L"]
+light_color = Color(1, 0.62, 0.24, 1)
+light_energy = 2.0
+omni_range = 10.0
+
+[node name="L35R" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(21.0261, 35.2, -400)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L35R"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L35R"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L35R"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="Light" type="OmniLight3D" parent="Environment/LanternTrail/L35R"]
+light_color = Color(1, 0.62, 0.24, 1)
+light_energy = 2.0
+omni_range = 10.0
+
+[node name="L36L" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(-6.9242, 32.0, -412)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L36L"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L36L"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L36L"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L36R" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(23.0758, 32.0, -412)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L36R"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L36R"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L36R"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L37L" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(-6.0268, 33.6, -424)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L37L"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L37L"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L37L"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L37R" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(23.9732, 33.6, -424)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L37R"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L37R"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L37R"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L38L" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(-6.4095, 35.2, -436)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L38L"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L38L"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L38L"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L38R" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(23.5905, 35.2, -436)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L38R"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L38R"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L38R"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L39L" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(-8.0179, 37.0, -448)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L39L"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L39L"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L39L"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L39R" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(21.9821, 37.0, -448)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L39R"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L39R"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L39R"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L40L" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(-10.6224, 38.6, -460)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L40L"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L40L"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L40L"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="Light" type="OmniLight3D" parent="Environment/LanternTrail/L40L"]
+light_color = Color(1, 0.62, 0.24, 1)
+light_energy = 2.0
+omni_range = 10.0
+
+[node name="L40R" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(19.3776, 38.6, -460)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L40R"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L40R"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L40R"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="Light" type="OmniLight3D" parent="Environment/LanternTrail/L40R"]
+light_color = Color(1, 0.62, 0.24, 1)
+light_energy = 2.0
+omni_range = 10.0
+
+[node name="L41L" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(-13.8515, 40.2, -472)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L41L"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L41L"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L41L"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L41R" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(16.1485, 40.2, -472)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L41R"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L41R"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L41R"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L42L" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(-17.2444, 37.0, -484)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L42L"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L42L"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L42L"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L42R" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(12.7556, 37.0, -484)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L42R"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L42R"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L42R"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L43L" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(-20.3171, 38.6, -496)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L43L"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L43L"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L43L"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L43R" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(9.6829, 38.6, -496)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L43R"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L43R"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L43R"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L44L" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(-22.6312, 40.2, -508)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L44L"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L44L"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L44L"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="L44R" type="Node3D" parent="Environment/LanternTrail"]
+position = Vector3(7.3688, 40.2, -508)
+
+[node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L44R"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Lantern")
+
+
+[node name="Cap" type="MeshInstance3D" parent="Environment/LanternTrail/L44R"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Cap")
+
+
+[node name="Cord" type="MeshInstance3D" parent="Environment/LanternTrail/L44R"]
+position = Vector3(0, 2.9, 0)
+mesh = SubResource("Cord")
+
+
+[node name="Gate_S1_02" type="Node3D" parent="Gates"]
+metadata/encounter_id = "S1-02"
+
+[node name="BarrierBody" type="StaticBody3D" parent="Gates/Gate_S1_02"]
+position = Vector3(0, 37.5, -140)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Gates/Gate_S1_02/BarrierBody"]
+shape = SubResource("Shape99")
+
+[node name="ClosedVisual" type="MeshInstance3D" parent="Gates/Gate_S1_02"]
+position = Vector3(0, 37.5, -140)
+mesh = SubResource("GateMesh2")
+
+
+[node name="Arch" type="Node3D" parent="Gates/Gate_S1_02"]
+position = Vector3(0, 0, -140)
+
+[node name="Left" type="StaticBody3D" parent="Gates/Gate_S1_02/Arch"]
+position = Vector3(-15, 10, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Gates/Gate_S1_02/Arch/Left"]
+shape = SubResource("Shape101")
+
+[node name="Mesh" type="MeshInstance3D" parent="Gates/Gate_S1_02/Arch/Left"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box102")
+
+
+[node name="Right" type="StaticBody3D" parent="Gates/Gate_S1_02/Arch"]
+position = Vector3(15, 10, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Gates/Gate_S1_02/Arch/Right"]
+shape = SubResource("Shape103")
+
+[node name="Mesh" type="MeshInstance3D" parent="Gates/Gate_S1_02/Arch/Right"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box104")
+
+
+[node name="Lintel" type="StaticBody3D" parent="Gates/Gate_S1_02/Arch"]
+position = Vector3(0, 20, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Gates/Gate_S1_02/Arch/Lintel"]
+shape = SubResource("Shape105")
+
+[node name="Mesh" type="MeshInstance3D" parent="Gates/Gate_S1_02/Arch/Lintel"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box106")
+
+
+[node name="Trim" type="MeshInstance3D" parent="Gates/Gate_S1_02/Arch"]
+position = Vector3(0, 18, 0)
+mesh = SubResource("Trim107")
+
+
+[node name="Gate_S1_03" type="Node3D" parent="Gates"]
+metadata/encounter_id = "S1-03"
+
+[node name="BarrierBody" type="StaticBody3D" parent="Gates/Gate_S1_03"]
+position = Vector3(0, 37.5, -225)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Gates/Gate_S1_03/BarrierBody"]
+shape = SubResource("Shape108")
+
+[node name="ClosedVisual" type="MeshInstance3D" parent="Gates/Gate_S1_03"]
+position = Vector3(0, 37.5, -225)
+mesh = SubResource("GateMesh3")
+
+
+[node name="Arch" type="Node3D" parent="Gates/Gate_S1_03"]
+position = Vector3(0, 12, -225)
+
+[node name="Left" type="StaticBody3D" parent="Gates/Gate_S1_03/Arch"]
+position = Vector3(-15, 10, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Gates/Gate_S1_03/Arch/Left"]
+shape = SubResource("Shape110")
+
+[node name="Mesh" type="MeshInstance3D" parent="Gates/Gate_S1_03/Arch/Left"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box111")
+
+
+[node name="Right" type="StaticBody3D" parent="Gates/Gate_S1_03/Arch"]
+position = Vector3(15, 10, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Gates/Gate_S1_03/Arch/Right"]
+shape = SubResource("Shape112")
+
+[node name="Mesh" type="MeshInstance3D" parent="Gates/Gate_S1_03/Arch/Right"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box113")
+
+
+[node name="Lintel" type="StaticBody3D" parent="Gates/Gate_S1_03/Arch"]
+position = Vector3(0, 20, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Gates/Gate_S1_03/Arch/Lintel"]
+shape = SubResource("Shape114")
+
+[node name="Mesh" type="MeshInstance3D" parent="Gates/Gate_S1_03/Arch/Lintel"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box115")
+
+
+[node name="Trim" type="MeshInstance3D" parent="Gates/Gate_S1_03/Arch"]
+position = Vector3(0, 18, 0)
+mesh = SubResource("Trim116")
+
+
+[node name="Gate_S1_04" type="Node3D" parent="Gates"]
+metadata/encounter_id = "S1-04"
+
+[node name="BarrierBody" type="StaticBody3D" parent="Gates/Gate_S1_04"]
+position = Vector3(0, 37.5, -315)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Gates/Gate_S1_04/BarrierBody"]
+shape = SubResource("Shape117")
+
+[node name="ClosedVisual" type="MeshInstance3D" parent="Gates/Gate_S1_04"]
+position = Vector3(0, 37.5, -315)
+mesh = SubResource("GateMesh4")
+
+
+[node name="Arch" type="Node3D" parent="Gates/Gate_S1_04"]
+position = Vector3(0, 18, -315)
+
+[node name="Left" type="StaticBody3D" parent="Gates/Gate_S1_04/Arch"]
+position = Vector3(-15, 10, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Gates/Gate_S1_04/Arch/Left"]
+shape = SubResource("Shape119")
+
+[node name="Mesh" type="MeshInstance3D" parent="Gates/Gate_S1_04/Arch/Left"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box120")
+
+
+[node name="Right" type="StaticBody3D" parent="Gates/Gate_S1_04/Arch"]
+position = Vector3(15, 10, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Gates/Gate_S1_04/Arch/Right"]
+shape = SubResource("Shape121")
+
+[node name="Mesh" type="MeshInstance3D" parent="Gates/Gate_S1_04/Arch/Right"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box122")
+
+
+[node name="Lintel" type="StaticBody3D" parent="Gates/Gate_S1_04/Arch"]
+position = Vector3(0, 20, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Gates/Gate_S1_04/Arch/Lintel"]
+shape = SubResource("Shape123")
+
+[node name="Mesh" type="MeshInstance3D" parent="Gates/Gate_S1_04/Arch/Lintel"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box124")
+
+
+[node name="Trim" type="MeshInstance3D" parent="Gates/Gate_S1_04/Arch"]
+position = Vector3(0, 18, 0)
+mesh = SubResource("Trim125")
+
+
+[node name="Gate_S1_05" type="Node3D" parent="Gates"]
+metadata/encounter_id = "S1-05"
+
+[node name="BarrierBody" type="StaticBody3D" parent="Gates/Gate_S1_05"]
+position = Vector3(0, 37.5, -425)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Gates/Gate_S1_05/BarrierBody"]
+shape = SubResource("Shape126")
+
+[node name="ClosedVisual" type="MeshInstance3D" parent="Gates/Gate_S1_05"]
+position = Vector3(0, 37.5, -425)
+mesh = SubResource("GateMesh5")
+
+
+[node name="Arch" type="Node3D" parent="Gates/Gate_S1_05"]
+position = Vector3(0, 23, -425)
+
+[node name="Left" type="StaticBody3D" parent="Gates/Gate_S1_05/Arch"]
+position = Vector3(-15, 10, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Gates/Gate_S1_05/Arch/Left"]
+shape = SubResource("Shape128")
+
+[node name="Mesh" type="MeshInstance3D" parent="Gates/Gate_S1_05/Arch/Left"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box129")
+
+
+[node name="Right" type="StaticBody3D" parent="Gates/Gate_S1_05/Arch"]
+position = Vector3(15, 10, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Gates/Gate_S1_05/Arch/Right"]
+shape = SubResource("Shape130")
+
+[node name="Mesh" type="MeshInstance3D" parent="Gates/Gate_S1_05/Arch/Right"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box131")
+
+
+[node name="Lintel" type="StaticBody3D" parent="Gates/Gate_S1_05/Arch"]
+position = Vector3(0, 20, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Gates/Gate_S1_05/Arch/Lintel"]
+shape = SubResource("Shape132")
+
+[node name="Mesh" type="MeshInstance3D" parent="Gates/Gate_S1_05/Arch/Lintel"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box133")
+
+
+[node name="Trim" type="MeshInstance3D" parent="Gates/Gate_S1_05/Arch"]
+position = Vector3(0, 18, 0)
+mesh = SubResource("Trim134")
+
+
+[node name="S1-01" type="Node3D" parent="Encounters"]
+metadata/encounter_id = "S1-01"
+
+[node name="EntryVolume" type="Area3D" parent="Encounters/S1-01"]
+position = Vector3(0, 37.5, 20)
+collision_layer = 0
+collision_mask = 2
+monitoring = false
+
+
+[node name="Collision" type="CollisionShape3D" parent="Encounters/S1-01/EntryVolume"]
+shape = SubResource("AreaShape135")
+
+[node name="ExitVolume" type="Area3D" parent="Encounters/S1-01"]
+position = Vector3(0, 37.5, -57)
+collision_layer = 0
+collision_mask = 2
+monitoring = false
+
+
+[node name="Collision" type="CollisionShape3D" parent="Encounters/S1-01/ExitVolume"]
+shape = SubResource("AreaShape136")
+
+[node name="Spawns" type="Node3D" parent="Encounters/S1-01"]
+
+
+[node name="RewardOrigin" type="Marker3D" parent="Encounters/S1-01"]
+position = Vector3(0, 9, -50)
+
+
+[node name="S1-02" type="Node3D" parent="Encounters"]
+metadata/encounter_id = "S1-02"
+
+[node name="EntryVolume" type="Area3D" parent="Encounters/S1-02"]
+position = Vector3(0, 37.5, -60)
+collision_layer = 0
+collision_mask = 2
+monitoring = false
+
+
+[node name="Collision" type="CollisionShape3D" parent="Encounters/S1-02/EntryVolume"]
+shape = SubResource("AreaShape137")
+
+[node name="ExitVolume" type="Area3D" parent="Encounters/S1-02"]
+position = Vector3(0, 37.5, -137)
+collision_layer = 0
+collision_mask = 2
+monitoring = false
+
+
+[node name="Collision" type="CollisionShape3D" parent="Encounters/S1-02/ExitVolume"]
+shape = SubResource("AreaShape138")
+
+[node name="Spawns" type="Node3D" parent="Encounters/S1-02"]
+
+
+[node name="Wave1_Spirit1" type="Marker3D" parent="Encounters/S1-02/Spawns"]
+position = Vector3(-17, 9, -95)
+
+
+[node name="Wave1_Spirit2" type="Marker3D" parent="Encounters/S1-02/Spawns"]
+position = Vector3(0, 15, -110)
+
+
+[node name="Wave1_Spirit3" type="Marker3D" parent="Encounters/S1-02/Spawns"]
+position = Vector3(17, 11, -96)
+
+
+[node name="Wave2_Spirit1" type="Marker3D" parent="Encounters/S1-02/Spawns"]
+position = Vector3(-20, 15, -112)
+
+
+[node name="Wave2_Spirit2" type="Marker3D" parent="Encounters/S1-02/Spawns"]
+position = Vector3(4, 8, -120)
+
+
+[node name="Wave2_Spirit3" type="Marker3D" parent="Encounters/S1-02/Spawns"]
+position = Vector3(19, 18, -104)
+
+
+[node name="RewardOrigin" type="Marker3D" parent="Encounters/S1-02"]
+position = Vector3(0, 9, -130)
+
+
+[node name="S1-03" type="Node3D" parent="Encounters"]
+metadata/encounter_id = "S1-03"
+
+[node name="EntryVolume" type="Area3D" parent="Encounters/S1-03"]
+position = Vector3(0, 37.5, -145)
+collision_layer = 0
+collision_mask = 2
+monitoring = false
+
+
+[node name="Collision" type="CollisionShape3D" parent="Encounters/S1-03/EntryVolume"]
+shape = SubResource("AreaShape139")
+
+[node name="ExitVolume" type="Area3D" parent="Encounters/S1-03"]
+position = Vector3(0, 37.5, -222)
+collision_layer = 0
+collision_mask = 2
+monitoring = false
+
+
+[node name="Collision" type="CollisionShape3D" parent="Encounters/S1-03/ExitVolume"]
+shape = SubResource("AreaShape140")
+
+[node name="Spawns" type="Node3D" parent="Encounters/S1-03"]
+
+
+[node name="Wave1_Sentry1" type="Marker3D" parent="Encounters/S1-03/Spawns"]
+position = Vector3(-16, 17, -172)
+
+
+[node name="Wave1_Sentry2" type="Marker3D" parent="Encounters/S1-03/Spawns"]
+position = Vector3(16, 28, -207)
+
+
+[node name="RewardOrigin" type="Marker3D" parent="Encounters/S1-03"]
+position = Vector3(0, 21, -215)
+
+
+[node name="ShieldPickup" type="Marker3D" parent="Encounters/S1-03"]
+position = Vector3(12, 24, -218)
+
+
+[node name="S1-04" type="Node3D" parent="Encounters"]
+metadata/encounter_id = "S1-04"
+
+[node name="EntryVolume" type="Area3D" parent="Encounters/S1-04"]
+position = Vector3(0, 37.5, -230)
+collision_layer = 0
+collision_mask = 2
+monitoring = false
+
+
+[node name="Collision" type="CollisionShape3D" parent="Encounters/S1-04/EntryVolume"]
+shape = SubResource("AreaShape141")
+
+[node name="ExitVolume" type="Area3D" parent="Encounters/S1-04"]
+position = Vector3(0, 37.5, -312)
+collision_layer = 0
+collision_mask = 2
+monitoring = false
+
+
+[node name="Collision" type="CollisionShape3D" parent="Encounters/S1-04/ExitVolume"]
+shape = SubResource("AreaShape142")
+
+[node name="Spawns" type="Node3D" parent="Encounters/S1-04"]
+
+
+[node name="Wave1_Sentry1" type="Marker3D" parent="Encounters/S1-04/Spawns"]
+position = Vector3(-24, 29, -270)
+
+
+[node name="Wave1_Sentry2" type="Marker3D" parent="Encounters/S1-04/Spawns"]
+position = Vector3(0, 44, -285)
+
+
+[node name="Wave1_Sentry3" type="Marker3D" parent="Encounters/S1-04/Spawns"]
+position = Vector3(24, 34, -270)
+
+
+[node name="RewardOrigin" type="Marker3D" parent="Encounters/S1-04"]
+position = Vector3(0, 27, -305)
+
+
+[node name="S1-05" type="Node3D" parent="Encounters"]
+metadata/encounter_id = "S1-05"
+
+[node name="EntryVolume" type="Area3D" parent="Encounters/S1-05"]
+position = Vector3(0, 37.5, -340)
+collision_layer = 0
+collision_mask = 2
+monitoring = false
+
+
+[node name="Collision" type="CollisionShape3D" parent="Encounters/S1-05/EntryVolume"]
+shape = SubResource("AreaShape143")
+
+[node name="ExitVolume" type="Area3D" parent="Encounters/S1-05"]
+position = Vector3(0, 37.5, -422)
+collision_layer = 0
+collision_mask = 2
+monitoring = false
+
+
+[node name="Collision" type="CollisionShape3D" parent="Encounters/S1-05/ExitVolume"]
+shape = SubResource("AreaShape144")
+
+[node name="Spawns" type="Node3D" parent="Encounters/S1-05"]
+
+
+[node name="Wave1_Spirit1" type="Marker3D" parent="Encounters/S1-05/Spawns"]
+position = Vector3(-18, 33, -365)
+
+
+[node name="Wave1_Spirit2" type="Marker3D" parent="Encounters/S1-05/Spawns"]
+position = Vector3(18, 39, -370)
+
+
+[node name="Wave1_Sentry1" type="Marker3D" parent="Encounters/S1-05/Spawns"]
+position = Vector3(0, 43, -386)
+
+
+[node name="Wave2_Spirit1" type="Marker3D" parent="Encounters/S1-05/Spawns"]
+position = Vector3(-20, 40, -401)
+
+
+[node name="Wave2_Spirit2" type="Marker3D" parent="Encounters/S1-05/Spawns"]
+position = Vector3(19, 31, -408)
+
+
+[node name="Wave2_Sentry1" type="Marker3D" parent="Encounters/S1-05/Spawns"]
+position = Vector3(0, 35, -410)
+
+
+[node name="RewardOrigin" type="Marker3D" parent="Encounters/S1-05"]
+position = Vector3(0, 32, -415)
+
+
+[node name="S1-06" type="Node3D" parent="Encounters"]
+metadata/encounter_id = "S1-06"
+
+[node name="EntryVolume" type="Area3D" parent="Encounters/S1-06"]
+position = Vector3(0, 37.5, -430)
+collision_layer = 0
+collision_mask = 2
+monitoring = false
+
+
+[node name="Collision" type="CollisionShape3D" parent="Encounters/S1-06/EntryVolume"]
+shape = SubResource("AreaShape145")
+
+[node name="ExitVolume" type="Area3D" parent="Encounters/S1-06"]
+position = Vector3(0, 37.5, -457)
+collision_layer = 0
+collision_mask = 2
+monitoring = false
+
+
+[node name="Collision" type="CollisionShape3D" parent="Encounters/S1-06/ExitVolume"]
+shape = SubResource("AreaShape146")
+
+[node name="Spawns" type="Node3D" parent="Encounters/S1-06"]
+
+
+[node name="RewardOrigin" type="Marker3D" parent="Encounters/S1-06"]
+position = Vector3(0, 37, -450)
+
+
+[node name="S1-07" type="Node3D" parent="Encounters"]
+metadata/encounter_id = "S1-07"
+
+[node name="EntryVolume" type="Area3D" parent="Encounters/S1-07"]
+position = Vector3(0, 37.5, -465)
+collision_layer = 0
+collision_mask = 2
+monitoring = false
+
+
+[node name="Collision" type="CollisionShape3D" parent="Encounters/S1-07/EntryVolume"]
+shape = SubResource("AreaShape147")
+
+[node name="ExitVolume" type="Area3D" parent="Encounters/S1-07"]
+position = Vector3(0, 37.5, -562)
+collision_layer = 0
+collision_mask = 2
+monitoring = false
+
+
+[node name="Collision" type="CollisionShape3D" parent="Encounters/S1-07/ExitVolume"]
+shape = SubResource("AreaShape148")
+
+[node name="Spawns" type="Node3D" parent="Encounters/S1-07"]
+
+
+[node name="Wave1_Boss1" type="Marker3D" parent="Encounters/S1-07/Spawns"]
+position = Vector3(0, 43, -520)
+
+
+[node name="RewardOrigin" type="Marker3D" parent="Encounters/S1-07"]
+position = Vector3(0, 37, -555)
+
+
+[node name="CP1-A" type="Area3D" parent="Checkpoints"]
+position = Vector3(0, 28, -325)
+collision_layer = 0
+collision_mask = 2
+monitoring = false
+metadata/checkpoint_id = "CP1-A"
+metadata/resume_encounter_id = "S1-05"
+
+[node name="Collision" type="CollisionShape3D" parent="Checkpoints/CP1-A"]
+shape = SubResource("AreaShape149")
+
+[node name="Respawn" type="Marker3D" parent="Checkpoints/CP1-A"]
+position = Vector3(0, -1, -4)
+
+
+[node name="CP1-AArch" type="Node3D" parent="Geometry"]
+position = Vector3(0, 18, -325)
+
+[node name="Left" type="StaticBody3D" parent="Geometry/CP1-AArch"]
+position = Vector3(-15, 10, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Geometry/CP1-AArch/Left"]
+shape = SubResource("Shape150")
+
+[node name="Mesh" type="MeshInstance3D" parent="Geometry/CP1-AArch/Left"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box151")
+
+
+[node name="Right" type="StaticBody3D" parent="Geometry/CP1-AArch"]
+position = Vector3(15, 10, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Geometry/CP1-AArch/Right"]
+shape = SubResource("Shape152")
+
+[node name="Mesh" type="MeshInstance3D" parent="Geometry/CP1-AArch/Right"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box153")
+
+
+[node name="Lintel" type="StaticBody3D" parent="Geometry/CP1-AArch"]
+position = Vector3(0, 20, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Geometry/CP1-AArch/Lintel"]
+shape = SubResource("Shape154")
+
+[node name="Mesh" type="MeshInstance3D" parent="Geometry/CP1-AArch/Lintel"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box155")
+
+
+[node name="Trim" type="MeshInstance3D" parent="Geometry/CP1-AArch"]
+position = Vector3(0, 18, 0)
+mesh = SubResource("Trim156")
+
+
+[node name="CP1-B" type="Area3D" parent="Checkpoints"]
+position = Vector3(0, 38, -450)
+collision_layer = 0
+collision_mask = 2
+monitoring = false
+metadata/checkpoint_id = "CP1-B"
+metadata/resume_encounter_id = "S1-07"
+
+[node name="Collision" type="CollisionShape3D" parent="Checkpoints/CP1-B"]
+shape = SubResource("AreaShape157")
+
+[node name="Respawn" type="Marker3D" parent="Checkpoints/CP1-B"]
+position = Vector3(0, -1, -4)
+
+
+[node name="CP1-BArch" type="Node3D" parent="Geometry"]
+position = Vector3(0, 28, -450)
+
+[node name="Left" type="StaticBody3D" parent="Geometry/CP1-BArch"]
+position = Vector3(-15, 10, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Geometry/CP1-BArch/Left"]
+shape = SubResource("Shape158")
+
+[node name="Mesh" type="MeshInstance3D" parent="Geometry/CP1-BArch/Left"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box159")
+
+
+[node name="Right" type="StaticBody3D" parent="Geometry/CP1-BArch"]
+position = Vector3(15, 10, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Geometry/CP1-BArch/Right"]
+shape = SubResource("Shape160")
+
+[node name="Mesh" type="MeshInstance3D" parent="Geometry/CP1-BArch/Right"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box161")
+
+
+[node name="Lintel" type="StaticBody3D" parent="Geometry/CP1-BArch"]
+position = Vector3(0, 20, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Geometry/CP1-BArch/Lintel"]
+shape = SubResource("Shape162")
+
+[node name="Mesh" type="MeshInstance3D" parent="Geometry/CP1-BArch/Lintel"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box163")
+
+
+[node name="Trim" type="MeshInstance3D" parent="Geometry/CP1-BArch"]
+position = Vector3(0, 18, 0)
+mesh = SubResource("Trim164")
+
+
+[node name="PortalLinks" type="Node3D" parent="Environment"]
+
+
+[node name="GuardLink1" type="MeshInstance3D" parent="Environment/PortalLinks"]
+position = Vector3(-12.0, 32.0, -292.0)
+mesh = SubResource("Link0")
+rotation = Vector3(0.1191, -0.4993, 0)
+
+[node name="GuardLink2" type="MeshInstance3D" parent="Environment/PortalLinks"]
+position = Vector3(0.0, 39.5, -299.5)
+mesh = SubResource("Link1")
+rotation = Vector3(-0.3009, 0.0, 0)
+
+[node name="GuardLink3" type="MeshInstance3D" parent="Environment/PortalLinks"]
+position = Vector3(12.0, 34.5, -292.0)
+mesh = SubResource("Link2")
+rotation = Vector3(0.0199, 0.4993, 0)
+
+[node name="ArenaPlatform" type="MeshInstance3D" parent="Geometry"]
+position = Vector3(0, 29, -515)
+mesh = SubResource("ArenaPlatform")
+
+
+[node name="ArenaBody" type="StaticBody3D" parent="Geometry"]
+position = Vector3(0, 29, -515)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Geometry/ArenaBody"]
+shape = SubResource("ArenaShape")
+
+[node name="ShrineBase" type="StaticBody3D" parent="Geometry"]
+position = Vector3(0, 32, -548)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Geometry/ShrineBase"]
+shape = SubResource("Shape170")
+
+[node name="Mesh" type="MeshInstance3D" parent="Geometry/ShrineBase"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box171")
+
+
+[node name="ShrineHouse" type="StaticBody3D" parent="Geometry"]
+position = Vector3(0, 37, -550)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Geometry/ShrineHouse"]
+shape = SubResource("Shape172")
+
+[node name="Mesh" type="MeshInstance3D" parent="Geometry/ShrineHouse"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box173")
+
+
+[node name="ShrineRoof" type="MeshInstance3D" parent="Geometry"]
+position = Vector3(0, 42, -550)
+mesh = SubResource("ShrineRoof")
+
+
+[node name="ArenaRim" type="MeshInstance3D" parent="Geometry"]
+position = Vector3(0, 30.1, -515)
+mesh = SubResource("ArenaRing")
+
+
+[node name="SanctuaryArch" type="Node3D" parent="Geometry"]
+position = Vector3(0, 28, -465)
+
+[node name="Left" type="StaticBody3D" parent="Geometry/SanctuaryArch"]
+position = Vector3(-15, 10, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Geometry/SanctuaryArch/Left"]
+shape = SubResource("Shape176")
+
+[node name="Mesh" type="MeshInstance3D" parent="Geometry/SanctuaryArch/Left"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box177")
+
+
+[node name="Right" type="StaticBody3D" parent="Geometry/SanctuaryArch"]
+position = Vector3(15, 10, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Geometry/SanctuaryArch/Right"]
+shape = SubResource("Shape178")
+
+[node name="Mesh" type="MeshInstance3D" parent="Geometry/SanctuaryArch/Right"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box179")
+
+
+[node name="Lintel" type="StaticBody3D" parent="Geometry/SanctuaryArch"]
+position = Vector3(0, 20, 0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Collision" type="CollisionShape3D" parent="Geometry/SanctuaryArch/Lintel"]
+shape = SubResource("Shape180")
+
+[node name="Mesh" type="MeshInstance3D" parent="Geometry/SanctuaryArch/Lintel"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Box181")
+
+
+[node name="Trim" type="MeshInstance3D" parent="Geometry/SanctuaryArch"]
+position = Vector3(0, 18, 0)
+mesh = SubResource("Trim182")
+
+
+[node name="BossFocus" type="Marker3D" parent="Geometry"]
+position = Vector3(0, 43, -520)
+

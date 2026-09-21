@@ -1,0 +1,385 @@
+[gd_scene format=3]
+[ext_resource type="Theme" path="res://assets/ui/menu_theme.tres" id="1_theme"]
+[ext_resource type="Texture2D" path="res://assets/ui/menu_forest.svg" id="2_forest"]
+[ext_resource type="Texture2D" path="res://assets/ui/menu_mountain.svg" id="3_mountain"]
+[ext_resource type="Texture2D" path="res://assets/ui/wind_emblem.svg" id="4_emblem"]
+[ext_resource type="Script" path="res://scripts/ui/menu_controller.gd" id="5_controller"]
+
+[node name="Options" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_theme")
+script = ExtResource("5_controller")
+
+[node name="Background" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_forest")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Layout" type="Control" parent="."]
+layout_mode = 0
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -640.0
+offset_top = -360.0
+offset_right = 640.0
+offset_bottom = 360.0
+mouse_filter = 2
+
+[node name="Emblem" type="TextureRect" parent="Layout"]
+layout_mode = 0
+offset_left = 64.0
+offset_top = 42.0
+offset_right = 106.0
+offset_bottom = 84.0
+mouse_filter = 2
+texture = ExtResource("4_emblem")
+expand_mode = 1
+
+[node name="Brand" type="Label" parent="Layout"]
+layout_mode = 0
+offset_left = 122.0
+offset_top = 46.0
+offset_right = 562.0
+offset_bottom = 78.0
+mouse_filter = 2
+text = "GUARDIÃ DOS VENTOS"
+theme_override_font_sizes/font_size = 17
+theme_override_colors/font_color = Color(0.48, 0.62, 0.63, 1)
+
+[node name="Heading" type="Label" parent="Layout"]
+layout_mode = 0
+offset_left = 64.0
+offset_top = 112.0
+offset_right = 1124.0
+offset_bottom = 177.0
+mouse_filter = 2
+text = "Opções"
+theme_override_font_sizes/font_size = 44
+
+
+[node name="Audio" type="Panel" parent="Layout"]
+layout_mode = 0
+offset_left = 64.0
+offset_top = 210.0
+offset_right = 420.0
+offset_bottom = 562.0
+
+
+[node name="Display" type="Panel" parent="Layout"]
+layout_mode = 0
+offset_left = 462.0
+offset_top = 210.0
+offset_right = 818.0
+offset_bottom = 562.0
+
+
+[node name="Controls" type="Panel" parent="Layout"]
+layout_mode = 0
+offset_left = 860.0
+offset_top = 210.0
+offset_right = 1216.0
+offset_bottom = 562.0
+
+
+[node name="Title" type="Label" parent="Layout/Audio"]
+layout_mode = 0
+offset_left = 22.0
+offset_top = 16.0
+offset_right = 322.0
+offset_bottom = 46.0
+mouse_filter = 2
+text = "ÁUDIO"
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.48, 0.62, 0.63, 1)
+
+[node name="MasterVolumeLabel" type="Label" parent="Layout/Audio"]
+layout_mode = 0
+offset_left = 22.0
+offset_top = 66.0
+offset_right = 302.0
+offset_bottom = 96.0
+mouse_filter = 2
+text = "Geral"
+theme_override_font_sizes/font_size = 20
+
+
+[node name="MasterVolume" type="HSlider" parent="Layout/Audio"]
+layout_mode = 0
+offset_left = 22.0
+offset_top = 100.0
+offset_right = 330.0
+offset_bottom = 125.0
+min_value = 0.0
+max_value = 100.0
+step = 1.0
+value = 80.0
+focus_mode = 2
+focus_next = NodePath("../../../Layout/Audio/MusicVolume")
+focus_previous = NodePath("../../../Layout/CreditsButton")
+
+[node name="MusicVolumeLabel" type="Label" parent="Layout/Audio"]
+layout_mode = 0
+offset_left = 22.0
+offset_top = 148.0
+offset_right = 302.0
+offset_bottom = 178.0
+mouse_filter = 2
+text = "Música"
+theme_override_font_sizes/font_size = 20
+
+
+[node name="MusicVolume" type="HSlider" parent="Layout/Audio"]
+layout_mode = 0
+offset_left = 22.0
+offset_top = 182.0
+offset_right = 330.0
+offset_bottom = 207.0
+min_value = 0.0
+max_value = 100.0
+step = 1.0
+value = 65.0
+focus_mode = 2
+focus_next = NodePath("../../../Layout/Audio/SfxVolume")
+focus_previous = NodePath("../../../Layout/Audio/MasterVolume")
+
+[node name="SfxVolumeLabel" type="Label" parent="Layout/Audio"]
+layout_mode = 0
+offset_left = 22.0
+offset_top = 230.0
+offset_right = 302.0
+offset_bottom = 260.0
+mouse_filter = 2
+text = "Efeitos"
+theme_override_font_sizes/font_size = 20
+
+
+[node name="SfxVolume" type="HSlider" parent="Layout/Audio"]
+layout_mode = 0
+offset_left = 22.0
+offset_top = 264.0
+offset_right = 330.0
+offset_bottom = 289.0
+min_value = 0.0
+max_value = 100.0
+step = 1.0
+value = 80.0
+focus_mode = 2
+focus_next = NodePath("../../../Layout/Display/WindowMode")
+focus_previous = NodePath("../../../Layout/Audio/MusicVolume")
+
+[node name="Title" type="Label" parent="Layout/Display"]
+layout_mode = 0
+offset_left = 22.0
+offset_top = 16.0
+offset_right = 322.0
+offset_bottom = 46.0
+mouse_filter = 2
+text = "TELA"
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.48, 0.62, 0.63, 1)
+
+[node name="ModeLabel" type="Label" parent="Layout/Display"]
+layout_mode = 0
+offset_left = 22.0
+offset_top = 66.0
+offset_right = 322.0
+offset_bottom = 96.0
+mouse_filter = 2
+text = "Modo"
+theme_override_font_sizes/font_size = 20
+
+
+[node name="WindowMode" type="OptionButton" parent="Layout/Display"]
+layout_mode = 0
+offset_left = 22.0
+offset_top = 102.0
+offset_right = 330.0
+offset_bottom = 146.0
+focus_mode = 2
+selected = 0
+item_count = 2
+popup/item_0/text = "Janela"
+popup/item_0/id = 0
+popup/item_1/text = "Tela cheia"
+popup/item_1/id = 1
+focus_next = NodePath("../../../Layout/Display/Resolution")
+focus_previous = NodePath("../../../Layout/Audio/SfxVolume")
+
+[node name="ResolutionLabel" type="Label" parent="Layout/Display"]
+layout_mode = 0
+offset_left = 22.0
+offset_top = 168.0
+offset_right = 322.0
+offset_bottom = 198.0
+mouse_filter = 2
+text = "Resolução"
+theme_override_font_sizes/font_size = 20
+
+
+[node name="Resolution" type="OptionButton" parent="Layout/Display"]
+layout_mode = 0
+offset_left = 22.0
+offset_top = 206.0
+offset_right = 330.0
+offset_bottom = 250.0
+focus_mode = 2
+selected = 0
+item_count = 3
+popup/item_0/text = "1280 × 720"
+popup/item_0/id = 0
+popup/item_1/text = "1600 × 900"
+popup/item_1/id = 1
+popup/item_2/text = "1920 × 1080"
+popup/item_2/id = 2
+focus_next = NodePath("../../../Layout/Controls/InputDevice")
+focus_previous = NodePath("../../../Layout/Display/WindowMode")
+
+[node name="Title" type="Label" parent="Layout/Controls"]
+layout_mode = 0
+offset_left = 22.0
+offset_top = 16.0
+offset_right = 322.0
+offset_bottom = 46.0
+mouse_filter = 2
+text = "CONTROLES"
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.48, 0.62, 0.63, 1)
+
+[node name="InputDevice" type="OptionButton" parent="Layout/Controls"]
+layout_mode = 0
+offset_left = 22.0
+offset_top = 62.0
+offset_right = 330.0
+offset_bottom = 106.0
+focus_mode = 2
+selected = 0
+item_count = 3
+popup/item_0/text = "Automático"
+popup/item_0/id = 0
+popup/item_1/text = "Teclado"
+popup/item_1/id = 1
+popup/item_2/text = "Controle"
+popup/item_2/id = 2
+focus_next = NodePath("../../../Layout/Controls/Sensitivity")
+focus_previous = NodePath("../../../Layout/Display/Resolution")
+
+[node name="SensitivityLabel" type="Label" parent="Layout/Controls"]
+layout_mode = 0
+offset_left = 22.0
+offset_top = 120.0
+offset_right = 322.0
+offset_bottom = 150.0
+mouse_filter = 2
+text = "Sensibilidade"
+theme_override_font_sizes/font_size = 20
+
+
+[node name="Sensitivity" type="HSlider" parent="Layout/Controls"]
+layout_mode = 0
+offset_left = 22.0
+offset_top = 156.0
+offset_right = 330.0
+offset_bottom = 182.0
+min_value = 0.2
+max_value = 2.0
+step = 0.05
+value = 1.0
+focus_mode = 2
+focus_next = NodePath("../../../Layout/Controls/InvertVertical")
+focus_previous = NodePath("../../../Layout/Controls/InputDevice")
+
+[node name="InvertVertical" type="CheckButton" parent="Layout/Controls"]
+layout_mode = 0
+offset_left = 16.0
+offset_top = 203.0
+offset_right = 328.0
+offset_bottom = 245.0
+text = "Inverter câmera vertical"
+theme_override_font_sizes/font_size = 17
+focus_mode = 2
+focus_next = NodePath("../../../Layout/Controls/BindingsButton")
+focus_previous = NodePath("../../../Layout/Controls/Sensitivity")
+
+[node name="BindingsButton" type="Button" parent="Layout/Controls"]
+layout_mode = 0
+offset_left = 22.0
+offset_top = 275.0
+offset_right = 330.0
+offset_bottom = 323.0
+text = "Ver comandos"
+alignment = 0
+focus_mode = 2
+focus_next = NodePath("../../../Layout/BackButton")
+focus_previous = NodePath("../../../Layout/Controls/InvertVertical")
+
+[node name="BackButton" type="Button" parent="Layout"]
+layout_mode = 0
+offset_left = 64.0
+offset_top = 590.0
+offset_right = 244.0
+offset_bottom = 642.0
+text = "Voltar"
+alignment = 0
+focus_mode = 2
+focus_next = NodePath("../../Layout/DefaultsButton")
+focus_previous = NodePath("../../Layout/Controls/BindingsButton")
+
+[node name="DefaultsButton" type="Button" parent="Layout"]
+layout_mode = 0
+offset_left = 266.0
+offset_top = 590.0
+offset_right = 506.0
+offset_bottom = 642.0
+text = "Restaurar padrões"
+alignment = 0
+focus_mode = 2
+focus_next = NodePath("../../Layout/CreditsButton")
+focus_previous = NodePath("../../Layout/BackButton")
+
+[node name="CreditsButton" type="Button" parent="Layout"]
+layout_mode = 0
+offset_left = 1036.0
+offset_top = 590.0
+offset_right = 1216.0
+offset_bottom = 642.0
+text = "Créditos"
+alignment = 0
+focus_mode = 2
+focus_next = NodePath("../../Layout/Audio/MasterVolume")
+focus_previous = NodePath("../../Layout/DefaultsButton")
+
+[node name="NavigationHint" type="Label" parent="Layout"]
+layout_mode = 0
+offset_left = 64.0
+offset_top = 664.0
+offset_right = 734.0
+offset_bottom = 689.0
+mouse_filter = 2
+text = "↑ ↓  Navegar     Enter  Confirmar"
+theme_override_font_sizes/font_size = 15
+theme_override_colors/font_color = Color(0.48, 0.62, 0.63, 1)
+
+[node name="ChapterLabel" type="Label" parent="Layout"]
+layout_mode = 0
+offset_left = 900.0
+offset_top = 664.0
+offset_right = 1230.0
+offset_bottom = 689.0
+mouse_filter = 2
+text = "UMA JORNADA ENTRE ESPÍRITOS"
+theme_override_font_sizes/font_size = 13
+theme_override_colors/font_color = Color(0.48, 0.62, 0.63, 1)

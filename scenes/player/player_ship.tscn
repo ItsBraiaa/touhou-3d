@@ -1,0 +1,118 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://assets/models/player/craft_speederA.glb" id="1_ship"]
+[ext_resource type="Script" path="res://scripts/player/player_controller.gd" id="2_player"]
+[ext_resource type="Script" path="res://scripts/player/camera_rig.gd" id="3_camera"]
+[ext_resource type="Script" path="res://scripts/player/targeting.gd" id="4_target"]
+[ext_resource type="Script" path="res://scripts/combat/player_weapon.gd" id="5_weapon"]
+
+[sub_resource type="StandardMaterial3D" id="Teal"]
+albedo_color = Color(0.08, 0.95, 0.84, 1)
+roughness = 0.85
+emission_enabled = true
+emission = Color(0.08, 0.95, 0.84, 1)
+emission_energy_multiplier = 2.0
+
+[sub_resource type="StandardMaterial3D" id="CoreWhite"]
+albedo_color = Color(0.75, 1, 1, 1)
+shading_mode = 0
+no_depth_test = true
+render_priority = 10
+
+[sub_resource type="BoxShape3D" id="BodyShape"]
+size = Vector3(2, 0.8, 2.1)
+
+[sub_resource type="SphereShape3D" id="CoreShape"]
+radius = 0.18
+
+[sub_resource type="SphereShape3D" id="GrazeShape"]
+radius = 0.55
+
+[sub_resource type="SphereMesh" id="CoreMesh"]
+radius = 0.18
+height = 0.36
+radial_segments = 16
+rings = 8
+material = SubResource("CoreWhite")
+
+[sub_resource type="SphereMesh" id="EngineMesh"]
+radius = 0.12
+height = 0.24
+radial_segments = 12
+rings = 6
+material = SubResource("Teal")
+
+[node name="PlayerShip" type="CharacterBody3D"]
+collision_layer = 2
+collision_mask = 1
+script = ExtResource("2_player")
+metadata/base_speed = 12.0
+metadata/focus_multiplier = 0.45
+
+[node name="BodyCollision" type="CollisionShape3D" parent="."]
+shape = SubResource("BodyShape")
+
+[node name="VisualRoot" type="Node3D" parent="."]
+
+
+[node name="Model" parent="VisualRoot" instance=ExtResource("1_ship")]
+position = Vector3(-2, -0.4, -1.5)
+
+[node name="EngineL" type="MeshInstance3D" parent="VisualRoot"]
+position = Vector3(-0.52000, -0.08000, 0.83000)
+mesh = SubResource("EngineMesh")
+cast_shadow = 0
+
+[node name="EngineR" type="MeshInstance3D" parent="VisualRoot"]
+position = Vector3(0.52000, -0.08000, 0.83000)
+mesh = SubResource("EngineMesh")
+cast_shadow = 0
+
+[node name="DamageCore" type="Area3D" parent="."]
+collision_layer = 4
+collision_mask = 0
+monitoring = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="DamageCore"]
+shape = SubResource("CoreShape")
+
+[node name="CoreVisual" type="MeshInstance3D" parent="DamageCore"]
+mesh = SubResource("CoreMesh")
+cast_shadow = 0
+
+[node name="GrazeVolume" type="Area3D" parent="."]
+collision_layer = 8
+collision_mask = 0
+monitoring = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="GrazeVolume"]
+shape = SubResource("GrazeShape")
+
+[node name="Muzzle" type="Marker3D" parent="."]
+position = Vector3(0, 0, -1.25)
+
+[node name="FamiliarAnchors" type="Node3D" parent="."]
+
+
+[node name="Left" type="Marker3D" parent="FamiliarAnchors"]
+position = Vector3(-1.60000, 0.25000, 0.10000)
+
+[node name="Right" type="Marker3D" parent="FamiliarAnchors"]
+position = Vector3(1.60000, 0.25000, 0.10000)
+
+[node name="Weapon" type="Node" parent="."]
+script = ExtResource("5_weapon")
+
+[node name="Targeting" type="Node" parent="."]
+script = ExtResource("4_target")
+
+[node name="CameraRig" type="Node3D" parent="."]
+script = ExtResource("3_camera")
+
+[node name="Camera3D" type="Camera3D" parent="CameraRig"]
+position = Vector3(0, 3.2, 8.5)
+rotation = Vector3(-0.16, 0, 0)
+current = true
+fov = 68.0
+near = 0.1
+far = 500.0

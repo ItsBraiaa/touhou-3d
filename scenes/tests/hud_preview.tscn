@@ -1,0 +1,12 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/tests/combat_arena.tscn" id="1_arena"]
+[ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="2_hud"]
+
+[node name="HUDPreview" type="Node"]
+
+[node name="CombatArena" parent="." instance=ExtResource("1_arena")]
+
+[node name="Interface" type="CanvasLayer" parent="."]
+
+[node name="HUD" parent="Interface" instance=ExtResource("2_hud")]

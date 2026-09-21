@@ -1,0 +1,732 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/player/player_ship.tscn" id="1_player"]
+
+[sub_resource type="StandardMaterial3D" id="Stone"]
+albedo_color = Color(0.19, 0.26, 0.29, 1)
+roughness = 0.85
+
+[sub_resource type="StandardMaterial3D" id="Rim"]
+albedo_color = Color(0.34, 0.43, 0.44, 1)
+roughness = 0.85
+
+[sub_resource type="StandardMaterial3D" id="Dark"]
+albedo_color = Color(0.055, 0.11, 0.13, 1)
+roughness = 0.85
+
+[sub_resource type="StandardMaterial3D" id="Wood"]
+albedo_color = Color(0.36, 0.11, 0.075, 1)
+roughness = 0.85
+
+[sub_resource type="StandardMaterial3D" id="Gold"]
+albedo_color = Color(0.95, 0.53, 0.14, 1)
+roughness = 0.85
+emission_enabled = true
+emission = Color(0.95, 0.53, 0.14, 1)
+emission_energy_multiplier = 2.0
+
+[sub_resource type="StandardMaterial3D" id="Teal"]
+albedo_color = Color(0.07, 0.8, 0.76, 1)
+roughness = 0.85
+emission_enabled = true
+emission = Color(0.07, 0.8, 0.76, 1)
+emission_energy_multiplier = 2.0
+
+[sub_resource type="StandardMaterial3D" id="Green"]
+albedo_color = Color(0.085, 0.23, 0.2, 1)
+roughness = 0.85
+
+[sub_resource type="StandardMaterial3D" id="Mountain"]
+albedo_color = Color(0.16, 0.28, 0.31, 1)
+roughness = 0.85
+
+[sub_resource type="CylinderMesh" id="FloorMesh"]
+top_radius = 39
+bottom_radius = 39
+height = 1.5
+radial_segments = 32
+material = SubResource("Stone")
+
+[sub_resource type="CylinderMesh" id="RimMesh"]
+top_radius = 40
+bottom_radius = 40
+height = 0.65
+radial_segments = 32
+material = SubResource("Rim")
+
+[sub_resource type="CylinderShape3D" id="FloorShape"]
+radius = 39.0
+height = 1.5
+
+[sub_resource type="BoxShape3D" id="BoundaryShape"]
+size = Vector3(3, 32, 80)
+
+[sub_resource type="BoxMesh" id="PostMesh"]
+size = Vector3(1.00000, 13.00000, 1.00000)
+material = SubResource("Wood")
+
+[sub_resource type="BoxMesh" id="BeamMesh"]
+size = Vector3(19.00000, 1.10000, 1.60000)
+material = SubResource("Wood")
+
+[sub_resource type="BoxMesh" id="TopMesh"]
+size = Vector3(22.00000, 0.65000, 2.40000)
+material = SubResource("Dark")
+
+[sub_resource type="BoxMesh" id="LanternMesh"]
+size = Vector3(0.70000, 1.00000, 0.70000)
+material = SubResource("Gold")
+
+[sub_resource type="BoxMesh" id="CapMesh"]
+size = Vector3(1.00000, 0.16000, 1.00000)
+material = SubResource("Dark")
+
+[sub_resource type="BoxMesh" id="PoleMesh"]
+size = Vector3(0.14000, 5.00000, 0.14000)
+material = SubResource("Dark")
+
+[sub_resource type="BoxMesh" id="LineMesh"]
+size = Vector3(0.06000, 0.02500, 64.00000)
+material = SubResource("Rim")
+
+[sub_resource type="TorusMesh" id="RingMesh"]
+inner_radius = 1.65
+outer_radius = 1.78
+rings = 48
+ring_segments = 8
+material = SubResource("Teal")
+
+[sub_resource type="SphereMesh" id="TargetOrb"]
+radius = 0.7
+height = 1.4
+radial_segments = 12
+rings = 6
+material = SubResource("Gold")
+
+[sub_resource type="SphereShape3D" id="TargetShape"]
+radius = 0.85
+
+[sub_resource type="PrismMesh" id="RockMesh"]
+size = Vector3(12, 28, 14)
+material = SubResource("Mountain")
+
+[sub_resource type="CylinderMesh" id="TreeMesh"]
+top_radius = 0.0
+bottom_radius = 4.0
+height = 12.0
+radial_segments = 7
+material = SubResource("Green")
+
+[sub_resource type="ProceduralSkyMaterial" id="SkyMaterial"]
+sky_top_color = Color(0.04, 0.12, 0.2, 1)
+sky_horizon_color = Color(0.65, 0.49, 0.37, 1)
+ground_bottom_color = Color(0.08, 0.14, 0.17, 1)
+ground_horizon_color = Color(0.65, 0.49, 0.37, 1)
+
+[sub_resource type="Sky" id="Sky"]
+sky_material = SubResource("SkyMaterial")
+
+[sub_resource type="Environment" id="Environment"]
+background_mode = 2
+sky = SubResource("Sky")
+ambient_light_source = 3
+ambient_light_color = Color(0.5, 0.72, 0.85, 1)
+ambient_light_energy = 0.65
+reflected_light_source = 2
+tonemap_mode = 2
+fog_enabled = true
+fog_light_color = Color(0.22, 0.35, 0.39, 1)
+fog_density = 0.0015
+glow_enabled = true
+
+[sub_resource type="BoxShape3D" id="LeftBodyShape"]
+size = Vector3(1, 13, 1)
+
+[sub_resource type="BoxShape3D" id="RightBodyShape"]
+size = Vector3(1, 13, 1)
+
+[sub_resource type="BoxShape3D" id="BeamShape"]
+size = Vector3(19, 1.1, 1.6)
+
+[sub_resource type="BoxShape3D" id="CeilingShape"]
+size = Vector3(80, 3, 80)
+
+[node name="CombatArena" type="Node3D"]
+metadata/handoff_state = "SCENE_READY_STATIC"
+
+[node name="Environment" type="Node3D" parent="."]
+
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="Environment"]
+environment = SubResource("Environment")
+
+[node name="Sun" type="DirectionalLight3D" parent="Environment"]
+rotation_degrees = Vector3(-38, -32, 0)
+light_color = Color(1, 0.79, 0.56, 1)
+light_energy = 1.6
+shadow_enabled = true
+directional_shadow_max_distance = 110.0
+
+[node name="Geometry" type="Node3D" parent="."]
+
+
+[node name="Floor" type="StaticBody3D" parent="Geometry"]
+position = Vector3(0, -0.75, -6)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Mesh" type="MeshInstance3D" parent="Geometry/Floor"]
+mesh = SubResource("FloorMesh")
+
+[node name="Collision" type="CollisionShape3D" parent="Geometry/Floor"]
+shape = SubResource("FloorShape")
+
+[node name="Foundation" type="MeshInstance3D" parent="Geometry"]
+position = Vector3(0, -1.55, -6)
+mesh = SubResource("RimMesh")
+
+[node name="GridLong0" type="MeshInstance3D" parent="Geometry"]
+position = Vector3(-24.00000, 0.01500, -6.00000)
+mesh = SubResource("LineMesh")
+
+[node name="GridCross0" type="MeshInstance3D" parent="Geometry"]
+position = Vector3(0.00000, 0.01500, -30.00000)
+rotation_degrees = Vector3(0, 90, 0)
+mesh = SubResource("LineMesh")
+
+[node name="GridLong1" type="MeshInstance3D" parent="Geometry"]
+position = Vector3(-16.00000, 0.01500, -6.00000)
+mesh = SubResource("LineMesh")
+
+[node name="GridCross1" type="MeshInstance3D" parent="Geometry"]
+position = Vector3(0.00000, 0.01500, -22.00000)
+rotation_degrees = Vector3(0, 90, 0)
+mesh = SubResource("LineMesh")
+
+[node name="GridLong2" type="MeshInstance3D" parent="Geometry"]
+position = Vector3(-8.00000, 0.01500, -6.00000)
+mesh = SubResource("LineMesh")
+
+[node name="GridCross2" type="MeshInstance3D" parent="Geometry"]
+position = Vector3(0.00000, 0.01500, -14.00000)
+rotation_degrees = Vector3(0, 90, 0)
+mesh = SubResource("LineMesh")
+
+[node name="GridLong3" type="MeshInstance3D" parent="Geometry"]
+position = Vector3(0.00000, 0.01500, -6.00000)
+mesh = SubResource("LineMesh")
+
+[node name="GridCross3" type="MeshInstance3D" parent="Geometry"]
+position = Vector3(0.00000, 0.01500, -6.00000)
+rotation_degrees = Vector3(0, 90, 0)
+mesh = SubResource("LineMesh")
+
+[node name="GridLong4" type="MeshInstance3D" parent="Geometry"]
+position = Vector3(8.00000, 0.01500, -6.00000)
+mesh = SubResource("LineMesh")
+
+[node name="GridCross4" type="MeshInstance3D" parent="Geometry"]
+position = Vector3(0.00000, 0.01500, 2.00000)
+rotation_degrees = Vector3(0, 90, 0)
+mesh = SubResource("LineMesh")
+
+[node name="GridLong5" type="MeshInstance3D" parent="Geometry"]
+position = Vector3(16.00000, 0.01500, -6.00000)
+mesh = SubResource("LineMesh")
+
+[node name="GridCross5" type="MeshInstance3D" parent="Geometry"]
+position = Vector3(0.00000, 0.01500, 10.00000)
+rotation_degrees = Vector3(0, 90, 0)
+mesh = SubResource("LineMesh")
+
+[node name="GridLong6" type="MeshInstance3D" parent="Geometry"]
+position = Vector3(24.00000, 0.01500, -6.00000)
+mesh = SubResource("LineMesh")
+
+[node name="GridCross6" type="MeshInstance3D" parent="Geometry"]
+position = Vector3(0.00000, 0.01500, 18.00000)
+rotation_degrees = Vector3(0, 90, 0)
+mesh = SubResource("LineMesh")
+
+[node name="ShrineGate" type="Node3D" parent="Geometry"]
+position = Vector3(0, 0, -27)
+
+[node name="Left" type="MeshInstance3D" parent="Geometry/ShrineGate"]
+position = Vector3(-8.00000, 6.50000, 0.00000)
+mesh = SubResource("PostMesh")
+
+[node name="Right" type="MeshInstance3D" parent="Geometry/ShrineGate"]
+position = Vector3(8.00000, 6.50000, 0.00000)
+mesh = SubResource("PostMesh")
+
+[node name="Beam" type="MeshInstance3D" parent="Geometry/ShrineGate"]
+position = Vector3(0.00000, 10.50000, 0.00000)
+mesh = SubResource("BeamMesh")
+
+[node name="Top" type="MeshInstance3D" parent="Geometry/ShrineGate"]
+position = Vector3(0.00000, 13.00000, 0.00000)
+mesh = SubResource("TopMesh")
+
+[node name="LeftBody" type="StaticBody3D" parent="Geometry/ShrineGate"]
+position = Vector3(-8.00000, 6.50000, 0.00000)
+
+[node name="Collision" type="CollisionShape3D" parent="Geometry/ShrineGate/LeftBody"]
+shape = SubResource("LeftBodyShape")
+
+[node name="RightBody" type="StaticBody3D" parent="Geometry/ShrineGate"]
+position = Vector3(8.00000, 6.50000, 0.00000)
+
+[node name="Collision" type="CollisionShape3D" parent="Geometry/ShrineGate/RightBody"]
+shape = SubResource("RightBodyShape")
+
+[node name="BeamBody" type="StaticBody3D" parent="Geometry/ShrineGate"]
+position = Vector3(0, 10.5, 0)
+
+[node name="Collision" type="CollisionShape3D" parent="Geometry/ShrineGate/BeamBody"]
+shape = SubResource("BeamShape")
+
+[node name="FlightBounds" type="Node3D" parent="."]
+metadata/min_corner = Vector3(-39, 0, -45)
+metadata/max_corner = Vector3(39, 30, 33)
+
+[node name="West" type="StaticBody3D" parent="FlightBounds"]
+position = Vector3(-40.50000, 15.00000, -6.00000)
+
+[node name="Collision" type="CollisionShape3D" parent="FlightBounds/West"]
+shape = SubResource("BoundaryShape")
+
+[node name="East" type="StaticBody3D" parent="FlightBounds"]
+position = Vector3(40.50000, 15.00000, -6.00000)
+
+[node name="Collision" type="CollisionShape3D" parent="FlightBounds/East"]
+shape = SubResource("BoundaryShape")
+
+[node name="North" type="StaticBody3D" parent="FlightBounds"]
+position = Vector3(0.00000, 15.00000, -46.50000)
+rotation_degrees = Vector3(0, 90, 0)
+
+[node name="Collision" type="CollisionShape3D" parent="FlightBounds/North"]
+shape = SubResource("BoundaryShape")
+
+[node name="South" type="StaticBody3D" parent="FlightBounds"]
+position = Vector3(0.00000, 15.00000, 34.50000)
+rotation_degrees = Vector3(0, 90, 0)
+
+[node name="Collision" type="CollisionShape3D" parent="FlightBounds/South"]
+shape = SubResource("BoundaryShape")
+
+[node name="Ceiling" type="StaticBody3D" parent="FlightBounds"]
+position = Vector3(0, 31.5, -6)
+
+[node name="Collision" type="CollisionShape3D" parent="FlightBounds/Ceiling"]
+shape = SubResource("CeilingShape")
+
+[node name="Lanterns" type="Node3D" parent="Geometry"]
+
+
+[node name="Lantern0" type="Node3D" parent="Geometry/Lanterns"]
+position = Vector3(34.00000, 0.00000, -6.00000)
+
+[node name="Pole" type="MeshInstance3D" parent="Geometry/Lanterns/Lantern0"]
+position = Vector3(0.00000, 2.50000, 0.00000)
+mesh = SubResource("PoleMesh")
+
+[node name="Light" type="MeshInstance3D" parent="Geometry/Lanterns/Lantern0"]
+position = Vector3(0.00000, 5.00000, 0.00000)
+mesh = SubResource("LanternMesh")
+
+[node name="Cap" type="MeshInstance3D" parent="Geometry/Lanterns/Lantern0"]
+position = Vector3(0.00000, 5.60000, 0.00000)
+mesh = SubResource("CapMesh")
+
+[node name="Lantern1" type="Node3D" parent="Geometry/Lanterns"]
+position = Vector3(29.44486, 0.00000, 11.00000)
+
+[node name="Pole" type="MeshInstance3D" parent="Geometry/Lanterns/Lantern1"]
+position = Vector3(0.00000, 2.50000, 0.00000)
+mesh = SubResource("PoleMesh")
+
+[node name="Light" type="MeshInstance3D" parent="Geometry/Lanterns/Lantern1"]
+position = Vector3(0.00000, 5.00000, 0.00000)
+mesh = SubResource("LanternMesh")
+
+[node name="Cap" type="MeshInstance3D" parent="Geometry/Lanterns/Lantern1"]
+position = Vector3(0.00000, 5.60000, 0.00000)
+mesh = SubResource("CapMesh")
+
+[node name="Lantern2" type="Node3D" parent="Geometry/Lanterns"]
+position = Vector3(17.00000, 0.00000, 23.44486)
+
+[node name="Pole" type="MeshInstance3D" parent="Geometry/Lanterns/Lantern2"]
+position = Vector3(0.00000, 2.50000, 0.00000)
+mesh = SubResource("PoleMesh")
+
+[node name="Light" type="MeshInstance3D" parent="Geometry/Lanterns/Lantern2"]
+position = Vector3(0.00000, 5.00000, 0.00000)
+mesh = SubResource("LanternMesh")
+
+[node name="Cap" type="MeshInstance3D" parent="Geometry/Lanterns/Lantern2"]
+position = Vector3(0.00000, 5.60000, 0.00000)
+mesh = SubResource("CapMesh")
+
+[node name="Lantern3" type="Node3D" parent="Geometry/Lanterns"]
+position = Vector3(0.00000, 0.00000, 28.00000)
+
+[node name="Pole" type="MeshInstance3D" parent="Geometry/Lanterns/Lantern3"]
+position = Vector3(0.00000, 2.50000, 0.00000)
+mesh = SubResource("PoleMesh")
+
+[node name="Light" type="MeshInstance3D" parent="Geometry/Lanterns/Lantern3"]
+position = Vector3(0.00000, 5.00000, 0.00000)
+mesh = SubResource("LanternMesh")
+
+[node name="Cap" type="MeshInstance3D" parent="Geometry/Lanterns/Lantern3"]
+position = Vector3(0.00000, 5.60000, 0.00000)
+mesh = SubResource("CapMesh")
+
+[node name="Lantern4" type="Node3D" parent="Geometry/Lanterns"]
+position = Vector3(-17.00000, 0.00000, 23.44486)
+
+[node name="Pole" type="MeshInstance3D" parent="Geometry/Lanterns/Lantern4"]
+position = Vector3(0.00000, 2.50000, 0.00000)
+mesh = SubResource("PoleMesh")
+
+[node name="Light" type="MeshInstance3D" parent="Geometry/Lanterns/Lantern4"]
+position = Vector3(0.00000, 5.00000, 0.00000)
+mesh = SubResource("LanternMesh")
+
+[node name="Cap" type="MeshInstance3D" parent="Geometry/Lanterns/Lantern4"]
+position = Vector3(0.00000, 5.60000, 0.00000)
+mesh = SubResource("CapMesh")
+
+[node name="Lantern5" type="Node3D" parent="Geometry/Lanterns"]
+position = Vector3(-29.44486, 0.00000, 11.00000)
+
+[node name="Pole" type="MeshInstance3D" parent="Geometry/Lanterns/Lantern5"]
+position = Vector3(0.00000, 2.50000, 0.00000)
+mesh = SubResource("PoleMesh")
+
+[node name="Light" type="MeshInstance3D" parent="Geometry/Lanterns/Lantern5"]
+position = Vector3(0.00000, 5.00000, 0.00000)
+mesh = SubResource("LanternMesh")
+
+[node name="Cap" type="MeshInstance3D" parent="Geometry/Lanterns/Lantern5"]
+position = Vector3(0.00000, 5.60000, 0.00000)
+mesh = SubResource("CapMesh")
+
+[node name="Lantern6" type="Node3D" parent="Geometry/Lanterns"]
+position = Vector3(-34.00000, 0.00000, -6.00000)
+
+[node name="Pole" type="MeshInstance3D" parent="Geometry/Lanterns/Lantern6"]
+position = Vector3(0.00000, 2.50000, 0.00000)
+mesh = SubResource("PoleMesh")
+
+[node name="Light" type="MeshInstance3D" parent="Geometry/Lanterns/Lantern6"]
+position = Vector3(0.00000, 5.00000, 0.00000)
+mesh = SubResource("LanternMesh")
+
+[node name="Cap" type="MeshInstance3D" parent="Geometry/Lanterns/Lantern6"]
+position = Vector3(0.00000, 5.60000, 0.00000)
+mesh = SubResource("CapMesh")
+
+[node name="Lantern7" type="Node3D" parent="Geometry/Lanterns"]
+position = Vector3(-29.44486, 0.00000, -23.00000)
+
+[node name="Pole" type="MeshInstance3D" parent="Geometry/Lanterns/Lantern7"]
+position = Vector3(0.00000, 2.50000, 0.00000)
+mesh = SubResource("PoleMesh")
+
+[node name="Light" type="MeshInstance3D" parent="Geometry/Lanterns/Lantern7"]
+position = Vector3(0.00000, 5.00000, 0.00000)
+mesh = SubResource("LanternMesh")
+
+[node name="Cap" type="MeshInstance3D" parent="Geometry/Lanterns/Lantern7"]
+position = Vector3(0.00000, 5.60000, 0.00000)
+mesh = SubResource("CapMesh")
+
+[node name="Lantern8" type="Node3D" parent="Geometry/Lanterns"]
+position = Vector3(-17.00000, 0.00000, -35.44486)
+
+[node name="Pole" type="MeshInstance3D" parent="Geometry/Lanterns/Lantern8"]
+position = Vector3(0.00000, 2.50000, 0.00000)
+mesh = SubResource("PoleMesh")
+
+[node name="Light" type="MeshInstance3D" parent="Geometry/Lanterns/Lantern8"]
+position = Vector3(0.00000, 5.00000, 0.00000)
+mesh = SubResource("LanternMesh")
+
+[node name="Cap" type="MeshInstance3D" parent="Geometry/Lanterns/Lantern8"]
+position = Vector3(0.00000, 5.60000, 0.00000)
+mesh = SubResource("CapMesh")
+
+[node name="Lantern9" type="Node3D" parent="Geometry/Lanterns"]
+position = Vector3(-0.00000, 0.00000, -40.00000)
+
+[node name="Pole" type="MeshInstance3D" parent="Geometry/Lanterns/Lantern9"]
+position = Vector3(0.00000, 2.50000, 0.00000)
+mesh = SubResource("PoleMesh")
+
+[node name="Light" type="MeshInstance3D" parent="Geometry/Lanterns/Lantern9"]
+position = Vector3(0.00000, 5.00000, 0.00000)
+mesh = SubResource("LanternMesh")
+
+[node name="Cap" type="MeshInstance3D" parent="Geometry/Lanterns/Lantern9"]
+position = Vector3(0.00000, 5.60000, 0.00000)
+mesh = SubResource("CapMesh")
+
+[node name="Lantern10" type="Node3D" parent="Geometry/Lanterns"]
+position = Vector3(17.00000, 0.00000, -35.44486)
+
+[node name="Pole" type="MeshInstance3D" parent="Geometry/Lanterns/Lantern10"]
+position = Vector3(0.00000, 2.50000, 0.00000)
+mesh = SubResource("PoleMesh")
+
+[node name="Light" type="MeshInstance3D" parent="Geometry/Lanterns/Lantern10"]
+position = Vector3(0.00000, 5.00000, 0.00000)
+mesh = SubResource("LanternMesh")
+
+[node name="Cap" type="MeshInstance3D" parent="Geometry/Lanterns/Lantern10"]
+position = Vector3(0.00000, 5.60000, 0.00000)
+mesh = SubResource("CapMesh")
+
+[node name="Lantern11" type="Node3D" parent="Geometry/Lanterns"]
+position = Vector3(29.44486, 0.00000, -23.00000)
+
+[node name="Pole" type="MeshInstance3D" parent="Geometry/Lanterns/Lantern11"]
+position = Vector3(0.00000, 2.50000, 0.00000)
+mesh = SubResource("PoleMesh")
+
+[node name="Light" type="MeshInstance3D" parent="Geometry/Lanterns/Lantern11"]
+position = Vector3(0.00000, 5.00000, 0.00000)
+mesh = SubResource("LanternMesh")
+
+[node name="Cap" type="MeshInstance3D" parent="Geometry/Lanterns/Lantern11"]
+position = Vector3(0.00000, 5.60000, 0.00000)
+mesh = SubResource("CapMesh")
+
+[node name="Backdrop" type="Node3D" parent="Environment"]
+
+
+[node name="Peak0" type="MeshInstance3D" parent="Environment/Backdrop"]
+position = Vector3(62.00000, -2.00000, -6.00000)
+rotation_degrees = Vector3(0.00000, 0.00000, 0.00000)
+scale = Vector3(1.00000, 1.00000, 1.00000)
+mesh = SubResource("RockMesh")
+
+[node name="Peak1" type="MeshInstance3D" parent="Environment/Backdrop"]
+position = Vector3(57.28053, -2.00000, 17.72637)
+rotation_degrees = Vector3(0.00000, 37.00000, 0.00000)
+scale = Vector3(1.35000, 1.30000, 1.00000)
+mesh = SubResource("RockMesh")
+
+[node name="Peak2" type="MeshInstance3D" parent="Environment/Backdrop"]
+position = Vector3(43.84062, -2.00000, 37.84062)
+rotation_degrees = Vector3(0.00000, 74.00000, 0.00000)
+scale = Vector3(1.70000, 1.60000, 1.00000)
+mesh = SubResource("RockMesh")
+
+[node name="Peak3" type="MeshInstance3D" parent="Environment/Backdrop"]
+position = Vector3(23.72637, -2.00000, 51.28053)
+rotation_degrees = Vector3(0.00000, 111.00000, 0.00000)
+scale = Vector3(1.00000, 1.90000, 1.00000)
+mesh = SubResource("RockMesh")
+
+[node name="Peak4" type="MeshInstance3D" parent="Environment/Backdrop"]
+position = Vector3(0.00000, -2.00000, 56.00000)
+rotation_degrees = Vector3(0.00000, 148.00000, 0.00000)
+scale = Vector3(1.35000, 1.00000, 1.00000)
+mesh = SubResource("RockMesh")
+
+[node name="Peak5" type="MeshInstance3D" parent="Environment/Backdrop"]
+position = Vector3(-23.72637, -2.00000, 51.28053)
+rotation_degrees = Vector3(0.00000, 185.00000, 0.00000)
+scale = Vector3(1.70000, 1.30000, 1.00000)
+mesh = SubResource("RockMesh")
+
+[node name="Peak6" type="MeshInstance3D" parent="Environment/Backdrop"]
+position = Vector3(-43.84062, -2.00000, 37.84062)
+rotation_degrees = Vector3(0.00000, 222.00000, 0.00000)
+scale = Vector3(1.00000, 1.60000, 1.00000)
+mesh = SubResource("RockMesh")
+
+[node name="Peak7" type="MeshInstance3D" parent="Environment/Backdrop"]
+position = Vector3(-57.28053, -2.00000, 17.72637)
+rotation_degrees = Vector3(0.00000, 259.00000, 0.00000)
+scale = Vector3(1.35000, 1.90000, 1.00000)
+mesh = SubResource("RockMesh")
+
+[node name="Peak8" type="MeshInstance3D" parent="Environment/Backdrop"]
+position = Vector3(-62.00000, -2.00000, -6.00000)
+rotation_degrees = Vector3(0.00000, 296.00000, 0.00000)
+scale = Vector3(1.70000, 1.00000, 1.00000)
+mesh = SubResource("RockMesh")
+
+[node name="Peak9" type="MeshInstance3D" parent="Environment/Backdrop"]
+position = Vector3(-57.28053, -2.00000, -29.72637)
+rotation_degrees = Vector3(0.00000, 333.00000, 0.00000)
+scale = Vector3(1.00000, 1.30000, 1.00000)
+mesh = SubResource("RockMesh")
+
+[node name="Peak10" type="MeshInstance3D" parent="Environment/Backdrop"]
+position = Vector3(-43.84062, -2.00000, -49.84062)
+rotation_degrees = Vector3(0.00000, 370.00000, 0.00000)
+scale = Vector3(1.35000, 1.60000, 1.00000)
+mesh = SubResource("RockMesh")
+
+[node name="Peak11" type="MeshInstance3D" parent="Environment/Backdrop"]
+position = Vector3(-23.72637, -2.00000, -63.28053)
+rotation_degrees = Vector3(0.00000, 407.00000, 0.00000)
+scale = Vector3(1.70000, 1.90000, 1.00000)
+mesh = SubResource("RockMesh")
+
+[node name="Peak12" type="MeshInstance3D" parent="Environment/Backdrop"]
+position = Vector3(-0.00000, -2.00000, -68.00000)
+rotation_degrees = Vector3(0.00000, 444.00000, 0.00000)
+scale = Vector3(1.00000, 1.00000, 1.00000)
+mesh = SubResource("RockMesh")
+
+[node name="Peak13" type="MeshInstance3D" parent="Environment/Backdrop"]
+position = Vector3(23.72637, -2.00000, -63.28053)
+rotation_degrees = Vector3(0.00000, 481.00000, 0.00000)
+scale = Vector3(1.35000, 1.30000, 1.00000)
+mesh = SubResource("RockMesh")
+
+[node name="Peak14" type="MeshInstance3D" parent="Environment/Backdrop"]
+position = Vector3(43.84062, -2.00000, -49.84062)
+rotation_degrees = Vector3(0.00000, 518.00000, 0.00000)
+scale = Vector3(1.70000, 1.60000, 1.00000)
+mesh = SubResource("RockMesh")
+
+[node name="Peak15" type="MeshInstance3D" parent="Environment/Backdrop"]
+position = Vector3(57.28053, -2.00000, -29.72637)
+rotation_degrees = Vector3(0.00000, 555.00000, 0.00000)
+scale = Vector3(1.00000, 1.90000, 1.00000)
+mesh = SubResource("RockMesh")
+
+[node name="Tree0" type="MeshInstance3D" parent="Environment/Backdrop"]
+position = Vector3(29.00000, 5.00000, -35.00000)
+mesh = SubResource("TreeMesh")
+
+[node name="Tree1" type="MeshInstance3D" parent="Environment/Backdrop"]
+position = Vector3(-32.00000, 5.00000, -35.00000)
+mesh = SubResource("TreeMesh")
+
+[node name="Tree2" type="MeshInstance3D" parent="Environment/Backdrop"]
+position = Vector3(35.00000, 5.00000, -26.00000)
+mesh = SubResource("TreeMesh")
+
+[node name="Tree3" type="MeshInstance3D" parent="Environment/Backdrop"]
+position = Vector3(-29.00000, 5.00000, -26.00000)
+mesh = SubResource("TreeMesh")
+
+[node name="Tree4" type="MeshInstance3D" parent="Environment/Backdrop"]
+position = Vector3(32.00000, 5.00000, -17.00000)
+mesh = SubResource("TreeMesh")
+
+[node name="Tree5" type="MeshInstance3D" parent="Environment/Backdrop"]
+position = Vector3(-35.00000, 5.00000, -17.00000)
+mesh = SubResource("TreeMesh")
+
+[node name="Tree6" type="MeshInstance3D" parent="Environment/Backdrop"]
+position = Vector3(29.00000, 5.00000, -8.00000)
+mesh = SubResource("TreeMesh")
+
+[node name="Tree7" type="MeshInstance3D" parent="Environment/Backdrop"]
+position = Vector3(-32.00000, 5.00000, -8.00000)
+mesh = SubResource("TreeMesh")
+
+[node name="Tree8" type="MeshInstance3D" parent="Environment/Backdrop"]
+position = Vector3(35.00000, 5.00000, 1.00000)
+mesh = SubResource("TreeMesh")
+
+[node name="Tree9" type="MeshInstance3D" parent="Environment/Backdrop"]
+position = Vector3(-29.00000, 5.00000, 1.00000)
+mesh = SubResource("TreeMesh")
+
+[node name="Tree10" type="MeshInstance3D" parent="Environment/Backdrop"]
+position = Vector3(32.00000, 5.00000, 10.00000)
+mesh = SubResource("TreeMesh")
+
+[node name="Tree11" type="MeshInstance3D" parent="Environment/Backdrop"]
+position = Vector3(-35.00000, 5.00000, 10.00000)
+mesh = SubResource("TreeMesh")
+
+[node name="Tree12" type="MeshInstance3D" parent="Environment/Backdrop"]
+position = Vector3(29.00000, 5.00000, 19.00000)
+mesh = SubResource("TreeMesh")
+
+[node name="Tree13" type="MeshInstance3D" parent="Environment/Backdrop"]
+position = Vector3(-32.00000, 5.00000, 19.00000)
+mesh = SubResource("TreeMesh")
+
+[node name="Targets" type="Node3D" parent="."]
+
+
+[node name="Low" type="Node3D" parent="Targets" groups=["targetable"]]
+position = Vector3(-10.00000, 5.00000, -8.00000)
+metadata/target_id = "low"
+
+[node name="Orb" type="MeshInstance3D" parent="Targets/Low"]
+mesh = SubResource("TargetOrb")
+
+[node name="Ring" type="MeshInstance3D" parent="Targets/Low"]
+rotation_degrees = Vector3(90, 0, 0)
+mesh = SubResource("RingMesh")
+
+[node name="HitVolume" type="Area3D" parent="Targets/Low"]
+collision_layer = 16
+collision_mask = 0
+monitoring = false
+
+[node name="Collision" type="CollisionShape3D" parent="Targets/Low/HitVolume"]
+shape = SubResource("TargetShape")
+
+[node name="Middle" type="Node3D" parent="Targets" groups=["targetable"]]
+position = Vector3(0.00000, 9.00000, -20.00000)
+metadata/target_id = "middle"
+
+[node name="Orb" type="MeshInstance3D" parent="Targets/Middle"]
+mesh = SubResource("TargetOrb")
+
+[node name="Ring" type="MeshInstance3D" parent="Targets/Middle"]
+rotation_degrees = Vector3(90, 0, 0)
+mesh = SubResource("RingMesh")
+
+[node name="HitVolume" type="Area3D" parent="Targets/Middle"]
+collision_layer = 16
+collision_mask = 0
+monitoring = false
+
+[node name="Collision" type="CollisionShape3D" parent="Targets/Middle/HitVolume"]
+shape = SubResource("TargetShape")
+
+[node name="High" type="Node3D" parent="Targets" groups=["targetable"]]
+position = Vector3(11.00000, 15.00000, -10.00000)
+metadata/target_id = "high"
+
+[node name="Orb" type="MeshInstance3D" parent="Targets/High"]
+mesh = SubResource("TargetOrb")
+
+[node name="Ring" type="MeshInstance3D" parent="Targets/High"]
+rotation_degrees = Vector3(90, 0, 0)
+mesh = SubResource("RingMesh")
+
+[node name="HitVolume" type="Area3D" parent="Targets/High"]
+collision_layer = 16
+collision_mask = 0
+monitoring = false
+
+[node name="Collision" type="CollisionShape3D" parent="Targets/High/HitVolume"]
+shape = SubResource("TargetShape")
+
+[node name="PlayerStart" type="Marker3D" parent="."]
+position = Vector3(0, 6, 18)
+
+[node name="PlayerShip" parent="." instance=ExtResource("1_player")]
+position = Vector3(0, 6, 18)
+
+[node name="RuntimeActors" type="Node3D" parent="."]
+
+
+[node name="ProjectileRoot" type="Node3D" parent="."]
+

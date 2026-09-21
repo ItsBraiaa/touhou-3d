@@ -1,0 +1,411 @@
+[gd_scene format=3]
+[ext_resource type="Theme" path="res://assets/ui/menu_theme.tres" id="1_theme"]
+[ext_resource type="Texture2D" path="res://assets/ui/menu_forest.svg" id="2_forest"]
+[ext_resource type="Texture2D" path="res://assets/ui/menu_mountain.svg" id="3_mountain"]
+[ext_resource type="Texture2D" path="res://assets/ui/wind_emblem.svg" id="4_emblem"]
+[ext_resource type="Script" path="res://scripts/ui/menu_controller.gd" id="5_controller"]
+
+[node name="Controls" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_theme")
+script = ExtResource("5_controller")
+
+[node name="Background" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_forest")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Layout" type="Control" parent="."]
+layout_mode = 0
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -640.0
+offset_top = -360.0
+offset_right = 640.0
+offset_bottom = 360.0
+mouse_filter = 2
+
+[node name="Emblem" type="TextureRect" parent="Layout"]
+layout_mode = 0
+offset_left = 64.0
+offset_top = 42.0
+offset_right = 106.0
+offset_bottom = 84.0
+mouse_filter = 2
+texture = ExtResource("4_emblem")
+expand_mode = 1
+
+[node name="Brand" type="Label" parent="Layout"]
+layout_mode = 0
+offset_left = 122.0
+offset_top = 46.0
+offset_right = 562.0
+offset_bottom = 78.0
+mouse_filter = 2
+text = "GUARDIÃ DOS VENTOS"
+theme_override_font_sizes/font_size = 17
+theme_override_colors/font_color = Color(0.48, 0.62, 0.63, 1)
+
+[node name="Heading" type="Label" parent="Layout"]
+layout_mode = 0
+offset_left = 64.0
+offset_top = 112.0
+offset_right = 1124.0
+offset_bottom = 177.0
+mouse_filter = 2
+text = "Comandos"
+theme_override_font_sizes/font_size = 44
+
+
+[node name="Bindings" type="Panel" parent="Layout"]
+layout_mode = 0
+offset_left = 64.0
+offset_top = 206.0
+offset_right = 1216.0
+offset_bottom = 582.0
+
+
+[node name="ActionHeader" type="Label" parent="Layout"]
+layout_mode = 0
+offset_left = 88.0
+offset_top = 222.0
+offset_right = 538.0
+offset_bottom = 250.0
+mouse_filter = 2
+text = "AÇÃO"
+theme_override_font_sizes/font_size = 15
+theme_override_colors/font_color = Color(0.48, 0.62, 0.63, 1)
+
+[node name="KeyboardHeader" type="Label" parent="Layout"]
+layout_mode = 0
+offset_left = 540.0
+offset_top = 222.0
+offset_right = 870.0
+offset_bottom = 250.0
+mouse_filter = 2
+text = "TECLADO"
+theme_override_font_sizes/font_size = 15
+theme_override_colors/font_color = Color(0.48, 0.62, 0.63, 1)
+
+[node name="ControllerHeader" type="Label" parent="Layout"]
+layout_mode = 0
+offset_left = 910.0
+offset_top = 222.0
+offset_right = 1170.0
+offset_bottom = 250.0
+mouse_filter = 2
+text = "CONTROLE"
+theme_override_font_sizes/font_size = 15
+theme_override_colors/font_color = Color(0.48, 0.62, 0.63, 1)
+
+[node name="Action0" type="Label" parent="Layout"]
+layout_mode = 0
+offset_left = 88.0
+offset_top = 267.0
+offset_right = 518.0
+offset_bottom = 297.0
+mouse_filter = 2
+text = "Mover"
+theme_override_font_sizes/font_size = 19
+
+
+[node name="Key0" type="Label" parent="Layout"]
+layout_mode = 0
+offset_left = 540.0
+offset_top = 267.0
+offset_right = 890.0
+offset_bottom = 297.0
+mouse_filter = 2
+text = "W A S D"
+theme_override_font_sizes/font_size = 19
+
+
+[node name="Pad0" type="Label" parent="Layout"]
+layout_mode = 0
+offset_left = 910.0
+offset_top = 267.0
+offset_right = 1190.0
+offset_bottom = 297.0
+mouse_filter = 2
+text = "Analógico esquerdo"
+theme_override_font_sizes/font_size = 19
+
+
+[node name="Action1" type="Label" parent="Layout"]
+layout_mode = 0
+offset_left = 88.0
+offset_top = 304.0
+offset_right = 518.0
+offset_bottom = 334.0
+mouse_filter = 2
+text = "Subir / descer"
+theme_override_font_sizes/font_size = 19
+
+
+[node name="Key1" type="Label" parent="Layout"]
+layout_mode = 0
+offset_left = 540.0
+offset_top = 304.0
+offset_right = 890.0
+offset_bottom = 334.0
+mouse_filter = 2
+text = "Espaço / Ctrl"
+theme_override_font_sizes/font_size = 19
+
+
+[node name="Pad1" type="Label" parent="Layout"]
+layout_mode = 0
+offset_left = 910.0
+offset_top = 304.0
+offset_right = 1190.0
+offset_bottom = 334.0
+mouse_filter = 2
+text = "RB / LB"
+theme_override_font_sizes/font_size = 19
+
+
+[node name="Action2" type="Label" parent="Layout"]
+layout_mode = 0
+offset_left = 88.0
+offset_top = 341.0
+offset_right = 518.0
+offset_bottom = 371.0
+mouse_filter = 2
+text = "Câmera"
+theme_override_font_sizes/font_size = 19
+
+
+[node name="Key2" type="Label" parent="Layout"]
+layout_mode = 0
+offset_left = 540.0
+offset_top = 341.0
+offset_right = 890.0
+offset_bottom = 371.0
+mouse_filter = 2
+text = "Setas / mouse"
+theme_override_font_sizes/font_size = 19
+
+
+[node name="Pad2" type="Label" parent="Layout"]
+layout_mode = 0
+offset_left = 910.0
+offset_top = 341.0
+offset_right = 1190.0
+offset_bottom = 371.0
+mouse_filter = 2
+text = "Analógico direito"
+theme_override_font_sizes/font_size = 19
+
+
+[node name="Action3" type="Label" parent="Layout"]
+layout_mode = 0
+offset_left = 88.0
+offset_top = 378.0
+offset_right = 518.0
+offset_bottom = 408.0
+mouse_filter = 2
+text = "Disparar"
+theme_override_font_sizes/font_size = 19
+
+
+[node name="Key3" type="Label" parent="Layout"]
+layout_mode = 0
+offset_left = 540.0
+offset_top = 378.0
+offset_right = 890.0
+offset_bottom = 408.0
+mouse_filter = 2
+text = "J"
+theme_override_font_sizes/font_size = 19
+
+
+[node name="Pad3" type="Label" parent="Layout"]
+layout_mode = 0
+offset_left = 910.0
+offset_top = 378.0
+offset_right = 1190.0
+offset_bottom = 408.0
+mouse_filter = 2
+text = "RT"
+theme_override_font_sizes/font_size = 19
+
+
+[node name="Action4" type="Label" parent="Layout"]
+layout_mode = 0
+offset_left = 88.0
+offset_top = 415.0
+offset_right = 518.0
+offset_bottom = 445.0
+mouse_filter = 2
+text = "Foco"
+theme_override_font_sizes/font_size = 19
+
+
+[node name="Key4" type="Label" parent="Layout"]
+layout_mode = 0
+offset_left = 540.0
+offset_top = 415.0
+offset_right = 890.0
+offset_bottom = 445.0
+mouse_filter = 2
+text = "Shift"
+theme_override_font_sizes/font_size = 19
+
+
+[node name="Pad4" type="Label" parent="Layout"]
+layout_mode = 0
+offset_left = 910.0
+offset_top = 415.0
+offset_right = 1190.0
+offset_bottom = 445.0
+mouse_filter = 2
+text = "LT"
+theme_override_font_sizes/font_size = 19
+
+
+[node name="Action5" type="Label" parent="Layout"]
+layout_mode = 0
+offset_left = 88.0
+offset_top = 452.0
+offset_right = 518.0
+offset_bottom = 482.0
+mouse_filter = 2
+text = "Fixar / trocar alvo"
+theme_override_font_sizes/font_size = 19
+
+
+[node name="Key5" type="Label" parent="Layout"]
+layout_mode = 0
+offset_left = 540.0
+offset_top = 452.0
+offset_right = 890.0
+offset_bottom = 482.0
+mouse_filter = 2
+text = "K / Tab"
+theme_override_font_sizes/font_size = 19
+
+
+[node name="Pad5" type="Label" parent="Layout"]
+layout_mode = 0
+offset_left = 910.0
+offset_top = 452.0
+offset_right = 1190.0
+offset_bottom = 482.0
+mouse_filter = 2
+text = "Y / X"
+theme_override_font_sizes/font_size = 19
+
+
+[node name="Action6" type="Label" parent="Layout"]
+layout_mode = 0
+offset_left = 88.0
+offset_top = 489.0
+offset_right = 518.0
+offset_bottom = 519.0
+mouse_filter = 2
+text = "Bomba"
+theme_override_font_sizes/font_size = 19
+
+
+[node name="Key6" type="Label" parent="Layout"]
+layout_mode = 0
+offset_left = 540.0
+offset_top = 489.0
+offset_right = 890.0
+offset_bottom = 519.0
+mouse_filter = 2
+text = "L"
+theme_override_font_sizes/font_size = 19
+
+
+[node name="Pad6" type="Label" parent="Layout"]
+layout_mode = 0
+offset_left = 910.0
+offset_top = 489.0
+offset_right = 1190.0
+offset_bottom = 519.0
+mouse_filter = 2
+text = "B"
+theme_override_font_sizes/font_size = 19
+
+
+[node name="Action7" type="Label" parent="Layout"]
+layout_mode = 0
+offset_left = 88.0
+offset_top = 526.0
+offset_right = 518.0
+offset_bottom = 556.0
+mouse_filter = 2
+text = "Pausa"
+theme_override_font_sizes/font_size = 19
+
+
+[node name="Key7" type="Label" parent="Layout"]
+layout_mode = 0
+offset_left = 540.0
+offset_top = 526.0
+offset_right = 890.0
+offset_bottom = 556.0
+mouse_filter = 2
+text = "Esc"
+theme_override_font_sizes/font_size = 19
+
+
+[node name="Pad7" type="Label" parent="Layout"]
+layout_mode = 0
+offset_left = 910.0
+offset_top = 526.0
+offset_right = 1190.0
+offset_bottom = 556.0
+mouse_filter = 2
+text = "Menu / Start"
+theme_override_font_sizes/font_size = 19
+
+
+[node name="BackButton" type="Button" parent="Layout"]
+layout_mode = 0
+offset_left = 64.0
+offset_top = 606.0
+offset_right = 244.0
+offset_bottom = 658.0
+text = "Voltar"
+alignment = 0
+focus_mode = 2
+focus_next = NodePath("../../Layout/BackButton")
+focus_previous = NodePath("../../Layout/BackButton")
+
+[node name="NavigationHint" type="Label" parent="Layout"]
+layout_mode = 0
+offset_left = 64.0
+offset_top = 664.0
+offset_right = 734.0
+offset_bottom = 689.0
+mouse_filter = 2
+text = "↑ ↓  Navegar     Enter  Confirmar"
+theme_override_font_sizes/font_size = 15
+theme_override_colors/font_color = Color(0.48, 0.62, 0.63, 1)
+
+[node name="ChapterLabel" type="Label" parent="Layout"]
+layout_mode = 0
+offset_left = 900.0
+offset_top = 664.0
+offset_right = 1230.0
+offset_bottom = 689.0
+mouse_filter = 2
+text = "UMA JORNADA ENTRE ESPÍRITOS"
+theme_override_font_sizes/font_size = 13
+theme_override_colors/font_color = Color(0.48, 0.62, 0.63, 1)

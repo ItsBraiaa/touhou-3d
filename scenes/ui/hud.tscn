@@ -1,0 +1,229 @@
+[gd_scene format=3]
+
+[ext_resource type="Theme" path="res://assets/ui/menu_theme.tres" id="1_theme"]
+[ext_resource type="Script" path="res://scripts/ui/hud.gd" id="2_script"]
+[ext_resource type="Texture2D" path="res://assets/ui/shield.svg" id="3_shield"]
+[ext_resource type="Texture2D" path="res://assets/ui/bomb.svg" id="4_bomb"]
+[ext_resource type="Texture2D" path="res://assets/ui/power.svg" id="5_power"]
+[ext_resource type="Texture2D" path="res://assets/ui/target.svg" id="6_target"]
+[ext_resource type="Texture2D" path="res://assets/ui/threat.svg" id="7_threat"]
+
+[sub_resource type="StyleBoxFlat" id="Panel"]
+bg_color = Color(0.02, 0.05, 0.075, 0.85)
+border_width_left = 2
+border_color = Color(0.39, 0.74, 0.68, 0.8)
+
+[sub_resource type="StyleBoxFlat" id="Track"]
+bg_color = Color(0.08, 0.15, 0.18, 0.9)
+
+[sub_resource type="StyleBoxFlat" id="HealthFill"]
+bg_color = Color(0.48, 0.85, 0.76, 1)
+
+[sub_resource type="StyleBoxFlat" id="BossFill"]
+bg_color = Color(0.9, 0.67, 0.4, 1)
+
+[node name="HUD" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme = ExtResource("1_theme")
+script = ExtResource("2_script")
+
+[node name="PlayerStatus" type="Panel" parent="."]
+layout_mode = 0
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 32.0
+offset_top = -132.0
+offset_right = 354.0
+offset_bottom = -32.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("Panel")
+
+[node name="HealthBar" type="ProgressBar" parent="PlayerStatus"]
+offset_left = 20.0
+offset_top = 24.0
+offset_right = 230.0
+offset_bottom = 34.0
+mouse_filter = 2
+theme_override_styles/background = SubResource("Track")
+theme_override_styles/fill = SubResource("HealthFill")
+value = 100.0
+show_percentage = false
+
+[node name="HealthValue" type="Label" parent="PlayerStatus"]
+offset_left = 240.0
+offset_top = 10.0
+offset_right = 308.0
+offset_bottom = 48.0
+mouse_filter = 2
+text = "100%"
+theme_override_font_sizes/font_size = 22
+
+[node name="Shield" type="TextureRect" parent="PlayerStatus"]
+offset_left = 20.0
+offset_top = 55.0
+offset_right = 47.0
+offset_bottom = 82.0
+mouse_filter = 2
+texture = ExtResource("3_shield")
+expand_mode = 1
+
+[node name="Bomb1" type="TextureRect" parent="PlayerStatus"]
+offset_left = 76.0
+offset_top = 56.0
+offset_right = 102.0
+offset_bottom = 82.0
+mouse_filter = 2
+texture = ExtResource("4_bomb")
+expand_mode = 1
+
+[node name="Bomb2" type="TextureRect" parent="PlayerStatus"]
+offset_left = 108.0
+offset_top = 56.0
+offset_right = 134.0
+offset_bottom = 82.0
+mouse_filter = 2
+texture = ExtResource("4_bomb")
+expand_mode = 1
+
+[node name="PowerIcon" type="TextureRect" parent="PlayerStatus"]
+offset_left = 179.0
+offset_top = 56.0
+offset_right = 205.0
+offset_bottom = 82.0
+mouse_filter = 2
+texture = ExtResource("5_power")
+expand_mode = 1
+
+[node name="PowerValue" type="Label" parent="PlayerStatus"]
+offset_left = 212.0
+offset_top = 48.0
+offset_right = 244.0
+offset_bottom = 85.0
+mouse_filter = 2
+text = "1"
+theme_override_font_sizes/font_size = 22
+
+[node name="PowerProgress" type="ProgressBar" parent="PlayerStatus"]
+offset_left = 247.0
+offset_top = 66.0
+offset_right = 302.0
+offset_bottom = 72.0
+mouse_filter = 2
+theme_override_styles/background = SubResource("Track")
+theme_override_styles/fill = SubResource("HealthFill")
+max_value = 5.0
+show_percentage = false
+
+[node name="BossStatus" type="Control" parent="."]
+visible = false
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -310.0
+offset_top = 26.0
+offset_right = 310.0
+offset_bottom = 91.0
+mouse_filter = 2
+
+[node name="Backing" type="Panel" parent="BossStatus"]
+offset_right = 620.0
+offset_bottom = 65.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("Panel")
+
+[node name="BossName" type="Label" parent="BossStatus"]
+offset_left = 16.0
+offset_top = 5.0
+offset_right = 604.0
+offset_bottom = 35.0
+mouse_filter = 2
+text = "Guardião das Lanternas"
+theme_override_font_sizes/font_size = 18
+horizontal_alignment = 1
+
+[node name="Phase1" type="ProgressBar" parent="BossStatus"]
+offset_left = 16.0
+offset_top = 45.0
+offset_right = 208.0
+offset_bottom = 53.0
+mouse_filter = 2
+theme_override_styles/background = SubResource("Track")
+theme_override_styles/fill = SubResource("BossFill")
+value = 100.0
+show_percentage = false
+
+[node name="Phase2" type="ProgressBar" parent="BossStatus"]
+offset_left = 214.0
+offset_top = 45.0
+offset_right = 406.0
+offset_bottom = 53.0
+mouse_filter = 2
+theme_override_styles/background = SubResource("Track")
+theme_override_styles/fill = SubResource("BossFill")
+value = 100.0
+show_percentage = false
+
+[node name="Phase3" type="ProgressBar" parent="BossStatus"]
+offset_left = 412.0
+offset_top = 45.0
+offset_right = 604.0
+offset_bottom = 53.0
+mouse_filter = 2
+theme_override_styles/background = SubResource("Track")
+theme_override_styles/fill = SubResource("BossFill")
+value = 100.0
+show_percentage = false
+
+[node name="AttackName" type="Label" parent="."]
+visible = false
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -340.0
+offset_top = 110.0
+offset_right = 340.0
+offset_bottom = 148.0
+mouse_filter = 2
+text = "Ritual das Lanternas"
+theme_override_font_sizes/font_size = 24
+theme_override_colors/font_shadow_color = Color(0.02, 0.04, 0.06, 1)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+horizontal_alignment = 1
+
+[node name="TargetMarker" type="TextureRect" parent="."]
+visible = false
+offset_right = 54.0
+offset_bottom = 54.0
+mouse_filter = 2
+texture = ExtResource("6_target")
+expand_mode = 1
+
+[node name="ThreatLeft" type="TextureRect" parent="."]
+visible = false
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 24.0
+offset_top = -16.0
+offset_right = 56.0
+offset_bottom = 16.0
+mouse_filter = 2
+texture = ExtResource("7_threat")
+
+[node name="ThreatRight" type="TextureRect" parent="."]
+visible = false
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = -56.0
+offset_top = -16.0
+offset_right = -24.0
+offset_bottom = 16.0
+mouse_filter = 2
+texture = ExtResource("7_threat")
+flip_h = true

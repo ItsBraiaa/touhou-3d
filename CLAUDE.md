@@ -1,0 +1,30 @@
+# Touhou 3D
+
+Godot 4.7.2 third-person 3D bullet hell (working title Guardiã dos Ventos). Two agents work here: Astra (Codex) is Lead Game Designer and owns scenes, art, layout, and content values; Claude is Lead Code Engineer and owns GDScript, tests, and project configuration. Engineering docs and code identifiers are in English; player-facing UI is in Portuguese.
+
+## Start here
+
+1. [docs/engineering/ROADMAP.md](docs/engineering/ROADMAP.md): what is done, what is next, what Astra still owes. Pick one ticket.
+2. [docs/engineering/CONVENTIONS.md](docs/engineering/CONVENTIONS.md): how code is written, tested, committed, and handed off.
+3. [CONTEXT.md](CONTEXT.md) for vocabulary and [docs/adr/](docs/adr/) for the four architectural decisions.
+4. [docs/GUIDE.md](docs/GUIDE.md) for scene and script contracts, then the gameplay sources [docs/PLANEJAMENTO.md](docs/PLANEJAMENTO.md) and [docs/STAGE_DESIGN.md](docs/STAGE_DESIGN.md).
+
+One ticket per session. A session ends with tests green, the ticket marked done or blocked, the roadmap row updated, a handoff log entry, and one commit of its own files.
+
+## Collaboration protocol
+
+Ownership and edit rights are in GUIDE.md Section 3 and CONVENTIONS.md "Shared-file protocol". Every change to a file owned by the other agent is announced in [docs/HANDOFF_LOG.md](docs/HANDOFF_LOG.md), newest first, never rewriting earlier entries. Never rerun a `tools/build_*.py` generator over an integrated scene without reconciling first.
+
+## Agent skills
+
+### Issue tracker
+
+Issues and specs live as local markdown files under `.scratch/<feature-slug>/` (no git remote). See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default vocabulary: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`, recorded as a `Status:` line in each issue file. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: one `CONTEXT.md` at the repo root plus ADRs in `docs/adr/`. See `docs/agents/domain.md`.

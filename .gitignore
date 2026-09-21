@@ -1,0 +1,10 @@
+# Godot 4+ specific ignores
+.godot/
+/android/
+/build/
+*.tmp
+
+# Raw asset download packs (kept on disk, each has a .gdignore; selected copies live in assets/)
+/All models/
+/all-sounds/
+/Music/

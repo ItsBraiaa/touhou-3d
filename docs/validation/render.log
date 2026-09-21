@@ -1,0 +1,6 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+D3D12 12_0 - Forward+ - Using Device #0: AMD - AMD Radeon RX 9070 XT
+
+SHIP_MESH /root/CombatArena/PlayerShip/VisualRoot/Model/craft_speederA AABB=[P: (-1.0, 0.0, -1.05), S: (2.0, 0.8, 2.1)] WORLD=(0.0, 5.6, 18.0)
+SCENE_CONTRACT_OK: 10 required nodes; targets=3
+PREVIEW_SAVED

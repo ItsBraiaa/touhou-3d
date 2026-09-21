@@ -1,0 +1,161 @@
+[gd_scene format=3]
+[ext_resource type="Theme" path="res://assets/ui/menu_theme.tres" id="1_theme"]
+[ext_resource type="Texture2D" path="res://assets/ui/menu_forest.svg" id="2_forest"]
+[ext_resource type="Texture2D" path="res://assets/ui/menu_mountain.svg" id="3_mountain"]
+[ext_resource type="Texture2D" path="res://assets/ui/wind_emblem.svg" id="4_emblem"]
+[ext_resource type="Script" path="res://scripts/ui/menu_controller.gd" id="5_controller"]
+
+[node name="Credits" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_theme")
+script = ExtResource("5_controller")
+
+[node name="Background" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_forest")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Layout" type="Control" parent="."]
+layout_mode = 0
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -640.0
+offset_top = -360.0
+offset_right = 640.0
+offset_bottom = 360.0
+mouse_filter = 2
+
+[node name="Emblem" type="TextureRect" parent="Layout"]
+layout_mode = 0
+offset_left = 64.0
+offset_top = 42.0
+offset_right = 106.0
+offset_bottom = 84.0
+mouse_filter = 2
+texture = ExtResource("4_emblem")
+expand_mode = 1
+
+[node name="Brand" type="Label" parent="Layout"]
+layout_mode = 0
+offset_left = 122.0
+offset_top = 46.0
+offset_right = 562.0
+offset_bottom = 78.0
+mouse_filter = 2
+text = "GUARDIÃ DOS VENTOS"
+theme_override_font_sizes/font_size = 17
+theme_override_colors/font_color = Color(0.48, 0.62, 0.63, 1)
+
+[node name="Heading" type="Label" parent="Layout"]
+layout_mode = 0
+offset_left = 64.0
+offset_top = 112.0
+offset_right = 1124.0
+offset_bottom = 177.0
+mouse_filter = 2
+text = "Créditos"
+theme_override_font_sizes/font_size = 44
+
+
+[node name="GameName" type="Label" parent="Layout"]
+layout_mode = 0
+offset_left = 64.0
+offset_top = 234.0
+offset_right = 964.0
+offset_bottom = 288.0
+mouse_filter = 2
+text = "GUARDIÃ DOS VENTOS"
+theme_override_font_sizes/font_size = 30
+
+
+[node name="ModelsHeader" type="Label" parent="Layout"]
+layout_mode = 0
+offset_left = 66.0
+offset_top = 326.0
+offset_right = 866.0
+offset_bottom = 356.0
+mouse_filter = 2
+text = "MODELO DA NAVE"
+theme_override_font_sizes/font_size = 15
+theme_override_colors/font_color = Color(0.48, 0.62, 0.63, 1)
+
+[node name="Models" type="Label" parent="Layout"]
+layout_mode = 0
+offset_left = 66.0
+offset_top = 366.0
+offset_right = 1016.0
+offset_bottom = 401.0
+mouse_filter = 2
+text = "Kenney · Space Kit · CC0"
+theme_override_font_sizes/font_size = 24
+
+
+[node name="ArtHeader" type="Label" parent="Layout"]
+layout_mode = 0
+offset_left = 66.0
+offset_top = 443.0
+offset_right = 866.0
+offset_bottom = 473.0
+mouse_filter = 2
+text = "CENÁRIOS E INTERFACE"
+theme_override_font_sizes/font_size = 15
+theme_override_colors/font_color = Color(0.48, 0.62, 0.63, 1)
+
+[node name="Art" type="Label" parent="Layout"]
+layout_mode = 0
+offset_left = 66.0
+offset_top = 482.0
+offset_right = 1016.0
+offset_bottom = 517.0
+mouse_filter = 2
+text = "Arte original do projeto"
+theme_override_font_sizes/font_size = 24
+
+
+[node name="BackButton" type="Button" parent="Layout"]
+layout_mode = 0
+offset_left = 64.0
+offset_top = 594.0
+offset_right = 244.0
+offset_bottom = 646.0
+text = "Voltar"
+alignment = 0
+focus_mode = 2
+focus_next = NodePath("../../Layout/BackButton")
+focus_previous = NodePath("../../Layout/BackButton")
+
+[node name="NavigationHint" type="Label" parent="Layout"]
+layout_mode = 0
+offset_left = 64.0
+offset_top = 664.0
+offset_right = 734.0
+offset_bottom = 689.0
+mouse_filter = 2
+text = "↑ ↓  Navegar     Enter  Confirmar"
+theme_override_font_sizes/font_size = 15
+theme_override_colors/font_color = Color(0.48, 0.62, 0.63, 1)
+
+[node name="ChapterLabel" type="Label" parent="Layout"]
+layout_mode = 0
+offset_left = 900.0
+offset_top = 664.0
+offset_right = 1230.0
+offset_bottom = 689.0
+mouse_filter = 2
+text = "UMA JORNADA ENTRE ESPÍRITOS"
+theme_override_font_sizes/font_size = 13
+theme_override_colors/font_color = Color(0.48, 0.62, 0.63, 1)

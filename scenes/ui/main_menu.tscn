@@ -1,0 +1,153 @@
+[gd_scene format=3]
+[ext_resource type="Theme" path="res://assets/ui/menu_theme.tres" id="1_theme"]
+[ext_resource type="Texture2D" path="res://assets/ui/menu_forest.svg" id="2_forest"]
+[ext_resource type="Texture2D" path="res://assets/ui/menu_mountain.svg" id="3_mountain"]
+[ext_resource type="Texture2D" path="res://assets/ui/wind_emblem.svg" id="4_emblem"]
+[ext_resource type="Script" path="res://scripts/ui/menu_controller.gd" id="5_controller"]
+
+[node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_theme")
+script = ExtResource("5_controller")
+
+[node name="Background" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_forest")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Layout" type="Control" parent="."]
+layout_mode = 0
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -640.0
+offset_top = -360.0
+offset_right = 640.0
+offset_bottom = 360.0
+mouse_filter = 2
+
+[node name="Emblem" type="TextureRect" parent="Layout"]
+layout_mode = 0
+offset_left = 76.0
+offset_top = 66.0
+offset_right = 128.0
+offset_bottom = 118.0
+mouse_filter = 2
+texture = ExtResource("4_emblem")
+expand_mode = 1
+
+[node name="Eyebrow" type="Label" parent="Layout"]
+layout_mode = 0
+offset_left = 146.0
+offset_top = 78.0
+offset_right = 586.0
+offset_bottom = 108.0
+mouse_filter = 2
+text = "ENTRE O VENTO E O SAGRADO"
+theme_override_font_sizes/font_size = 15
+theme_override_colors/font_color = Color(0.48, 0.62, 0.63, 1)
+
+[node name="Title" type="Label" parent="Layout"]
+layout_mode = 0
+offset_left = 76.0
+offset_top = 142.0
+offset_right = 716.0
+offset_bottom = 304.0
+mouse_filter = 2
+text = "GUARDIÃ\nDOS VENTOS"
+theme_override_font_sizes/font_size = 62
+
+
+[node name="Subtitle" type="Label" parent="Layout"]
+layout_mode = 0
+offset_left = 80.0
+offset_top = 312.0
+offset_right = 640.0
+offset_bottom = 344.0
+mouse_filter = 2
+text = "O céu guarda seus próprios mistérios."
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0.48, 0.62, 0.63, 1)
+
+[node name="StartButton" type="Button" parent="Layout"]
+layout_mode = 0
+offset_left = 78.0
+offset_top = 376.0
+offset_right = 420.0
+offset_bottom = 425.0
+text = "Iniciar"
+alignment = 0
+focus_mode = 2
+focus_next = NodePath("../../Layout/StageSelectButton")
+focus_previous = NodePath("../../Layout/QuitButton")
+
+[node name="StageSelectButton" type="Button" parent="Layout"]
+layout_mode = 0
+offset_left = 78.0
+offset_top = 433.0
+offset_right = 420.0
+offset_bottom = 482.0
+text = "Selecionar fase"
+alignment = 0
+focus_mode = 2
+focus_next = NodePath("../../Layout/OptionsButton")
+focus_previous = NodePath("../../Layout/StartButton")
+
+[node name="OptionsButton" type="Button" parent="Layout"]
+layout_mode = 0
+offset_left = 78.0
+offset_top = 490.0
+offset_right = 420.0
+offset_bottom = 539.0
+text = "Opções"
+alignment = 0
+focus_mode = 2
+focus_next = NodePath("../../Layout/QuitButton")
+focus_previous = NodePath("../../Layout/StageSelectButton")
+
+[node name="QuitButton" type="Button" parent="Layout"]
+layout_mode = 0
+offset_left = 78.0
+offset_top = 547.0
+offset_right = 420.0
+offset_bottom = 596.0
+text = "Sair"
+alignment = 0
+focus_mode = 2
+focus_next = NodePath("../../Layout/StartButton")
+focus_previous = NodePath("../../Layout/OptionsButton")
+
+[node name="NavigationHint" type="Label" parent="Layout"]
+layout_mode = 0
+offset_left = 64.0
+offset_top = 664.0
+offset_right = 734.0
+offset_bottom = 689.0
+mouse_filter = 2
+text = "↑ ↓  Navegar     Enter  Confirmar"
+theme_override_font_sizes/font_size = 15
+theme_override_colors/font_color = Color(0.48, 0.62, 0.63, 1)
+
+[node name="ChapterLabel" type="Label" parent="Layout"]
+layout_mode = 0
+offset_left = 900.0
+offset_top = 664.0
+offset_right = 1230.0
+offset_bottom = 689.0
+mouse_filter = 2
+text = "UMA JORNADA ENTRE ESPÍRITOS"
+theme_override_font_sizes/font_size = 13
+theme_override_colors/font_color = Color(0.48, 0.62, 0.63, 1)
