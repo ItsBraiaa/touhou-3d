@@ -12,11 +12,28 @@ Gameplay remains defined by [STAGE_DESIGN.md](STAGE_DESIGN.md).
 Forward is -Z, up is +Y. The Stage transform is identity; use global transforms
 when instancing it elsewhere. The flight interior is X=-55..55, Y=0..160,
 Z=-760..40, also recorded on `FlightBounds/Limits` as min/max metadata.
-Physical floors rise: 0 before Z=-90; 14 to -195; 25 to -345; 48 to -450;
-65 to -570; 83 through the summit. Flight clamping must respect these floors.
-The full-width terrace rises require flight; they are not walkable stairs.
-Peaks and clouds are decorative and outside the side walls. Cyan fragments
-mark the route margins. The duel and summit platforms top out at Y=50 and 85.
+Base floor elevations rise from 0 to 14, 25, 48, 65, and 83 at the original
+terrace boundaries. The last 28 units of each section now form a smooth rise to
+the next level; the duel exit uses a shorter 6-unit rise to preserve its orbit
+platform. Edge relief adds up to five units outside the central lane. Read actual
+terrain collision when clamping flight; the original step-height table is no longer
+an exact floor query. Each foundation has Surface and SurfaceBody/Collision nodes.
+Concave terrain collision is generated from the same triangles as its visible mesh.
+The duel and summit platforms still top out at Y=50 and 85.
+
+The art revision replaces identical blue peaks with three original irregular crag
+meshes, textured granite/moss/gravel, broad terrain surfaces, green and amber tree
+canopies, shrubs, grass and flowers. Vermilion gate wood, slate roofs, warm lanterns
+and bronze inlays distinguish shrine structures. All tree trunks and major crags
+remain outside the flight walls; low plants decorate the margins. Cyan fragments
+remain route guidance. Four waterfalls and a shallow stream provide moving accents.
+
+Visual materials live in `assets/environment/stage_02/`. Native FastNoiseLite /
+NoiseTexture2D feeds world-space terrain texturing; no downloaded textures are used.
+Four shaders handle terrain, wind on foliage/cloth, flowing water, and edge-faded
+closed-gate wisps. These use shader time and do not attach production GDScript.
+Ambient motion does not imply working enemy, seal, checkpoint, or gate behavior.
+Water is cosmetic; the ground underneath provides collision. Clouds remain static.
 
 All common Stage roots from GUIDE Section 5 exist, plus `Gates` and
 `FlightBounds`. Static scenery uses layer 1, mask 2. Entry, exit, checkpoint,
@@ -95,9 +112,9 @@ spawns follow STAGE_DESIGN. CP2-A retries repeat the duel and final ascent.
 ## Validation and remaining work
 
 Godot MCP confirmed version 4.7.2 and project access. The Linux executable ran
-`tests/run_tests.gd`: 15 tests passed, zero failures, including the new scene
+`tests/run_tests.gd`: 16 tests passed, zero failures, including the new scene
 contract. PowerShell is unavailable here, so the same runner was invoked directly.
-`tools/validate_stage_02.gd` rendered five inspected views using Compatibility on
+`tools/validate_stage_02.gd` rendered six inspected views and checked ambient frame changes using Compatibility on
 NVIDIA RTX 4050. See [validation/stage-02.md](validation/stage-02.md).
 
 Claude: attach the validated director, author typed encounter resources, connect
@@ -106,5 +123,6 @@ Boss retreat containment, boundary feedback, animated seal/gate states, storm
 resolution, input reachability, and the five-minute efficient clear remain open.
 No active duration or playability is claimed by the static scene.
 
-`tools/build_stage_02.py` rewrites only Stage 2 and its preview. Reconcile any
+`tools/build_stage_02.py` rewrites Stage 2, its preview, and the original OBJ
+terrain/stream/crag meshes in `assets/environment/stage_02/`. Reconcile any
 integration edits before running it again. No Stage 1 generator was executed.

@@ -15,6 +15,20 @@ Action required by <other agent>: <what they must do, or "none">
 
 ---
 
+## 2026-09-21 — Astra — Stage 2 texture, color and life revision
+State: SCENE_READY
+Files: `scenes/stages/stage_02.tscn`, `tools/build_stage_02.py`, `assets/environment/stage_02/`, `tools/validate_stage_02.gd`, `tests/scene/test_stage_02_contract.gd`, `.scratch/stage-02-area/issues/02-mountain-art-pass.md`, Stage 2 handoff/validation, credits, roadmap.
+Change: Replaced repeated blue cones/slabs with original irregular crags, moss/gravel/granite texture and terrain ramps. Added green/amber vegetation, vermilion shrine structures, warm lanterns, bronze inlays, water flow, foliage/cloth wind and fading gate wisps. Terrain collision matches its mesh; the old step-floor lookup is no longer exact. Encounter IDs, spawn/checkpoint positions, full gate coverage and seal links are preserved. No production gameplay scripts or project settings edited.
+Why: User rejected the monochrome and lifeless blockout. Six views reviewed on Godot 4.7.2 Compatibility, including player height; ambient motion check passed. All 16 tests passed, including physics terrain clearance and front-facing ramp collision. Review docs/validation/stage-02.md for limits.
+Action required by Claude: Use actual sculpted terrain collision for floor constraints; see STAGE_02_HANDOFF.md. Shader motion is cosmetic and requires no gameplay binding. Generator now also authors the terrain/stream/crag OBJ meshes; reconcile before reruns. Gameplay integration and duration testing remain pending.
+
+## 2026-09-21 — Astra — Stage 2 art revision announced
+State: PLANNED
+Files: `tools/build_stage_02.py`, `scenes/stages/stage_02.tscn`, original environment assets/shaders, QA, Stage 2 docs.
+Change: User rejected the monochrome blockout. Rework terrain presentation, mountain silhouettes, surface texture, vegetation, lighting and ambient movement. Generator and scene were reconciled against bda60cd: no subsequent integration edits exist. Keep encounter/gate/checkpoint contracts; terrain collision follows any changed terrain surface.
+Why: Improve visual quality and environmental life while preserving combat readability.
+Action required by Claude: review the updated Stage 2 handoff after this ticket; no production GDScript changes planned.
+
 ## 2026-09-21 — Astra — Stage 2 mountain spatial pass delivered
 State: SCENE_READY
 Files: `scenes/stages/stage_02.tscn`, `scenes/tests/stage_02_preview.tscn`, `tools/build_stage_02.py`, `tools/validate_stage_02.gd`, `tests/scene/test_stage_02_contract.gd` (and UIDs), `.scratch/stage-02-area/`, `docs/STAGE_02_HANDOFF.md`, `docs/GUIDE.md`, `docs/engineering/ROADMAP.md`, `docs/validation/stage-02*`.

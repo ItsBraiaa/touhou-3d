@@ -61,3 +61,32 @@ func _floor_at(z: float) -> float:
 	if z >= -570:
 		return 65
 	return 83
+
+func test_sculpted_terrain_keeps_spawns_and_checkpoints_clear() -> void:
+	var packed: PackedScene = load("res://scenes/stages/stage_02.tscn") as PackedScene
+	var stage: Node3D = packed.instantiate() as Node3D
+	tree.root.add_child(stage)
+	await tree.physics_frame
+	await tree.physics_frame
+	var positions: Array[Vector3] = []
+	for encounter: Node in stage.get_node("Encounters").get_children():
+		for spawn: Node3D in encounter.get_node("Spawns").get_children():
+			positions.append(spawn.global_position)
+	for checkpoint: Node in stage.get_node("Checkpoints").get_children():
+		var respawn: Marker3D = checkpoint.get_node("Respawn") as Marker3D
+		positions.append(respawn.global_position)
+	for position: Vector3 in positions:
+		var query: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(position, position + Vector3.DOWN * 180.0, 1)
+		var hit: Dictionary = stage.get_world_3d().direct_space_state.intersect_ray(query)
+		if assert_false(hit.is_empty(), "Authored terrain exists under spawn"):
+			var ground: Vector3 = hit["position"]
+			assert_true(position.y - ground.y > 3.0, "Spawn clears sculpted terrain")
+	# The ramp must collide at its visible surface, not the old flat foundation.
+	var ramp_query: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(Vector3(0, 40, -76), Vector3(0, -10, -76), 1)
+	ramp_query.hit_back_faces = false
+	var ramp_hit: Dictionary = stage.get_world_3d().direct_space_state.intersect_ray(ramp_query)
+	if assert_false(ramp_hit.is_empty(), "Ramp top faces upward"):
+		var ramp_position: Vector3 = ramp_hit["position"]
+		assert_almost_eq(ramp_position.y, 7.0, 0.1, "Ramp collision matches visible mesh")
+	stage.queue_free()
+	await tree.process_frame

@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://cd572wu2mm8wq"
+path="res://.godot/imported/terrain_summit.obj-0a7cf4f39656be84a400a67e5653ab1e.mesh"
+
+[deps]
+
+files=["res://.godot/imported/terrain_summit.obj-0a7cf4f39656be84a400a67e5653ab1e.mesh"]
+
+source_file="res://assets/environment/stage_02/terrain_summit.obj"
+dest_files=["res://.godot/imported/terrain_summit.obj-0a7cf4f39656be84a400a67e5653ab1e.mesh", "res://.godot/imported/terrain_summit.obj-0a7cf4f39656be84a400a67e5653ab1e.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false
