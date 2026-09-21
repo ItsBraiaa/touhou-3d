@@ -14,7 +14,7 @@ func run() -> void:
 	root.add_child(arena)
 	current_scene = arena
 	var required := ["PlayerShip/BodyCollision", "PlayerShip/DamageCore/CollisionShape3D", "PlayerShip/GrazeVolume/CollisionShape3D", "PlayerShip/Muzzle", "PlayerShip/FamiliarAnchors/Left", "PlayerShip/CameraRig/Camera3D", "Targets/Low", "Targets/Middle", "Targets/High", "Environment/WorldEnvironment"]
-	for path in required:
+	for path: String in required:
 		if not arena.has_node(path):
 			push_error("Missing scene contract: " + path)
 			quit(1)

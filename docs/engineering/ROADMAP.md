@@ -8,7 +8,7 @@ Deadline: 2026-09-24 (academic delivery). Today's baseline: 2026-09-20.
 
 1. Pick the first ticket whose Status is `todo` and whose dependencies are `done` (or a `parallel-safe: yes` ticket if another session is already running).
 2. Paste its kickoff line into a fresh session. One ticket per session, never two.
-3. The session ends with: `tools/test.ps1` green, ticket `Status: done` (or `blocked` with the blocker written in the ticket), this page's row updated, a `docs/HANDOFF_LOG.md` entry, one commit of the session's own files.
+3. The session ends with: `tools/test.ps1` (`tools/test.sh` on Linux) green, ticket `Status: done` (or `blocked` with the blocker written in the ticket), this page's row updated, a `docs/HANDOFF_LOG.md` entry, one commit of the session's own files.
 4. Features F3 to F14 start with a `00-plan` ticket that writes `spec.md` and the real tickets, using what Codex has delivered by then.
 
 Status values: `todo`, `doing`, `done`, `blocked`. Tickets live in `.scratch/<feature>/issues/NN-slug.md`. Rules are in [CONVENTIONS.md](CONVENTIONS.md), vocabulary in [CONTEXT.md](../../CONTEXT.md), decisions in [docs/adr/](../adr/).
@@ -19,7 +19,7 @@ Status values: `todo`, `doing`, `done`, `blocked`. Tickets live in `.scratch/<fe
 | --- | --- | --- | --- | --- | --- | --- |
 | F0 | Foundation | `foundation` | 01 git-init-and-ignores | docs | no | done |
 | | | | 02 godot-wrapper-and-test-runner | core | no | done |
-| | | | 03 project-config-main-scene-buses-export | integration | no | todo |
+| | | | 03 project-config-main-scene-buses-export | integration | no | done (export step blocked: no export templates on this host) |
 | | | | 04 guide-ownership-and-protocol-docs | docs | no | todo |
 | F1 | Player flight | `player-flight` | 01 flight-model-core | core | yes | todo |
 | | | | 02 player-controller-adapter | adapter | no | todo |
@@ -73,6 +73,7 @@ Dependencies Claude has on scene and content work. These are needs by Feature, n
 | --- | --- |
 | F0-03 | None. Claude takes ownership of `project.godot`, `export_presets.cfg`, `default_bus_layout.tres`, `scenes/main.tscn`. Do not edit them afterwards without a log entry. |
 | F0-03 onward | Do not rerun `tools/build_scene_handoff.py`, `build_menu_handoff.py`, or `build_stage_01.py` over integrated scenes without reconciling first. |
+| F0-03 onward | Every `.gd` compiles with `untyped_declaration`, `unused_variable`, `unused_parameter`, `shadowed_variable` as errors: type `for` iterators over untyped arrays (`for path: String in paths`). Claude typed the ones in `tools/validate_*.gd` on 2026-09-21; behavior unchanged. |
 | F6 | Projectile visual presets (bullet meshes and materials for player and enemy shots) if final art is wanted; Claude ships `scenes/dev/` placeholders otherwise. |
 | F7 | Pickup visuals (Power Pickup, Shield Pickup) following the `pickup.gd` root `Area3D` contract; dev placeholders otherwise. |
 | F8-04 onward | Review and tune the Stage 1 `content/*.tres` draft that Claude transcribes from STAGE_DESIGN.md. Values are yours. |

@@ -55,15 +55,15 @@ These node names form the initial integration vocabulary. Finalize each tree whe
 
 ### Main composition
 
-`scenes/main.tscn`:
+`scenes/main.tscn` is the project main scene and Claude-owned since F0-03. Actual tree:
 
-- `Main` — Node; attach `scripts/session/game_session.gd`.
+- `Main` — Node, `process_mode = ALWAYS`; `scripts/session/game_session.gd` (`GameSession`) attached, its four exports pointing at the children below.
 - `Main/WorldRoot` — Node3D; holds the loaded stage instance.
-- `Main/ProjectileRoot` — Node3D; attach `scripts/combat/projectile_system.gd`.
-- `Main/Interface` — CanvasLayer; holds menus and the in-game HUD.
-- `Main/Audio` — Node; attach `scripts/audio/audio_controller.gd`.
+- `Main/ProjectileRoot` — Node3D; will hold `scripts/combat/projectile_system.gd`.
+- `Main/Interface` — CanvasLayer, `process_mode = ALWAYS`; holds menus and the in-game HUD. `GameSession` instances `scenes/ui/main_menu.tscn` here at startup; screen navigation arrives with F2.
+- `Main/Audio` — Node, `process_mode = ALWAYS`; will hold `scripts/audio/audio_controller.gd`.
 
-Use explicit Inspector references or composition-time injection to connect these systems. The initial contract does not require new global autoloads. Claude may propose a small persistent service where justified.
+Systems are connected through Inspector references and composition-time injection; the autoload list stays empty (ADR-0002). Contract test: `tests/scene/test_main_contract.gd`. Audio buses `Master`, `Music`, `SFX` live in `default_bus_layout.tres`; the sixteen gameplay input actions live in `project.godot` (CONVENTIONS "Input actions").
 
 ### Player
 
@@ -114,7 +114,7 @@ All fields below are public configuration intentions. Claude chooses safe GDScri
 
 | Script path | Attach to | Astra configures | Claude implements |
 | --- | --- | --- | --- |
-| `scripts/session/game_session.gd` | Main | Stage scene references, interface/world/projectile/audio references | Campaign/direct-stage lifecycle, results and transitions |
+| `scripts/session/game_session.gd` | Main | Nothing yet: `world_root: Node3D`, `projectile_root: Node3D`, `interface: CanvasLayer`, `audio: Node` are set in the Claude-owned `scenes/main.tscn`; stage scene references come with F2/F11 | Validates the four exports and instances the main menu (F0-03); campaign/direct-stage lifecycle, results and transitions (F2, F11) |
 | `scripts/player/player_controller.gd` | PlayerShip | Movement speed, focus multiplier, visual root, combat-volume references | Input, movement, scenery collision, reset and control enable/disable |
 | `scripts/player/camera_rig.gd` | CameraRig | Camera reference, follow distance/height, FOV, damping defaults | Follow/orbit, lock framing, camera obstruction response |
 | `scripts/player/targeting.gd` | Targeting | Targeting range/cone and camera reference | Visibility filtering, acquire/switch/release, invalid target recovery |
@@ -184,7 +184,7 @@ For shared scenes or project settings, announce the files being edited to the co
 
 | Deliverable | Scene owner | Code owner | State | Evidence |
 | --- | --- | --- | --- | --- |
-| Main composition and session | Astra | Claude | PLANNED | Contract only |
+| Main composition and session | Claude (`scenes/main.tscn`, F0-03) | Claude | CODE_READY | Composition root instanced headless by `tests/scene/test_main_contract.gd`; main menu shown at startup; navigation pending (F2) |
 | Player/camera test arena | Astra | Claude | SCENE_READY | Both scenes load and render in Godot 4.7.2; static camera only; Section 13 |
 | Player combat and projectiles | Astra: presentation | Claude | PLANNED | Product rules documented |
 | Common enemies and miniboss | Astra | Claude | PLANNED | Behavior and reuse strategy documented |

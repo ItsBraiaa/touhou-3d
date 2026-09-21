@@ -28,7 +28,7 @@ func run() -> void:
 		for spawn in encounter.get_node("Spawns").get_children():
 			check(absf(spawn.position.x) < 44 and spawn.position.y < 75, "Spawn outside flight bounds")
 	check(stage.get_node("Checkpoints").get_child_count() == 2, "Expected two checkpoints")
-	for pair in [["CP1-A", "S1-05"], ["CP1-B", "S1-07"]]:
+	for pair: Array in [["CP1-A", "S1-05"], ["CP1-B", "S1-07"]]:
 		var checkpoint: Area3D = stage.get_node("Checkpoints/" + pair[0])
 		var entry: Area3D = stage.get_node("Encounters/" + pair[1] + "/EntryVolume")
 		check(checkpoint.global_position.z - entry.global_position.z > 10, "Checkpoint overlaps next encounter")
@@ -46,7 +46,7 @@ func run() -> void:
 			["arena", Vector3(28,56,-475), Vector3(0,35,-529)],
 			["overview", Vector3(210,265,-145), Vector3(0,5,-270)]
 		]
-		for view in views:
+		for view: Array in views:
 			camera.position = view[1]
 			camera.look_at(view[2])
 			for frame in range(10):

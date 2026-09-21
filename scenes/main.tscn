@@ -1,0 +1,21 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/session/game_session.gd" id="1_session"]
+
+[node name="Main" type="Node" node_paths=PackedStringArray("world_root", "projectile_root", "interface", "audio")]
+process_mode = 3
+script = ExtResource("1_session")
+world_root = NodePath("WorldRoot")
+projectile_root = NodePath("ProjectileRoot")
+interface = NodePath("Interface")
+audio = NodePath("Audio")
+
+[node name="WorldRoot" type="Node3D" parent="."]
+
+[node name="ProjectileRoot" type="Node3D" parent="."]
+
+[node name="Interface" type="CanvasLayer" parent="."]
+process_mode = 3
+
+[node name="Audio" type="Node" parent="."]
+process_mode = 3

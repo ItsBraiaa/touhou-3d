@@ -11,6 +11,7 @@ Owns how tests are discovered, executed, and reported: `TestCase` (assertions, h
 - `tools/godot.ps1`: resolves the Godot 4.7.2 console binary from `$env:GODOT_BIN`, else the verified Downloads path; prints `Using Godot: <path>` to stderr once; forwards every argument; returns Godot's exit code, or 2 when no binary exists at either location.
 - `tools/godot.cmd`: the same from `cmd.exe`, with `-ExecutionPolicy Bypass`.
 - `tools/test.ps1`: runs the suite headless and exits with the runner's code.
+- `tools/godot.sh`, `tools/test.sh`: POSIX mirrors of the two wrappers for hosts without PowerShell (this Linux machine, since F0-03). Same resolution order (`$GODOT_BIN`, then `~/Documents/Godot/Godot_v4.7.2-stable_linux.x86_64`), same import heuristic and stamp, same exit codes; the flags are `-f <substring>` and `-i`.
 - `tests/run_tests.gd`: the runner, `extends SceneTree`.
 - `tests/framework/test_case.gd`: `class_name TestCase`, the base class of every test.
 - `tests/unit/framework/test_self_check.gd`: exercises every assertion in passing and failing form, one coroutine test, the exposed tree, and the signal recorder.
@@ -24,6 +25,15 @@ tools/test.ps1 -Import               # force the class-cache refresh first
 tools/test.ps1 --timeout=60          # per-test watchdog in seconds (default 30)
 ```
 
+On Linux (no PowerShell):
+
+```sh
+tools/test.sh                        # whole suite
+tools/test.sh -f flight_model        # filter
+tools/test.sh -i                     # force the class-cache refresh first
+tools/test.sh --timeout=60           # per-test watchdog in seconds
+```
+
 Output is one `PASS res://tests/unit/<area>/test_x.gd::test_y` or `FAIL <label>: <message>` line per test, then `TESTS_PASSED <n>` and `TESTS_FAILED <n>`. Exit 0 only when nothing failed and at least one test ran; a filter that matches nothing is exit 1.
 
 Class cache: a script that names a `class_name` type (`TestCase`, the Rules Cores) resolves it only through `.godot/global_script_class_cache.cfg`, which the editor writes when it scans the project. `tools/test.ps1` therefore runs `godot --headless --import` (about three seconds) when that cache is missing, when `-Import` is given, or when a `.gd` under `scripts/`, `tests/`, `tools/`, `scenes/`, `content/`, or `addons/` is newer than its last import stamp (`.godot/test_import.stamp`). The import also creates `.uid` files next to new scripts and imports new assets, exactly as opening the editor would. Commit `.uid` files together with their scripts.
@@ -32,6 +42,10 @@ Running Godot directly:
 
 ```powershell
 tools/godot.ps1 --headless --path . --script res://tools/validate_scene_handoff.gd
+```
+
+```sh
+tools/godot.sh --headless --path . --script res://tools/validate_scene_handoff.gd
 ```
 
 From a PowerShell prompt, PowerShell itself removes the first bare `--` of a direct `.ps1` call, so Godot user arguments need `-- --` there. `tools/godot.cmd` and `tools/test.ps1` forward `--` correctly.
@@ -107,7 +121,7 @@ Rules:
 
 ## Dependencies
 
-Godot 4.7.2 console binary at the path recorded in `docs/validation/first-scene.md` "Environment", or `$env:GODOT_BIN`. No addons, no Python.
+Godot 4.7.2 console binary at the path recorded in `docs/validation/first-scene.md` "Environment", or `$env:GODOT_BIN`; on Linux `~/Documents/Godot/Godot_v4.7.2-stable_linux.x86_64` or `$GODOT_BIN`. No addons, no Python.
 
 ## Invariants and tests
 
@@ -118,11 +132,11 @@ Godot 4.7.2 console binary at the path recorded in `docs/validation/first-scene.
 | Coroutine tests are awaited; `tree` is the live tree | `test_coroutine_is_awaited`, `test_tree_root_accepts_nodes` |
 | Signal recorder captures zero, one, and two argument emissions, stops on request, reports missing signals, stays alive without a local reference, and does not leak | `test_signal_recorder_*`; leak check is the absence of "ObjectDB instances were leaked" at exit |
 | `tools/test.ps1` exits 1 on a failing test, on a file that fails to compile, and on a filter that matches nothing; `tools/godot.cmd` forwards `--` | Verified manually on 2026-09-21 (ticket F0-02 "Tests required"); not automated |
-| The framework compiles with every GDScript warning treated as an error | Verified manually on 2026-09-21 with a temporary `project.godot`; F0-03 makes the four CONVENTIONS warnings permanent |
+| The framework compiles with every GDScript warning treated as an error | Verified manually on 2026-09-21 with a temporary `project.godot`. Since F0-03 `project.godot` treats the four CONVENTIONS warnings as errors permanently, so every run re-verifies them |
 
 ## Setup for Astra
 
-Nothing to attach. Run a validation script with `tools/godot.ps1 --headless --path . --script res://tools/validate_scene_handoff.gd`. Before handing off a scene that has a contract test, run `tools/test.ps1 -Filter <scene>`.
+Nothing to attach. Run a validation script with `tools/godot.ps1 --headless --path . --script res://tools/validate_scene_handoff.gd` (`tools/godot.sh` on Linux). Before handing off a scene that has a contract test, run `tools/test.ps1 -Filter <scene>` (`tools/test.sh -f <scene>`). Your scripts compile under the four warnings-as-errors: type `for` iterators over untyped arrays (`for path: String in paths`).
 
 ## Open issues
 
@@ -131,3 +145,4 @@ Nothing to attach. Run a validation script with `tools/godot.ps1 --headless --pa
 - `Engine.get_process_frames()` increments after each iteration, so it lags one frame behind `process_frame`; count awaited frames instead of comparing frame numbers exactly.
 - The import heuristic watches only the listed code folders; a `class_name` script elsewhere needs `tools/test.ps1 -Import`.
 - The exit-2 path of `tools/godot.ps1` (no binary anywhere) was reviewed but not executed, since the default binary is present on this machine.
+- The headless import prints `Attempting to parent and popup a dialog that already has a parent` a few times while "Reopening scenes" from the editor layout saved in `.godot/editor/`. Editor noise: the import exits 0 and the tests are unaffected.

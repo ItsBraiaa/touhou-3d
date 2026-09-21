@@ -9,7 +9,7 @@ func _initialize() -> void:
 
 func run() -> void:
 	root.size = Vector2i(1280, 720)
-	for scene_name in SCENES:
+	for scene_name: String in SCENES:
 		var packed := load("res://scenes/ui/" + scene_name + ".tscn") as PackedScene
 		if packed == null:
 			failures.append("Failed to load: " + scene_name)
@@ -22,7 +22,7 @@ func run() -> void:
 		for control in controls:
 			if control.focus_mode == Control.FOCUS_ALL:
 				focus_count += 1
-				for property in ["focus_next", "focus_previous"]:
+				for property: String in ["focus_next", "focus_previous"]:
 					var neighbor: NodePath = control.get(property)
 					if not neighbor.is_empty() and not control.has_node(neighbor):
 						failures.append(scene_name + ": invalid " + property + " on " + str(control.get_path()))

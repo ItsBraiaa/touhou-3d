@@ -20,7 +20,7 @@ func run() -> void:
 	var scene := packed.instantiate()
 	root.add_child(scene)
 	var hud: Control = scene.get_node("Interface/HUD")
-	for path in ["PlayerStatus/HealthBar", "PlayerStatus/HealthValue", "PlayerStatus/Shield", "PlayerStatus/Bomb1", "PlayerStatus/Bomb2", "PlayerStatus/PowerValue", "PlayerStatus/PowerProgress", "BossStatus/Phase1", "BossStatus/Phase2", "BossStatus/Phase3", "TargetMarker", "ThreatLeft", "ThreatRight"]:
+	for path: String in ["PlayerStatus/HealthBar", "PlayerStatus/HealthValue", "PlayerStatus/Shield", "PlayerStatus/Bomb1", "PlayerStatus/Bomb2", "PlayerStatus/PowerValue", "PlayerStatus/PowerProgress", "BossStatus/Phase1", "BossStatus/Phase2", "BossStatus/Phase3", "TargetMarker", "ThreatLeft", "ThreatRight"]:
 		assert(hud.has_node(path), "Missing HUD node: " + path)
 	assert(not hud.get_node("BossStatus").visible)
 	for control in hud.find_children("*", "Control", true, false):

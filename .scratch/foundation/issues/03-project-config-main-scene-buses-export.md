@@ -1,6 +1,7 @@
 # F0-03 Project config, main scene, audio buses, export preset
 
-Status: todo
+Status: done
+Export step: blocked (no export templates on this host; see Outcome)
 Type: integration
 parallel-safe: no
 Depends on: F0-02
@@ -89,3 +90,11 @@ Menu navigation, settings application, any gameplay.
 ```
 Read CLAUDE.md, docs/engineering/ROADMAP.md and .scratch/foundation/issues/03-project-config-main-scene-buses-export.md, then implement that ticket. Finish with its Definition of Done and commit.
 ```
+
+## Outcome (2026-09-21)
+
+- Delivered as specified: warnings as errors, sixteen actions (physical keycodes, `device = -1`, `location = LEFT` on Left Ctrl and Left Shift), `scenes/main.tscn` with `GameSession`, `default_bus_layout.tres`, `export_presets.cfg`. GUIDE Sections 5, 6, and 10 updated; module doc `docs/engineering/project.md`.
+- Tests: `tests/scene/test_main_contract.gd` (4), `tests/unit/project/test_input_map.gd` (5), plus `tests/unit/project/test_audio_buses.gd` (2) so F3 has the bus contract pinned. 27 tests green. The axis test uses `is_action_pressed`, because Godot matches a joypad axis event in both directions and only the pressed flag carries the direction.
+- Verified: `--headless --quit` prints no errors; every `.gd` under `scripts/`, `tests/`, `tools/` passes `--check-only` under the new warnings; the project runs windowed (Vulkan Forward+) and a 1280 × 720 screenshot of `main.tscn` shows the main menu exactly as before.
+- Export step blocked: this session ran on Linux, where `~/.local/share/godot/export_templates/4.7.2.stable/` is empty. Godot reported `No export template found at the expected path: .../windows_release_x86_64.exe` (and `windows_debug_x86_64.exe`). The user installs the 4.7.2 templates (Editor > Manage Export Templates, about 1 GB), then runs `tools/godot.sh --headless --path . --export-release "Windows Desktop" build/Touhou-3D.exe` and launches the exe once. Nothing else in the ticket depends on it; F14-01 repeats the export.
+- Additions beyond the ticket: `tools/godot.sh` and `tools/test.sh`, POSIX mirrors of the PowerShell wrappers, because this host has no PowerShell (Astra hit the same limit on Stage 2). Four Astra-owned `tools/validate_*.gd` scripts had untyped `for` iterators over untyped arrays and stopped compiling; they received type annotations only, announced in the handoff log.
