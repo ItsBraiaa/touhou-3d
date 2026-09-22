@@ -15,6 +15,20 @@ Action required by <other agent>: <what they must do, or "none">
 
 ---
 
+## 2026-09-22 00:15 — Claude — Gameplay roots stop while paused (F0-03 review fix) [shared]
+State: CODE_READY
+Files: `scenes/main.tscn`, `tests/scene/test_main_contract.gd`, `tests/run_tests.gd`, `docs/GUIDE.md` (Section 5 "Main composition", two lines), `docs/engineering/project.md`, `docs/engineering/testing.md`, `docs/engineering/ROADMAP.md` (the F0-03 row), `.scratch/foundation/issues/03-project-config-main-scene-buses-export.md`.
+Change: `Main/WorldRoot` and `Main/ProjectileRoot` are now `process_mode = PAUSABLE`. They had been left at INHERIT under a `Main` that is ALWAYS, so both kept receiving `_process` and `_physics_process` while the tree was paused; the 2026-09-22 review of the F0/F1 commits caught it with a runtime probe (P2). Two regression tests pin the contract: `test_world_and_projectile_roots_are_pausable` checks the modes, and `test_only_interface_and_audio_keep_processing_while_paused` pauses the tree and counts callbacks on probe nodes under all four roots (gameplay roots receive none and `can_process()` is false, `Interface` and `Audio` keep processing, gameplay roots resume on unpause). The second test failed against the old scene with three `_process` calls and one `_physics_process` call per root. The runner's watchdog is now ALWAYS, so a test that pauses the tree and then hangs still times out; a test that pauses the tree resets `tree.paused` in `after_each`. 47 tests green.
+Why: F2-04 and F11 pause the tree from `GameSession`; with the old modes the stage, enemies, and projectiles would have kept simulating behind the pause menu.
+Action required by Astra: none. `docs/GUIDE.md` is shared, which is why this entry carries the tag; only the two Section 5 lines for `WorldRoot` and `ProjectileRoot` changed.
+
+## 2026-09-22 00:12 — Claude — Editor re-save of theme, enemy texture imports, and settings (retroactive for commit e54b7d6) [shared]
+State: dev
+Files: `assets/ui/menu_theme.tres`, `assets/models/enemies/Goleling_Atlas_Monsters.png.import`, `assets/models/enemies/Hywirl_Atlas_Monsters.png.import`, `project.godot`.
+Change: Commit `e54b7d6` (2026-09-21 13:37) tracked Godot 4.7.2 editor side effects with no authored change and shipped without a log entry; this entry closes that gap (P3 in the 2026-09-22 review). `menu_theme.tres` was re-saved with a `uid` and sorted properties, serialization only. `project.godot` had two `[rendering]` keys reordered. The two enemy atlas textures were re-imported as VRAM-compressed: `detect_3d` fired the first time the editor rendered them on 3D meshes, so `compress/mode` went from 0 (lossless) to 2 (VRAM compressed, S3TC/BPTC) and `detect_3d/compress_to` from 1 to 0.
+Why: running the project from the editor during F0-03 triggered the re-import and re-save; committing them stops the files from showing as dirty in every later session.
+Action required by Astra: confirm the VRAM-compressed import is acceptable for the Hywirl and Goleling atlases. It is Godot's standard mode for 3D textures; quality loss shows mainly on flat colour gradients. If the lossless look is wanted, set `compress/mode=0` and `detect_3d/compress_to=0` in the two `.import` files so the editor does not switch them again. Nothing else in that commit touched your files.
+
 ## 2026-09-21 14:26 — Claude — FlightModel core (F1-01)
 State: CODE_READY
 Files: `scripts/player/flight_model.gd`, `tests/unit/player/test_flight_model.gd` (and their `.uid` files), `docs/engineering/player-flight.md` (new), `docs/engineering/README.md`, `docs/engineering/ROADMAP.md` (the F1-01 row), `.scratch/player-flight/issues/01-flight-model-core.md`.

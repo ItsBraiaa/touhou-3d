@@ -52,6 +52,8 @@ func _run() -> void:
 	var watchdog := Watchdog.new()
 	watchdog.name = "TestWatchdog"
 	watchdog.on_timeout = _on_test_timed_out
+	# ALWAYS, so a test that pauses the tree and then hangs still times out.
+	watchdog.process_mode = Node.PROCESS_MODE_ALWAYS
 	root.add_child(watchdog)
 	var files := _discover_test_files()
 	if files.is_empty():

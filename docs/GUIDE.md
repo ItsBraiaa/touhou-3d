@@ -65,8 +65,8 @@ These node names form the initial integration vocabulary. Finalize each tree whe
 `scenes/main.tscn` is the project main scene and Claude-owned since F0-03. Actual tree:
 
 - `Main` — Node, `process_mode = ALWAYS`; `scripts/session/game_session.gd` (`GameSession`) attached, its four exports pointing at the children below.
-- `Main/WorldRoot` — Node3D; holds the loaded stage instance.
-- `Main/ProjectileRoot` — Node3D; will hold `scripts/combat/projectile_system.gd`.
+- `Main/WorldRoot` — Node3D, `process_mode = PAUSABLE`; holds the loaded stage instance. Stops with the tree, and so does everything under it.
+- `Main/ProjectileRoot` — Node3D, `process_mode = PAUSABLE`; will hold `scripts/combat/projectile_system.gd`. Stops with the tree.
 - `Main/Interface` — CanvasLayer, `process_mode = ALWAYS`; holds menus and the in-game HUD. `GameSession` instances `scenes/ui/main_menu.tscn` here at startup; screen navigation arrives with F2.
 - `Main/Audio` — Node, `process_mode = ALWAYS`; will hold `scripts/audio/audio_controller.gd`.
 

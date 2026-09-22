@@ -11,8 +11,10 @@ interface = NodePath("Interface")
 audio = NodePath("Audio")
 
 [node name="WorldRoot" type="Node3D" parent="."]
+process_mode = 1
 
 [node name="ProjectileRoot" type="Node3D" parent="."]
+process_mode = 1
 
 [node name="Interface" type="CanvasLayer" parent="."]
 process_mode = 3

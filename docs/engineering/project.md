@@ -11,7 +11,7 @@ Owns `project.godot` (warnings as errors, input map, main scene, bus layout refe
 - `project.godot`: `[debug]` sets `untyped_declaration`, `unused_variable`, `unused_parameter`, `shadowed_variable` to Error; `[application] run/main_scene` is `res://scenes/main.tscn`; `[audio] buses/default_bus_layout`; `[input]` holds the sixteen gameplay actions.
 - `default_bus_layout.tres`: buses `Master`, `Music` (send Master), `SFX` (send Master).
 - `export_presets.cfg`: preset "Windows Desktop", `build/Touhou-3D.exe`, embedded PCK, x86_64.
-- `scenes/main.tscn`: composition root (ADR-0002); tree in GUIDE.md Section 5.
+- `scenes/main.tscn`: composition root (ADR-0002); tree in GUIDE.md Section 5. `Main`, `Interface`, and `Audio` are `PROCESS_MODE_ALWAYS`; `WorldRoot` and `ProjectileRoot` are `PROCESS_MODE_PAUSABLE`, so gameplay stops with the tree while menus, pause handling, and audio keep running.
 - `scripts/session/game_session.gd` (Adapter, attached to `Main`).
 - `tests/scene/test_main_contract.gd`, `tests/unit/project/test_input_map.gd`, `tests/unit/project/test_audio_buses.gd`.
 
@@ -21,8 +21,8 @@ Owns `project.godot` (warnings as errors, input map, main scene, bus layout refe
 
 | Export | Type | Default | Required | Meaning |
 | --- | --- | --- | --- | --- |
-| `world_root` | Node3D | `Main/WorldRoot` | yes | Holds the loaded Stage instance |
-| `projectile_root` | Node3D | `Main/ProjectileRoot` | yes | Root of the projectile system |
+| `world_root` | Node3D | `Main/WorldRoot` | yes | Holds the loaded Stage instance; PAUSABLE, stops while the tree is paused |
+| `projectile_root` | Node3D | `Main/ProjectileRoot` | yes | Root of the projectile system; PAUSABLE, stops while the tree is paused |
 | `interface` | CanvasLayer | `Main/Interface` | yes | Menus and HUD; processes while paused |
 | `audio` | Node | `Main/Audio` | yes | Audio controller root; processes while paused |
 
@@ -68,6 +68,7 @@ None injected. `GameSession` receives its four children through the exports set 
 | --- | --- |
 | `scenes/main.tscn` has `Main` (`GameSession`) with exactly `WorldRoot`, `ProjectileRoot`, `Interface`, `Audio` of the documented types | `test_main_contract.gd::test_root_is_main_with_game_session_attached`, `::test_four_children_with_the_documented_types` |
 | `Main`, `Interface`, `Audio` process while the tree is paused | `test_main_contract.gd::test_main_interface_and_audio_process_while_paused` |
+| `WorldRoot` and `ProjectileRoot` are `PROCESS_MODE_PAUSABLE`: nodes under them receive no `_process` or `_physics_process` while the tree is paused and resume when it is unpaused, while nodes under `Interface` and `Audio` keep processing | `test_main_contract.gd::test_world_and_projectile_roots_are_pausable`, `::test_only_interface_and_audio_keep_processing_while_paused` |
 | The main menu is instanced under `Interface` after one frame | `test_main_contract.gd::test_main_menu_is_instanced_under_interface` |
 | Sixteen actions exist with deadzone 0.2, one keyboard and one joypad event each, no mouse | `test_input_map.gd::test_every_action_exists_with_deadzone`, `::test_every_action_has_one_keyboard_and_one_joypad_event` |
 | Each binding in the table presses its action; the opposite stick direction does not | `test_input_map.gd::test_keyboard_bindings_match_the_table`, `::test_joypad_buttons_match_the_table`, `::test_joypad_axes_match_the_table` |

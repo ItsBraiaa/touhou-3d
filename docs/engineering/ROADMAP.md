@@ -19,7 +19,7 @@ Status values: `todo`, `doing`, `done`, `blocked`. Tickets live in `.scratch/<fe
 | --- | --- | --- | --- | --- | --- | --- |
 | F0 | Foundation | `foundation` | 01 git-init-and-ignores | docs | no | done |
 | | | | 02 godot-wrapper-and-test-runner | core | no | done |
-| | | | 03 project-config-main-scene-buses-export | integration | no | done (export step blocked: no export templates on this host) |
+| | | | 03 project-config-main-scene-buses-export | integration | no | done (export step blocked: no export templates on this host; 2026-09-22 review fix: gameplay roots PAUSABLE) |
 | | | | 04 guide-ownership-and-protocol-docs | docs | no | done |
 | F1 | Player flight | `player-flight` | 01 flight-model-core | core | yes | done |
 | | | | 02 player-controller-adapter | adapter | no | todo |

@@ -87,6 +87,7 @@ Rules:
 - A test that makes no assertions fails with "test made no assertions". This also catches tests aborted by a runtime error before their first assertion; the `SCRIPT ERROR` lines appear above the FAIL line.
 - Coroutines: `await tree.process_frame` or `await tree.create_timer(0.1).timeout`. The runner awaits the method and both hooks. A test that awaits longer than the watchdog fails and ends the run.
 - Scene tests: `tree.root.add_child(instance)`, `await tree.process_frame`, check the contract, then `tree.root.remove_child(instance)` and `instance.free()`.
+- Pausing: a test may set `tree.paused = true` to check process modes (see `test_main_contract.gd`). Reset it in `after_each`, so a failure does not leave the following tests paused. The watchdog is `PROCESS_MODE_ALWAYS` and keeps counting while the tree is paused. `process_frame` is emitted before the nodes process, so count callbacks over more than one awaited frame rather than expecting an exact number.
 - Randomness: pass a seeded `RandomNumberGenerator` to the core (CONVENTIONS "Time and randomness").
 
 ## How to filter
