@@ -144,6 +144,27 @@ func test_the_input_actions_drive_the_body_through_the_core() -> void:
 	assert_true(_ship.global_position.z < 0.0, "the ship advanced to z %f" % _ship.global_position.z)
 
 
+## The yaw contract with [CameraRig]: camera-relative movement is rotated by the rig's
+## own `global_rotation.y`, which [method CameraRig.get_yaw] publishes. A rig that kept
+## its yaw in a private variable and turned only its `Camera3D` would leave this node
+## unrotated, the yaw would read 0 forever, and the ship would keep flying along world
+## axes while the camera turned — with nothing raising an error.
+func test_forward_input_follows_the_camera_yaw_instead_of_the_world_axis() -> void:
+	if not assert_not_null(_ship, "%s loads with a PlayerController root" % PLAYER_SCENE_PATH):
+		return
+	var parked := _ship.global_position
+	# A quarter turn to the left: the camera then faces world -X, and so must forward.
+	_ship.camera_rig.rotation.y = PI / 2.0
+	assert_almost_eq(_ship.camera_rig.get_yaw(), PI / 2.0, 0.0001, "the rig publishes the turn")
+
+	Input.action_press(&"move_forward")
+	await _await_physics_frames()
+
+	assert_almost_eq(_ship.velocity.x, -AUTHORED_BASE_SPEED, 0.001, "forward is now -X")
+	assert_almost_eq(_ship.velocity.z, 0.0, 0.001, "and no longer -Z")
+	assert_true(_ship.global_position.x < parked.x, "the ship advanced to x %f" % _ship.global_position.x)
+
+
 func test_disabled_controls_ignore_the_input_and_hold_the_ship_still() -> void:
 	if not assert_not_null(_ship, "%s loads with a PlayerController root" % PLAYER_SCENE_PATH):
 		return

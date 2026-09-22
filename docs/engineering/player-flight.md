@@ -1,6 +1,6 @@
 # Player flight
 
-The player's movement rules and the ship that obeys them, started with ticket F1-01 on 2026-09-21 and extended by F1-02 on 2026-09-22. `FlightModel` and `PlayerController` are both CODE_READY; the camera rig and targeting arrive with F1-03 and F1-04, and this page grows with them.
+The player's movement rules, the ship that obeys them, and the camera that watches it. Started with ticket F1-01 on 2026-09-21 and extended by F1-02 and F1-03 on 2026-09-22. `FlightModel`, `PlayerController` and `CameraRig` are all CODE_READY; targeting arrives with F1-04, and this page grows with it.
 
 ## Purpose
 
@@ -8,15 +8,18 @@ The player's movement rules and the ship that obeys them, started with ticket F1
 
 `PlayerController` is the Adapter that gives those rules a body: it reads the sixteen input actions, asks the camera rig for its yaw, drives the core, moves the `CharacterBody3D` against scenery, banks `VisualRoot`, and exposes control enable, reset and edge feedback to whoever owns the ship.
 
-Between them they deliberately do not own the camera's own behavior (F1-03), Target Lock (F1-04), the weapon, or anything that reads the damage Core. The core never integrates and never touches a Node; the adapter never decides a movement rule.
+`CameraRig` is the Adapter that decides where the camera is and where it looks: it follows the ship without inheriting its rotation, orbits with the `camera_*` actions, frames a Target Lock together with the ship, shortens against scenery, and publishes the one number the other two depend on — its yaw. It has no Rules Core, because every question it answers is a question about the scene: where the ship is, where the target is, what the ray hit (ADR-0001).
+
+Between them they deliberately do not own target selection (F1-04), the weapon, or anything that reads the damage Core. The core never integrates and never touches a Node; neither adapter decides a movement rule.
 
 ## Files
 
 - `scripts/player/flight_model.gd` (Rules Core, `class_name FlightModel extends RefCounted`).
 - `scripts/player/player_controller.gd` (Adapter, `class_name PlayerController extends CharacterBody3D`, attached to `PlayerShip` in `scenes/player/player_ship.tscn`).
-- `tests/unit/player/test_flight_model.gd` (18 tests) and `tests/scene/test_player_ship_contract.gd` (10 tests).
-- `scenes/dev/arena_harness.tscn` and `scenes/dev/arena_harness.gd` (dev only: the scene to run while flying, and the stand-in owner until F2-04).
-- `tools/validate_player_flight.gd` (offline flight QA: drives the harness with simulated input, measures it, writes the screenshots in `docs/validation/player-flight.md`).
+- `scripts/player/camera_rig.gd` (Adapter, `class_name CameraRig extends Node3D`, attached to `PlayerShip/CameraRig` in the same scene).
+- `tests/unit/player/test_flight_model.gd` (18 tests), `tests/scene/test_player_ship_contract.gd` (11 tests) and `tests/scene/test_camera_rig_contract.gd` (11 tests).
+- `scenes/dev/arena_harness.tscn` and `scenes/dev/arena_harness.gd` (dev only: the scene to run while flying, the stand-in owner until F2-04, and a stand-in for F1-04's target selection so the lock can be flown by hand).
+- `tools/validate_player_flight.gd` (offline flight and camera QA: drives the harness with simulated input, measures it, writes the screenshots in `docs/validation/player-flight.md`).
 
 ## Public contract
 
@@ -32,7 +35,7 @@ Authored in `scenes/player/player_ship.tscn`. The numbers are Astra's to tune; t
 | `max_bank_angle_degrees` | float | 25.0 | — | Largest roll of `VisualRoot` at full lateral speed. Proposal, not an authored value. |
 | `bank_smoothing` | float | 8.0 | — | Rate the bank eases toward its target, in reciprocal seconds. Frame-rate independent; 0 leaves the ship level. |
 | `visual_root` | Node3D | `VisualRoot` | yes | The only node banking is applied to. |
-| `camera_rig` | Node3D | `CameraRig` | yes | Yaw source for camera-relative movement. |
+| `camera_rig` | CameraRig | `CameraRig` | yes | Yaw source for camera-relative movement. Typed to the class since F1-03; the stored `NodePath` did not change. |
 | `damage_core` | Area3D | `DamageCore` | yes | Projectile damage volume. Not read yet; F7 owns damage. |
 | `graze_volume` | Area3D | `GrazeVolume` | yes | Near-miss volume. Not read yet; F5 owns graze. |
 
@@ -66,11 +69,70 @@ A missing reference is reported with `push_error` naming this node's path and th
 
 The body is `motion_mode = MOTION_MODE_FLOATING` with no gravity, collision layer 2 and mask 1 (scenery only). Floating mode leaves `velocity` alone when a slide is blocked, so the value a HUD reads is the commanded velocity, not the achieved one; nothing accumulates, because the velocity is recomputed from the input every tick.
 
+## Camera contract
+
+### The yaw, and why it lives in a node rotation
+
+Camera-relative movement is one number: the yaw the horizontal input is rotated by. `CameraRig` keeps it in its own `global_rotation.y` and publishes it through `get_yaw()`, which is what `PlayerController._camera_yaw()` calls. Both readings are the same value on purpose, and the scene node is the single source of truth: the rig reads its own rotation at the start of every tick, modifies it, and writes it back, so anything that turns the node — a test, a future respawn placing the camera behind the ship — turns where "forward" flies with it.
+
+The alternative, a private `_yaw` that only rotates the `Camera3D`, fails silently: the rig node stays unrotated, `global_rotation.y` reads 0 forever, and the ship keeps flying along world axes while the camera turns, with nothing raising an error. `test_forward_input_follows_the_camera_yaw_instead_of_the_world_axis` is the regression test for exactly that, and the measured `camera-relative forward` case repeats it in the running game.
+
+The pitch is private, because nothing outside the rig reads it.
+
+### Exports (CameraRig)
+
+Authored on `PlayerShip/CameraRig`. `camera` must point at the `Camera3D`; the rest are framing and feel values for Astra to tune in the Inspector.
+
+| Export | Type | Default | Required | Meaning |
+| --- | --- | --- | --- | --- |
+| `camera` | Camera3D | `Camera3D` | yes | The camera the rig places. Its `current` flag is left as authored. |
+| `follow_distance` | float | 8.5 | — | Distance behind the ship at rest, before the pitch rotates the offset (GUIDE Section 13). |
+| `follow_height` | float | 3.2 | — | Height above the ship at rest, on the same terms. |
+| `default_pitch_degrees` | float | -9.0 | — | Pitch the rig starts at. Negative lifts the camera and looks down; -9° is the export form of the authored -0.16 rad. |
+| `pitch_limits_degrees` | Vector2 | (-60, 35) | — | Lowest and highest pitch. `x` looks down from above the ship, `y` looks up from below it. |
+| `orbit_speed_degrees` | float | 120.0 | — | Turn rate of the `camera_*` actions at full deflection, in degrees per second. |
+| `sensitivity` | float | 1.0 | — | Player's camera sensitivity (PLANEJAMENTO Section 7); scales the turn rate. |
+| `invert_vertical` | bool | false | — | When true, `camera_up` looks down instead of up. |
+| `position_damping` | float | 10.0 | — | Rate the camera position eases toward its place behind the ship, in reciprocal seconds. |
+| `rotation_damping` | float | 8.0 | — | Rate the aim chases the Target Lock framing. Follow mode's angles come straight from the input, so this shapes locked framing only. |
+| `lock_blend_speed` | float | 4.0 | — | Rate the lock framing fades in and out. At 4.0 a lock takes a quarter of a second to take hold and the same to let go. |
+| `obstruction_margin` | float | 0.4 | — | Distance the camera is held short of whatever the ray hit. |
+| `collision_mask` | int (3D physics flags) | 1 | — | Layers the obstruction ray tests. Layer 1 is scenery and closed Gate barriers; the player body is layer 2 and is deliberately not in it. |
+
+A missing `camera`, or a rig whose parent is not a `Node3D`, is reported with `push_error` naming this node's path and the rig sets its own `process_mode` to `DISABLED` (CONVENTIONS "Setup errors are loud").
+
+### Methods (CameraRig)
+
+| Method | Called by | Effect |
+| --- | --- | --- |
+| `get_yaw() -> float` | `PlayerController` every tick; F1-04 and the HUD later | The yaw the camera faces, in radians around world Y. The same value as the node's `global_rotation.y`. |
+| `set_lock_target(target: Node3D) -> void` | F1-04's targeting; the dev harness today | Frames `target` together with the ship: the yaw eases toward the direction from the ship to it, the pitch toward their midpoint, fading in over `lock_blend_speed`. A target that is freed is dropped as if it had been cleared; passing null clears the lock. |
+| `clear_lock_target() -> void` | The same caller | Returns to follow mode, fading the framing out over `lock_blend_speed` and leaving the camera where it is instead of snapping it behind the ship. |
+| `apply_settings(p_sensitivity: float, p_invert_vertical: bool) -> void` | F3's settings | Stores the two camera settings of PLANEJAMENTO Section 7. Reading and persisting them is F3's. |
+
+### Framing geometry
+
+The rig is `top_level`, so the body's bank and any rotation an owner gives it never reach the camera. Every physics tick the rig places itself at the ship's position with a basis that is a pure yaw rotation — rebuilt, not rotated, so no pitch or roll can accumulate in it — and the camera is placed at `Vector3(0, follow_height, follow_distance)` rotated by the pitch around the rig's right axis and then by the yaw around world Y. The camera's own basis is built from the same yaw and pitch with an explicit zero roll. That is the whole of the stable horizon: there is no code path that can tilt it.
+
+Because the offset and the view direction rotate by the same pitch, the angle between them is constant, so the ship keeps the same place on screen at every pitch — about 20.5° below the view centre with the authored values.
+
+- **Follow mode.** The yaw and pitch change only from the `camera_*` actions, at `orbit_speed_degrees × sensitivity`, with `invert_vertical` on the vertical axis. The actions name where the *view* turns: `camera_up` raises the view, which orbits the camera below the ship. The pitch is clamped to `pitch_limits_degrees`.
+- **Lock mode.** The framing pull is applied before the input, scaled by the blend, so the orbit input still moves the camera while locked and the framing eases back when it stops. The pitch aims at the midpoint between ship and target, measured from where the camera actually is, and is clamped by the same limits.
+- **Obstruction.** Every physics tick a ray runs from the ship to the desired camera position on `collision_mask`. A hit caps how far the camera may sit from the ship, at the hit distance minus `obstruction_margin`. `_process` eases the camera position toward the desired one and then applies that cap, which means the camera leaves an obstruction smoothly and enters one immediately — easing in would spend those frames inside the scenery the ray already found.
+
+### Ticking (CameraRig)
+
+`_physics_process` owns everything that is coupled to the simulation: the lock blend, the aim, the rig's own transform, the desired camera position and the obstruction ray, which may only be cast during a physics step. `_process` interpolates: it eases the camera position toward the desired one, applies the obstruction cap and writes the camera's transform (CONVENTIONS "Time and randomness").
+
+The rig runs after `PlayerController` in the same tick, because Godot calls a parent before its children, so the controller uses the yaw from the previous tick. One tick of camera latency on movement direction is invisible and keeps the pivot exact: the rig reads the ship's position after `move_and_slide` and the clamp, never before.
+
 ## Dependencies
 
 The core imports nothing, holds no Node, and is constructed with `FlightModel.new()` by the adapter, which injects the authored values through `configure()` and the Flight Volume through `set_bounds()`.
 
-The adapter depends on four scene nodes through its exports, on the input actions in `project.godot`, and on the camera rig for one number: `camera_rig.global_rotation.y`. It is driven by an owner that calls `setup()`, and optionally `set_controls_enabled()` and `reset_to()`. Nothing calls up: the adapter's two signals are the only way out.
+`PlayerController` depends on four scene nodes through its exports, on the input actions in `project.godot`, and on the camera rig for one number: `camera_rig.get_yaw()`. It is driven by an owner that calls `setup()`, and optionally `set_controls_enabled()` and `reset_to()`. Nothing calls up: the adapter's two signals are the only way out.
+
+`CameraRig` depends on its `camera` export, on its own parent being the `Node3D` it follows, on the four `camera_*` actions, and on the 3D physics space for the obstruction ray. It holds no reference to `PlayerController` and emits no signal: F1-04 and F3 call down into it, and the only thing that flows out is `get_yaw()`.
 
 ## Invariants and tests
 
@@ -89,6 +151,15 @@ The adapter depends on four scene nodes through its exports, on the input action
 | Respawn carries no motion over | `test_reset_to_teleports_the_ship_and_clears_its_motion` |
 | A scene missing a reference fails loudly instead of running half-configured (CONVENTIONS "Setup errors are loud") | `test_a_missing_visual_root_is_reported_and_stops_the_adapter` |
 | The body wiring Claude owns stays as documented | `test_root_is_a_player_controller_with_the_authored_body_wiring`, `test_required_exports_resolve_to_the_authored_nodes` |
+| Camera-relative movement follows the rig, not the world axes (PLANEJAMENTO Section 3) | `test_forward_input_follows_the_camera_yaw_instead_of_the_world_axis`, `test_get_yaw_is_finite_and_is_the_rig_node_rotation`, and the measured `camera-relative forward` case. Mutation-checked: making `_camera_yaw()` return 0 fails the first one and nothing else |
+| Stable horizon: the camera never rolls, in any state (ENGINEERING_BRIEF 4.B) | `test_the_horizon_stays_level_in_every_state` (at rest, with the body pitched, turned and rolled, while orbiting, while locked, after release), plus a roll assertion on every measured camera case |
+| The camera follows the body's position and not its rotation | `test_the_rig_follows_the_body_position_but_not_its_rotation`, `test_the_authored_rig_places_the_authored_camera` (which pins `top_level`) |
+| The rest pose is the authored camera (GUIDE Section 13) | `test_the_rig_rests_behind_and_above_the_ship`, and the measured `camera rest offset` and `camera rest pitch` cases |
+| The `camera_*` actions orbit at the authored rate and stop at the pitch limits | `test_the_camera_actions_orbit_the_rig`, and the measured `orbit yaw`, `orbit pitch`, `pitch ceiling` and `pitch floor` cases |
+| The vertical camera axis can be inverted (PLANEJAMENTO Section 7) | `test_apply_settings_inverts_the_vertical_orbit` |
+| A Target Lock frames ship and target together, and a release does not snap (PLANEJAMENTO Section 3) | `test_the_lock_framing_turns_the_yaw_toward_the_target`, `test_clearing_the_lock_returns_to_follow_mode`, and the measured `lock Low`, `lock Middle` and `lock High` cases, which check the aim, both ends in view and the roll at three target heights |
+| Scenery between ship and camera shortens the rig and lets it back out (ENGINEERING_BRIEF 4.B) | `test_scenery_between_the_ship_and_the_camera_shortens_the_rig`. Mutation-checked: a ray on mask 0 fails it with 9.08 against the expected 3.63 |
+| A rig missing its camera fails loudly instead of running half-configured | `test_a_missing_camera_is_reported_and_stops_the_rig` |
 
 Manual and measured results, with screenshots, are in [docs/validation/player-flight.md](../validation/player-flight.md).
 
@@ -100,15 +171,21 @@ Manual and measured results, with screenshots, are in [docs/validation/player-fl
 - Under **Scene references**, `visual_root`, `camera_rig`, `damage_core` and `graze_volume` point at `VisualRoot`, `CameraRig`, `DamageCore` and `GrazeVolume`. Renaming or moving one of those nodes breaks the reference; the game then prints `PlayerShip: required export '<field>' is not set` and the ship does not move at all.
 - Keep `DamageCore`, `GrazeVolume` and `Muzzle` outside `VisualRoot`. Banking rolls `VisualRoot`, and anything under it rolls with it.
 - The root also carries `motion_mode = 1` (floating) with collision layer 2 and mask 1. Those are Claude's wiring; ask instead of editing them.
-- `scenes/dev/arena_harness.tscn` is Claude's dev scene. It instances your `combat_arena.tscn` untouched and adds a debug readout on top. Run that scene, not the arena, when you want to fly.
-- `tools/build_scene_handoff.py` no longer reproduces the integrated `player_ship.tscn`: it still writes the two retired `metadata/*` entries and none of the exports, the `node_paths` marker or `motion_mode`. Reconcile it before any rerun (GUIDE Section 9 step 0), or the ship loses its wiring.
+- `scenes/dev/arena_harness.tscn` is Claude's dev scene. It instances your `combat_arena.tscn` untouched and adds a debug readout on top. Run that scene, not the arena, when you want to fly. Since F1-03 the readout also shows the camera's yaw, pitch, roll and distance from the ship, and `K` / `Y` locks the selected arena target while `Tab` / `X` cycles the three — a dev stand-in for F1-04's real selection.
+- `PlayerShip/CameraRig` now carries the `CameraRig` script's values: `camera` points at `Camera3D`, and `follow_distance` 8.5 and `follow_height` 3.2 are your authored camera offset moved onto the rig. The `Camera3D` node keeps its authored transform as the documented rest pose, but the rig writes that transform every frame at runtime, so moving the camera node in the editor no longer changes where the camera sits — change `follow_distance`, `follow_height` and `default_pitch_degrees` instead. Its FOV, near and far are still yours and are not touched.
+- The rig sets `top_level` on itself at run time, which is why the camera does not roll with the banking ship. Do not clear it.
+- `tools/build_scene_handoff.py` no longer reproduces the integrated `player_ship.tscn`: it still writes the two retired `metadata/*` entries and none of the `PlayerShip` exports, its `node_paths` marker or `motion_mode`, and since F1-03 none of the `CameraRig` exports or its own `node_paths` marker either. Reconcile it before any rerun (GUIDE Section 9 step 0), or the ship loses its wiring and the camera stops working.
 
 ## Open issues
 
 - `edge_margin` 4.0 and `max_bank_angle_degrees` 25.0 are still Claude's proposals; no design document fixes them. They are now visible: the feedback reads 0.75 one unit from a face and the roll is 24.5 degrees at full lateral speed. Astra tunes them.
 - The Flight Volume is the rectangular `AABB` Astra authored, but the Stage 1 platform is a circle of radius 39 centered at (0, 0, -6), so the rectangle's corners are open void inside the playable volume. Measured: past the rim the clamp is the only floor and holds the ship at y 0 over nothing, with the edge feedback at 1.0 ([screenshot](../validation/player-flight-clamp.png)). It is consistent, not pretty. Whether the volume should become a cylinder, or the scenery should fill the corners, is Astra's call.
 - A three-axis diagonal is bounded by its speed but not split evenly between the axes: `Input.get_vector` normalizes the horizontal pair before the model clamps the whole 3D vector, so holding forward, right and ascend gives (0.5, 0.707, -0.5) × `base_speed` — the vertical axis keeps the larger share. Total speed is exactly 12.0, which is the invariant the brief fixes. If the ascent should not dominate, the input layer has to read the two horizontal axes separately and let the 3D clamp do all the work; that is a feel decision, not a bug.
-- F1-03 must keep the camera rig's yaw in the rig node's own rotation, because `PlayerController._camera_yaw()` reads `camera_rig.global_rotation.y`. A rig that stores its yaw elsewhere has to change that one line, and the export's type becomes the `CameraRig` class then.
+- ~~F1-03 must keep the camera rig's yaw in the rig node's own rotation~~ — decided and closed by F1-03: the yaw lives in the rig node's `global_rotation.y`, `get_yaw()` publishes it, `_camera_yaw()` calls `get_yaw()`, the export is typed `CameraRig`, and the round trip is pinned by a test and by a measured case. See "The yaw, and why it lives in a node rotation" above.
+- The camera framing values are Claude's proposals except `follow_distance` and `follow_height`, which are Astra's authored camera offset. `default_pitch_degrees` -9, the (-60, 35) pitch limits, 120 degrees per second of orbit, the three damping rates and `obstruction_margin` 0.4 are all first guesses that no design document fixes. They are visible in the Inspector and in the harness readout; Astra tunes them.
+- The obstruction rule has no minimum distance. Turned into the west wall with the ship parked against it, the camera collapses to 0.75 units from the ship and the hull fills the frame ([screenshot](../validation/player-flight-camera-obstruction.png)). The remedies are a distance floor below which the camera stops shortening, or the ship transparency PLANEJAMENTO Section 3 already anticipates ("the ship may become partially transparent when it obscures bullets near the vulnerable core"). Neither is in F1-03's scope; the second belongs with the ship material, which is Astra's.
+- Entering an obstruction is a snap, not an ease: that is the rule the ticket fixes, because easing in would put the camera inside the geometry for those frames. Measured under the shrine gate, the shortening is a single-frame change of 6.5 units. A swept sphere instead of a ray, or a shorten rate cap, would trade that pop for some clipping; it is a feel decision and needs Astra's eyes on it before anyone spends the frames.
+- A teleport sweeps the camera. `PlayerController.reset_to` moves the body instantly and the rig's pivot follows instantly, but the camera position is eased, so a respawn or checkpoint restore flies the camera across the arena over about half a second. Nothing calls `reset_to` in anger yet; F7 and F10 will, and whoever wires them should ask the rig for a snap.
 - `damage_core` and `graze_volume` are validated but unread until F5 and F7 use them. They are required now so the scene fails loudly at the handoff rather than in a later ticket.
-- No physical gamepad on this host: the pad bindings are proven only by `tests/unit/project/test_input_map.gd` and by simulated actions, which ENGINEERING_BRIEF Section 8 explicitly says is not the same thing. A controller pass is still owed.
+- The pad bindings are still proven only by `tests/unit/project/test_input_map.gd` and by simulated actions, which ENGINEERING_BRIEF Section 8 explicitly says is not the same thing. What F1-03 added is the device fact: `tools/validate_player_flight.gd` now prints the connected joypads, and this host has `0:DualSense Wireless Controller` with Godot reporting a standard mapping, so the Xbox-named bindings of CONVENTIONS "Input actions" do land on real buttons. Nobody has pressed them. A human pass on keyboard and on that pad — flight, Focus, the right stick, `K` and `Tab` — is owed by F1-02 and F1-03 both.
 - The clamp does not cancel the velocity that pushed into a face, and measurement found no jitter: the ship rests at exactly x -38.000 against the west wall, y 0.400 on the platform and y 0.000 on the clamped floor. Because floating mode leaves `velocity` alone, a blocked ship still reports the commanded speed; if a HUD ever needs ground speed it should measure position change instead.

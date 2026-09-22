@@ -37,9 +37,9 @@ signal focus_changed(active: bool)
 ## the damage Core, the Graze Volume and the Muzzle are siblings, so banking cannot
 ## move them (ENGINEERING_BRIEF 4.B "Key boundary").
 @export var visual_root: Node3D
-## Yaw source for camera-relative movement. F1-03 attaches `CameraRig` here and owns
-## the rotation; until then the rig never turns and the ship flies along world axes.
-@export var camera_rig: Node3D
+## Yaw source for camera-relative movement. The rig owns where the camera looks; this
+## adapter only asks it for one number every tick.
+@export var camera_rig: CameraRig
 ## Projectile damage volume. Not read here — F7 owns damage — but required so a scene
 ## missing it fails loudly now, and the contract test can check that banking spares it.
 @export var damage_core: Area3D
@@ -111,9 +111,10 @@ func reset_to(p_transform: Transform3D) -> void:
 
 ## Yaw the horizontal input is rotated by, in radians. World-space, because the model
 ## rotates around world Y: the body itself is never rotated, so the rig's own turn is
-## the whole of it. F1-03 must keep the rig's yaw in this node's rotation.
+## the whole of it. [method CameraRig.get_yaw] returns the rig's own `global_rotation.y`,
+## so turning that node by any means turns where forward flies.
 func _camera_yaw() -> float:
-	return camera_rig.global_rotation.y
+	return camera_rig.get_yaw()
 
 
 func _set_focus_active(active: bool) -> void:

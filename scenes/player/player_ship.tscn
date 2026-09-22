@@ -114,8 +114,11 @@ script = ExtResource("5_weapon")
 [node name="Targeting" type="Node" parent="."]
 script = ExtResource("4_target")
 
-[node name="CameraRig" type="Node3D" parent="."]
+[node name="CameraRig" type="Node3D" parent="." node_paths=PackedStringArray("camera")]
 script = ExtResource("3_camera")
+camera = NodePath("Camera3D")
+follow_distance = 8.5
+follow_height = 3.2
 
 [node name="Camera3D" type="Camera3D" parent="CameraRig"]
 position = Vector3(0, 3.2, 8.5)

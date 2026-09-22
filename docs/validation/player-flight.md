@@ -1,8 +1,11 @@
-# Player flight validation — 2026-09-22 (F1-02)
+# Player flight validation — 2026-09-22 (F1-02, F1-03)
 
 Engine: Godot 4.7.2.stable.official.ed1daf0bf, Windows 11, D3D12 Forward+ on an AMD
 Radeon RX 9070 XT. Scene under test: `scenes/dev/arena_harness.tscn`, which instances
 Astra's `scenes/tests/combat_arena.tscn` and adds a debug readout.
+
+The flight sections are F1-02's and were re-run unchanged against the F1-03 code; the
+camera sections at the bottom are F1-03's.
 
 ## Automated
 
@@ -10,11 +13,22 @@ Astra's `scenes/tests/combat_arena.tscn` and adds a debug readout.
 tools/test.ps1
 ```
 
-57 passed, 0 failed. Ten of them are the new `tests/scene/test_player_ship_contract.gd`
-(body wiring, exports, the loud failure on a missing reference, banking against the
-combat volumes, `reset_to`, `set_controls_enabled`, `focus_changed`, and the injected
-Flight Volume). One `ERROR: ... required export 'visual_root' is not set` line in the
-output belongs to the test that provokes it.
+69 passed, 0 failed. Eleven of them are `tests/scene/test_player_ship_contract.gd` (body
+wiring, exports, the loud failure on a missing reference, banking against the combat
+volumes, `reset_to`, `set_controls_enabled`, `focus_changed`, the injected Flight Volume,
+and the camera-yaw round trip) and eleven the new
+`tests/scene/test_camera_rig_contract.gd` (rest pose, published yaw, orbit, inverted
+vertical axis, lock framing, release, the level horizon in every state, position-without-
+rotation following, obstruction, and the loud failure on a missing camera). Two
+`ERROR: ... required export ... is not set` lines in the output belong to the two tests
+that provoke them.
+
+Two mutations were used to check that the new assertions bite:
+
+| Mutation | Caught by |
+| --- | --- |
+| `PlayerController._camera_yaw()` returns `0.0` — the silent failure the F1-03 ticket describes | `test_forward_input_follows_the_camera_yaw_instead_of_the_world_axis`, and nothing else (10 of 11 ship tests still passed) |
+| the obstruction ray runs on mask 0, so it never hits | `test_scenery_between_the_ship_and_the_camera_shortens_the_rig`, with 9.08 against the expected 3.63 |
 
 The clamp assertion was checked by mutation: commenting out
 `global_position = _model.clamp_position(global_position)` fails
@@ -51,16 +65,50 @@ not fight each other at a surface. The `speed` line of the readout is the comman
 velocity: floating mode leaves `velocity` alone when a slide is blocked, which is why a
 ship parked on the platform still reads 12.00.
 
+## Measured camera — F1-03
+
+Same command, same run: the utility drives the `camera_*`, `lock_target` and
+`next_target` actions and measures the rig. Every case also reads the rendered camera's
+roll, which is the invariant that must not move. The numbers below are reproducible: two
+consecutive runs printed the same values.
+
+| Case | Measured | Expected | Source of the expectation |
+| --- | --- | --- | --- |
+| camera rest offset | (0.033, 4.490, 7.895) | (0, 4.490, 7.895) | GUIDE 13 camera (0, 3.2, 8.5) rotated by the -9° rest pitch; the 0.033 is the tail of the ease after the ship was teleported |
+| camera rest pitch | -9.000° | -9.0° | `default_pitch_degrees`, the export form of GUIDE 13's -0.16 rad |
+| camera rest roll | 0.000° | 0 | PLANEJAMENTO 3 "stable horizon" |
+| orbit yaw, `camera_right` held 30 ticks | -60.000° | -60° | `orbit_speed_degrees` 120 × 0.5 s, negative because looking right is a negative rotation around world Y |
+| orbit pitch, `camera_up` held 15 ticks | +30.000° | +30° | the same rate on the vertical axis; `camera_up` raises the view |
+| orbit roll | 0.000° | 0 | turning the view may not tilt it |
+| orbit returns | yaw 0.000°, pitch -9.000° | the rest pose | opposite actions held for the same ticks undo each other exactly |
+| pitch ceiling / floor | +35.000° / -60.000° | `pitch_limits_degrees` | held far past the limit; the clamp is what stops it, and the roll stays 0 at both ends |
+| quarter turn | 90.000° | 120°/s × 45 ticks | `camera_left` |
+| camera-relative forward | travel (-6.000, 0, 0), speed 12.000 | -X, because the camera now faces -X | PLANEJAMENTO 3 "horizontal movement is camera-relative". World -Z would be the failure |
+| lock Low / Middle / High, aim | 0.017° / 0.007° / 0.007° off the ship-to-target line | 0 | PLANEJAMENTO 3 "frame the player and target" |
+| lock Low / Middle / High, framing | ship and target both inside the 68° vertical FOV, roll 0.000° | both in view | the three arena targets are at y 5, 9 and 15 (GUIDE 13), which is the "different heights" the brief asks for |
+| release | heading held to -0.001° | unchanged | PLANEJAMENTO 3 "return smoothly to follow mode": the rig lets go where it was, it does not snap behind the ship |
+| camera distance against the west wall | 0.753 | 0.753 | the ship parked at x -38, camera turned into the x -39 wall: hit distance minus `obstruction_margin` 0.4 |
+| camera stays inside the wall | x ≥ -39 | inside | the shortening must not put the view outside the arena |
+| shrine gate pass | shortest distance 3.533 of 9.08, roll 0.000° through the whole pass | shortens | the beam at y 10.5, z -27 crosses the camera line once the ship is a few units past it |
+| shrine gate, largest single-frame change | 6.522 | — | reported, not asserted. This is the snap into an obstruction: the rig shortens immediately by design, because easing in would put the camera inside the beam. Easing back out is smooth |
+
+- [Orbited to yaw -60, pitch +21](player-flight-camera-orbit.png) — roll 0.00, horizon level, distance 8.94 of 9.1.
+- [Locked on the High target](player-flight-camera-lock.png) — `lock High` on the readout, ship and target both framed, roll 0.00.
+- [Turned into the west wall](player-flight-camera-obstruction.png) — yaw -90, distance 0.75 of 9.1, the hull filling the frame; the extreme end of the obstruction rule, recorded as an open issue.
+- [Past the shrine gate](player-flight-camera-gate.png) — parked at z -31 with the beam between ship and camera: distance 3.53 of 9.1, yaw 0, horizon still level.
+
 ## The harness as the running game
 
 ```powershell
 tools/godot.ps1 --path . res://scenes/dev/arena_harness.tscn --quit-after 240
 ```
 
-Four seconds windowed, no errors and no warnings: the harness resolves the ship, reads
-the `FlightBounds` metadata (`min_corner` (-39, 0, -45), `max_corner` (39, 30, 33)), and
-hands the Flight Volume to the controller. A missing metadata key would have printed the
-documented warning and left the ship on collision alone.
+Four seconds windowed, no errors and no warnings, re-run on the F1-03 code: the harness
+resolves the ship and its rig, reads the `FlightBounds` metadata (`min_corner`
+(-39, 0, -45), `max_corner` (39, 30, 33)), hands the Flight Volume to the controller, and
+collects the three `targetable` markers for the dev lock actions. A missing metadata key
+would have printed the documented warning and left the ship on collision alone; an arena
+without `Targets` would have warned and left the lock actions inert.
 
 - [Parked on the platform](player-flight-floor.png) — y 0.400, level, readout edge 0.90.
 - [Held by the clamp past the rim](player-flight-clamp.png) — y 0.000 over open void at (30, 0, 25), readout edge 1.00.
@@ -69,14 +117,25 @@ documented warning and left the ship on collision alone.
 
 ## Not verified
 
-- **No physical input device was pressed.** Every case above was driven with
-  `Input.action_press`, which ENGINEERING_BRIEF Section 8 explicitly says does not
-  replace a real device. The keyboard and Xbox bindings themselves (WASD, Space, left
-  Ctrl, left Shift, left stick, RB, LB, LT) are checked as data by
-  `tests/unit/project/test_input_map.gd`. A human pass on keyboard and on a physical
-  controller is still owed, and is the one remaining manual item of F1-02.
-- Camera behavior: the rig is still Astra's static camera, so every case above was flown
-  with a camera yaw of 0. Camera-relative movement is proven only in the core's unit
-  tests until F1-03 turns the rig.
-- Feel judgements — whether 12.0 units per second, a 25° bank and a 4-unit edge margin
-  read well in motion — are Astra's, not measurements.
+- **No physical input device was pressed, in F1-02 or in F1-03.** Every case above was
+  driven with `Input.action_press`, which ENGINEERING_BRIEF Section 8 explicitly says
+  does not replace a real device. What was actually pressed in this session: nothing —
+  the sessions that produced this page ran the utility and the test suite from the
+  command line, and no key or button was touched by a human. The keyboard and Xbox
+  bindings themselves (WASD, Space, left Ctrl, left Shift, arrow keys, K, Tab, left
+  stick, right stick, RB, LB, LT) are checked as data by
+  `tests/unit/project/test_input_map.gd`.
+- **The pad exists.** The F1-03 run printed
+  `joypads connected: 0:DualSense Wireless Controller (standard mapping: true)`, so this
+  host does have a controller and Godot has a standard mapping for it, which is what
+  makes the Xbox-named bindings land on the right buttons. That is a device inventory,
+  not a device test. The human pass still owed is: fly the six movement axes and Focus on
+  the keyboard and on that pad, orbit with the arrow keys and with the right stick, lock
+  with `K` and with `Y`, cycle with `Tab` and with `X`, and say whether the camera reads
+  well in motion.
+- Feel judgements — whether 12.0 units per second, a 25° bank, a 4-unit edge margin,
+  120°/s of orbit, the -60 to +35 pitch range and the three damping rates read well in
+  motion — are Astra's, not measurements.
+- The obstruction snap under the shrine gate (6.5 units in one frame) is measured but not
+  judged: whether it reads as a pop in motion needs eyes, and the remedies are in the
+  engineering page's open issues.

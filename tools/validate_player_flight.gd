@@ -1,14 +1,16 @@
 extends SceneTree
-## Offline flight QA for `scenes/dev/arena_harness.tscn` (Claude, F1-02). Not gameplay
-## code and not attached to any node: it drives the harness with simulated input,
-## measures what the ship actually did, and captures the screenshots recorded in
-## `docs/validation/player-flight.md`. Exits non-zero when a measurement is off.
+## Offline flight QA for `scenes/dev/arena_harness.tscn` (Claude, F1-02, extended by
+## F1-03). Not gameplay code and not attached to any node: it drives the harness with
+## simulated input, measures what the ship and the camera actually did, and captures the
+## screenshots recorded in `docs/validation/player-flight.md`. Exits non-zero when a
+## measurement is off.
 ##
 ## Run it with `tools/godot.ps1 --path . --script res://tools/validate_player_flight.gd`.
-## With a display it also writes the three PNGs; headless it skips them.
+## With a display it also writes the PNGs; headless it skips them.
 ##
 ## A simulated action is not a physical controller (ENGINEERING_BRIEF Section 8), so the
 ## gamepad rows of the validation page stay unverified until someone flies it with a pad.
+## The tool prints the joypads the host actually has, so that claim stays checkable.
 
 
 const HARNESS_PATH := "res://scenes/dev/arena_harness.tscn"
@@ -35,8 +37,39 @@ const BODY_HALF_HEIGHT := 0.4
 const SURFACE_TOLERANCE := 0.1
 ## Bank tolerance in radians, about 3 degrees of the eased roll.
 const BANK_TOLERANCE := 0.05
+## Ticks the eased camera needs to settle after the ship is teleported, at
+## `position_damping` 10: half a second is five time constants.
+const SETTLE_TICKS := 30
+## Ticks of held camera input per orbit measurement, and the quarter turn used by the
+## camera-relative case: 45 ticks of 120 degrees per second is 90 degrees.
+const ORBIT_TICKS := 30
+const QUARTER_TURN_TICKS := 45
+## Ticks of held pitch input per measurement: 30 degrees, which fits between the rest
+## pose at -9 and the +35 ceiling, so the rate is measured and not the clamp.
+const PITCH_TICKS := 15
+## Ticks of held camera input long enough to reach a pitch limit from anywhere in range.
+const PITCH_LIMIT_TICKS := 200
+## Ticks awaited for the lock framing to take hold: the blend plus the chase.
+const LOCK_TICKS := 60
+## The arena's three targets, in the order the harness cycles them, at the three heights
+## of GUIDE Section 13. The screenshot is taken on the highest one, the widest framing.
+const LOCK_TARGET_NAMES: Array[String] = ["Low", "Middle", "High"]
+const LOCK_SHOT_TARGET := "High"
+## Camera tolerances: degrees for the aim, units for the distances, and a tight one for
+## the roll, which is the invariant that must not move at all.
+const ANGLE_TOLERANCE := 2.0
+const DISTANCE_TOLERANCE := 0.1
+const ROLL_TOLERANCE := 0.01
+## The shrine gate pass: start short of the gate at z -27, fly forward for two seconds,
+## and end up where the beam is between the ship and the camera. The altitude clears the
+## beam's underside at y 9.95 and the posts stand at x +-8, so the ship flies between them.
+const GATE_APPROACH := Vector3(0.0, 8.0, -12.0)
+const GATE_PAST := Vector3(0.0, 8.0, -31.0)
+const GATE_TICKS := 120
 
 var _player: PlayerController
+var _rig: CameraRig
+var _arena: Node3D
 var _readout: Label
 var _base_speed: float = 0.0
 var _failures: int = 0
@@ -55,13 +88,20 @@ func run() -> void:
 	var harness := packed.instantiate()
 	root.add_child(harness)
 	current_scene = harness
+	_arena = harness.get_node_or_null(^"CombatArena") as Node3D
 	_player = harness.get_node_or_null(^"CombatArena/PlayerShip") as PlayerController
 	_readout = harness.get_node_or_null(^"DebugLayer/Readout") as Label
 	if _player == null or _readout == null:
 		push_error("Harness is missing CombatArena/PlayerShip or DebugLayer/Readout")
 		quit(1)
 		return
+	_rig = _player.camera_rig
+	if _rig == null:
+		push_error("Harness PlayerShip has no CameraRig")
+		quit(1)
+		return
 	_base_speed = _player.base_speed
+	_print_input_devices()
 	await _ticks(4)
 
 	await _measure_axis_speeds()
@@ -71,6 +111,13 @@ func run() -> void:
 	await _stop_against_the_flight_volume_floor()
 	await _stop_against_the_west_wall()
 	await _bank_into_a_strafe()
+	await _camera_rests_behind_the_ship()
+	await _orbit_with_the_camera_actions()
+	await _orbit_stops_at_the_pitch_limits()
+	await _fly_where_the_camera_looks()
+	await _lock_frames_the_ship_and_the_target()
+	await _camera_shortens_against_the_west_wall()
+	await _camera_under_the_shrine_gate()
 
 	if _failures > 0:
 		print("FLIGHT_FAILED %d" % _failures)
@@ -157,6 +204,156 @@ func _bank_into_a_strafe() -> void:
 	_release([&"move_right"])
 
 
+## The rest pose: the authored offset behind and above the ship, level, looking down by
+## `default_pitch_degrees` — GUIDE Section 13's camera at (0, 3.2, 8.5), -0.16 rad.
+func _camera_rests_behind_the_ship() -> void:
+	_player.reset_to(Transform3D(Basis(), OPEN_AIR))
+	await _ticks(SETTLE_TICKS)
+	var offset := _rig.camera.global_position - _player.global_position
+	_report_vector("camera rest offset", offset, _offset_for(_rig.get_yaw(), _rig.default_pitch_degrees), DISTANCE_TOLERANCE)
+	_report_value("camera rest pitch", _camera_degrees().x, _rig.default_pitch_degrees, ANGLE_TOLERANCE)
+	_report_value("camera rest roll", _camera_degrees().z, 0.0, ROLL_TOLERANCE)
+
+
+## CONVENTIONS "Input actions": the four `camera_*` actions turn the view at
+## `orbit_speed_degrees` per second, opposite directions undo each other exactly, and
+## none of it rolls the camera (PLANEJAMENTO Section 3, "stable horizon").
+func _orbit_with_the_camera_actions() -> void:
+	var start_yaw := _rig.get_yaw()
+	var start_pitch := _camera_degrees().x
+	await _press_for([&"camera_right"], ORBIT_TICKS)
+	# Looking right is a negative rotation around world Y.
+	_report_value("orbit yaw, camera_right", rad_to_deg(angle_difference(start_yaw, _rig.get_yaw())),
+		-_orbit_degrees(ORBIT_TICKS), ANGLE_TOLERANCE)
+	await _press_for([&"camera_up"], PITCH_TICKS)
+	_report_value("orbit pitch, camera_up", _camera_degrees().x - start_pitch, _orbit_degrees(PITCH_TICKS), ANGLE_TOLERANCE)
+	_report_value("orbit roll", _camera_degrees().z, 0.0, ROLL_TOLERANCE)
+	await _capture("camera-orbit")
+
+	await _press_for([&"camera_left"], ORBIT_TICKS)
+	await _press_for([&"camera_down"], PITCH_TICKS)
+	_report_value("orbit yaw returns", rad_to_deg(angle_difference(start_yaw, _rig.get_yaw())), 0.0, ANGLE_TOLERANCE)
+	_report_value("orbit pitch returns", _camera_degrees().x, start_pitch, ANGLE_TOLERANCE)
+
+
+## The pitch stops at the authored limits instead of tumbling over the ship.
+func _orbit_stops_at_the_pitch_limits() -> void:
+	await _press_for([&"camera_up"], PITCH_LIMIT_TICKS)
+	_report_value("pitch ceiling", _camera_degrees().x, _rig.pitch_limits_degrees.y, ANGLE_TOLERANCE)
+	_report_value("pitch ceiling roll", _camera_degrees().z, 0.0, ROLL_TOLERANCE)
+	await _press_for([&"camera_down"], PITCH_LIMIT_TICKS)
+	_report_value("pitch floor", _camera_degrees().x, _rig.pitch_limits_degrees.x, ANGLE_TOLERANCE)
+	_report_value("pitch floor roll", _camera_degrees().z, 0.0, ROLL_TOLERANCE)
+	await _press_for([&"camera_up"], _orbit_ticks_for(_rig.default_pitch_degrees - _camera_degrees().x))
+	_report_value("pitch back at the rest pose", _camera_degrees().x, _rig.default_pitch_degrees, ANGLE_TOLERANCE)
+
+
+## The yaw contract in the running game (PLANEJAMENTO Section 3, "horizontal movement is
+## camera-relative"): after a quarter turn, forward flies where the camera looks. A rig
+## that kept its yaw outside its own node rotation would still turn the camera here while
+## the travel stayed on world -Z, which is the silent failure this case exists for.
+func _fly_where_the_camera_looks() -> void:
+	var start_yaw := _rig.get_yaw()
+	await _press_for([&"camera_left"], QUARTER_TURN_TICKS)
+	var yaw := _rig.get_yaw()
+	_report_value("quarter turn", rad_to_deg(angle_difference(start_yaw, yaw)), _orbit_degrees(QUARTER_TURN_TICKS), ANGLE_TOLERANCE)
+	var travel: Vector3 = await _fly([&"move_forward"], MEASURE_TICKS)
+	_report_travel("camera-relative forward", travel, Vector3.FORWARD.rotated(Vector3.UP, yaw) * _base_speed * _measured_seconds())
+	await _press_for([&"camera_right"], QUARTER_TURN_TICKS)
+
+
+## PLANEJAMENTO Section 3: while locked, frame the player and the target together and
+## return smoothly to follow mode on release. `lock_target` reaches the rig through the
+## harness's dev target cycling, which F1-04 replaces with real selection.
+func _lock_frames_the_ship_and_the_target() -> void:
+	_player.reset_to(Transform3D(Basis(), OPEN_AIR))
+	await _ticks(SETTLE_TICKS)
+	# The arena's three targets are at three heights (GUIDE Section 13), which is the
+	# "orbit targets at different heights" the brief asks for evidence of.
+	await _tap(&"lock_target")
+	for target_name: String in LOCK_TARGET_NAMES:
+		if target_name != LOCK_TARGET_NAMES[0]:
+			await _tap(&"next_target")
+		await _ticks(LOCK_TICKS)
+		var target := _arena.get_node_or_null(NodePath("Targets/%s" % target_name)) as Node3D
+		if target == null:
+			_failures += 1
+			print("FLIGHT FAIL lock: the arena has no Targets/%s" % target_name)
+			return
+		_report_bool("lock %s reached the rig through the harness" % target_name, _readout_lock() == target.name)
+		var aim := -_rig.camera.global_transform.basis.z
+		aim.y = 0.0
+		var to_target := target.global_position - _player.global_position
+		to_target.y = 0.0
+		_report_value("lock %s aims along the ship-to-target line" % target_name,
+			rad_to_deg(aim.angle_to(to_target)), 0.0, ANGLE_TOLERANCE)
+		_report_bool("lock %s keeps the ship in view" % target_name, _in_view(_player.global_position))
+		_report_bool("lock %s keeps the target in view" % target_name, _in_view(target.global_position))
+		_report_value("lock %s roll" % target_name, _camera_degrees().z, 0.0, ROLL_TOLERANCE)
+		if target_name == LOCK_SHOT_TARGET:
+			await _capture("camera-lock")
+
+	var held := _rig.get_yaw()
+	await _tap(&"lock_target")
+	await _ticks(LOCK_TICKS)
+	_report_bool("the release reached the rig", _readout_lock().is_empty())
+	_report_value("released camera holds its heading", rad_to_deg(angle_difference(held, _rig.get_yaw())), 0.0, ANGLE_TOLERANCE)
+
+
+## ENGINEERING_BRIEF 4.B "camera behavior near geometry": turned into the west wall, the
+## rig shortens against it instead of letting the view pass through.
+func _camera_shortens_against_the_west_wall() -> void:
+	await _recentre_camera()
+	_player.reset_to(Transform3D(Basis(), OPEN_AIR))
+	await _hold([&"move_left"], TRAVEL_TICKS)
+	_release([&"move_left"])
+	# A quarter turn to the right swings the camera onto the wall side of the ship.
+	await _press_for([&"camera_right"], QUARTER_TURN_TICKS)
+	await _ticks(SETTLE_TICKS)
+
+	var ship := _player.global_position
+	var direction := _offset_for(_rig.get_yaw(), _camera_degrees().x).normalized()
+	var expected := (BOUNDS_MIN_X - ship.x) / direction.x - _rig.obstruction_margin
+	_report_value("camera distance against the west wall", _camera_distance(), expected, DISTANCE_TOLERANCE)
+	_report_bool("the camera stays inside the wall", _rig.camera.global_position.x >= BOUNDS_MIN_X)
+	_report_value("obstructed roll", _camera_degrees().z, 0.0, ROLL_TOLERANCE)
+	await _capture("camera-obstruction")
+
+	await _press_for([&"camera_left"], QUARTER_TURN_TICKS)
+
+
+## The shrine gate's beam at z -27 is the arena's only overhead scenery. Flying under it
+## measures both halves of the obstruction rule: how short the rig gets, and the largest
+## single-frame change on the way in and out, which is what a pop would look like.
+func _camera_under_the_shrine_gate() -> void:
+	await _recentre_camera()
+	_player.reset_to(Transform3D(Basis(), GATE_APPROACH))
+	await _ticks(SETTLE_TICKS)
+	_report_value("camera recentred before the gate", rad_to_deg(_rig.get_yaw()), 0.0, ANGLE_TOLERANCE)
+	var shortest := _camera_distance()
+	var largest_step := 0.0
+	var previous := shortest
+	var rolled := 0.0
+	Input.action_press(&"move_forward")
+	for _tick: int in range(GATE_TICKS):
+		await physics_frame
+		var current := _camera_distance()
+		shortest = minf(shortest, current)
+		largest_step = maxf(largest_step, absf(current - previous))
+		rolled = maxf(rolled, absf(_camera_degrees().z))
+		previous = current
+	_release([&"move_forward"])
+
+	_report_bool("the gate shortens the camera", shortest < _offset_for(0.0, _rig.default_pitch_degrees).length() - 1.0)
+	_report_value("roll while passing the gate", rolled, 0.0, ROLL_TOLERANCE)
+	print("FLIGHT note: shortest camera distance under the gate %.3f, largest single-frame change %.3f" % [
+		shortest, largest_step,
+	])
+	_player.reset_to(Transform3D(Basis(), GATE_PAST))
+	await _ticks(SETTLE_TICKS)
+	await _capture("camera-gate")
+
+
 ## Travel over [param ticks] physics frames while [param actions] are held, always from
 ## [constant OPEN_AIR] so every case starts from the same clear spot.
 func _fly(actions: Array[StringName], ticks: int) -> Vector3:
@@ -181,6 +378,37 @@ func _hold(actions: Array[StringName], ticks: int) -> void:
 	await _ticks(ticks)
 
 
+## Holds [param actions] for exactly [param ticks] physics steps: the leading await lands
+## at the start of a step, before the nodes run, so the count is not off by one.
+func _press_for(actions: Array[StringName], ticks: int) -> void:
+	await physics_frame
+	for action: StringName in actions:
+		Input.action_press(action)
+	await _ticks(ticks)
+	_release(actions)
+
+
+## Turns the camera back to its rest heading. A released lock deliberately leaves the
+## camera where it let go, so a case that must be reproducible starts by undoing that.
+func _recentre_camera() -> void:
+	var yaw_degrees := rad_to_deg(angle_difference(0.0, _rig.get_yaw()))
+	var yaw_actions: Array[StringName] = [&"camera_right" if yaw_degrees > 0.0 else &"camera_left"]
+	await _press_for(yaw_actions, _orbit_ticks_for(yaw_degrees))
+	var pitch_degrees := _rig.default_pitch_degrees - _camera_degrees().x
+	var pitch_actions: Array[StringName] = [&"camera_up" if pitch_degrees > 0.0 else &"camera_down"]
+	await _press_for(pitch_actions, _orbit_ticks_for(pitch_degrees))
+
+
+## One press and release of an action the harness reads with `is_action_just_pressed`,
+## which is only true during the frame the press lands in.
+func _tap(action: StringName) -> void:
+	await process_frame
+	Input.action_press(action)
+	await process_frame
+	Input.action_release(action)
+	await process_frame
+
+
 func _release(actions: Array[StringName]) -> void:
 	for action: StringName in actions:
 		Input.action_release(action)
@@ -201,6 +429,69 @@ func _readout_edge() -> float:
 		if line.begins_with("edge "):
 			return line.trim_prefix("edge ").to_float()
 	return -1.0
+
+
+## The locked target's name as the harness label shows it, or an empty string while the
+## rig is in follow mode. Reading the readout is how the action path is checked end to end.
+func _readout_lock() -> String:
+	for line: String in _readout.text.split("\n"):
+		if not line.begins_with("lock "):
+			continue
+		var value := line.trim_prefix("lock ").strip_edges()
+		return "" if value.begins_with("none") or value.begins_with("unavailable") else value
+	return ""
+
+
+## Camera offset from the ship for a yaw and a pitch, from the geometry the rig documents:
+## the authored height and distance, rotated by the pitch and then around world Y.
+func _offset_for(yaw: float, pitch_degrees: float) -> Vector3:
+	var offset := Vector3(0.0, _rig.follow_height, _rig.follow_distance)
+	return offset.rotated(Vector3.RIGHT, deg_to_rad(pitch_degrees)).rotated(Vector3.UP, yaw)
+
+
+## Pitch, yaw and roll of the rendered camera, in degrees.
+func _camera_degrees() -> Vector3:
+	var euler := _rig.camera.global_transform.basis.get_euler()
+	return Vector3(rad_to_deg(euler.x), rad_to_deg(euler.y), rad_to_deg(euler.z))
+
+
+func _camera_distance() -> float:
+	return _rig.camera.global_position.distance_to(_player.global_position)
+
+
+## How far the view turns while an orbit action is held for [param ticks] physics steps.
+func _orbit_degrees(ticks: int) -> float:
+	return _rig.orbit_speed_degrees * _rig.sensitivity * float(ticks) / float(Engine.physics_ticks_per_second)
+
+
+func _orbit_ticks_for(degrees: float) -> int:
+	return roundi(absf(degrees) * float(Engine.physics_ticks_per_second) / (_rig.orbit_speed_degrees * _rig.sensitivity))
+
+
+## Whether [param point] is in front of the camera and inside its vertical field of view,
+## which is what "framed" means for a Target Lock. Measured from the camera basis rather
+## than from the frustum, so the answer does not depend on the window size.
+func _in_view(point: Vector3) -> bool:
+	var local := _rig.camera.global_transform.affine_inverse() * point
+	if local.z >= 0.0:
+		return false
+	return rad_to_deg(atan2(absf(local.y), absf(local.z))) <= _rig.camera.fov * 0.5
+
+
+## The devices this host actually has. A simulated action proves nothing about a pad
+## (ENGINEERING_BRIEF Section 8), so the validation page quotes this line instead of
+## inheriting a controller claim.
+func _print_input_devices() -> void:
+	var pads := Input.get_connected_joypads()
+	if pads.is_empty():
+		print("FLIGHT note: no joypad connected on this host; every case below is simulated input")
+		return
+	var names: PackedStringArray = []
+	for pad: int in pads:
+		# A "known" pad is one Godot has a standard mapping for, which is what makes the
+		# Xbox-named bindings of CONVENTIONS "Input actions" land on the right buttons.
+		names.append("%d:%s (standard mapping: %s)" % [pad, Input.get_joy_name(pad), Input.is_joy_known(pad)])
+	print("FLIGHT note: joypads connected: %s; cases below are still simulated input" % ", ".join(names))
 
 
 func _report_travel(label: String, travel: Vector3, expected: Vector3) -> void:
@@ -229,6 +520,22 @@ func _report_diagonal(label: String, travel: Vector3, expected_speed: float, pre
 	print("FLIGHT %s %s: speed %.3f, expected %.3f +- %.3f, travel %s" % [
 		"ok  " if passed else "FAIL", label, speed, expected_speed, SPEED_TOLERANCE, travel,
 	])
+
+
+func _report_vector(label: String, actual: Vector3, expected: Vector3, tolerance: float) -> void:
+	var passed := actual.distance_to(expected) <= tolerance
+	if not passed:
+		_failures += 1
+	print("FLIGHT %s %s: %s, expected %s +- %.3f" % [
+		"ok  " if passed else "FAIL", label, actual, expected, tolerance,
+	])
+
+
+## For the checks that are a yes or a no: in view, inside the wall, the action arrived.
+func _report_bool(label: String, passed: bool) -> void:
+	if not passed:
+		_failures += 1
+	print("FLIGHT %s %s" % ["ok  " if passed else "FAIL", label])
 
 
 func _report_value(label: String, actual: float, expected: float, tolerance: float) -> void:

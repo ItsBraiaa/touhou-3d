@@ -1,6 +1,6 @@
 # F1-03 Camera rig
 
-Status: todo
+Status: done
 Type: adapter
 parallel-safe: no
 Depends on: F1-02
@@ -82,3 +82,36 @@ Framing defaults are exports on `CameraRig`; tune them in the Inspector. If an a
 ```
 Read CLAUDE.md, docs/engineering/ROADMAP.md and .scratch/player-flight/issues/03-camera-rig.md, then implement that ticket. Use /run to test in the dev harness on keyboard and gamepad. Finish with its Definition of Done and commit.
 ```
+
+## Result — 2026-09-22
+
+Done. `scripts/player/camera_rig.gd` is `class_name CameraRig extends Node3D`, wired to
+`PlayerShip/CameraRig` with `camera` → `Camera3D` and the authored framing pair.
+
+The yaw contract went to the first option: **the yaw lives in the rig node's own
+`global_rotation.y`**, read at the start of every tick, modified, and written back, so
+an external turn of the node is picked up rather than overwritten. `get_yaw()` publishes
+it and `PlayerController._camera_yaw()` calls `get_yaw()` instead of reading the property
+directly — an explicit contract on both sides, with both readings the same number.
+`PlayerController.camera_rig` is typed `CameraRig`; the stored `NodePath` did not need
+editing, but `scenes/player/player_ship.tscn` still changed because the rig's own
+`camera` export had to be authored, so the commit carries `[shared]`.
+
+Verified: 69 tests green (11 new camera contract tests, 1 new round-trip test on the ship
+contract), and `tools/validate_player_flight.gd` printing `FLIGHT_OK` over 24 camera
+measurements in a real window, reproducible across runs. Mutation-checked both ways:
+`_camera_yaw()` returning 0 fails only the round-trip test, and an obstruction ray on
+mask 0 fails only the shortening test.
+
+Not done, and recorded rather than silently accepted:
+
+- No physical key or pad button was pressed. The run does now report the host's devices
+  (`0:DualSense Wireless Controller`, standard mapping), which is an inventory, not a
+  test. The human pass is listed in the roadmap's requests to Astra.
+- Turned into a wall the camera collapses to 0.75 units from the ship; there is no
+  minimum distance, because the ticket's rule is "hit point minus margin".
+- Entering an obstruction is a snap: 6.5 units in one frame under the shrine gate.
+  Easing in would put the camera inside the beam; a swept sphere would trade the pop for
+  some clipping. Left as a feel decision with the numbers measured.
+- A teleport (`reset_to`) sweeps the camera across the arena, because only the pivot
+  snaps. Nothing calls it in anger before F7/F10.
