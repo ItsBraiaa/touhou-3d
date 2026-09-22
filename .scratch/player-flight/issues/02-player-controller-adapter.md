@@ -1,6 +1,6 @@
 # F1-02 Player controller adapter
 
-Status: todo
+Status: done
 Type: adapter
 parallel-safe: no
 Depends on: F0-03, F1-01
@@ -65,3 +65,31 @@ Camera behavior (F1-03), targeting (F1-04), HUD, weapon.
 ```
 Read CLAUDE.md, docs/engineering/ROADMAP.md and .scratch/player-flight/issues/02-player-controller-adapter.md, then implement that ticket. Use /run to fly the dev harness. Finish with its Definition of Done and commit.
 ```
+
+## Result — 2026-09-22
+
+Done. 57 tests green (`tools/test.ps1`), ten of them the new
+`tests/scene/test_player_ship_contract.gd`. Measured flight and four screenshots are in
+`docs/validation/player-flight.md`; the adapter contract is in
+`docs/engineering/player-flight.md`.
+
+Five notes for the next session:
+
+- The `FlightBounds` metadata keys are `min_corner` and `max_corner`, not `min`/`max` as
+  written above. The harness reads the real keys and passes `AABB(min, max - min)`.
+- `reset_to` takes `p_transform`, since a parameter named `transform` shadows
+  `Node3D.transform`. Behavior is the ticket's.
+- The root node needed `node_paths=PackedStringArray(...)` on its `[node]` line for the
+  four exported node references to resolve; without it Godot assigns the raw `NodePath`
+  and every reference reads as unset. `tools/build_scene_handoff.py` still lacks that
+  line plus the exports and `motion_mode`, so it no longer reproduces the integrated
+  scene — five lines to reconcile before any rerun. It was left unchanged because this
+  host has no Python to verify a rerun with.
+- The manual list is only partly discharged: `tools/validate_player_flight.gd` drives
+  every case with `Input.action_press`, which ENGINEERING_BRIEF Section 8 says does not
+  replace a physical device. A human pass on keyboard and on a controller is still owed
+  and is recorded as unverified in the validation page.
+- The harness script is on the harness root, not "on the arena root" as the `setup`
+  bullet says: `arena_harness.tscn` instances `combat_arena.tscn` as a child and drives
+  it from outside, which is what the Dev harness section describes and leaves Astra's
+  scene file untouched.

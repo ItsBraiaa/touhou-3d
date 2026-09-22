@@ -22,7 +22,7 @@ Status values: `todo`, `doing`, `done`, `blocked`. Tickets live in `.scratch/<fe
 | | | | 03 project-config-main-scene-buses-export | integration | no | done (export step blocked: no export templates on this host; 2026-09-22 review fix: gameplay roots PAUSABLE) |
 | | | | 04 guide-ownership-and-protocol-docs | docs | no | done |
 | F1 | Player flight | `player-flight` | 01 flight-model-core | core | yes | done |
-| | | | 02 player-controller-adapter | adapter | no | todo |
+| | | | 02 player-controller-adapter | adapter | no | done |
 | | | | 03 camera-rig | adapter | no | todo |
 | | | | 04 target-selector-and-targeting | core+adapter | no | todo |
 | F2 | Menus and Session skeleton | `menus-session` | 01 screen-router-core | core | yes | todo |
@@ -74,6 +74,7 @@ Dependencies Claude has on scene and content work. These are needs by Feature, n
 | F0-03 | None. Claude takes ownership of `project.godot`, `export_presets.cfg`, `default_bus_layout.tres`, `scenes/main.tscn` and `scenes/dev/`, plus script attachment, exported values, collision layers, masks, monitoring flags and the instancing of Claude's prefabs inside any `.tscn`. Do not edit them afterwards without a log entry. See GUIDE Section 3. |
 | F0-03 onward | Do not rerun `tools/build_scene_handoff.py`, `build_menu_handoff.py`, or `build_stage_01.py` over integrated scenes without reconciling first. |
 | F0-03 onward | Every `.gd` compiles with `untyped_declaration`, `unused_variable`, `unused_parameter`, `shadowed_variable` as errors: type `for` iterators over untyped arrays (`for path: String in paths`). Claude typed the ones in `tools/validate_*.gd` on 2026-09-21; behavior unchanged. |
+| F1-02 onward | Fly `scenes/dev/arena_harness.tscn` and tune the three proposals on `PlayerShip`: `edge_margin` 4.0, `max_bank_angle_degrees` 25.0, `bank_smoothing` 8.0. `base_speed` 12.0 and `focus_multiplier` 0.45 are pinned by `tests/scene/test_player_ship_contract.gd`, so tell Claude before changing those two. Also decide whether the rectangular Flight Volume should keep the open void in its corners past the circular platform rim (see `docs/validation/player-flight.md`), and note that `tools/build_scene_handoff.py` now diverges from the integrated `player_ship.tscn` by five lines. |
 | F6 | Projectile visual presets (bullet meshes and materials for player and enemy shots) if final art is wanted; Claude ships `scenes/dev/` placeholders otherwise. |
 | F7 | Pickup visuals (Power Pickup, Shield Pickup) following the `pickup.gd` root `Area3D` contract; dev placeholders otherwise. |
 | F8-04 onward | Review and tune the Stage 1 `content/*.tres` draft that Claude transcribes from STAGE_DESIGN.md. Values are yours. |

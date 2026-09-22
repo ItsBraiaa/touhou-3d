@@ -2,7 +2,7 @@
 
 **Owners:** Astra — Lead Game Designer and Godot scene author. Claude — Lead Code Engineer and GDScript author.
 **Language:** English documentation and code identifiers; Portuguese player-facing UI.
-**Status:** Integration contract, version 5. The player/test arena, eight menu layouts, and combat HUD are SCENE_READY; the Stage 1 and Stage 2 areas are SCENE_READY_STATIC. Claude owns the project configuration and `scenes/main.tscn` since F0-03. Gameplay, menu, and HUD scripts remain explicit placeholders for Claude. See Sections 13–15 for actual files, node paths, and validation limits.
+**Status:** Integration contract, version 6. The player/test arena, eight menu layouts, and combat HUD are SCENE_READY; the Stage 1 and Stage 2 areas are SCENE_READY_STATIC. Claude owns the project configuration and `scenes/main.tscn` since F0-03. `scripts/player/player_controller.gd` is CODE_READY since F1-02 and `PlayerShip` now carries real exports instead of handoff metadata; the camera, targeting, menu, HUD and combat scripts remain explicit placeholders for Claude. See Sections 13–15 for actual files, node paths, and validation limits.
 
 ## 1. Working agreement
 
@@ -36,7 +36,7 @@ The old Superpowers implementation draft is non-authoritative. Prefer the curren
 | `assets/` selection, materials, VFX, animation presentation | Astra | Claude verifies import/runtime compatibility |
 | Stage encounter values and balance, `content/*.tres` values | Astra | Claude supplies validation and interprets the data |
 | `project.godot`, `export_presets.cfg`, `default_bus_layout.tres`, autoload registration, input actions, export presets | Claude, since F0-03 | Astra asks for a setting instead of editing it; Claude reports the exact keys changed |
-| `scenes/main.tscn` and `scenes/dev/` | Claude | Astra reviews the composition and replaces `scenes/dev/` placeholders with real prefabs through a handoff. `scenes/dev/` does not exist yet; the first entry is the F1-02 arena harness, with spike and projectile placeholders from F6 |
+| `scenes/main.tscn` and `scenes/dev/` | Claude | Astra reviews the composition and replaces `scenes/dev/` placeholders with real prefabs through a handoff. `scenes/dev/` holds `arena_harness.tscn` since F1-02, the scene to run while flying; spike and projectile placeholders arrive with F6 |
 | Inside any `.tscn`: script attachment, exported values, collision layers, masks, monitoring flags, instancing of Claude's prefabs | Claude | Astra keeps geometry, visuals, layout, markers, materials, and content values in the same file |
 | `GUIDE.md` | Shared | Update attachment contracts with every intentional interface change |
 | Game design documents | Astra | Claude proposes gameplay changes with technical rationale |
@@ -122,8 +122,8 @@ All fields below are public configuration intentions. Claude chooses safe GDScri
 | Script path | Attach to | Astra configures | Claude implements |
 | --- | --- | --- | --- |
 | `scripts/session/game_session.gd` | Main | Nothing yet: `world_root: Node3D`, `projectile_root: Node3D`, `interface: CanvasLayer`, `audio: Node` are set in the Claude-owned `scenes/main.tscn`; stage scene references come with F2/F11 | Validates the four exports and instances the main menu (F0-03); campaign/direct-stage lifecycle, results and transitions (F2, F11) |
-| `scripts/player/player_controller.gd` | PlayerShip | Movement speed, focus multiplier, visual root, combat-volume references | Input, movement, scenery collision, reset and control enable/disable |
-| `scripts/player/camera_rig.gd` | CameraRig | Camera reference, follow distance/height, FOV, damping defaults | Follow/orbit, lock framing, camera obstruction response |
+| `scripts/player/player_controller.gd` (`PlayerController`, CODE_READY F1-02) | PlayerShip | **Flight values**: `base_speed` 12.0, `focus_multiplier` 0.45, `edge_margin` 4.0, `max_bank_angle_degrees` 25.0, `bank_smoothing` 8.0. **Scene references** (all required): `visual_root` → `VisualRoot`, `camera_rig` → `CameraRig`, `damage_core` → `DamageCore`, `graze_volume` → `GrazeVolume` | Input, movement, scenery collision, Flight Volume clamp and edge feedback, visual banking, `setup(bounds)`, `set_controls_enabled()`, `reset_to()`; signals `edge_proximity_changed(value)` and `focus_changed(active)`. Contract in [engineering/player-flight.md](engineering/player-flight.md) |
+| `scripts/player/camera_rig.gd` | CameraRig | Camera reference, follow distance/height, FOV, damping defaults | Follow/orbit, lock framing, camera obstruction response. F1-03 must keep the rig's yaw in the `CameraRig` node's own rotation: `PlayerController` reads `camera_rig.global_rotation.y` as the yaw camera-relative movement is rotated by |
 | `scripts/player/targeting.gd` | Targeting | Targeting range/cone and camera reference | Visibility filtering, acquire/switch/release, invalid target recovery |
 | `scripts/combat/player_weapon.gd` | Weapon | Muzzle/familiar references, shot settings, bomb radius and VFX references | Cadence, assisted shots, familiar fire, bomb requests |
 | `scripts/combat/projectile_system.gd` | ProjectileRoot | Projectile visual presets, capacity/lifetime defaults | Projectile lifecycle, swept collision, graze, bomb/phase cleanup |
@@ -199,6 +199,7 @@ For shared scenes or project settings, announce the files being edited to the co
 | Foundation and conventions | Claude | Claude | CODE_READY | F0 done: repository hygiene, `tools/godot.*` and `tools/test.*`, project configuration, input actions, audio buses, export preset, and this contract. The export run itself is blocked on missing export templates; [engineering/ROADMAP.md](engineering/ROADMAP.md) |
 | Main composition and session | Claude (`scenes/main.tscn`, F0-03) | Claude | CODE_READY | Composition root instanced headless by `tests/scene/test_main_contract.gd`; main menu shown at startup; navigation pending (F2) |
 | Player/camera test arena | Astra | Claude | SCENE_READY | Both scenes load and render in Godot 4.7.2; static camera only; Section 13 |
+| Player flight | Astra: ship, arena and Flight Volume | Claude | CODE_READY | F1-01 `FlightModel` and F1-02 `PlayerController`: the ship flies the arena, stops at the walls and the platform, banks visually, and reports edge proximity. 28 tests plus measured flight in [validation/player-flight.md](validation/player-flight.md); camera (F1-03), targeting (F1-04) and a physical-controller pass pending |
 | Player combat and projectiles | Astra: presentation | Claude | PLANNED | Product rules documented |
 | Common enemies and miniboss | Astra | Claude | PLANNED | Behavior and reuse strategy documented |
 | Lantern Guardian | Astra | Claude | PLANNED | Ghost selected; animation metadata inspected |
@@ -234,7 +235,7 @@ For shared scenes or project settings, announce the files being edited to the co
 - `scenes/player/player_ship.tscn`: reusable player scene matching the player tree in Section 5.
 - `scenes/tests/combat_arena.tscn`: directly runnable static scene; open it directly (F6) for scene testing. The project main scene is `scenes/main.tscn` since F0-03.
 - `assets/models/player/craft_speederA.glb`: selected copy of the approved ship, with embedded materials.
-- `scripts/player/player_controller.gd`, `camera_rig.gd`, `targeting.gd`, and `scripts/combat/player_weapon.gd`: base type and handoff comments only. No movement, aiming, firing, combat, or camera-follow logic is implemented.
+- `scripts/player/camera_rig.gd`, `targeting.gd`, and `scripts/combat/player_weapon.gd`: base type and handoff comments only. No aiming, firing, combat, or camera-follow logic is implemented. `scripts/player/player_controller.gd` was the fourth of these placeholders and is now Claude's `PlayerController` (F1-02); movement works.
 - `ASSET_CREDITS.md` and `assets/licenses/kenney-space-kit.txt`: selected asset provenance.
 - `docs/validation/first-scene.md`, logs, and `arena-preview.png`: verification evidence.
 
@@ -246,7 +247,7 @@ The arena is a functional scene blockout for later gameplay integration, not eit
 
 `Targets/Low`, `Targets/Middle`, and `Targets/High` are Node3D members of the `targetable` group. Each contains `Orb`, `Ring`, and `HitVolume/Collision`. Their world positions are (-10, 5, -8), (0, 9, -20), and (11, 15, -10). They are static targeting references, not damageable enemies. Target IDs are stored as metadata.
 
-`PlayerStart` and the initial ship position are (0, 6, 18). World up is +Y; forward is -Z. The platform is centered at (0, 0, -6) with radius 39. FlightBounds metadata proposes min (-39, 0, -45) and max (39, 30, 33), with perimeter and ceiling collision surfaces. The circle does not fill the corners of those rectangular bounds; Claude must implement a readable playable-volume limit before free-flight testing near the edge. Collision alone is not the final boundary warning behavior.
+`PlayerStart` and the initial ship position are (0, 6, 18). World up is +Y; forward is -Z. The platform is centered at (0, 0, -6) with radius 39. FlightBounds metadata `min_corner` (-39, 0, -45) and `max_corner` (39, 30, 33) is the Flight Volume, with perimeter and ceiling collision surfaces. Since F1-02 an owner reads that metadata and passes `AABB(min, max - min)` to `PlayerController.setup()`: the position clamp and the `edge_proximity_changed` feedback are the playable-volume limit, and the authored walls stop the body first everywhere except below the platform rim. The circle still does not fill the corners of the rectangle, so past the rim the clamp holds the ship at y 0 over open void with the feedback at 1.0; whether that reads acceptably is Astra's call ([validation/player-flight.md](validation/player-flight.md)).
 
 ### Authored player values
 
@@ -260,10 +261,11 @@ The arena is a functional scene blockout for later gameplay integration, not eit
 | Muzzle | (0, 0, -1.25), separate from banked visuals |
 | Familiar anchors | (-1.6, 0.25, 0.1) and (1.6, 0.25, 0.1); no familiar gameplay/meshes yet |
 | Camera | CameraRig/Camera3D at (0, 3.2, 8.5), X rotation -0.16 radians, FOV 68°, near 0.1, far 500 |
-| Movement defaults | PlayerShip metadata: base_speed 12.0 and focus_multiplier 0.45 |
+| Movement values | PlayerShip exports since F1-02: `base_speed` 12.0, `focus_multiplier` 0.45, `edge_margin` 4.0, `max_bank_angle_degrees` 25.0, `bank_smoothing` 8.0. The `metadata/base_speed` and `metadata/focus_multiplier` handoff entries were removed |
+| Body wiring | Claude's, since F1-02: `motion_mode` floating, collision layer 2, mask 1, no gravity |
 | Rendering | Existing Forward Plus/D3D12 retained; viewport 1280 × 720, 4× MSAA |
 
-Metadata is a design handoff, not a working exported script property. Claude must define the actual exports and update this registry before expecting Inspector values to drive behavior.
+The Inspector values now drive behavior: they are read in `_ready` and passed to the `FlightModel` core. `edge_margin`, `max_bank_angle_degrees` and `bank_smoothing` are Claude's proposals awaiting Astra's tuning; `base_speed` and `focus_multiplier` are pinned to 12.0 and 0.45 by `tests/scene/test_player_ship_contract.gd`, so a deliberate change to those two needs the test updated with it. Renaming `VisualRoot`, `CameraRig`, `DamageCore` or `GrazeVolume` breaks a required reference and the ship refuses to move, with the missing field named in the error.
 
 Collision layer allocation: scenery 1; player body 2; damage core 3; graze 4; target hit volume 5. Corresponding bit values are 1, 2, 4, 8, 16. Player body mask is scenery only. Area monitoring is intentionally disabled until Claude selects the projectile/collision strategy; Claude must configure masks/monitoring for the chosen implementation.
 
@@ -273,13 +275,15 @@ The core's unshaded material disables depth testing to make it visible through t
 
 `tools/build_scene_handoff.py` is an offline scene-authoring utility. It writes both scene files from scratch. Do not rerun it after manual or Claude integration changes without updating the generator; it would overwrite scene wiring. It is not runtime game logic.
 
+It already diverges from the integrated scene: since F1-02 the generator's `PlayerShip` props still carry the two retired `metadata/*` entries and none of the exports, the `node_paths=PackedStringArray("visual_root", "camera_rig", "damage_core", "graze_volume")` marker on the node line, or `motion_mode = 1`. Reconcile those five lines before any rerun (Section 9 step 0); `tests/scene/test_player_ship_contract.gd` fails immediately if a rerun drops them.
+
 `tools/validate_scene_handoff.gd` is an offline QA script that loads the scene, checks required nodes and imported mesh presence, and captures a rendered preview when a graphics display is available. It is not attached to gameplay nodes and does not implement player behavior.
 
 Source-download folders have `.gdignore` files so Godot imports selected assets instead of every duplicate format. To use another downloaded asset, copy its required dependencies under `assets/` first. The downloaded MP3s are not integrated.
 
 ### Next assignment for Claude
 
-Implement flight, focus movement, camera follow/orbit, and stable target acquisition/switch/release against the three static targets. Begin with the three player scripts; leave weapon behavior for the combat handoff. Preserve the authored scene and document required input actions and final exported references. Validate normalized three-axis speed, core independence from banking, keyboard-only controls, physical-gamepad ergonomics, and target loss. The current scene is not evidence that any of those behaviors already work.
+Flight and focus movement are done (F1-01, F1-02): normalized three-axis speed, the 45 % Focus factor, the Flight Volume limit with edge feedback, scenery collision, and core independence from banking are all measured in [validation/player-flight.md](validation/player-flight.md). Two of the listed validations are still open: keyboard and physical-gamepad ergonomics were only driven with simulated actions, and target loss does not exist yet. What remains is camera follow/orbit (F1-03) and stable target acquisition/switch/release against the three static targets (F1-04); weapon behavior stays with the combat handoff. The authored scene is preserved — only the root node's script wiring changed.
 
 ## 14. Menu scene handoff
 

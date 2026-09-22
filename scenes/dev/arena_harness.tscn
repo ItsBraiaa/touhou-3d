@@ -1,0 +1,23 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/tests/combat_arena.tscn" id="1_arena"]
+[ext_resource type="Script" path="res://scenes/dev/arena_harness.gd" id="2_harness"]
+
+[node name="ArenaHarness" type="Node3D" node_paths=PackedStringArray("arena", "readout")]
+script = ExtResource("2_harness")
+arena = NodePath("CombatArena")
+readout = NodePath("DebugLayer/Readout")
+
+[node name="CombatArena" parent="." instance=ExtResource("1_arena")]
+
+[node name="DebugLayer" type="CanvasLayer" parent="."]
+
+[node name="Readout" type="Label" parent="DebugLayer"]
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 336.0
+offset_bottom = 104.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 18
