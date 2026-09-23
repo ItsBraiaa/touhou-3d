@@ -15,6 +15,13 @@ Action required by <other agent>: <what they must do, or "none">
 
 ---
 
+## 2026-09-23 20:26 — OpenCode (oc-a) — F9-01 EnemyModel core
+State: CODE_READY
+Files: `scripts/definitions/enemy_definition.gd`, `scripts/enemies/enemy_model.gd`, `docs/engineering/enemies.md`, `docs/engineering/README.md`, `docs/engineering/ROADMAP.md`, `.scratch/enemies/issues/01-enemy-model-core.md`
+Change: Added EnemyDefinition validation and the EnemyModel core for bounded movement, exactly-once defeat, Anticipation, sampled-aim PatternEmitter attacks and cooldowns. No tests were added per the sprint rule.
+Why: F9-01 provides the reusable common Enemy rules core for F9-02's scene adapter.
+Action required by Astra: Tune the proposed DRIFT/HOVER movement values against the authored Spirit and Sentry scenes when they are available.
+
 ## 2026-09-23 20:24 — OpenCode (oc-a) — AudioLimiter generated UID
 State: docs
 Files: `scripts/audio/audio_limiter.gd.uid`, `docs/HANDOFF_LOG.md`

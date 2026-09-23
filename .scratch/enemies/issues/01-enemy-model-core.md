@@ -1,6 +1,6 @@
 # F9-01 EnemyModel core
 
-Status: todo
+Status: done
 Type: core
 parallel-safe: yes
 Depends on: F5-04
@@ -63,6 +63,10 @@ Node, scene, collision and the hit sphere (F9-02); the off-screen warning (F9-02
 - No Error-level warnings. `docs/engineering/enemies.md` written from `TEMPLATE.md` with its README line.
 - Handoff log entry; `Status: done` with an Outcome; ROADMAP row.
 - One commit: `enemies: add EnemyModel core`.
+
+## Outcome
+
+Implemented `EnemyDefinition` validation and the Node-free `EnemyModel` for health, exactly-once defeat, bounded DRIFT/HOVER movement, Anticipation/Firing/Cooldown timing, sampled-aim attacks through F5-04 and out-of-bounds repositioning. Added the enemy module contract and updated the README and roadmap. No tests were added under the sprint rule; validation is through `tools/lane.ps1 land`.
 
 ## Handoff notes for Astra
 

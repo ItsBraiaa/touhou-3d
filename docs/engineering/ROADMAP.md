@@ -62,7 +62,7 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | | | | 03 snapshot-capture-restore | core | yes | oc-b | todo |
 | | | | 04 stage-01-content-draft | content | yes | oc-b | todo |
 | F9 | Enemies | `enemies` | 00 plan | docs | no | — | done (one-pass planning) |
-| | | | 01 enemy-model-core | core | yes | oc-a | todo |
+| | | | 01 enemy-model-core | core | yes | oc-a | done (no new tests, by the sprint rule) |
 | | | | 02 dev-prefabs-and-enemy-actor | adapter | no | path | todo |
 | | | | 03 seal-and-guard-rules | core+adapter | no | oc-a | todo (consumed by F12-05, Stage 2 S2-03) |
 | F10 | Stage Director in Stage 1 | `stage-director` | 00 plan | docs | no | — | done (one-pass planning) |
