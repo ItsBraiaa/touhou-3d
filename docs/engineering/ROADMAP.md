@@ -27,7 +27,7 @@ Status values: `todo`, `doing`, `done`, `blocked`. Tickets live in `.scratch/<fe
 | | | | 04 target-selector-and-targeting | core+adapter | no | done (physical-device pass still owed, as for 02 and 03) |
 | | | | 05 astra-design-pass | design | no | blocked (decisions recorded; Inspector flight pass interrupted by Computer Use stop) |
 | F2 | Menus and Session skeleton | `menus-session` | 01 screen-router-core | core | yes | done |
-| | | | 02 interface-and-menu-controller | adapter | no | todo |
+| | | | 02 interface-and-menu-controller | adapter | no | done (scripted keyboard and gamepad pass; physical-device pass owed; gamepad A/B added to `ui_accept`/`ui_cancel`) |
 | | | | 03 run-state-core | core | yes | done |
 | | | | 04 game-session-start-pause-quit | integration | no | todo |
 | F3 | Settings | `settings` | 00 plan | docs | no | todo |
@@ -79,6 +79,7 @@ Dependencies Claude has on scene and content work. These are needs by Feature, n
 | F1-03 onward | F1-05: camera tuning blocked. Choose proximity-driven ship transparency; reject the 6.5-unit gate pop as final production presentation. Claude to investigate obstruction transition; implementation and motion acceptance pending. See player-flight.md Open issues. |
 | F1-03 onward | A human pass on a physical keyboard and on the DualSense pad this host has: the six movement axes, Focus, the arrow keys and right stick for the camera, `K`/`Y` to lock and `Tab`/`X` to cycle in the harness. Everything measured so far is simulated input, which ENGINEERING_BRIEF Section 8 says is not the same thing. |
 | F1-04 onward | F1-05: keep left-to-right wrap as the design rule; feel/range/radius tuning still pending. Stage solid trunks/branches should occlude with fitted layer-1 collision; foliage should not. Collision authoring is a follow-up. Every lockable prefab remains a Node3D in targetable with a HitVolume child and its own volumes off layer 1. |
+| F2-02 onward | Make a focused slider visible in `assets/ui/menu_theme.tres`: Godot 4.7's `Slider` never draws `HSlider/styles/focus`, and `grabber_area_highlight` is the same `SliderFill` as `grabber_area`, so a focused slider only has a slightly brighter grabber (`docs/validation/menus-options-entry.png`). A gold `HSlider/icons/grabber_highlight` or a distinct `grabber_area_highlight` would do. Optional: move Menu principal and Créditos up when Results hides both Continue and Replay (`menus-results-final.png`). |
 | F6 | Projectile visual presets (bullet meshes and materials for player and enemy shots) if final art is wanted; Claude ships `scenes/dev/` placeholders otherwise. |
 | F7 | Pickup visuals (Power Pickup, Shield Pickup) following the `pickup.gd` root `Area3D` contract; dev placeholders otherwise. |
 | F8-04 onward | Review and tune the Stage 1 `content/*.tres` draft that Claude transcribes from STAGE_DESIGN.md. Values are yours. |

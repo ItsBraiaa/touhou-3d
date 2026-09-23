@@ -207,8 +207,9 @@ func test_focus_is_forgotten_when_its_screen_leaves_the_stack() -> void:
 
 
 ## How the adapter uses it: remember a screen's focus when it is hidden, restore it when
-## it is shown. A covered screen is still on the stack when its `screen_hidden` fires,
-## so the memory sticks; a screen that Back removes is already off it, so it does not.
+## it is shown. Every `screen_hidden` fires before the stack changes, so the memory lands
+## on the entry being hidden: kept when a covered entry stays, dropped with an entry that
+## Back removes.
 func test_focus_remembered_on_hide_comes_back_on_return() -> void:
 	_router.screen_hidden.connect(_remember_focus_on_hide)
 	_router.home(ScreenRouter.HUD)
@@ -222,6 +223,18 @@ func test_focus_remembered_on_hide_comes_back_on_return() -> void:
 	assert_eq(_router.focus_for(ScreenRouter.PAUSE), _focused_on(ScreenRouter.PAUSE))
 	assert_true(_router.focus_for(ScreenRouter.OPTIONS).is_empty(), "Options left the stack")
 
+
+
+## `home()` of the screen already shown opens it anew, so the old entry's focus must not
+## pass to the new one through the adapter wiring. Found in F2-02: the main menu shown
+## again from itself came back on the button it was left on, not on its first one.
+func test_home_of_the_shown_screen_does_not_hand_its_old_focus_to_the_new_entry() -> void:
+	_router.screen_hidden.connect(_remember_focus_on_hide)
+	_router.home(ScreenRouter.MAIN_MENU)
+	_router.home(ScreenRouter.MAIN_MENU)
+	assert_true(_router.focus_for(ScreenRouter.MAIN_MENU).is_empty(), "main menu shown again from itself")
+	_router.replace(ScreenRouter.OPTIONS)
+	assert_eq(_router.focus_for(ScreenRouter.MAIN_MENU), _focused_on(ScreenRouter.MAIN_MENU), "a covered screen still remembers")
 
 func _record_transitions() -> void:
 	# Method callables, not lambdas: a lambda would hold this test alive from the router.

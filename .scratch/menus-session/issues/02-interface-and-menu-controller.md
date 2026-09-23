@@ -1,6 +1,6 @@
 # F2-02 Interface and menu controller
 
-Status: todo
+Status: done (2026-09-23)
 Type: adapter
 parallel-safe: no
 Depends on: F0-03, F2-01
@@ -57,6 +57,25 @@ Applying settings widgets (F3), binding HUD values (F4), starting a stage (F2-04
 ## Handoff notes for Astra
 
 Button paths from Section 14 are now load-bearing. Renaming a button requires a matching change in `MenuController.ACTIONS_BY_SCREEN`; announce it in the log first.
+
+## Outcome (2026-09-23)
+
+Delivered as specified: `MenuController` on the eight menu roots, `Interface` on `Main/Interface` with the eight menus and the HUD set in `scenes/main.tscn`, and `GameSession` opening the main menu through `interface.show_home(MAIN_MENU)` instead of instancing it. 15 registry tests and 11 interface tests; suite green at 153; thirteen mutants each caught by assertion. Contract in `docs/engineering/menus-session.md`.
+
+Differences from the text above, each listed in the module doc's Open issues:
+
+- **Initial focus is the first focusable control, not the first button**, so Options starts on its Geral slider, the top of its authored focus loop, rather than on the Modo dropdown in the middle column.
+- **`back` never reaches the Session.** Back buttons and `ui_cancel` go through the same path in `Interface`: return to the caller; `resume` on Pause; `back_refused` when there is nowhere to go. `ui_cancel` is consumed while a menu is on top and left alone over the HUD, where Escape is the Session's `pause`.
+- **The footer is `Layout/NavigationHint`** on the five full screens. The overlays have none by design, so a test pins the path instead of a runtime log.
+- **`current_screen()`** added to `Interface` for the Session.
+- **The interface test** checks that only the main menu is visible after startup, because `GameSession` shows it in `_ready`. The "all hidden" state is the moment before that call.
+
+Found by the scripted pass (`tools/validate_menus.gd`, recorded in `docs/validation/menus.md`) and fixed here:
+
+- **Gamepad A and B did nothing in menus:** Godot 4.7 binds `ui_accept` and `ui_cancel` to keys only. `project.godot` now adds A and B; test in `test_input_map.gd`.
+- **`show_home` of a screen already shown restored its old focus:** `ScreenRouter` emitted hides after replacing its stack. It now emits them before; regression test in `test_screen_router.gd`.
+
+Not fixed here: a focused slider is barely visible because Godot's `Slider` never draws the theme's focus style. That is a theme change, requested from Astra in the roadmap. The manual pass was synthetic: no person pressed a key and no pad was connected. The physical keyboard and DualSense pass is still owed.
 
 ## Kickoff prompt
 

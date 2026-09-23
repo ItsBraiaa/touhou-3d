@@ -68,7 +68,7 @@ Follows the official GDScript style guide (tabs, `snake_case` files and members,
 
 Names in `project.godot`; bindings from PLANEJAMENTO.md Section 8. Dead zone 0.2. No mouse camera in this delivery.
 
-`move_forward`, `move_back`, `move_left`, `move_right`, `ascend`, `descend`, `camera_left`, `camera_right`, `camera_up`, `camera_down`, `fire`, `focus`, `lock_target`, `next_target`, `bomb`, `pause`. Menus use the built-in `ui_*` actions.
+`move_forward`, `move_back`, `move_left`, `move_right`, `ascend`, `descend`, `camera_left`, `camera_right`, `camera_up`, `camera_down`, `fire`, `focus`, `lock_target`, `next_target`, `bomb`, `pause`. Menus use the built-in `ui_*` actions; because Godot 4.7 binds `ui_accept` and `ui_cancel` to keys only, `project.godot` adds gamepad A to `ui_accept` and B to `ui_cancel` (F2-02). B is therefore also Back in menus while it is `bomb` in play.
 
 ## Tests
 

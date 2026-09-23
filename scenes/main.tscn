@@ -1,6 +1,16 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=12 format=3]
 
 [ext_resource type="Script" path="res://scripts/session/game_session.gd" id="1_session"]
+[ext_resource type="Script" path="res://scripts/ui/interface.gd" id="2_interface"]
+[ext_resource type="PackedScene" path="res://scenes/ui/main_menu.tscn" id="3_main_menu"]
+[ext_resource type="PackedScene" path="res://scenes/ui/stage_select.tscn" id="4_stage_select"]
+[ext_resource type="PackedScene" path="res://scenes/ui/options.tscn" id="5_options"]
+[ext_resource type="PackedScene" path="res://scenes/ui/controls.tscn" id="6_controls"]
+[ext_resource type="PackedScene" path="res://scenes/ui/credits.tscn" id="7_credits"]
+[ext_resource type="PackedScene" path="res://scenes/ui/pause_menu.tscn" id="8_pause_menu"]
+[ext_resource type="PackedScene" path="res://scenes/ui/defeat.tscn" id="9_defeat"]
+[ext_resource type="PackedScene" path="res://scenes/ui/results.tscn" id="10_results"]
+[ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="11_hud"]
 
 [node name="Main" type="Node" node_paths=PackedStringArray("world_root", "projectile_root", "interface", "audio")]
 process_mode = 3
@@ -18,6 +28,9 @@ process_mode = 1
 
 [node name="Interface" type="CanvasLayer" parent="."]
 process_mode = 3
+script = ExtResource("2_interface")
+menu_scenes = Array[PackedScene]([ExtResource("3_main_menu"), ExtResource("4_stage_select"), ExtResource("5_options"), ExtResource("6_controls"), ExtResource("7_credits"), ExtResource("8_pause_menu"), ExtResource("9_defeat"), ExtResource("10_results")])
+hud_scene = ExtResource("11_hud")
 
 [node name="Audio" type="Node" parent="."]
 process_mode = 3

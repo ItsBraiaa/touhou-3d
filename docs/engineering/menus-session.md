@@ -1,6 +1,6 @@
 # Menus and Session
 
-Feature F2: which screen is shown, how Back returns to the caller, and, as later tickets land, the Run's state and the Session that starts, pauses and ends it. Started with ticket F2-01 on 2026-09-22 and extended by F2-03 the same day. `ScreenRouter` and `RunState` are CODE_READY. `Interface` and `MenuController` (F2-02) and `GameSession` (F2-04) add their own sections to this page.
+Feature F2: which screen is shown, how Back returns to the caller, and, as later tickets land, the Run's state and the Session that starts, pauses and ends it. Started with ticket F2-01 on 2026-09-22, extended by F2-03 the same day and by F2-02 on 2026-09-23. `ScreenRouter`, `RunState`, `Interface` and `MenuController` are CODE_READY. `GameSession` (F2-04) adds its own section to this page.
 
 ## Purpose
 
@@ -8,12 +8,18 @@ Feature F2: which screen is shown, how Back returns to the caller, and, as later
 
 It does not own any Node, any actual Control focus, input, pausing the tree, or what a button does. It does not know whether a Run is active beyond the HUD being on its stack.
 
+`Interface` (adapter on `Main/Interface`) owns the nine screen instances: it instances the eight menus and the HUD once, shows, hides and focuses them as its `ScreenRouter` reports, resolves Back (`ui_cancel` and the Back buttons), and passes every other menu action up to the Session as `action_requested`. `MenuController` (adapter on each menu scene root) owns one screen's buttons, its focus on entry and return, its runtime text, and its keyboard footer. Neither decides what an action does, pauses the tree, or reads gameplay state; the Session does (F2-04).
+
 `RunState` owns the Run: its Run Mode and stage order, which stage is in play and whether it is complete, the Attempt count, the pause flag Active Time respects, the Active Time, score, Graze and bombs used of the current Attempt and what a Checkpoint committed, each stage's entry values (starting Power Level, carried score), the Snapshot slice of all that, and the four lifecycle signals the Session reacts to. It does not own combat resources (Health, Shield, Bombs held), Power Progress, the live Power Level, Encounter or Objective flags (F8-03 adds them to the Snapshot), pausing the tree, loading scenes, or deciding when a Checkpoint activates.
 
 ## Files
 
 - `scripts/ui/screen_router.gd` (Rules Core, `class_name ScreenRouter extends RefCounted`).
-- `tests/unit/ui/test_screen_router.gd` (13 tests).
+- `tests/unit/ui/test_screen_router.gd` (14 tests).
+- `scripts/ui/interface.gd` (Adapter, `class_name Interface extends CanvasLayer`), attached to `Main/Interface` in `scenes/main.tscn`.
+- `scripts/ui/menu_controller.gd` (Adapter, `class_name MenuController extends Control`), attached by Astra's eight `scenes/ui/*.tscn` menu roots since F0 (it was a placeholder until F2-02).
+- `tests/scene/test_menu_registry_contract.gd` (15 tests), `tests/scene/test_interface_contract.gd` (11 tests), and one test in `tests/unit/project/test_input_map.gd` for the menu bindings.
+- `tools/validate_menus.gd`: offline navigation QA with keyboard and gamepad events, results in [validation/menus.md](../validation/menus.md).
 - `scripts/session/run_state.gd` (Rules Core, `class_name RunState extends RefCounted`, with the internal inner class `RunState.Tally`).
 - `tests/unit/session/test_run_state.gd` (19 tests).
 
@@ -51,7 +57,7 @@ Everything shown is one stack of entries, bottom to top, each with its id, the p
 | `screen_hidden` | `id: StringName` | `id` stopped being visible: covered by a full screen, removed by `back()`, or cleared by `home()`. |
 | `screen_shown` | `id: StringName, params: Dictionary` | `id` became visible, with the params it was opened with, including when `back()` uncovers it. |
 
-One transition emits every hide before any show: hides top of the stack first, shows bottom first. Each screen gets at most one signal per transition, and a screen that stays visible gets none (the HUD under a new Pause). Entries are compared by identity, so `home(HUD)` from `[hud, defeat]` (Retry) emits hidden `defeat`, hidden `hud`, shown `hud`: the adapter must tolerate a hide immediately followed by a show of the same screen.
+One transition emits every hide before any show, and every hide before the stack changes: hides top of the stack first, shows bottom first. So during a `screen_hidden` handler `current()` is still the old top. Each screen gets at most one signal per transition, and a screen that stays visible gets none (the HUD under a new Pause). Entries are compared by identity, so `home(HUD)` from `[hud, defeat]` (Retry) emits hidden `defeat`, hidden `hud`, shown `hud`: the adapter must tolerate a hide immediately followed by a show of the same screen.
 
 ### Methods
 
@@ -78,7 +84,100 @@ GUIDE Section 14 asks for "initial focus on screen entry, preserve focus on retu
 - Resume, then pause again: the new Pause entry starts with no memory, so focus goes to its initial button rather than to "End run" if that was the last one visited.
 - `home()` forgets everything, so the main menu after a Run starts on its initial button.
 
-The intended adapter wiring, which relies on the hide-before-show order: on `screen_hidden(id)`, `router.remember_focus(id, menu.leave())`, then hide; on `screen_shown(id, params)`, show, then `menu.enter(params, router.focus_for(id))`. A covered screen is still on the stack when its `screen_hidden` fires, so the memory sticks; a screen that Back removes has already left, so the call is a no-op.
+The adapter wiring (`Interface`, F2-02): on `screen_hidden(id)`, `router.remember_focus(id, menu.leave())`, where `leave()` hides; on `screen_shown(id, params)`, `menu.enter(params, router.focus_for(id))`, where `enter()` shows. Every hide fires before the stack changes, so the memory lands on the entry being hidden: a covered entry keeps it, and an entry that `back()` removes or `home()` clears drops it. Until F2-02 the hides fired after the stack changed; then `home(MAIN_MENU)` with the main menu already shown handed the old entry's focus to the new one, found by `tools/validate_menus.gd` and pinned by `test_home_of_the_shown_screen_does_not_hand_its_old_focus_to_the_new_entry`.
+
+## Interface contract
+
+`class_name Interface extends CanvasLayer` on `Main/Interface`, which `scenes/main.tscn` sets to `PROCESS_MODE_ALWAYS`, so every menu works over a paused tree.
+
+### Exports
+
+| Export | Type | Set in `main.tscn` to | Required |
+| --- | --- | --- | --- |
+| `menu_scenes` | `Array[PackedScene]` | the eight `scenes/ui/` menus; order does not matter, each is identified by its root name | yes: an empty slot disables the node; a missing, repeated or foreign scene is reported and skipped |
+| `hud_scene` | `PackedScene` | `scenes/ui/hud.tscn` | yes |
+
+### Behaviour
+
+- `_ready` instances the HUD first (so every menu, overlays included, draws above it), then each menu, all hidden, connects each `MenuController.action_requested` to one handler, reports any menu screen no scene provides, and connects the router's two signals. Nothing is shown until the Session calls `show_home`.
+- A menu action other than `back` is re-emitted unchanged as `action_requested(action, payload)`. `back` never leaves `Interface`: it is resolved like `ui_cancel` below.
+- `ui_cancel` (Escape, gamepad B) in `_unhandled_input`, while a menu is on top: on Pause it emits `action_requested(&"resume", {})` and leaves Pause up for the Session to remove, because the router's `back()` cannot unpause the tree; elsewhere it calls `back()`, and when that returns false (main menu, Defeat, Results) it emits `action_requested(&"back_refused", {})`. Either way the event is marked handled, so the same Escape press cannot also reach the Session as `pause`.
+- `ui_cancel` with the HUD on top (running gameplay), or before the first `show_home`, is left unhandled: over gameplay Escape is the Session's `pause`.
+- Focus follows the router's memory: see "Focus memory" above.
+
+### Signal
+
+| Signal | Payload | Emitted when |
+| --- | --- | --- |
+| `action_requested` | `action: StringName, payload: Dictionary` | A registry button other than a Back button was pressed (the actions and payloads of `MenuController.ACTIONS_BY_SCREEN`), or `ui_cancel` / a Back button produced `resume` or `back_refused`. |
+
+### Methods
+
+| Method | Called by | Effect |
+| --- | --- | --- |
+| `show_home(id)` | Session | `router.home(id)`: `MAIN_MENU` when entering the menus, `HUD` when an Attempt starts. The screen takes its initial focus, also when it was already shown. |
+| `show_screen(id, params := {})` | Session, on `open_*` | `router.replace(id, params)`: a full screen Back returns from. |
+| `push_overlay(id, params := {})` | Session: pause, defeat, results | `router.push(id, params)`. |
+| `back() -> bool` | Session, e.g. on `resume` to remove Pause | `router.back()`. Does not unpause anything. |
+| `current_screen() -> StringName` | Session, tests | `router.current()`. |
+| `is_gameplay_covered() -> bool` | Session | `router.is_gameplay_covered()`. |
+| `get_hud() -> Control` | Session (F4 binds it) | The HUD instance. |
+
+## MenuController contract
+
+`class_name MenuController extends Control`, the root script of all eight menu scenes. `get_screen_id()` maps the root node name to the router id (`MainMenu`, `StageSelect`, `Options`, `Controls`, `Credits`, `PauseMenu`, `Defeat`, `Results`, table `SCREEN_IDS`); any other name is reported and the node disables itself.
+
+### Registry (`ACTIONS_BY_SCREEN`, from GUIDE Section 14)
+
+| Screen | Button path | Action | Payload |
+| --- | --- | --- | --- |
+| MainMenu | `Layout/StartButton` | `start_campaign` | |
+| MainMenu | `Layout/StageSelectButton` | `open_stage_select` | |
+| MainMenu | `Layout/OptionsButton` | `open_options` | |
+| MainMenu | `Layout/QuitButton` | `quit` | |
+| StageSelect | `Layout/ForestCard/SelectButton` | `start_direct_stage` | `{"stage": &"stage_01"}` |
+| StageSelect | `Layout/MountainCard/SelectButton` | `start_direct_stage` | `{"stage": &"stage_02"}` |
+| StageSelect, Options, Controls, Credits | `Layout/BackButton` | `back` (resolved by `Interface`) | |
+| Options | `Layout/Controls/BindingsButton` | `open_controls` | |
+| Options | `Layout/DefaultsButton` | `restore_defaults` (F3) | |
+| Options, Results | `Layout/CreditsButton` | `open_credits` | |
+| PauseMenu | `Layout/ResumeButton` | `resume` | |
+| PauseMenu | `Layout/RestartButton` | `restart_stage` | |
+| PauseMenu | `Layout/OptionsButton` | `open_options` | |
+| PauseMenu, Defeat, Results | `Layout/MenuButton` | `return_to_menu` | |
+| Defeat | `Layout/RetryButton` | `retry` (F11) | |
+| Results | `Layout/ContinueButton` | `continue_campaign` (F11) | |
+| Results | `Layout/ReplayButton` | `replay_stage` (F11) | |
+
+Each press emits `action_requested(action, payload)` with a new payload Dictionary. A path missing from the scene is reported with the screen and path, and only that button is skipped.
+
+### Methods
+
+| Method | Called by | Effect |
+| --- | --- | --- |
+| `enter(params, focus_path)` | `Interface`, on `screen_shown` | Shows the screen, writes the params below, and focuses `focus_path` (relative to the root) if that control is visible and focusable, otherwise the first visible focusable control in tree order. |
+| `leave() -> NodePath` | `Interface`, on `screen_hidden` | Returns the focused control's path relative to the root (empty when focus is not inside the screen), then hides. |
+| `get_screen_id() -> StringName` | `Interface`, tests | The router id, valid before `_ready`. |
+
+Initial focus in tree order is: MainMenu Iniciar, StageSelect the forest card, Options the Geral slider (`Layout/Audio/MasterVolume`), Controls and Credits Voltar, Pause Continuar, Defeat Tentar novamente, Results Continuar, Jogar novamente or Menu principal depending on the mode.
+
+### Params
+
+| Screen | Key | Effect |
+| --- | --- | --- |
+| PauseMenu | `score`, `graze` (int) | `Layout/Score` reads `Pontos  <score>     Graze  <graze>`; a missing value shows `—`, so no params restore the authored text. |
+| Defeat | `checkpoint` (the latest Checkpoint's id) | `Layout/RetryLocation` reads `Último checkpoint · <id>`; absent or empty reads `Início da fase`. |
+| Results | `mode` | `RESULTS_CAMPAIGN_STAGE` (`&"campaign_stage_1"`, also the default): Continue shown, Replay hidden. `RESULTS_DIRECT_STAGE` (`&"direct_stage"`): Replay in Continue's place. `RESULTS_FINAL_VICTORY` (`&"final_victory"`): both hidden and `Layout/Heading` reads `Jornada concluída`; the other modes restore the authored heading. `focus_next` and `focus_previous` of the visible buttons are relinked into one loop, so Tab skips the hidden ones; the directional search already skips hidden controls. An unknown mode is reported and shown as the Campaign layout. |
+
+The Results value labels (time, score, Graze, bombs) are F11's.
+
+### Footer
+
+`Layout/NavigationHint`, the keyboard hint on the five full screens, is hidden after a gamepad button or a stick pushed past 0.5 and shown again after a key press or when the last gamepad is disconnected. Every menu tracks this in `_input` even while hidden, so the next screen opens with the right state. Pause, Defeat and Results are authored without a footer; the path is pinned by a test instead of a runtime log.
+
+### Menu input bindings
+
+Menus use the built-in `ui_*` actions. Godot 4.7 binds `ui_accept` and `ui_cancel` to keys only, so `project.godot` adds the gamepad's A to `ui_accept` and B to `ui_cancel`; without them a pad could move focus but never press a button or go back. The D-pad and left stick already drive `ui_up`/`ui_down`/`ui_left`/`ui_right`.
 
 ## RunState contract
 
@@ -141,6 +240,8 @@ None. `ScreenRouter` imports nothing and holds no Node. `Interface` (F2-02) cons
 
 None for `RunState` either. `GameSession` (F2-04) constructs it in `_ready`, connects its four signals there, once, and ticks it from `_physics_process` only while the tree is not paused (`Main` is `PROCESS_MODE_ALWAYS`).
 
+`Interface` depends on `ScreenRouter`, on `MenuController` (screen ids, `enter`, `leave`, `action_requested`) and on the nine scenes set in `main.tscn`. `MenuController` depends on `ScreenRouter`'s id constants and on the Section 14 node paths. `GameSession` holds `Interface` as its typed `interface` export and, until F2-04, only calls `show_home(ScreenRouter.MAIN_MENU)` from `_ready`; nothing is connected to `Interface.action_requested` yet.
+
 ## Invariants and tests
 
 | Invariant (ticket F2-01, GUIDE Section 14) | Test |
@@ -159,7 +260,28 @@ None for `RunState` either. `GameSession` (F2-04) constructs it in `_ready`, con
 | Focus is forgotten when its screen leaves the stack | `test_focus_is_forgotten_when_its_screen_leaves_the_stack` |
 | Focus remembered from `screen_hidden` comes back on return | `test_focus_remembered_on_hide_comes_back_on_return` |
 
-Mutation-checked: per-id focus that is never forgotten, re-showing screens that stayed visible, hiding bottom first, "covered" meaning anything but the HUD, and Back dropping the uncovered screen's params each fail a named test above.
+Mutation-checked: per-id focus that is never forgotten, re-showing screens that stayed visible, hiding bottom first, "covered" meaning anything but the HUD, and Back dropping the uncovered screen's params each fail a named test above. F2-02 added `test_home_of_the_shown_screen_does_not_hand_its_old_focus_to_the_new_entry`, red against the old hide-after-change order.
+
+| Invariant (ticket F2-02, GUIDE Section 14) | Test |
+| --- | --- |
+| Every registry row of Section 14 is a `BaseButton` at its path, and the table has exactly those rows | `test_menu_registry_contract.gd::test_every_registry_row_is_a_button_on_its_screen` |
+| Each button requests its action; the stage cards carry their stage | `::test_each_button_requests_its_registry_action` |
+| A payload is a new, editable Dictionary on each press | `::test_a_payload_is_a_new_dictionary_on_each_press` |
+| Entering a screen focuses its first control | `::test_entering_a_screen_focuses_its_first_control` |
+| A remembered focus is restored; a stale or unfocusable one falls back; `leave()` reports and hides | `::test_returning_restores_the_remembered_focus_and_leaving_reports_it`, `::test_leaving_without_focus_inside_the_screen_reports_nothing` |
+| Results per mode: Continue or Replay or neither, the heading, the rebuilt focus loop, and the authored heading back on the next Results | `::test_results_after_campaign_stage_1_shows_continue_and_skips_replay`, `::test_results_after_a_direct_stage_shows_replay_in_place_of_continue`, `::test_results_final_victory_hides_both_and_names_the_journey`, `::test_a_remembered_button_hidden_by_the_run_mode_is_not_focused` |
+| Defeat names the retry location; Pause shows score and Graze | `::test_defeat_names_the_retry_location`, `::test_pause_shows_the_score_and_graze_it_is_given` |
+| A missing button is skipped and the rest of the screen works | `::test_a_missing_button_is_reported_and_the_rest_of_the_screen_works` |
+| The footer exists on the five full screens, hides on gamepad input, ignores stick drift, returns on a key | `::test_the_five_full_screens_carry_the_keyboard_footer`, `::test_the_footer_hides_on_gamepad_input_and_returns_on_keyboard_input` |
+| `Interface` instances the eight menus and the HUD once, the HUD first | `test_interface_contract.gd::test_interface_instances_the_eight_menus_and_the_hud_once` |
+| Startup shows only the main menu, focused on Iniciar; `show_home` shows exactly one screen and re-enters a shown menu on its first button | `::test_startup_shows_only_the_main_menu_with_its_first_button_focused`, `::test_show_home_shows_exactly_that_screen`, `::test_show_home_of_the_shown_menu_starts_on_its_first_button` |
+| A press is passed up with its payload | `::test_a_button_press_is_passed_up_as_an_action_request` |
+| Back (button or `ui_cancel`) returns to the caller with its focus, nested too, and is not passed up | `::test_a_back_button_returns_to_the_caller_with_its_focus`, `::test_nested_screens_restore_each_callers_focus` |
+| Options from Pause returns to Pause over the HUD with Pause's focus and params | `::test_options_opened_from_pause_returns_to_pause_with_the_hud_underneath` |
+| `ui_cancel` on Pause requests `resume`, on the main menu and Defeat `back_refused`, consumed in both; over gameplay it is left for the Session | `::test_cancel_on_pause_requests_resume`, `::test_cancel_with_nowhere_to_go_back_is_refused`, `::test_cancel_over_running_gameplay_is_left_to_the_session` |
+| `ui_accept` and `ui_cancel` answer the gamepad's A and B as well as their keys | `test_input_map.gd::test_menus_confirm_and_go_back_on_the_keyboard_and_on_a_gamepad` |
+
+Mutation-checked, thirteen mutants, each failing a named test above by assertion with no `SCRIPT ERROR`: `enter` ignoring the remembered focus, `leave` hiding before reading focus, the Results loop not rebuilt, the Results heading never restored, the payload not copied, stick drift counted as gamepad use, initial focus limited to buttons, `ui_cancel` left unhandled, `ui_cancel` on Pause calling `back()`, `ui_cancel` handled over gameplay, `back` passed up, the HUD added last, and focus never remembered.
 
 | Invariant (ticket F2-03, ENGINEERING_BRIEF Sections 4.H and 8, PLANEJAMENTO Section 6) | Test |
 | --- | --- |
@@ -191,9 +313,22 @@ Nothing to attach: `ScreenRouter` is code only. The screen ids are code; which s
 
 Nothing to attach for `RunState` either. The stage ids `&"stage_01"` and `&"stage_02"` and Direct Stage 2's entry Power Level of 2 are constants in the core (`CAMPAIGN_ORDER`, `ENTRY_POWER_LEVEL`), taken from PLANEJAMENTO Section 6; tell Claude before changing either rule.
 
+Nothing to attach for `Interface` or `MenuController`: the eight menu roots already carry `menu_controller.gd`, and `Main/Interface` is Claude's. What the scenes must keep:
+
+- The root node names (`MainMenu` … `Results`): they are how each menu knows its screen.
+- Every button path in the registry above, and `Layout/Score`, `Layout/RetryLocation`, `Layout/Heading` and `Layout/NavigationHint`. Renaming or moving one needs the same change in `MenuController`; announce it in the handoff log first. A missing path is reported at startup and that button stops working.
+- Tree order decides the initial focus (the first visible focusable control), so reordering nodes can move it.
+- Slider focus is not visible: see Open issues.
+
 ## Open issues
 
-- **Back from Pause resumes in the router only.** `back()` from `[hud, pause]` removes Pause, but the router cannot unpause the tree. F2-02's `Interface` calls `back()` on every `ui_cancel`, so Escape on the pause menu would leave the tree paused with no menu. F2-02 or F2-04 must route that case into the Session's `resume` — for example, `Interface` emits `action_requested(&"resume", {})` instead of calling `back()` when `current()` is `PAUSE`. F2-04's "the Session never unpauses on Back" is about Back from Options, which the router already keeps paused.
+- **Resolved by F2-02: Back from Pause.** `Interface` turns `ui_cancel` on Pause into `action_requested(&"resume", {})` instead of calling `back()`, and leaves Pause up; the Session unpauses and removes it (`interface.back()`).
+- **Slider focus is not visible (theme, Astra).** A focused `HSlider` shows only a slightly brighter grabber: Godot 4.7's `Slider` draws no `focus` stylebox, so `menu_theme.tres`'s `HSlider/styles/focus` is never used, and `grabber_area_highlight` is the same `SliderFill` as `grabber_area`. Options opens on the Geral slider (`docs/validation/menus-options-entry.png`), so its entry focus is hard to see. Buttons, `OptionButton` and `CheckButton` show the gold border. Requested from Astra in the roadmap: a distinct `HSlider/icons/grabber_highlight` or `grabber_area_highlight`.
+- **For F2-04 and F7: gamepad B is both `ui_cancel` and `bomb`.** B on Pause requests `resume`; if the weapon reads `is_action_just_pressed(&"bomb")` on the first physics tick after the unpause, that press can also fire a bomb. Resume on release, or have the weapon ignore a press that began while paused.
+- **For F2-04: Start while Options is open from Pause.** Start is `pause` only, so `Interface` does not see it; a Session that toggles pause on every `pause` press would resume with Options still on screen. Toggle only when `interface.current_screen()` is `HUD` or `PAUSE`.
+- **F2-02 decisions beyond the ticket text:** (a) initial focus is the first visible focusable *control* in tree order, not the first button, so Options starts on its first slider, the top of its authored focus loop; (b) `back` is resolved inside `Interface` and never reaches the Session, which F2-04's action list already assumes; (c) `ui_cancel` is ignored while the HUD is on top, and consumed whenever a menu is; (d) `current_screen()` was added for the Session; (e) the footer is `Layout/NavigationHint`, the authored name, and its absence on the three overlays is by design, so a test pins it instead of a runtime log; (f) a Results `mode` missing from the params means the authored Campaign layout; (g) Defeat shows the raw Checkpoint id (`Último checkpoint · CP1-A`) — a player-facing name per Checkpoint is a design call; (h) `GameSession.interface` is typed `Interface`; (i) `ScreenRouter` now emits every hide before the stack changes (see "Focus memory"); (j) gamepad A and B were added to `ui_accept` and `ui_cancel`.
+- **Results with neither Continue nor Replay** leaves the empty slot where they sit above Menu principal (`docs/validation/menus-results-final.png`). Moving the two remaining buttons up is a layout call for Astra; the focus loop already skips the slot.
+- **The navigation pass is synthetic.** `tools/validate_menus.gd` sends key and joypad events through the real bindings and focus search; no person has pressed a key or a pad button on these menus yet, and no pad was connected during the run. A physical keyboard and DualSense pass is still owed, as for F1.
 - **Decisions beyond the ticket text:** Back refuses Defeat and Results; focus memory is dropped when its screen leaves the stack; a full screen hides the HUD too (Pause's dim layer and the HUD are not left visible under Options, so directional focus cannot reach Pause's buttons); `replace(HUD)` is a programmer error.
 - The kind asserts are stripped in release builds, like every `assert` here (CONVENTIONS "Setup errors are loud").
 - **RunState decisions beyond the ticket text**, each pinned by a test above: (a) score is a Run result carried into Campaign Stage 2, while Clear Time, Graze and bombs used are per stage — PLANEJAMENTO names only power and score as carried, and Section 5 calls score "a run result"; if results should show a Run-total Graze, that is one line in `_entry_tally()`. (b) The Attempt index is counted per stage, so "cleared on Attempt 1" means no Retry or Restart in that stage (STAGE_DESIGN asks each stage-clear test to record whether Checkpoints were retried). (c) Attempt changes are ignored outside `IN_STAGE`, so replaying a completed Direct Stage (F11) must call `start()` again, not `restart_stage()`. (d) `advance()` takes the Power Level as a required argument instead of an optional one.

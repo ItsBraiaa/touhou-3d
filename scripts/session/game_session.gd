@@ -1,19 +1,17 @@
 class_name GameSession
 extends Node
 ## Composition root of `scenes/main.tscn` (ADR-0002). Owns the four roots every later
-## system is injected into and, for now, only instances the main menu under
-## [member interface]. Screen navigation, Run ownership, pause handling, and stage
-## loading arrive with F2; nothing here decides gameplay.
+## system is injected into and, for now, only opens the main menu on [member interface].
+## Menu actions, Run ownership, pause handling, and stage loading arrive with F2-04;
+## nothing here decides gameplay.
 
-
-const MAIN_MENU_SCENE: PackedScene = preload("res://scenes/ui/main_menu.tscn")
 
 ## Holds the loaded Stage instance.
 @export var world_root: Node3D
 ## Root of the projectile system (ADR-0004).
 @export var projectile_root: Node3D
 ## Holds menus and the HUD. Processes while the tree is paused.
-@export var interface: CanvasLayer
+@export var interface: Interface
 ## Root of the audio controller. Processes while the tree is paused.
 @export var audio: Node
 
@@ -22,7 +20,7 @@ func _ready() -> void:
 	if not _validate_exports():
 		process_mode = Node.PROCESS_MODE_DISABLED
 		return
-	interface.add_child(MAIN_MENU_SCENE.instantiate())
+	interface.show_home(ScreenRouter.MAIN_MENU)
 
 
 ## Reports every unset export with this node's path (CONVENTIONS "Setup errors are loud").

@@ -8,10 +8,10 @@ Owns `project.godot` (warnings as errors, input map, main scene, bus layout refe
 
 ## Files
 
-- `project.godot`: `[debug]` sets `untyped_declaration`, `unused_variable`, `unused_parameter`, `shadowed_variable` to Error; `[application] run/main_scene` is `res://scenes/main.tscn`; `[audio] buses/default_bus_layout`; `[input]` holds the sixteen gameplay actions.
+- `project.godot`: `[debug]` sets `untyped_declaration`, `unused_variable`, `unused_parameter`, `shadowed_variable` to Error; `[application] run/main_scene` is `res://scenes/main.tscn`; `[audio] buses/default_bus_layout`; `[input]` holds the sixteen gameplay actions, plus `ui_accept` and `ui_cancel` with their default keys and the gamepad's A and B added (F2-02; Godot 4.7 binds those two to keys only).
 - `default_bus_layout.tres`: buses `Master`, `Music` (send Master), `SFX` (send Master).
 - `export_presets.cfg`: preset "Windows Desktop", `build/Touhou-3D.exe`, embedded PCK, x86_64.
-- `scenes/main.tscn`: composition root (ADR-0002); tree in GUIDE.md Section 5. `Main`, `Interface`, and `Audio` are `PROCESS_MODE_ALWAYS`; `WorldRoot` and `ProjectileRoot` are `PROCESS_MODE_PAUSABLE`, so gameplay stops with the tree while menus, pause handling, and audio keep running.
+- `scenes/main.tscn`: composition root (ADR-0002); tree in GUIDE.md Section 5. `Main`, `Interface`, and `Audio` are `PROCESS_MODE_ALWAYS`; `WorldRoot` and `ProjectileRoot` are `PROCESS_MODE_PAUSABLE`, so gameplay stops with the tree while menus, pause handling, and audio keep running. Since F2-02 `Interface` carries `scripts/ui/interface.gd` with `menu_scenes` (the eight `scenes/ui/` menus) and `hud_scene` (`scenes/ui/hud.tscn`); contract in [menus-session.md](menus-session.md).
 - `scripts/session/game_session.gd` (Adapter, attached to `Main`).
 - `tests/scene/test_main_contract.gd`, `tests/unit/project/test_input_map.gd`, `tests/unit/project/test_audio_buses.gd`.
 
@@ -23,7 +23,7 @@ Owns `project.godot` (warnings as errors, input map, main scene, bus layout refe
 | --- | --- | --- | --- | --- |
 | `world_root` | Node3D | `Main/WorldRoot` | yes | Holds the loaded Stage instance; PAUSABLE, stops while the tree is paused |
 | `projectile_root` | Node3D | `Main/ProjectileRoot` | yes | Root of the projectile system; PAUSABLE, stops while the tree is paused |
-| `interface` | CanvasLayer | `Main/Interface` | yes | Menus and HUD; processes while paused |
+| `interface` | `Interface` (was `CanvasLayer` until F2-02) | `Main/Interface` | yes | Menus and HUD; processes while paused |
 | `audio` | Node | `Main/Audio` | yes | Audio controller root; processes while paused |
 
 ### Signals
@@ -34,7 +34,7 @@ None yet.
 
 | Method | Called by | Effect |
 | --- | --- | --- |
-| `_ready()` | engine | Validates the four exports. On success instances `scenes/ui/main_menu.tscn` under `interface`. On failure calls `push_error` with the node path and each missing field, then sets `process_mode = DISABLED`. |
+| `_ready()` | engine | Validates the four exports. On success calls `interface.show_home(ScreenRouter.MAIN_MENU)`; `Interface` has already instanced every menu (F2-02). On failure calls `push_error` with the node path and each missing field, then sets `process_mode = DISABLED`. |
 
 ### Input actions
 

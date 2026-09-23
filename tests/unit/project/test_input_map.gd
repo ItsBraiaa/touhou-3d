@@ -1,7 +1,8 @@
 extends TestCase
 ## Checks the `[input]` section of `project.godot` against CONVENTIONS "Input actions"
 ## and PLANEJAMENTO Section 8: sixteen gameplay actions with deadzone 0.2, exactly one
-## keyboard and one joypad binding each, no mouse bindings.
+## keyboard and one joypad binding each, no mouse bindings. Also the two built-in menu
+## actions the project extends with gamepad buttons.
 
 
 const DEADZONE := 0.2
@@ -37,6 +38,14 @@ const JOYPAD_BUTTONS: Dictionary = {
 	&"next_target": JOY_BUTTON_X,
 	&"bomb": JOY_BUTTON_B,
 	&"pause": JOY_BUTTON_START,
+}
+
+## Menus use the built-in `ui_*` actions (CONVENTIONS). Godot 4.7 binds `ui_accept` and
+## `ui_cancel` to keys only, so without the gamepad buttons below a pad could move focus
+## but never press a button or go back. Action -> [its default keys, the added button].
+const MENU_ACTIONS: Dictionary = {
+	&"ui_accept": [[KEY_ENTER, KEY_KP_ENTER, KEY_SPACE], JOY_BUTTON_A],
+	&"ui_cancel": [[KEY_ESCAPE], JOY_BUTTON_B],
 }
 
 ## Action -> [axis, direction] of its joypad motion binding.
@@ -112,3 +121,18 @@ func test_joypad_axes_match_the_table() -> void:
 		assert_true(event.is_action_pressed(action), "joypad axis %d towards %.0f should press %s" % [axis, direction, action])
 		event.axis_value = -direction
 		assert_false(event.is_action_pressed(action), "the opposite direction of axis %d must not press %s" % [axis, action])
+
+
+func test_menus_confirm_and_go_back_on_the_keyboard_and_on_a_gamepad() -> void:
+	for action: StringName in MENU_ACTIONS:
+		var binding: Array = MENU_ACTIONS[action]
+		for key: Key in binding[0]:
+			var key_event := InputEventKey.new()
+			key_event.keycode = key
+			key_event.pressed = true
+			assert_true(key_event.is_action_pressed(action), "%s should still press %s" % [OS.get_keycode_string(key), action])
+		var button: JoyButton = binding[1]
+		var button_event := InputEventJoypadButton.new()
+		button_event.button_index = button
+		button_event.pressed = true
+		assert_true(button_event.is_action_pressed(action), "joypad button %d should press %s" % [button, action])

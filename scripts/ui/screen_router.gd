@@ -14,7 +14,7 @@ extends RefCounted
 
 ## [param id] stopped being visible: covered by a full screen, removed by
 ## [method back], or cleared by [method home]. Within one transition every hide comes
-## before any show, top of the stack first.
+## before any show, top of the stack first, and before the stack changes.
 signal screen_hidden(id: StringName)
 ## [param id] became visible, bottom of the stack first, with the params it was opened
 ## with, which Back passes again when it uncovers the screen. A screen that stays
@@ -62,9 +62,8 @@ var _stack: Array[_Entry] = []
 ## the HUD. [param id] is shown anew even when it was already visible.
 func home(id: StringName) -> void:
 	assert(id in FULL_SCREENS, "home() takes a full screen, got %s" % id)
-	var before := _visible_entries()
-	_stack = [_Entry.new(id, {})]
-	_announce(before)
+	var fresh: Array[_Entry] = [_Entry.new(id, {})]
+	_change_to(fresh)
 
 
 ## Shows the full screen [param id] over the current stack, which [method back] returns
@@ -75,18 +74,14 @@ func home(id: StringName) -> void:
 ## let Back leave a running stage for the menu.
 func replace(id: StringName, params: Dictionary = {}) -> void:
 	assert(id in FULL_SCREENS and id != HUD, "replace() takes a full screen other than the HUD, got %s" % id)
-	var before := _visible_entries()
-	_stack.append(_Entry.new(id, params))
-	_announce(before)
+	_change_to(_stack_with(_Entry.new(id, params)))
 
 
 ## Shows the overlay [param id] above the current stack, which stays visible under it.
 ## [param params] are handled as in [method replace].
 func push(id: StringName, params: Dictionary = {}) -> void:
 	assert(id in OVERLAYS, "push() takes an overlay, got %s" % id)
-	var before := _visible_entries()
-	_stack.append(_Entry.new(id, params))
-	_announce(before)
+	_change_to(_stack_with(_Entry.new(id, params)))
 
 
 ## Removes the top entry and uncovers what it covered. Back from Pause removes Pause,
@@ -95,9 +90,7 @@ func push(id: StringName, params: Dictionary = {}) -> void:
 func back() -> bool:
 	if _stack.size() < 2 or current() in _OUTCOMES:
 		return false
-	var before := _visible_entries()
-	_stack.pop_back()
-	_announce(before)
+	_change_to(_stack.slice(0, -1))
 	return true
 
 
@@ -110,7 +103,7 @@ func current() -> StringName:
 ## above it.
 func visible_stack() -> Array[StringName]:
 	var ids: Array[StringName] = []
-	for entry: _Entry in _visible_entries():
+	for entry: _Entry in _visible_entries(_stack):
 		ids.append(entry.id)
 	return ids
 
@@ -130,8 +123,9 @@ func is_gameplay_covered() -> bool:
 ## Records which control had focus on [param screen], as a path relative to the screen
 ## root. Kept only while [param screen] is on the stack: a call for a screen that is
 ## not on it does nothing, and a screen that leaves the stack forgets its focus. Called
-## by the adapter from [signal screen_hidden], which reaches a covered screen while it
-## is still on the stack and a removed one after it has left.
+## by the adapter from [signal screen_hidden], which fires before the stack changes: a
+## covered screen keeps what it remembers, a screen leaving the stack drops it with its
+## entry.
 func remember_focus(screen: StringName, control_path: NodePath) -> void:
 	var entry := _topmost(screen)
 	if entry != null:
@@ -156,23 +150,36 @@ func _topmost(id: StringName) -> _Entry:
 	return null
 
 
-## The topmost full screen and the overlays above it, bottom to top.
-func _visible_entries() -> Array[_Entry]:
+## The topmost full screen of [param stack] and the overlays above it, bottom to top.
+static func _visible_entries(stack: Array[_Entry]) -> Array[_Entry]:
 	var shown: Array[_Entry] = []
-	for index: int in range(_stack.size() - 1, -1, -1):
-		shown.push_front(_stack[index])
-		if _stack[index].id not in OVERLAYS:
+	for index: int in range(stack.size() - 1, -1, -1):
+		shown.push_front(stack[index])
+		if stack[index].id not in OVERLAYS:
 			break
 	return shown
 
 
-## Emits the difference between [param before] and what is visible now. Entries are
-## compared by identity, so a screen [method home] opens anew is hidden and shown again.
-func _announce(before: Array[_Entry]) -> void:
-	var after := _visible_entries()
+## A copy of the stack with [param entry] on top.
+func _stack_with(entry: _Entry) -> Array[_Entry]:
+	var stack: Array[_Entry] = _stack.duplicate()
+	stack.append(entry)
+	return stack
+
+
+## Makes [param stack] the stack and emits the difference in what is visible. Every hide
+## is emitted before the stack changes, so [method remember_focus] called from
+## [signal screen_hidden] reaches the entry being hidden: it is kept when that entry
+## stays covered on the stack and discarded with it otherwise, even when [method home]
+## opens a screen of the same id anew. Entries are compared by identity, so that screen
+## is hidden and shown again.
+func _change_to(stack: Array[_Entry]) -> void:
+	var before := _visible_entries(_stack)
+	var after := _visible_entries(stack)
 	for index: int in range(before.size() - 1, -1, -1):
 		if before[index] not in after:
 			screen_hidden.emit(before[index].id)
+	_stack = stack
 	for entry: _Entry in after:
 		if entry not in before:
 			screen_shown.emit(entry.id, entry.params)
