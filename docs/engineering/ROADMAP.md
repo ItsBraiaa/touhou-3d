@@ -31,7 +31,8 @@ Status values: `todo`, `doing`, `done`, `blocked`. Tickets live in `.scratch/<fe
 | | | | 03 run-state-core | core | yes | done |
 | | | | 04 game-session-start-pause-quit | integration | no | done (menu-to-flight flow scripted on keyboard and gamepad; physical-device pass owed; Stage 2 wired too) |
 | F3 | Settings | `settings` | 00 plan | docs | no | todo |
-| F4 | Combat state and HUD | `combat-hud` | 00 plan | docs | no | todo |
+| F4 | Combat state and HUD | `combat-hud` | 00 plan | docs | no | todo (01 was written from its planned bullet and delivered first; 00 still writes `spec.md`, 02 and 03) |
+| | | | 01 combat-state-core | core | yes | done |
 | F5 | Projectile Field | `projectile-field` | 00 plan | docs | no | todo |
 | F6 | Weapon and rendering | `weapon-rendering` | 00 plan | docs | no | todo |
 | F7 | Damage, bomb, pickups | `damage-pickups` | 00 plan | docs | no | todo |
