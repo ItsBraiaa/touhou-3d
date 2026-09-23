@@ -1,6 +1,6 @@
 # F6-00 Plan the Weapon and rendering feature
 
-Status: todo
+Status: done (2026-09-23)
 Type: docs
 parallel-safe: no
 Depends on: F5-03
@@ -32,3 +32,14 @@ Write `.scratch/weapon-rendering/spec.md` and the full tickets for F6.
 ```
 Read CLAUDE.md, docs/engineering/ROADMAP.md and .scratch/weapon-rendering/issues/00-plan.md, then write the F6 spec and tickets as described. Finish with its Definition of Done and commit.
 ```
+
+## Outcome (2026-09-23)
+
+The one-pass F4 to F14 planning session wrote these tickets (commit `plan: write F4-F14 tickets`): `.scratch/weapon-rendering/spec.md`, `01-rendering-spike.md`, `02-projectile-system-adapter.md` and `03-weapon-model-and-player-weapon.md`. None of them is parallel-safe.
+
+Deviations from the planned list:
+
+- 01 depends on F5-01 only, not on F5-03, because it needs just the field's movement. It is time-boxed to 1 h and also measures the cost of one layer-1 `intersect_ray` per Projectile.
+- In 02, `GameSession.projectile_root: Node3D` becomes `projectile_system: ProjectileSystem`. `_unload_stage` calls `clear_all()` instead of freeing `ProjectileRoot`'s children. 02 also adds a dev spray to the arena harness.
+- In 03, `WeaponModel` has no Bomb edge detection, because `CombatState.update_bomb_input()` (F4-01) owns it. `PlayerWeapon` feeds that method from `_unhandled_input` bomb events and has no `bomb_requested` signal.
+- 03 adds a `camera_rig` export to `PlayerWeapon`, a required `weapon` export on `PlayerController` (`set_controls_enabled` cascades to it), and a dependency on F4-02, whose Session `CombatState` it needs.

@@ -1,6 +1,6 @@
 # F10-00 Plan the Stage Director feature
 
-Status: todo
+Status: done (2026-09-23)
 Type: docs
 parallel-safe: no
 Depends on: F8-04, F9-02
@@ -33,3 +33,12 @@ Write `.scratch/stage-director/spec.md` and the full tickets for F10: attach the
 ```
 Read CLAUDE.md, docs/engineering/ROADMAP.md and .scratch/stage-director/issues/00-plan.md, then write the F10 spec and tickets as described. Finish with its Definition of Done and commit.
 ```
+
+## Outcome (2026-09-23)
+
+The tickets were written in the one-pass planning session (commit "plan: write F4-F14 tickets"): `spec.md`, `01-stage-director-adapter.md`, `02-gate-and-checkpoint-adapters.md`, `03-retry-restart-flow.md`, `04-stage-01-contract-smoke-test.md`. They differ from the planned list above in these ways:
+
+- **01.** It depends on F4-03 too (`Hud.show_threat`). `setup()` takes no seed; `start_attempt(attempt_seed)` does. `check_setup()` lets the Session refuse invalid content before loading. `lantern_guardian` maps to the dev Sentry as a stand-in until F12-03.
+- **02.** It depends on F7-02 too, for the bomb-kill-of-the-last-guard test. The Director owns the `CheckpointStore`, and this ticket makes no Session edit.
+- **03.** Retry is in place: the Director survives, and the Session re-instances only the ship at `get_respawn_transform()`. Restart keeps F2-04's full reload, so there is no `restart_from_entry()`. `retry_from_checkpoint(player, attempt_seed)` takes two arguments.
+- **04.** Parallel-safe, needing only F8-04.

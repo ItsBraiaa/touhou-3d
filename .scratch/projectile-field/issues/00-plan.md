@@ -1,6 +1,6 @@
 # F5-00 Plan the Projectile Field feature
 
-Status: todo
+Status: done (2026-09-23)
 Type: docs
 parallel-safe: no
 Depends on: F4-01
@@ -33,3 +33,16 @@ Write `.scratch/projectile-field/spec.md` and the full tickets for F5. All four 
 ```
 Read CLAUDE.md, docs/engineering/ROADMAP.md and .scratch/projectile-field/issues/00-plan.md, then write the F5 spec and tickets as described. Finish with its Definition of Done and commit.
 ```
+
+## Outcome (2026-09-23)
+
+Tickets written in the one-pass planning session for F4 to F14 (commit `plan: write F4-F14 tickets`): `.scratch/projectile-field/spec.md`, `01-field-core-spawn-move-cull.md`, `02-core-hit-sweep-and-graze-rules.md`, `03-bomb-phase-clears-and-hit-spheres.md` and `04-pattern-emitter-core.md`, all Rules Cores and all `parallel-safe: yes`. 01 → 02 → 03 share `projectile_field.gd` and are serialized by Depends on; 04 needs only 01.
+
+Deviations from the planned list:
+
+- The owner array became a faction (`ProjectileSpawn.Faction { PLAYER, HOSTILE }`). The graze flag moved from 01 to 02, where its rules live.
+- The full-field policy is to refuse the new request (`spawn` returns -1, `get_refused_count()` counts it) and never evict. Ids are never reused.
+- Events are emitted after the tick's pass. `clear_all()` from a listener drops the tick's remaining events.
+- The obstacle check comes before the Core sweep. In 02 the first `player_hit` of a tick makes the rest of the tick invulnerable. Invulnerable contact marks a Projectile graze-spent (the strict reading).
+- `player_hit` also carries `damage`, `enemy_hit` carries `damage`, and 03 adds `targets_in_radius` for the Bomb. 02 adds `clear_player()`.
+- `PatternDefinition` is owned by 04 (not F8-01), with its fields finalized there. AIMED samples the aim point once per run.

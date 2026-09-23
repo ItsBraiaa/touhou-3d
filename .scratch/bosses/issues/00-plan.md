@@ -1,6 +1,6 @@
 # F12-00 Plan the Bosses feature
 
-Status: todo
+Status: done (2026-09-23)
 Type: docs
 parallel-safe: no
 Depends on: F9-02, F10-01; ticket 04 also depends on Astra's Stage 2 and boss scenes
@@ -33,3 +33,15 @@ Write `.scratch/bosses/spec.md` and the full tickets for F12.
 ```
 Read CLAUDE.md, docs/engineering/ROADMAP.md and .scratch/bosses/issues/00-plan.md, then write the F12 spec and tickets as described. Finish with its Definition of Done and commit.
 ```
+
+## Outcome (2026-09-23)
+
+The tickets and `spec.md` were written in the one-pass planning session (commit "plan: write F4-F14 tickets"), not in a session of their own: `01-boss-machine-core.md` (parallel-safe), `02-boss-controller-adapter.md`, `03-lantern-guardian-in-s1-07.md`, and `04-tempest-sentinel-and-storm-guardian.md` as a stub.
+
+**F12-04 is cut, pending the user (2026-09-23).** It also carries all Stage 2 gameplay integration. Stage 2 has no content, and the Sentinel and Storm Guardian scenes do not exist. The stub records its scope, the consequences (Campaign final victory unreachable, F9-03 without a consumer, the Stage 2 duration check not verified), and what un-cuts it: the user's decision plus Astra's Stage 2 gameplay markers and boss scenes.
+
+Deviations from the planned list above:
+
+- 01 depends on F5-04 only. It owns four Definitions, adding `AttackStepDefinition`, because Attacks are ordered Pattern steps with their own Anticipation and height. The step signal is `step_started(step_index)`.
+- 02 depends on F4-03 too, and proves the HUD panel payloads in its scene test. `spawn_setup` mirrors `EnemyActor`'s but takes a `BossDefinition`, so the Director gets a separate `boss_definitions` export in 03.
+- 03 removes F10-01's Sentry stand-in for `lantern_guardian`. The shrine lighting hook is `StageDirector.boss_defeated` plus an optional Astra-authored `AnimationPlayer` clip.

@@ -15,6 +15,13 @@ Action required by <other agent>: <what they must do, or "none">
 
 ---
 
+## 2026-09-23 16:00 — Claude — F4 to F14 tickets written; F3, F13 and F12-04 cut pending the user
+State: PLANNED
+Files: `.scratch/{combat-hud,projectile-field,weapon-rendering,damage-pickups,progression-core,enemies,stage-director,run-flow,bosses,delivery}/spec.md` (new) and their `issues/NN-*.md` tickets (31 `todo` plus the F12-04 `cut` stub, new); every F4 to F14 `issues/00-plan.md` (`Status: done` and an Outcome); `.scratch/settings/issues/00-plan.md` and `.scratch/audio/issues/00-plan.md` (`Status: cut`); `docs/engineering/ROADMAP.md` (the ticket rows, a `cut` status, "Order to 2026-09-24", Risk, "Requests to Astra"). No code, scene, content or GUIDE change.
+Change: The per-feature planning sessions were collapsed into one pass. Each ticket names its exact files (Creates, Edits, Serialized at session end, Must not touch, Conflicts with) and carries a parallel-safe flag. Each `spec.md` lists under "Cross-feature contracts" the class, method and signal names the later features share. Those names were written against the real `CombatState` from F4-01. F3 Settings, F13 Audio and F12-04 (the Tempest Sentinel, the Storm Guardian and Stage 2 gameplay) are cut from the 2026-09-24 delivery until the user decides. Two of the cuts each break an assignment requirement: sound effects (F13), and the five-minute stage (planned for Stage 2, so F12-04). See the roadmap Risk section.
+Why: The deadline is tomorrow; the Stage 1 loop comes first.
+Action required by Astra: see the updated "Requests to Astra" rows F4-02, F6, F7, F8-04, F9, F10 and F12. The new requests are the tuning of Claude's proposed weapon, pattern, enemy and HUD values; Portuguese names for CP1-A and CP1-B; a Lantern Guardian scene with its clip names and the shrine-lighting clip; and a ruling on whether a boss takes damage during a Phase transition. The Stage 1 content, enemy and boss `.tres` files will be drafted by Claude and marked `dev` when those tickets run. Keep the load-bearing names in `stage_01.tscn` listed in the F10 row.
+
 ## 2026-09-23 15:10 — Claude — CombatState core (F4-01)
 State: CODE_READY
 Files: `scripts/combat/combat_state.gd` and `tests/unit/combat/test_combat_state.gd` (new), `docs/engineering/combat-hud.md` (new), `docs/engineering/README.md`, `docs/engineering/ROADMAP.md` (a new F4-01 row; F4-00 stays `todo` for `spec.md`, 02 and 03), `.scratch/combat-hud/issues/01-combat-state-core.md` (new, written from the 00-plan bullet).

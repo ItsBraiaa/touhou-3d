@@ -1,6 +1,6 @@
 # F9-00 Plan the Enemies feature
 
-Status: todo
+Status: done (2026-09-23)
 Type: docs
 parallel-safe: no
 Depends on: F7-03, F8-01
@@ -32,3 +32,11 @@ Write `.scratch/enemies/spec.md` and the full tickets for F9. Enemies come befor
 ```
 Read CLAUDE.md, docs/engineering/ROADMAP.md and .scratch/enemies/issues/00-plan.md, then write the F9 spec and tickets as described. Finish with its Definition of Done and commit.
 ```
+
+## Outcome (2026-09-23)
+
+The three tickets and `spec.md` were written in the one-pass planning session (commit "plan: write F4-F14 tickets"), not in a session of their own: `01-enemy-model-core.md` (parallel-safe), `02-dev-prefabs-and-enemy-actor.md`, `03-seal-and-guard-rules.md`. Deviations from the planned list above:
+
+- 01 depends on F5-04 (`PatternEmitter`) rather than F7-03 or F8-01. `EnemyDefinition` lives in F9-01. The model owns its position: `tick(delta, player_position, emitter_offset)` plus `get_position()`, with the signal `repositioned(position)`. The hit radius is the `HitVolume` sphere, not a Definition field.
+- 02's spawn API is `spawn_setup(definition, enemy_id, encounter_id, rng, projectile_system, player, bounds)`, not `spawn_at(transform, ...)`. The Director places the actor at the marker first. Dev prefabs instance Astra's visual variants as `VisualRoot`; the dev `.tres` content is created here.
+- 03 is the lowest priority: Stage 2 gameplay is cut with F12-04, so no scheduled scene hosts a Seal, and portal lights, Guard passivity and per-seal rewards are deferred. Stage 1's S1-04 guards are not Seals.

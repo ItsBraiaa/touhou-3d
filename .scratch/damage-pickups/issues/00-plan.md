@@ -1,6 +1,6 @@
 # F7-00 Plan the Damage, bomb, and pickups feature
 
-Status: todo
+Status: done (2026-09-23)
 Type: docs
 parallel-safe: no
 Depends on: F6-03
@@ -31,3 +31,12 @@ Write `.scratch/damage-pickups/spec.md` and the full tickets for F7. After F7 th
 ```
 Read CLAUDE.md, docs/engineering/ROADMAP.md and .scratch/damage-pickups/issues/00-plan.md, then write the F7 spec and tickets as described. Finish with its Definition of Done and commit.
 ```
+
+## Outcome (2026-09-23)
+
+The tickets were written in the one-pass planning session (commit "plan: write F4-F14 tickets"): `spec.md`, `01-hit-to-combat-state-and-defeat.md`, `02-bomb-clear-and-invulnerability.md`, `03-pickup-adapter-and-rewards.md`. They differ from the planned list above in these ways:
+
+- **The real `CombatState` (F4-01) replaces the planned names.** Tickets use `take_hit() -> HitOutcome`, `update_bomb_input(held)` with `bomb_activated`, `collect_power_pickup()` and `collect_shield_pickup()`, and `score_awarded`. CombatState already grants the 2 s of Bomb Invulnerability.
+- **01.** Defeat pauses the tree (`_set_paused(true)`) and pushes Defeat; the plan said only "stops Active Time". There is no `player_defeated` Session signal, because the Session is the listener. Retry = Restart until F10-03.
+- **02.** The Bomb edge is fed by F6-03's `PlayerWeapon` (from input events); the Session only reacts to `bomb_activated`. There is no `WeaponModel` edge in the Session and no `ProjectileField` call from the weapon.
+- **03.** Acceptance polls the overlap every physics tick, so a Shield Pickup touched while shielded is taken once the Shield breaks. `pickup_accepted` has no audio consumer (F13 is cut).

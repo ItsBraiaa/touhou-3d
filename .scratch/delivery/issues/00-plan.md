@@ -1,6 +1,6 @@
 # F14-00 Plan the Delivery feature
 
-Status: todo
+Status: done (2026-09-23)
 Type: docs
 parallel-safe: no
 Depends on: F11-03 (a complete Stage 1 loop); should be planned by 2026-09-23 at the latest
@@ -30,3 +30,10 @@ Write `.scratch/delivery/spec.md` and the full tickets for F14. Exports have alr
 ```
 Read CLAUDE.md, docs/engineering/ROADMAP.md and .scratch/delivery/issues/00-plan.md, then write the F14 spec and tickets as described. Finish with its Definition of Done and commit.
 ```
+
+## Outcome (2026-09-23)
+
+The tickets were written in the one-pass planning session (commit "plan: write F4-F14 tickets"): `spec.md`, `01-export-and-run-outside-editor.md`, `02-package-and-acceptance-record.md`. They differ from the planned list above in these ways:
+
+- **01.** It starts with a precondition check for the 4.7.2 templates in `%APPDATA%\Godot\export_templates\4.7.2.stable\`, which was empty on 2026-09-23. If they are absent, the ticket is blocked for the user to install them; a session never downloads them. The densest-boss FPS needs a human pass.
+- **02.** The package is built from `git ls-files` on a clean tree, excluding `.claude/` and `.agents/`, as `project/`, `game/` and `LEIA-ME.txt`. Credit gaps become Astra requests, not edits. The cut features' checks are recorded as "not verified (cut)".

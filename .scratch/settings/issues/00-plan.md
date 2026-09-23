@@ -1,6 +1,6 @@
 # F3-00 Plan the Settings feature
 
-Status: todo
+Status: cut (pending the user, 2026-09-23)
 Type: docs
 parallel-safe: no
 Depends on: F2-04
@@ -33,3 +33,9 @@ Write `.scratch/settings/spec.md` and the full tickets for F3 using the ticket t
 ```
 Read CLAUDE.md, docs/engineering/ROADMAP.md and .scratch/settings/issues/00-plan.md, then write the F3 spec and tickets as described. Finish with its Definition of Done and commit.
 ```
+
+## Cut (2026-09-23)
+
+Cut from the 2026-09-24 delivery by the one-pass planning session (commit `plan: write F4-F14 tickets`) to protect the Stage 1 loop. Do not pick it while cut; reinstating it is the user's call (set Status back to `todo`, then run this plan ticket as written).
+
+Consequence while cut: the Options widgets show their authored defaults and apply nothing, `user://settings.cfg` is never written, `CameraRig.apply_settings()` stays uncalled, the buses from F0-03 keep their default volumes, and a controller disconnect does not pause the game.

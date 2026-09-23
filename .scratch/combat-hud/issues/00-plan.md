@@ -1,6 +1,6 @@
 # F4-00 Plan the Combat state and HUD feature
 
-Status: todo
+Status: done (2026-09-23)
 Type: docs
 parallel-safe: no
 Depends on: F2-04 (F3 may run in parallel)
@@ -31,3 +31,13 @@ Write `.scratch/combat-hud/spec.md` and the full tickets for F4.
 ```
 Read CLAUDE.md, docs/engineering/ROADMAP.md and .scratch/combat-hud/issues/00-plan.md, then write the F4 spec and tickets as described. Finish with its Definition of Done and commit.
 ```
+
+## Outcome (2026-09-23)
+
+Tickets written in the one-pass planning session for F4 to F14 (commit `plan: write F4-F14 tickets`): `.scratch/combat-hud/spec.md`, `02-hud-binding-and-target-marker.md` and `03-boss-panel-and-attack-cue-api.md`. `01-combat-state-core.md` was written separately from its bullet above and delivered before this plan (commit `combat: add CombatState core`); it is not rewritten here, and 02, 03 and the spec use its real API (`start`, `HitOutcome`, `update_bomb_input`, the per-value change signals).
+
+Deviations from the planned list:
+
+- The `threat_reported(direction)` feed became `show_threat(side: int, seconds: float)` on `Hud` (side -1 left, +1 right); F9-02 produces `threat_reported(side)` and F10-01 routes it.
+- 02 also gives `GameSession` its one `CombatState` for the Session's lifetime (not one per Run): `start()` at each stage entry, `set_paused()` with the tree, `get_combat_state()`.
+- 03 adds a scripted dev harness, `scenes/dev/hud_harness.tscn`, for verification, because no boss exists yet.

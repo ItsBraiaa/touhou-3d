@@ -1,6 +1,6 @@
 # F11-00 Plan the Run flow feature
 
-Status: todo
+Status: done (2026-09-23)
 Type: docs
 parallel-safe: no
 Depends on: F10-03
@@ -31,3 +31,11 @@ Write `.scratch/run-flow/spec.md` and the full tickets for F11: the Defeat, Resu
 ```
 Read CLAUDE.md, docs/engineering/ROADMAP.md and .scratch/run-flow/issues/00-plan.md, then write the F11 spec and tickets as described. Finish with its Definition of Done and commit.
 ```
+
+## Outcome (2026-09-23)
+
+The tickets were written in the one-pass planning session (commit "plan: write F4-F14 tickets"): `spec.md`, `01-defeat-results-retry-restart-screens.md`, `02-campaign-continuation-and-direct-stage.md`, `03-active-and-clear-time-verification.md`. They differ from the planned list above in these ways:
+
+- **01.** The Defeat retry location is written by F10-03, and 01 verifies it. A final stage completion calls `advance()` at once, so `run_ended(true)` fires once. A `STAGE_RESULT` log line records each clear.
+- **02.** Only the Power Level is carried into Stage 2; Power Progress resets (Claude's reading). The Stage 2 final victory is test-driven through `RunState`, because Stage 2 has no gameplay while F12-04 is cut.
+- **03.** Stage 1 only; the Stage 2 five-minute check is "not verified (cut)". Any fix it makes stays in `run_state.gd`.
