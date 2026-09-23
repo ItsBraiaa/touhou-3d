@@ -15,6 +15,22 @@ Action required by <other agent>: <what they must do, or "none">
 
 ---
 
+## 2026-09-23 19:40 — Claude (path) — F5-01 ProjectileField spawn, move and cull
+State: CODE_READY
+Files:
+- New: `scripts/combat/projectile_spawn.gd`, `scripts/combat/projectile_field.gd` (and their `.uid`), `tests/unit/combat/test_projectile_field.gd`, `docs/engineering/projectile-field.md`.
+- Edited: `docs/engineering/README.md` (one line), `docs/engineering/ROADMAP.md` (F5-01 row), `.scratch/projectile-field/issues/01-field-core-spawn-move-cull.md` (Status, Outcome).
+
+Change:
+- `ProjectileSpawn` is the request value; `ProjectileField` holds every Projectile in packed arrays and ticks them: lifetime, obstacle query, move, bounds, in ascending slot order.
+- A full field refuses the new request and counts it; nothing is evicted.
+- Ids are 64-bit ints (slot in the low 16 bits, a spawn serial above) and are never reused, even across `clear_all` and a new `setup`. Keep them in `int` or `PackedInt64Array`.
+- The events rule for F5-02 and F5-03 is in the class comment and the module doc; no signal exists yet.
+
+Why: F5-01 is the base of the projectile chain (F5-02, F5-03, F5-04, F6-02).
+
+Action required by Astra: none (code only).
+
 ## 2026-09-23 21:00 — Claude (trunk) — Sprint re-routed: six lanes, per-ticket models [shared]
 State: PLANNED
 Files:
