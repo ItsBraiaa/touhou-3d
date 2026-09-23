@@ -220,3 +220,7 @@ Release every pressed action in `after_each`. Grep the output for `SCRIPT ERROR`
 ```
 Read CLAUDE.md, docs/engineering/ROADMAP.md and .scratch/weapon-rendering/issues/03-weapon-model-and-player-weapon.md, then implement that ticket. Use /run to verify firing, Aim Assist, Familiars and one-press Bombs in the dev arena harness. Finish with its Definition of Done and commit.
 ```
+
+## Outcome
+
+Part 1 implementation is committed as `combat: add WeaponModel core (F6-03 part 1)`: the Node-free `WeaponModel` emits cadence-based main/Familiar shots, counts Familiars by Power Level, and provides normalized static Aim Assist direction. No tests were added per the sprint rule. **The land blocker is resolved by the `tools/lane.ps1` fix on `dev-01` (`6a5d801`), synced into this worktree; the generated UID files are handled by sync/land.** F6-03 remains todo for trunk's part 2 (`PlayerWeapon` and scene integration).

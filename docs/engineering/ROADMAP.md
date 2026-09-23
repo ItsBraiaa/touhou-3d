@@ -45,7 +45,7 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | | | | 03 boss-panel-and-attack-cue-api | adapter | no | trunk | done (2026-09-23: boss panel, cue and threat API on `Hud`; verified by `scenes/dev/hud_harness.tscn`, no new tests per the sprint rule) |
 | F5 | Projectile Field | `projectile-field` | 00 plan | docs | no | — | done (one-pass planning) |
 | | | | 01 field-core-spawn-move-cull | core | yes | path | done |
-| | | | 02 core-hit-sweep-and-graze-rules | core | yes (after 01, same file) | path | done (no unit tests, by the sprint rule; ruling 5 pending) |
+| | | | 02 core-hit-sweep-and-graze-rules | core | yes (after 01, same file) | path | done (no unit tests, by the sprint rule; ruling 5 confirmed strict by D-07 Part B) |
 | | | | 03 bomb-phase-clears-and-hit-spheres | core | yes (after 02, same file) | path | done (no unit tests, by the sprint rule) |
 | | | | 04 pattern-emitter-core | core | yes | oc-a | done (no new tests, by the sprint rule) |
 | F6 | Weapon and rendering | `weapon-rendering` | 00 plan | docs | no | — | done (one-pass planning) |
@@ -75,7 +75,7 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | | | | 02 campaign-continuation-and-direct-stage | integration | no | trunk | todo |
 | | | | 03 active-and-clear-time-verification | test | no | path | todo (manual protocol only; no tests) |
 | F12 | Bosses and Stage 2 | `bosses` | 00 plan | docs | no | — | done (one-pass planning; Stage 2 reinstated by the sprint plan) |
-| | | | 01 boss-machine-core | core | yes | path | todo |
+| | | | 01 boss-machine-core | core | yes | path | done (no unit tests, by the sprint rule; transition cap 0.75 s from D-07 ruling 1) |
 | | | | 02 boss-controller-adapter | adapter | no | path | todo |
 | | | | 03 lantern-guardian-in-s1-07 | integration | no | trunk (part 1: oc-a) | todo |
 | | | | 04 stage-02-content-draft | content | yes | oc-b | todo |
@@ -89,7 +89,7 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | F14 | Delivery | `delivery` | 00 plan | docs | no | — | done (one-pass planning) |
 | | | | 01 export-and-run-outside-editor | integration | no | trunk | todo (blocks itself until the user installs the Godot 4.7.2 export templates) |
 | | | | 02 package-and-acceptance-record | tooling | no | oc-b | todo |
-| D | Design sprint (Astra) | `design-sprint` | 01 sfx-selection-and-import | design | — | sol | todo |
+| D | Design sprint (Astra) | `design-sprint` | 01 sfx-selection-and-import | design | — | sol | done (listening pass owed by the human pass) |
 | | | | 02 combat-visuals | design | — | sol | todo |
 | | | | 03 lantern-guardian-scene | design | — | sol | done (2026-09-23: Ghost prefab, clips and dusk render verified) |
 | | | | 04 stage-2-boss-scenes | design | — | sol | done (2026-09-23: Tempest Sentinel and Storm Guardian prefabs, clips and Stage 2 renders verified) |
