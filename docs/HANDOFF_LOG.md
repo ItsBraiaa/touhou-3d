@@ -15,6 +15,13 @@ Action required by <other agent>: <what they must do, or "none">
 
 ---
 
+## 2026-09-23 20:43 — Astra (sol) — Stage 2 boss scenes (D-04) [shared]
+State: SCENE_READY
+Files: `scenes/enemies/tempest_sentinel.tscn`, `scenes/enemies/storm_guardian.tscn`, `assets/models/bosses/Dragon_Evolved.gltf` and copied atlas plus `.import` files, `tools/validate_boss_scenes.gd`, `docs/validation/boss-scenes.log`, `docs/validation/tempest-sentinel.png`, `docs/validation/storm-guardian.png`, `docs/ENEMY_VISUAL_HANDOFF.md`, `docs/ASSET_CREDITS.md`, `docs/engineering/ROADMAP.md`, and D-04's ticket.
+Change: Both scenes have an identity `Enemy` Node3D root with no script; `VisualRoot/Model`, `HitVolume/Collision`, and `Emitters/Main`; no collision object under `VisualRoot`. HitVolume is layer 16, mask 0, and both monitoring flags off. `tempest_sentinel.tscn` uses Goleling at scale `(3.1, 3.1, 3.1)`, hit radius 2.5 at `(0, 6.9, 0)`, and emitter `(0, 7.1, -1.7)`. Its three storm rings spin through independent `VisualRoot/OrnamentPlayer` clip `storm_orbit` (loop/autoplay). `storm_guardian.tscn` uses Dragon_Evolved at scale `(5, 5, 5)`, hit radius 5.0 at `(0, 8.8, 0)`, and emitter `(0, 9.5, -3.5)`. Each model player is `VisualRoot/Model/AnimationPlayer`: idle `Flying_Idle` (loop/autoplay), step `Punch`, Phase gesture `Yes` (for later `phase_clip`), defeat `Death` (non-looping). The headless and windowed QA reported zero failures; S2-04 and S2-07 approach renders were inspected.
+Why: F12-06 and F12-07 can integrate the approved Stage 2 boss art without changing encounter geometry or content values.
+Action required by Claude: F12-06 attaches `boss_controller.gd` to the Tempest root, sets its exports, and points `stage_02.tscn`'s `actor_scenes[&"tempest_sentinel"]` at it. F12-07 does the same for Storm Guardian and `actor_scenes[&"storm_guardian"]`. Both roots currently have no script.
+
 ## 2026-09-23 20:32 — Astra (sol) — Lantern Guardian scene (D-03) [shared]
 State: SCENE_READY
 Files: `scenes/enemies/lantern_guardian.tscn`, `assets/models/bosses/Ghost.gltf` and copied atlas plus `.import` files, `tools/validate_boss_scenes.gd`, `docs/validation/boss-scenes.log`, `docs/validation/lantern-guardian.png`, `docs/ENEMY_VISUAL_HANDOFF.md`, `docs/ASSET_CREDITS.md`, `docs/engineering/ROADMAP.md`, and D-03's ticket.
