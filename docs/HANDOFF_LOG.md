@@ -22,6 +22,18 @@ Change: All 17 F13 events have a selected non-looping CC0 Kenney stream and prop
 Why: F13 needs a concrete event-to-stream mapping and distributable credits. The menu credit names only packs used.
 Action required by Claude: F13-03 copies the table's paths and `volume_db` values into `Main/Audio`. No music track table applies. Human listening approval is still needed before D-01 can be marked done; this agent cannot hear the selected files, so the ticket is blocked on that perceptual pass.
 
+## 2026-09-23 20:18 — OpenCode (oc-b) — F8-01 progression Definitions
+State: CODE_READY
+Files: `scripts/definitions/encounter_definition.gd`, `wave_definition.gd`, `reward_definition.gd`, `checkpoint_definition.gd`, `stage_definition.gd`, `docs/engineering/progression-core.md`, `docs/engineering/README.md`, `docs/engineering/ROADMAP.md`, `.scratch/progression-core/issues/01-definition-schemas-and-content-validation.md`
+Change: Added typed Resource schemas, local validation and Stage-level route/checkpoint validation, plus the module contract. No tests were written per the sprint rule.
+Why: F8-01 provides the authored-data contract required by EncounterMachine and the later Stage 1 content draft.
+Action required by Astra: Author content against the exported fields and validation rules in `docs/engineering/progression-core.md`; none for this ticket.
+## 2026-09-23 20:17 — OpenCode (oc-a) — F13-01 AudioLimiter core
+State: CODE_READY
+Files: `scripts/audio/audio_limiter.gd`, `docs/engineering/audio.md`, `docs/engineering/README.md`, `docs/engineering/ROADMAP.md`, `.scratch/audio/issues/01-audio-limiter-core.md`
+Change: Added the Node-free AudioLimiter core with event intervals, per-event/global caps, strict-priority oldest-voice stealing, monotonic ids, epsilon-based ticking and clear semantics. No tests were added per the sprint rule.
+Why: F13-01 supplies the rules core used by F13-02's playback adapter.
+Action required by Astra: None for this ticket; event rule values remain provisional until D-01's listening pass.
 
 ## 2026-09-23 20:13 — Astra (sol) — Rulings (D-07 Part B) [shared]
 State: docs

@@ -57,7 +57,7 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | | | | 02 bomb-clear-and-invulnerability | integration | no | trunk | todo |
 | | | | 03 pickup-adapter-and-rewards | adapter | no | path | todo |
 | F8 | Progression cores and content | `progression-core` | 00 plan | docs | no | — | done (one-pass planning) |
-| | | | 01 definition-schemas-and-content-validation | core | yes | oc-b | todo |
+| | | | 01 definition-schemas-and-content-validation | core | yes | oc-b | done (typed schemas and validators landed 2026-09-23; no tests per sprint rule) |
 | | | | 02 encounter-machine-core | core | yes | oc-b | todo |
 | | | | 03 snapshot-capture-restore | core | yes | oc-b | todo |
 | | | | 04 stage-01-content-draft | content | yes | oc-b | todo |
@@ -83,7 +83,7 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | | | | 06 tempest-sentinel-miniboss | integration | no | sol | todo |
 | | | | 07 storm-guardian | integration | no | sol | todo |
 | F13 | Audio | `audio` | 00 plan | docs | no | — | done (cut, then reinstated by the sprint plan, 2026-09-23) |
-| | | | 01 audio-limiter-core | core | yes | oc-a | todo |
+| | | | 01 audio-limiter-core | core | yes | oc-a | done |
 | | | | 02 audio-controller-adapter | adapter | no | oc-a | todo |
 | | | | 03 audio-event-wiring | integration | no | trunk | todo |
 | F14 | Delivery | `delivery` | 00 plan | docs | no | — | done (one-pass planning) |
