@@ -15,6 +15,14 @@ Action required by <other agent>: <what they must do, or "none">
 
 ---
 
+## 2026-09-23 20:32 — Astra (sol) — Lantern Guardian scene (D-03) [shared]
+State: SCENE_READY
+Files: `scenes/enemies/lantern_guardian.tscn`, `assets/models/bosses/Ghost.gltf` and copied atlas plus `.import` files, `tools/validate_boss_scenes.gd`, `docs/validation/boss-scenes.log`, `docs/validation/lantern-guardian.png`, `docs/ENEMY_VISUAL_HANDOFF.md`, `docs/ASSET_CREDITS.md`, `docs/engineering/ROADMAP.md`, and D-03's ticket.
+Change: `Enemy` is an identity Node3D with no script; `VisualRoot/Model` is the imported Ghost at scale `(2.6, 2.6, 2.6)`. Eight amber `VisualRoot/Lanterns/Lantern1..8` meshes orbit through `VisualRoot/LanternMotion` clip `orbit` (loop/autoplay). `HitVolume/Collision` is a sphere of radius 3.0, centered at `(0, 4.3, 0)` relative to Enemy, with layer 16, mask 0 and both monitoring flags off. `Emitters/Main` is `(0, 5, -1.5)`. The model player is `VisualRoot/Model/AnimationPlayer`: idle `Flying_Idle` (loop/autoplay), step `Punch`, Phase gesture `Yes` (recorded for later `phase_clip`), defeat `Death` (non-looping). The validator passed headless and windowed; the S1-07 dusk screenshot was inspected at 35 units.
+Why: F12-03 can use the approved Stage 1 boss art without changing its gameplay model or markers.
+Action required by Claude: trunk F12-03 attaches `boss_controller.gd` to Enemy; sets `visual_root`, `hit_volume`, `emitter`, `animation_player`, `idle_clip`, `step_clip`, and `defeat_clip`; and replaces the dev boss in `stage_01.tscn`'s `actor_scenes[&"lantern_guardian"]`. The root currently has no script. A future `phase_clip` may use `Yes`.
+
+
 ## 2026-09-23 20:21 — Astra (sol) — D-01 SFX selection and import [shared]
 State: SCENE_READY
 Files: `assets/audio/sfx/` (16 Ogg files and their `.import` settings), four `assets/licenses/kenney-*.txt` pack licenses, `docs/ASSET_CREDITS.md`, `scenes/ui/credits.tscn`, `docs/validation/audio-selection.md`, `docs/validation/menu-credits.png`, `tools/validate_audio_selection.gd`, and D-01's ticket.

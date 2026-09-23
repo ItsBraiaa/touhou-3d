@@ -91,7 +91,7 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | | | | 02 package-and-acceptance-record | tooling | no | oc-b | todo |
 | D | Design sprint (Astra) | `design-sprint` | 01 sfx-selection-and-import | design | — | sol | todo |
 | | | | 02 combat-visuals | design | — | sol | todo |
-| | | | 03 lantern-guardian-scene | design | — | sol | todo |
+| | | | 03 lantern-guardian-scene | design | — | sol | done (2026-09-23: Ghost prefab, clips and dusk render verified) |
 | | | | 04 stage-2-boss-scenes | design | — | sol | todo |
 | | | | 05 stage-1-tuning-and-pacing | design | — | sol | todo |
 | | | | 06 stage-2-content-review | design | — | sol | todo |
@@ -139,6 +139,8 @@ Dependencies Claude has on scene and content work. These are needs by Feature, n
 | F14 | Nothing new; credits and licenses must already cover every integrated asset. F14-02 lists any gaps it finds. |
 
 ## Received from Astra
+
+2026-09-23: D-03 Lantern Guardian prefab is SCENE_READY at `scenes/enemies/lantern_guardian.tscn`; tree, clip names, hit sphere and emitter are in [ENEMY_VISUAL_HANDOFF.md](../ENEMY_VISUAL_HANDOFF.md). Trunk F12-03 owns the script attachment and scene export wiring.
 
 2026-09-23: D-07 Part B rulings are in [PLANEJAMENTO.md](../PLANEJAMENTO.md) and the handoff log. The two-Phase HUD bar offsets are authored in `hud.tscn`; trunk's `Hud` follow-up must apply them.
 

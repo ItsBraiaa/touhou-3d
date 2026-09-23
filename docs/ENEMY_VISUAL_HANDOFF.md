@@ -26,3 +26,20 @@ Suggested assignment: S1-02 first wave lume and second wave twilight; S1-03 lant
 Godot 4.7.2 imported both source models and loaded all four scenes. Offline QA started/advanced Flying_Idle for all variants and checked that visuals have no collision components or root scripts. `docs/validation/enemy-visuals.log` records zero failures. Gallery: `scenes/tests/enemy_variants_preview.tscn` (F6), screenshot `docs/validation/enemy-variants.png`. This checks the idle pose and scene structure, not all clips or combat behavior.
 
 Original source files remain untouched. Selected runtime copies are under `assets/models/enemies/`. Supplied CC0 license is preserved as `assets/licenses/quaternius-ultimate-monsters.txt` (its source heading says Ultimate Platformer Pack). Offline generator `tools/build_enemy_visuals.gd` rewrites only the four visual scenes; do not rerun after integration edits without reconciliation.
+
+## Boss prefabs
+
+### Lantern Guardian (D-03, SCENE_READY)
+
+`scenes/enemies/lantern_guardian.tscn` is the Stage 1 S1-07 boss prefab. Its `Enemy` root is an identity `Node3D` with no script or gameplay values. `VisualRoot/Model` instances the approved `assets/models/bosses/Ghost.gltf` at scale 2.6. `VisualRoot/Lanterns/Lantern1..8` are amber emissive `MeshInstance3D` lanterns with simple caps; `VisualRoot/LanternMotion` turns the ring through a 12-second looping `orbit` clip independently of the imported model's animation player. No collision object is under `VisualRoot`.
+
+`Enemy/HitVolume` is an `Area3D` on layer 16, mask 0, with monitoring and monitorable off; `HitVolume/Collision` is a sphere of radius 3.0 centered at `(0, 4.3, 0)` relative to `Enemy`. `Enemy/Emitters/Main` is at `(0, 5, -1.5)`. Both gameplay nodes are outside the scaled model.
+
+| Role | Actual clip on `VisualRoot/Model/AnimationPlayer` | Design reading |
+| --- | --- | --- |
+| Idle | `Flying_Idle` | Loops and autoplays. |
+| Step cue | `Punch` | The mid-clip arm draw reads as a spell windup at the approach camera. |
+| Phase change | `Yes` | A head lift/nod; reserved for a later `phase_clip` export. |
+| Defeat | `Death` | Non-looping collapse, 0.667 s. |
+
+Godot 4.7.2 imported the Ghost and the copied atlas. The offline QA in `tools/validate_boss_scenes.gd` reported zero failures headless and windowed; `docs/validation/boss-scenes.log` records the result. [The S1-07 dusk capture](validation/lantern-guardian.png) was inspected at a 35-unit approach distance: the silhouette, eyes, amber lanterns and central gap remain distinct. The lantern ring was shifted half a step so no lantern covers the face from this angle. Trunk F12-03 attaches `boss_controller.gd` and sets its exports; the dev boss remains untouched until then.
