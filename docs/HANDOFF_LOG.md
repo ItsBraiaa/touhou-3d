@@ -30,6 +30,20 @@ Change:
 Why: F5-02 unblocks F5-03, and then F6-02 and F7-01, which wire these signals.
 
 Action required by Astra: none (code only). D-07 Part B ruling 5 decides strict or lenient Graze under Invulnerability.
+## 2026-09-23 22:30 — Claude (plan) — No new tests, ever: the user's rule for the sprint [shared]
+State: docs
+Files: `docs/engineering/SPRINT.md` ("Product decisions", workflow shapes, escalation, overflow, Claude guard, every kickoff prompt), `docs/engineering/CONVENTIONS.md` ("Tests", Definition of Done), `docs/engineering/ROADMAP.md` (F10-04, F11-03, Risk), `tools/lane.ps1` (a boot smoke and a wider error scan), `.scratch/stage-director/issues/04-stage-01-contract-smoke-test.md` (cut), `.scratch/run-flow/issues/03-active-and-clear-time-verification.md` (note), `CLAUDE.md`, `AGENTS.md` (shared).
+Change:
+- **The rule.** Nobody writes unit or scene tests or does TDD, in any lane. Every ticket's "Tests required" section and tdd kickoff are void.
+- **The gate.** `tools/lane.ps1 land` still runs the existing suite (no token cost), and now also boots the main scene headless for 300 frames. A red run, `SCRIPT ERROR`, parse error or failed script load stops a landing, and so does any `ERROR:` line during the boot. Adapters are also checked by running the game.
+- **Workflow shapes.** The 3-agent shape is now implementer, verifier (runs the game) and reviewer. Cores use implementer and reviewer.
+- **Tickets.** F10-04, a test-only ticket, is cut; F11-03 keeps only its manual protocol.
+- **Old tests.** If an old test fails only because a ticket intentionally changed that behavior, delete or minimally adjust that test and name it in the handoff.
+- **Running lanes.** Trunk and path were told directly and have switched.
+
+Why: The user's decision, to spend every lane's quota on the game itself.
+
+Action required by Astra: none beyond the new sol kickoff in SPRINT.md. Your F tickets (F12-05 to F12-07) are code without tests, checked by `land` and a game run.
 
 ## 2026-09-23 22:10 — Claude (trunk) — F4-02: HUD bound to CombatState and Targeting [shared]
 State: CODE_READY

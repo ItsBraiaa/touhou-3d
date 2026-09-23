@@ -4,6 +4,12 @@ Planned 2026-09-23 by Claude acting as product owner, engineer and game-design a
 
 ## Product decisions
 
+- **No new tests, ever (the user's rule, 2026-09-23).**
+  - Nobody writes a unit test or a scene test, and nobody does TDD. Every ticket's "Tests required" section, its `/mattpocock-skills:tdd` kickoff and any "named test for each invariant" line in its Definition of Done are void.
+  - The only automated gate is `tools/lane.ps1 land`: the existing suite plus a 300-frame headless boot of the main scene. A red run, a `SCRIPT ERROR`, a parse error or a failed script load stops the landing, and so does any `ERROR:` line during the boot. The suite prints `ERROR:` lines on purpose, from tests of loud setup errors.
+  - Adapter and integration tickets are also checked by running the game (`/run` in Claude, or the ticket's manual check).
+  - If an existing test fails only because a ticket intentionally changed that behavior, delete or minimally adjust that test, and name it in the handoff entry.
+  - F10-04 (a test-only ticket) is cut by this rule. F11-03 keeps only its manual measurement protocol.
 - **Reinstated, reduced but real.** These are back in scope:
   - F3 Settings (four tickets);
   - F13 Audio (three tickets plus D-01);
@@ -47,7 +53,7 @@ No two agents ever share a working tree or a branch.
    2. `tools/lane.ps1 status <ticket path>`
    3. Implement and test.
    4. Commit on your lane branch.
-   5. `tools/lane.ps1 land`, which merges `dev-01` in, runs the tests (a red run or any `SCRIPT ERROR` stops it), and fast-forwards the primary tree. It retries if another lane landed first.
+   5. `tools/lane.ps1 land`, which merges `dev-01` in, runs the existing suite and a boot smoke of the main scene (a red run, `SCRIPT ERROR`, parse error or failed script load stops it, and so does any `ERROR:` line during the boot), and fast-forwards the primary tree. It retries if another lane landed first.
 4. **Conflicts.**
    - `docs/HANDOFF_LOG.md` and `docs/engineering/README.md` merge with the union driver: add entries, never reorder.
    - Any other conflict is resolved in your lane branch, never in the primary tree, and the file is named in your handoff entry.
@@ -63,7 +69,7 @@ No two agents ever share a working tree or a branch.
 | `scripts/ui/menu_controller.gd`, `tests/scene/test_menu_registry_contract.gd` | oc-b F3-03; trunk F11-01 | Whichever starts second syncs first and keeps the other's hunks. They overlap only at the tail of `_ready`. |
 | `scripts/ui/interface.gd` | trunk F4-02, then oc-b F3-02, then F3-03 | Ordered by dependencies. |
 | `scenes/dev/arena_harness.gd` and `.tscn` | trunk F6-02, F6-03; path F9-02, F7-03, F12-02 | Serialized: path starts F9-02 only after trunk's F6-03 (part 2) has landed. No other ticket edits the harness. |
-| `docs/engineering/stage-director.md` | oc-a F10-04; trunk F10-01, F12-03; sol F12-05 | F10-04 lands before F10-01 starts, or puts its notes in its handoff entry. F12-03 and F12-05 each write only their own section. |
+| `docs/engineering/stage-director.md` | trunk F10-01, F12-03; sol F12-05 | F12-03 and F12-05 each write only their own section. |
 | `docs/engineering/damage-pickups.md`, `docs/validation/combat.md` | trunk F7-02; path F7-03 | Each appends its own headed section; the second lander keeps both. |
 | `docs/engineering/weapon-rendering.md` | trunk F6-02 creates it | Oc-a's F6-03 part 1 must not create it: its contract goes in doc comments and the handoff entry, and trunk's part 2 writes the section. |
 | `content/bosses/lantern_guardian.tres`, `content/patterns/lantern_*.tres` | oc-a F12-03 part 1 creates them | Trunk's part 2 only references them. Sol's D-07 Part C tunes values after F12-03 has landed. |
@@ -83,7 +89,7 @@ Handoff entry headers name the lane: `— Claude (trunk) —`, `— Claude (path
 Run top to bottom. When the next ticket's dependencies are not done, take the first later ticket in your own queue whose dependencies are. If none is ready, read ahead and check again in ten minutes. Never write code against an interface that has not landed. If the rest of your queue waits on another lane for more than an hour, stop and report.
 
 **Workflow shapes for the Opus lanes** (at most 3 agents per workflow):
-- **3 agents:** an implementer; a test-writer who writes the ticket's listed tests from the spec, in parallel and in separate files; and a reviewer who checks correctness, conventions and the Files boundary once the tests are green. The implementer fixes what the reviewer confirms.
+- **3 agents:** an implementer; a verifier who runs the game (headless, then `/run` where the ticket has a visible behavior) and checks the behavior the ticket describes; and a reviewer who checks correctness, conventions and the Files boundary. The implementer fixes what the verifier or the reviewer confirms. No agent writes tests.
 - **2 agents:** an implementer and a reviewer.
 - **Solo:** one agent that self-reviews against the Definition of Done.
 
@@ -114,15 +120,15 @@ Slip rule: if F11-02 has not landed by T0 + 19.5 h, run F14-01 straight after F1
 | # | Ticket | Shape | Depends on |
 | --- | --- | --- | --- |
 | 1 | F5-01 field-core-spawn-move-cull | solo | done |
-| 2 | F5-02 core-hit-sweep-and-graze-rules | 3 agents | F5-01. It waits at most until T0 + 1 h for sol's D-07 Part B (ruling 5), then pins the current reading and logs "ruling 5 pending" |
-| 3 | F5-03 bomb-phase-clears-and-hit-spheres | 3 agents | F5-02 |
+| 2 | F5-02 core-hit-sweep-and-graze-rules | 2 agents | F5-01. It waits at most until T0 + 1 h for sol's D-07 Part B (ruling 5), then pins the current reading and logs "ruling 5 pending" |
+| 3 | F5-03 bomb-phase-clears-and-hit-spheres | 2 agents | F5-02 |
 | 4 | F12-01 boss-machine-core | solo | F5-04 |
 | 5 | F9-02 dev-prefabs-and-enemy-actor | 2 agents | F9-01, F6-02, and trunk's F6-03 part 2 (arena harness). It reads the ProjectileSystem priority that F6-02 actually landed. |
 | 6 | F7-03 pickup-adapter-and-rewards | solo | F7-01 |
 | 7 | F12-02 boss-controller-adapter | solo | F12-01, F9-02, F4-03 |
 | 8 | F3-04 part 1: the windowed F3 pass for F3-02 and F3-03, `docs/validation/settings.md` and screenshots | solo | F3-02, F3-03 |
 | 9 | F14-01 pre-flight: export `dev-01` in this worktree, run it, and record export-only errors in a handoff entry (no other file edits) | solo | F10-02 |
-| 10 | F11-03 active-and-clear-time-verification. It never edits `game_session.gd`; a Session defect goes to trunk as a blocker. | solo | F11-02 |
+| 10 | F11-03 active-and-clear-time-verification, as the manual protocol and `docs/validation/clear-time.md` only (no tests). It never edits `game_session.gd`; a Session defect goes to trunk as a blocker. | solo | F11-02 |
 
 Expected gaps (stop the session): about T0 + 4.0 to 5.9 h, T0 + 10.7 to 12.4 h, and T0 + 13.2 to 19.5 h.
 
@@ -135,7 +141,7 @@ Expected gaps (stop the session): about T0 + 4.0 to 5.9 h, T0 + 10.7 to 12.4 h, 
 | 3 | F9-01 enemy-model-core | GPT 5.6 Luna (DeepSeek V4.1 Flash) | F5-04 |
 | 4 | F6-03 part 1: the WeaponModel core only (no scene) | GPT 5.6 Luna (DeepSeek V4.1 Flash) | F4-01 only |
 | 5 | F13-02 audio-controller-adapter (not attached). Run a 5-request check of Qwen3.8 Max first | **Qwen3.8 Max** (GPT 5.6 Luna) | F13-01 |
-| 6 | F10-04 stage-01-contract-smoke-test (lands before trunk starts F10-01) | GPT 5.6 Luna (DeepSeek V4.1 Flash) | F8-04 |
+| 6 | ~~F10-04 stage-01-contract-smoke-test~~: cut by the no-tests rule; skip it | — | — |
 | 7 | F12-03 part 1: `lantern_guardian.tres`, three lantern patterns, the content unit test | GPT 5.6 Luna (DeepSeek V4.1 Flash) | F12-01, F5-04, F6-03 part 1 |
 | 8 | F9-03 part 1: the SealRules core | GPT 5.6 Luna (DeepSeek V4.1 Flash) | F9-02 |
 | 9 | F9-03 part 2: the Seal adapter; closes the ticket. Starts after Qwen3.8 Max's window has reset (about T0 + 8.4 h) | **Qwen3.8 Max** (Kimi K3) | F9-03 part 1 |
@@ -199,19 +205,19 @@ Excluded by default: Muse Spark 1.2 and 1.3 Contributor (train on prompts) and S
 
 ## Escalation
 
-1. **When an OpenCode ticket is stuck.** A workhorse or flash model is red twice on the same failing test, or twice hits a tool-call error that poisons the session. The lane then stops and writes the failing test, the error and its hypothesis into the ticket's Outcome.
+1. **When an OpenCode ticket is stuck.** A workhorse or flash model hits the same error twice after a fix (the land gate or the game run), or twice hits a tool-call error that poisons the session. The lane then stops and writes the error, where it shows, and its hypothesis into the ticket's Outcome.
 2. **Kimi K3 comes next.** The user switches that session to Kimi K3 for at most 100 requests, to debug and fix only (no rewrite), one session per window.
 3. **The ticket goes to `rescue` instead when:**
    - Kimi K3 is spent or busy with the other lane;
    - Kimi K3 also fails twice;
    - the ticket already runs on a power model and has failed twice;
-   - its needed-by time is under 2 h: F8-02 by T0 + 9.1 h, F10-04 by T0 + 9.1 h, F8-03 by T0 + 11.4 h, F9-03 by T0 + 15.2 h, and F14-02 part 2 at the end.
+   - its needed-by time is under 2 h: F8-02 by T0 + 9.1 h, F8-03 by T0 + 11.4 h, F9-03 by T0 + 15.2 h, and F14-02 part 2 at the end.
 4. **Handover to rescue.**
    1. The user stops the OpenCode session.
    2. The user opens Claude Code Opus 5.5 in that lane's worktree with the rescue prompt below.
    3. When rescue lands the ticket, the lane resumes.
 5. **Other rules.**
-   - A power-model ticket's fix-up after a written diagnosis may drop to DeepSeek V4.1 Flash to save quota; a second red on the same test escalates.
+   - A power-model ticket's fix-up after a written diagnosis may drop to DeepSeek V4.1 Flash to save quota; the same error a second time escalates.
    - Opus lanes never escalate to cheaper models. A stuck trunk or path ticket adds a diagnosing reviewer within its 3-agent cap.
    - A Session defect found by path's F11-03 becomes trunk's next ticket.
    - Sol keeps its tickets; rescue only resolves its `stage_director.gd` merge.
@@ -220,7 +226,7 @@ Excluded by default: Muse Spark 1.2 and 1.3 Contributor (train on prompts) and S
 
 Both overflows are optional, and neither is expected under this plan (Luna's quota is not tight).
 
-**Codex Terra (lane `terra`).** Start it with `tools/lane.ps1 setup terra` only if an OpenCode lane has been blocked for more than an hour, by quota or a model outage, while one of these easy tickets is ready: **F8-04, F10-04, F13-01, F3-01**.
+**Codex Terra (lane `terra`).** Start it with `tools/lane.ps1 setup terra` only if an OpenCode lane has been blocked for more than an hour, by quota or a model outage, while one of these easy tickets is ready: **F8-04, F13-01, F3-01**.
 - Tell the owning lane to skip that ticket.
 - Terra never takes a D ticket, anything sol owns, or any file outside those tickets.
 
@@ -230,11 +236,10 @@ Both overflows are optional, and neither is expected under this plan (Luna's quo
 
 Run easy tickets in batches of two or three in one session. Switch back as soon as the OpenCode window resets. The candidates:
 - F8-04, F12-04 and F12-03 part 1 (content);
-- F10-04 (read-only contract test);
 - F14-02 parts 1 and 2;
 - F13-01;
-- the fix-up retry of any OpenCode ticket whose first red run has a written diagnosis naming the fix;
-- the ROADMAP row, handoff entry and module-doc tail of any OpenCode ticket whose code is already green.
+- the fix-up retry of any OpenCode ticket whose first failed land or game run has a written diagnosis naming the fix;
+- the ROADMAP row, handoff entry and module-doc tail of any OpenCode ticket whose code already lands cleanly.
 
 Never send OpenRouter a strong-coder, complexity-4 or 5, or critical-path ticket.
 
@@ -248,7 +253,7 @@ At most three Opus sessions, each running workflows of at most 3 agents:
 **Expected spend.** In mid-tier-request units (a 3-agent ticket costs about 2.5× and a 2-agent ticket about 1.6×): trunk about 4,100, path about 1,300, rescue at most 300. Trunk peaks in windows W3 and W4, at about 1,100 each.
 
 **Guard.** If the Claude meter passes 75 % of a window with more than 1.5 h left in it, cut in this order:
-1. The test-writers (3 agents become 2).
+1. The verifiers (3 agents become 2).
 2. The reviewers on tickets of complexity 4 or lower.
 
 Never drop the reviewer on F10-01, F10-02, F10-03 or F12-03. Path pauses before trunk ever does, because trunk sets the pace. Mid-coder and content work never runs on Opus (F4-03 is the exception: it fills trunk's otherwise idle wait).
@@ -260,37 +265,37 @@ Paste one into a fresh session of the right tool, opened in the lane's worktree.
 **trunk: Claude Code desktop, Opus 5.5, ultracode on,** in `touhou-3d-trunk`:
 
 ```
-You are lane trunk of docs/engineering/SPRINT.md. Read CLAUDE.md, docs/engineering/SPRINT.md and docs/engineering/ROADMAP.md once. Work the trunk queue in order, one ticket at a time: tools/lane.ps1 sync; tools/lane.ps1 status <ticket path> (for a part, check the part dependencies in SPRINT's table, using git log dev-01 --oneline --grep "<ID> part N"); implement it with the workflow shape the trunk table gives (3 agents: implementer, test-writer, reviewer; 2 agents: implementer, reviewer; solo: self-review against the Definition of Done), applying the Claude usage guard; finish its Definition of Done; commit on lane/trunk; tools/lane.ps1 land. Then the next ticket. Stop after four tickets and report what landed. Run every tools script as powershell -NoProfile -ExecutionPolicy Bypass -File tools\<script>.ps1 <args>.
+You are lane trunk of docs/engineering/SPRINT.md. Read CLAUDE.md, docs/engineering/SPRINT.md and docs/engineering/ROADMAP.md once. Work the trunk queue in order, one ticket at a time: tools/lane.ps1 sync; tools/lane.ps1 status <ticket path> (for a part, check the part dependencies in SPRINT's table, using git log dev-01 --oneline --grep "<ID> part N"); implement it with the workflow shape the trunk table gives (3 agents: implementer, verifier who runs the game, reviewer; 2 agents: implementer, reviewer; solo: self-review against the Definition of Done), applying the Claude usage guard. Write no tests of any kind (SPRINT "No new tests"); land is the gate, plus /run for visible behavior; finish its Definition of Done; commit on lane/trunk; tools/lane.ps1 land. Then the next ticket. Stop after four tickets and report what landed. Run every tools script as powershell -NoProfile -ExecutionPolicy Bypass -File tools\<script>.ps1 <args>.
 ```
 
 **path: Claude Code desktop, Opus 5.5, ultracode on,** in `touhou-3d-path`:
 
 ```
-You are lane path of docs/engineering/SPRINT.md. Read CLAUDE.md, docs/engineering/SPRINT.md and docs/engineering/ROADMAP.md once. Work the path queue in order with the workflow shape its table gives, one ticket at a time: tools/lane.ps1 sync; tools/lane.ps1 status <ticket path> (for a part, use SPRINT's part dependencies); implement; finish its Definition of Done; commit on lane/path; tools/lane.ps1 land. Never edit a trunk-only file (SPRINT "Lanes"). When your next ticket is not ready and none later is, stop the session and report which dependency you are waiting for; the user restarts you with this prompt. Stop after four tickets and report what landed. Run every tools script as powershell -NoProfile -ExecutionPolicy Bypass -File tools\<script>.ps1 <args>.
+You are lane path of docs/engineering/SPRINT.md. Read CLAUDE.md, docs/engineering/SPRINT.md and docs/engineering/ROADMAP.md once. Write no tests of any kind (SPRINT "No new tests"); land is the gate, plus /run for visible behavior. Work the path queue in order with the workflow shape its table gives, one ticket at a time: tools/lane.ps1 sync; tools/lane.ps1 status <ticket path> (for a part, use SPRINT's part dependencies); implement; finish its Definition of Done; commit on lane/path; tools/lane.ps1 land. Never edit a trunk-only file (SPRINT "Lanes"). When your next ticket is not ready and none later is, stop the session and report which dependency you are waiting for; the user restarts you with this prompt. Stop after four tickets and report what landed. Run every tools script as powershell -NoProfile -ExecutionPolicy Bypass -File tools\<script>.ps1 <args>.
 ```
 
 **rescue: Claude Code desktop, Opus 5.5,** opened in the stuck lane's worktree after that lane's session is stopped:
 
 ```
-You are rescue for lane <lane> of docs/engineering/SPRINT.md. Read CLAUDE.md and the "Escalation" section of docs/engineering/SPRINT.md, then finish <ticket path> starting from the failing test and the diagnosis in its Outcome, solo, without rewriting what already works. Finish its Definition of Done, commit on lane/<lane> with the handoff header "— Claude (rescue for <lane>) —", run tools/lane.ps1 land, and stop. Run every tools script as powershell -NoProfile -ExecutionPolicy Bypass -File tools\<script>.ps1 <args>.
+You are rescue for lane <lane> of docs/engineering/SPRINT.md. Read CLAUDE.md and the "Escalation" section of docs/engineering/SPRINT.md, then finish <ticket path> starting from the error and the diagnosis in its Outcome, solo, without rewriting what already works and without writing tests. Finish its Definition of Done, commit on lane/<lane> with the handoff header "— Claude (rescue for <lane>) —", run tools/lane.ps1 land, and stop. Run every tools script as powershell -NoProfile -ExecutionPolicy Bypass -File tools\<script>.ps1 <args>.
 ```
 
 **oc-a and oc-b: OpenCode desktop,** one session per lane, in `touhou-3d-oc-a` or `touhou-3d-oc-b`:
 
 ```
-You are lane oc-a of docs/engineering/SPRINT.md (use oc-b for the other session). Read AGENTS.md, docs/engineering/SPRINT.md and docs/engineering/CONVENTIONS.md once. SPRINT.md supersedes every "cut pending the user" line in the tickets. Work your lane's queue from SPRINT, one ticket at a time. Before each ticket, read its Model line in SPRINT's table: if it names a different model from the one you are running, stop and ask the user to switch models, then continue. For each ticket: tools/lane.ps1 sync; tools/lane.ps1 status <ticket path> (for a part, SPRINT's part dependencies apply, and you do only that part; commit it with "(<ID> part N)" in the message and leave the ticket todo unless it is the last part); read only the ticket's "Read first" list; write the tests first, then the code, with strict static typing (warnings are errors); run tools/test.ps1 until green with no SCRIPT ERROR; finish its Definition of Done; commit on your lane branch with the ticket's commit message; tools/lane.ps1 land. If the same test fails twice after fixes, stop, write the failing test, error and hypothesis into the ticket's Outcome, and ask the user to escalate (SPRINT "Escalation"). Skill names in a ticket's kickoff (/mattpocock-skills:tdd, /run) are Claude-only: follow their intent. Stop after four tickets and report what landed. Run every tools script as powershell -NoProfile -ExecutionPolicy Bypass -File tools\<script>.ps1 <args>.
+You are lane oc-a of docs/engineering/SPRINT.md (use oc-b for the other session). Read AGENTS.md, docs/engineering/SPRINT.md and docs/engineering/CONVENTIONS.md once. SPRINT.md supersedes every "cut pending the user" line in the tickets. Work your lane's queue from SPRINT, one ticket at a time. Before each ticket, read its Model line in SPRINT's table: if it names a different model from the one you are running, stop and ask the user to switch models, then continue. For each ticket: tools/lane.ps1 sync; tools/lane.ps1 status <ticket path> (for a part, SPRINT's part dependencies apply, and you do only that part; commit it with "(<ID> part N)" in the message and leave the ticket todo unless it is the last part); read only the ticket's "Read first" list; write the code with strict static typing (warnings are errors) and write NO tests of any kind: ignore the ticket's "Tests required" section (SPRINT "No new tests"); finish its Definition of Done without its test items; commit on your lane branch with the ticket's commit message; tools/lane.ps1 land. tools/lane.ps1 land is your only check: if it or the game run shows the same error twice after fixes, stop, write the error and your hypothesis into the ticket's Outcome, and ask the user to escalate (SPRINT "Escalation"). Skill names in a ticket's kickoff (/mattpocock-skills:tdd, /run) are Claude-only: follow their intent. Stop after four tickets and report what landed. Run every tools script as powershell -NoProfile -ExecutionPolicy Bypass -File tools\<script>.ps1 <args>.
 ```
 
 **sol: Codex, GPT Sol,** in `touhou-3d-sol`:
 
 ```
-You are Astra, lane sol of docs/engineering/SPRINT.md. Run tools/lane.ps1 sync first. Read AGENTS.md, docs/engineering/SPRINT.md, docs/engineering/CONVENTIONS.md and docs/GUIDE.md Sections 3 and 5 once. SPRINT.md supersedes every "cut pending the user" line in the tickets. Work the sol queue in SPRINT's order, one item at a time, starting with D-07 Part B: tools/lane.ps1 sync; tools/lane.ps1 status <ticket path> (for a part or pass, SPRINT's dependencies apply; commit it with "(<ID> part N)" or "(<ID> pass N)" and leave the ticket todo unless it is the last); deliver it inside its Files boundary (D tickets are design deliverables; F tickets are code: test-first, strict static typing, tools/test.ps1 green with no SCRIPT ERROR); finish its Definition of Done or Handoff section; commit on lane/sol; tools/lane.ps1 land. If a stage_director.gd merge conflicts inside one function, stop and ask the user for the rescue session. Stop after four items and report what landed. Run every tools script as powershell -NoProfile -ExecutionPolicy Bypass -File tools\<script>.ps1 <args>.
+You are Astra, lane sol of docs/engineering/SPRINT.md. Run tools/lane.ps1 sync first. Read AGENTS.md, docs/engineering/SPRINT.md, docs/engineering/CONVENTIONS.md and docs/GUIDE.md Sections 3 and 5 once. SPRINT.md supersedes every "cut pending the user" line in the tickets. Work the sol queue in SPRINT's order, one item at a time, starting with D-07 Part B: tools/lane.ps1 sync; tools/lane.ps1 status <ticket path> (for a part or pass, SPRINT's dependencies apply; commit it with "(<ID> part N)" or "(<ID> pass N)" and leave the ticket todo unless it is the last); deliver it inside its Files boundary (D tickets are design deliverables; F tickets are code with strict static typing and NO tests of any kind, checked by tools/lane.ps1 land and a run of the game); finish its Definition of Done or Handoff section; commit on lane/sol; tools/lane.ps1 land. If a stage_director.gd merge conflicts inside one function, stop and ask the user for the rescue session. Stop after four items and report what landed. Run every tools script as powershell -NoProfile -ExecutionPolicy Bypass -File tools\<script>.ps1 <args>.
 ```
 
 **terra: Codex, Terra (optional),** in `touhou-3d-terra` after `tools/lane.ps1 setup terra`:
 
 ```
-You are lane terra of docs/engineering/SPRINT.md. Take only the ticket(s) the user names, from F8-04, F10-04, F13-01 and F3-01. Read AGENTS.md, docs/engineering/SPRINT.md and docs/engineering/CONVENTIONS.md once. For each: tools/lane.ps1 sync; tools/lane.ps1 status <ticket path>; tests first, then code; tools/test.ps1 green with no SCRIPT ERROR; its Definition of Done; commit on lane/terra; tools/lane.ps1 land. Never touch a D ticket or any file outside the ticket. Run every tools script as powershell -NoProfile -ExecutionPolicy Bypass -File tools\<script>.ps1 <args>.
+You are lane terra of docs/engineering/SPRINT.md. Take only the ticket(s) the user names, from F8-04, F13-01 and F3-01. Read AGENTS.md, docs/engineering/SPRINT.md and docs/engineering/CONVENTIONS.md once. For each: tools/lane.ps1 sync; tools/lane.ps1 status <ticket path>; code only, no tests of any kind; its Definition of Done without its test items; commit on lane/terra; tools/lane.ps1 land. Never touch a D ticket or any file outside the ticket. Run every tools script as powershell -NoProfile -ExecutionPolicy Bypass -File tools\<script>.ps1 <args>.
 ```
 
 ## Checkpoints (T0 = the lanes start; planned for about 21:00 on 2026-09-23)
@@ -301,7 +306,7 @@ You are lane terra of docs/engineering/SPRINT.md. Take only the ticket(s) the us
 | --- | --- | --- |
 | T0 + 1 h | D-07 Part B, F5-01, F13-01, F8-01 | Rulings pinned before F5-02 and F12-01; field spawn, move and cull; Luna smoke-tested |
 | T0 + 3 h | F4-02, F4-03, F5-02, F5-03, F5-04, F9-01, F8-02, F8-04, D-01, D-03 | Full projectile-field core and PatternEmitter; HUD bound with marker, boss panel and cues; schemas, EncounterMachine and Stage 1 content; SFX imported; Lantern Guardian scene |
-| T0 + 6 h | F12-01, F6-03 part 1, F13-02, F10-04, F12-04, F8-03, F3-01, F6-02, F12-03 part 1, D-04, D-02, D-06 pass 1 | MultiMesh Projectiles with the benchmark recorded; boss, audio and Snapshot cores; Stage 2 and lantern content |
+| T0 + 6 h | F12-01, F6-03 part 1, F13-02, F12-04, F8-03, F3-01, F6-02, F12-03 part 1, D-04, D-02, D-06 pass 1 | MultiMesh Projectiles with the benchmark recorded; boss, audio and Snapshot cores; Stage 2 and lantern content |
 | T0 + 9.5 h | F6-03, F7-01, F7-02, F9-02, F7-03, F3-02, F14-02 part 1, F9-03 part 1, D-05 | The ship fires; hostile fire damages it; Defeat; Bomb; Spirits and Sentries fight in the arena; Pickups; Options apply and persist; Stage 1 tuned |
 | T0 + 13.5 h | F10-01, F10-02, F12-02, F9-03, F3-03, F3-04 part 1, F14-01 pre-flight | The Stage 1 route with Encounters, Waves, rewards, Gates, Checkpoints and PortalLinks; boss adapter; controller disconnect pause; a first exported build smoke-tested |
 | T0 + 17.5 h | F10-03, F12-03, F12-05, D-06 pass 2 | Stage 1 end to end with Retry, Restart and the Lantern Guardian; the Stage 2 route live |
