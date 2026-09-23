@@ -1,0 +1,10 @@
+[gd_resource type="SphereMesh" format=3]
+
+[ext_resource type="Material" path="res://assets/combat/hostile_shot.tres" id="1_r8bn3"]
+
+[resource]
+material = ExtResource("1_r8bn3")
+radius = 1.0
+height = 2.0
+radial_segments = 8
+rings = 4

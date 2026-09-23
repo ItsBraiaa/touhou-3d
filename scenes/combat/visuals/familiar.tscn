@@ -1,0 +1,59 @@
+[gd_scene format=4]
+
+[ext_resource type="Material" path="res://assets/combat/player_shot.tres" id="1_bb5to"]
+
+[sub_resource type="ArrayMesh" id="ArrayMesh_8f0bm"]
+_surfaces = [{
+"aabb": AABB(-0.42, -0.42, -0.42, 0.84, 0.84, 0.84),
+"format": 34359742465,
+"index_count": 24,
+"index_data": PackedByteArray("AAACAAEAAAADAAIAAAAEAAMAAAABAAQABQABAAIABQACAAMABQADAAQABQAEAAEA"),
+"material": ExtResource("1_bb5to"),
+"primitive": 3,
+"uv_scale": Vector4(0, 0, 0, 0),
+"vertex_count": 6,
+"vertex_data": PackedByteArray("AAAAAD0K1z4AAAAAPQrXPgAAAAAAAAAAAAAAAAAAAAA9Ctc+PQrXvgAAAAAAAAAAAAAAAAAAAAA9Cte+AAAAAD0K174AAAAA")
+}]
+
+[sub_resource type="TorusMesh" id="TorusMesh_0d1ob"]
+material = ExtResource("1_bb5to")
+inner_radius = 0.51
+outer_radius = 0.58
+rings = 24
+ring_segments = 6
+
+[sub_resource type="Animation" id="Animation_wds38"]
+length = 2.0
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("VisualPivot:rotation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 2),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector3(0, 0, 0), Vector3(0, 6.2831855, 0)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_q4cka"]
+_data = {
+&"hover": SubResource("Animation_wds38")
+}
+
+[node name="Familiar" type="Node3D" unique_id=203210214]
+
+[node name="VisualPivot" type="Node3D" parent="." unique_id=1377895803]
+
+[node name="StarCore" type="MeshInstance3D" parent="VisualPivot" unique_id=308582481]
+mesh = SubResource("ArrayMesh_8f0bm")
+
+[node name="Orbit" type="MeshInstance3D" parent="VisualPivot" unique_id=1329002509]
+transform = Transform3D(1, 0, 0, 0, 0.87758255, -0.47942555, 0, 0.47942555, 0.87758255, 0, 0, 0)
+mesh = SubResource("TorusMesh_0d1ob")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=2025226480]
+libraries/ = SubResource("AnimationLibrary_q4cka")
+autoplay = &"hover"

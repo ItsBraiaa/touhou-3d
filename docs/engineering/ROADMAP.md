@@ -90,7 +90,7 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | | | | 01 export-and-run-outside-editor | integration | no | trunk | todo (blocks itself until the user installs the Godot 4.7.2 export templates) |
 | | | | 02 package-and-acceptance-record | tooling | no | oc-b | todo |
 | D | Design sprint (Astra) | `design-sprint` | 01 sfx-selection-and-import | design | — | sol | done (listening pass owed by the human pass) |
-| | | | 02 combat-visuals | design | — | sol | todo |
+| | | | 02 combat-visuals | design | — | sol | done (2026-09-23: six visuals and focused-slider fix verified) |
 | | | | 03 lantern-guardian-scene | design | — | sol | done (2026-09-23: Ghost prefab, clips and dusk render verified) |
 | | | | 04 stage-2-boss-scenes | design | — | sol | done (2026-09-23: Tempest Sentinel and Storm Guardian prefabs, clips and Stage 2 renders verified) |
 | | | | 05 stage-1-tuning-and-pacing | design | — | sol | todo |
@@ -139,6 +139,8 @@ Dependencies Claude has on scene and content work. These are needs by Feature, n
 | F14 | Nothing new; credits and licenses must already cover every integrated asset. F14-02 lists any gaps it finds. |
 
 ## Received from Astra
+
+2026-09-23: D-02 combat visuals are SCENE_READY under `scenes/combat/visuals/`; exact mesh, scene, animation and consumer swap paths are in [combat-visuals.md](../validation/combat-visuals.md). The Options slider focus fill is gold and visually verified.
 
 2026-09-23: D-04 Tempest Sentinel and Storm Guardian prefabs are SCENE_READY at `scenes/enemies/tempest_sentinel.tscn` and `scenes/enemies/storm_guardian.tscn`; tree, clips, hit spheres, emitters and render notes are in [ENEMY_VISUAL_HANDOFF.md](../ENEMY_VISUAL_HANDOFF.md). Sol F12-06 and F12-07 own controller attachment and Stage 2 actor scene wiring.
 
