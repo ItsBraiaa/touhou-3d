@@ -6,7 +6,7 @@ Planned 2026-09-23 by Claude acting as product owner, engineer and game-design a
 
 - **No new tests, ever (the user's rule, 2026-09-23).**
   - Nobody writes a unit test or a scene test, and nobody does TDD. Every ticket's "Tests required" section, its `/mattpocock-skills:tdd` kickoff and any "named test for each invariant" line in its Definition of Done are void.
-  - The only automated gate is `tools/lane.ps1 land`: the existing suite plus a 300-frame headless boot of the main scene. A red run, a `SCRIPT ERROR`, a parse error, a failed script load or an `ERROR:` line stops the landing.
+  - The only automated gate is `tools/lane.ps1 land`: the existing suite plus a 300-frame headless boot of the main scene. A red run, a `SCRIPT ERROR`, a parse error or a failed script load stops the landing, and so does any `ERROR:` line during the boot. The suite prints `ERROR:` lines on purpose, from tests of loud setup errors.
   - Adapter and integration tickets are also checked by running the game (`/run` in Claude, or the ticket's manual check).
   - If an existing test fails only because a ticket intentionally changed that behavior, delete or minimally adjust that test, and name it in the handoff entry.
   - F10-04 (a test-only ticket) is cut by this rule. F11-03 keeps only its manual measurement protocol.
@@ -53,7 +53,7 @@ No two agents ever share a working tree or a branch.
    2. `tools/lane.ps1 status <ticket path>`
    3. Implement and test.
    4. Commit on your lane branch.
-   5. `tools/lane.ps1 land`, which merges `dev-01` in, runs the existing suite and a boot smoke of the main scene (a red run, `SCRIPT ERROR`, parse error, failed script load or `ERROR:` line stops it), and fast-forwards the primary tree. It retries if another lane landed first.
+   5. `tools/lane.ps1 land`, which merges `dev-01` in, runs the existing suite and a boot smoke of the main scene (a red run, `SCRIPT ERROR`, parse error or failed script load stops it, and so does any `ERROR:` line during the boot), and fast-forwards the primary tree. It retries if another lane landed first.
 4. **Conflicts.**
    - `docs/HANDOFF_LOG.md` and `docs/engineering/README.md` merge with the union driver: add entries, never reorder.
    - Any other conflict is resolved in your lane branch, never in the primary tree, and the file is named in your handoff entry.

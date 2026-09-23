@@ -20,7 +20,7 @@ State: docs
 Files: `docs/engineering/SPRINT.md` ("Product decisions", workflow shapes, escalation, overflow, Claude guard, every kickoff prompt), `docs/engineering/CONVENTIONS.md` ("Tests", Definition of Done), `docs/engineering/ROADMAP.md` (F10-04, F11-03, Risk), `tools/lane.ps1` (a boot smoke and a wider error scan), `.scratch/stage-director/issues/04-stage-01-contract-smoke-test.md` (cut), `.scratch/run-flow/issues/03-active-and-clear-time-verification.md` (note), `CLAUDE.md`, `AGENTS.md` (shared).
 Change:
 - **The rule.** Nobody writes unit or scene tests or does TDD, in any lane. Every ticket's "Tests required" section and tdd kickoff are void.
-- **The gate.** `tools/lane.ps1 land` still runs the existing suite (no token cost), and now also boots the main scene headless for 300 frames. A red run, `SCRIPT ERROR`, parse error, failed script load or `ERROR:` line stops a landing. Adapters are also checked by running the game.
+- **The gate.** `tools/lane.ps1 land` still runs the existing suite (no token cost), and now also boots the main scene headless for 300 frames. A red run, `SCRIPT ERROR`, parse error or failed script load stops a landing, and so does any `ERROR:` line during the boot. Adapters are also checked by running the game.
 - **Workflow shapes.** The 3-agent shape is now implementer, verifier (runs the game) and reviewer. Cores use implementer and reviewer.
 - **Tickets.** F10-04, a test-only ticket, is cut; F11-03 keeps only its manual protocol.
 - **Old tests.** If an old test fails only because a ticket intentionally changed that behavior, delete or minimally adjust that test and name it in the handoff.

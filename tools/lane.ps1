@@ -18,9 +18,9 @@ setup <lane>            Creates the worktree <primary>-<lane> on branch lane/<la
 sync                    Merges the integration branch into the current lane branch.
 land                    From a lane worktree with everything committed: merges the
                         integration branch in, runs tools/test.ps1 (the existing suite), then a
-                        300-frame headless boot of the main scene. A red suite, or any
-                        SCRIPT ERROR, parse error, failed script load or ERROR line in either,
-                        stops the landing. Then it fast-forwards the primary tree to the lane
+                        300-frame headless boot of the main scene. A red suite, a SCRIPT ERROR,
+                        parse error or failed script load in either, or any ERROR line in the
+                        boot, stops the landing. Then it fast-forwards the primary tree to the lane
                         branch, retrying while another lane lands first. During the sprint
                         this gate is the only automated check: nobody writes new tests.
 
@@ -152,13 +152,17 @@ function Invoke-MergeBase([string]$Base) {
     }
 }
 
-$errorPattern = 'SCRIPT ERROR|Parse Error|Failed to load script|ERROR:'
+# The suite deliberately provokes push_error ("ERROR: ... required export ... is not set") in
+# its negative tests, so only script failures count there. A clean boot prints no ERROR line
+# at all, so the boot smoke also rejects plain ERROR lines.
+$suiteErrorPattern = 'SCRIPT ERROR|Parse Error|Failed to load script'
+$bootErrorPattern = 'SCRIPT ERROR|Parse Error|Failed to load script|ERROR:'
 
 function Invoke-Tests {
     $output = & (Join-Path $PSScriptRoot 'test.ps1') *>&1 | ForEach-Object { "$_" }
     $code = $LASTEXITCODE
     $output | ForEach-Object { Write-Host $_ }
-    $scriptErrors = @($output | Where-Object { $_ -match $errorPattern })
+    $scriptErrors = @($output | Where-Object { $_ -match $suiteErrorPattern })
     if ($code -ne 0 -or $scriptErrors.Count -gt 0) {
         Write-Host "lane: the suite is not green (exit $code, $($scriptErrors.Count) error line(s)). Fix them before landing; if an old test fails only because your ticket intentionally changed that behavior, delete or minimally adjust it and name it in your handoff entry."
         exit 1
@@ -169,7 +173,7 @@ function Invoke-BootSmoke {
     $root = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..')).Path
     $output = & (Join-Path $PSScriptRoot 'godot.ps1') --headless --path $root --quit-after 300 *>&1 | ForEach-Object { "$_" }
     $code = $LASTEXITCODE
-    $bootErrors = @($output | Where-Object { $_ -match $errorPattern })
+    $bootErrors = @($output | Where-Object { $_ -match $bootErrorPattern })
     if ($code -ne 0 -or $bootErrors.Count -gt 0) {
         $output | ForEach-Object { Write-Host $_ }
         Write-Host "lane: the main scene does not boot cleanly (exit $code, $($bootErrors.Count) error line(s)). Fix them before landing."
