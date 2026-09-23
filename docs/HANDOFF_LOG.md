@@ -15,6 +15,13 @@ Action required by <other agent>: <what they must do, or "none">
 
 ---
 
+## 2026-09-23 20:29 — OpenCode (oc-a) — Generated script UIDs
+State: docs
+Files: `scripts/combat/pattern_emitter.gd.uid`, `scripts/definitions/pattern_definition.gd.uid`, `scripts/definitions/checkpoint_definition.gd.uid`, `scripts/definitions/encounter_definition.gd.uid`, `scripts/definitions/reward_definition.gd.uid`, `scripts/definitions/stage_definition.gd.uid`, `scripts/definitions/wave_definition.gd.uid`, `tools/validate_audio_selection.gd.uid`, `docs/HANDOFF_LOG.md`
+Change: Tracked eight stable Godot script UIDs generated while importing scripts already integrated from F5-04, F8-01 and D-01; no source scripts were changed.
+Why: Godot's import created these metadata files and the lane gate requires generated `.uid` files to be tracked beside their scripts.
+Action required by the owning lanes: No source changes; these generated UIDs are now tracked.
+
 ## 2026-09-23 20:26 — OpenCode (oc-a) — F9-01 EnemyModel core
 State: CODE_READY
 Files: `scripts/definitions/enemy_definition.gd`, `scripts/enemies/enemy_model.gd`, `docs/engineering/enemies.md`, `docs/engineering/README.md`, `docs/engineering/ROADMAP.md`, `.scratch/enemies/issues/01-enemy-model-core.md`
