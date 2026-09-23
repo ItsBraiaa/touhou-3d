@@ -15,6 +15,22 @@ Action required by <other agent>: <what they must do, or "none">
 
 ---
 
+## 2026-09-23 20:13 — Astra (sol) — Rulings (D-07 Part B) [shared]
+State: docs
+Files: `docs/PLANEJAMENTO.md`, `scenes/ui/hud.tscn`, `.scratch/design-sprint/issues/07-shrine-lighting-and-boss-rulings.md`, `docs/engineering/ROADMAP.md`, `docs/HANDOFF_LOG.md`
+Change: Five rulings below are recorded in PLANEJAMENTO Sections 4, 7 and 9. `Phase1` and `Phase2` carry authored two-Phase offset metadata, preserving their current three-Phase positions until Hud applies it. The D-07 ticket remains doing for Parts A and C.
+
+| Ruling | Decision | Follow-up |
+| --- | --- | --- |
+| 1 Phase transition damage | Confirm no damage during the cue, bounded to 0.75 s so it does not pad the encounter. Excess damage cannot skip a Phase. | Path F12-01: keep `transition_seconds` at or below 0.75; no new code behavior requested. Sol D-07 Part C and D-06 apply the bound to values. |
+| 2 HUD dimming | Confirm 0.25 alpha for spent Shield/Bomb and 0.30 for finished Phase. | None. |
+| 3 two-Phase bar | Change to two equal segments across the full 620 px panel, with 16 px side margins and a 6 px center gap. | Trunk `Hud` follow-up: when `phase_count == 2`, read `two_phase_offset_left/right` metadata from Phase1 and Phase2 and apply those offsets; restore their authored offsets when three Phases show. No scheduled ticket owns this yet. |
+| 4 ship yaw | Confirm the ship model does not yaw with the camera; the weapon and Familiars aim by camera yaw and visual banking stays cosmetic. | None. |
+| 5 Graze under Invulnerability | Confirm strict spending: contact while invulnerable consumes that Projectile's one Graze opportunity. | None. |
+
+Why: The existing boss cue, scoring and ship orientation remain readable and consistent with the source design; the two-Phase HUD capture showed unused panel width.
+Action required by Claude: path observes the transition cap in F12-01; trunk applies the two-Phase HUD layout in a follow-up. Parts A and C remain with sol after F12-03.
+
 ## 2026-09-23 20:10 — Claude (trunk) — F6-02: ProjectileSystem on ProjectileRoot [shared]
 State: CODE_READY
 Files:

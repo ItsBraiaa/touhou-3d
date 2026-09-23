@@ -147,6 +147,8 @@ theme_override_font_sizes/font_size = 18
 horizontal_alignment = 1
 
 [node name="Phase1" type="ProgressBar" parent="BossStatus"]
+metadata/two_phase_offset_left = 16.0
+metadata/two_phase_offset_right = 307.0
 offset_left = 16.0
 offset_top = 45.0
 offset_right = 208.0
@@ -158,6 +160,8 @@ value = 100.0
 show_percentage = false
 
 [node name="Phase2" type="ProgressBar" parent="BossStatus"]
+metadata/two_phase_offset_left = 313.0
+metadata/two_phase_offset_right = 604.0
 offset_left = 214.0
 offset_top = 45.0
 offset_right = 406.0

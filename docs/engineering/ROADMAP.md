@@ -95,7 +95,7 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | | | | 04 stage-2-boss-scenes | design | — | sol | todo |
 | | | | 05 stage-1-tuning-and-pacing | design | — | sol | todo |
 | | | | 06 stage-2-content-review | design | — | sol | todo |
-| | | | 07 shrine-lighting-and-boss-rulings | design | — | sol | todo (Part B, the rulings, lands early) |
+| | | | 07 shrine-lighting-and-boss-rulings | design | — | sol | doing (Part B rulings delivered; Parts A and C await F12-03) |
 
 Order rationale: Player before Menus (highest UX risk and GUIDE Section 13's assignment). Audio buses are created in F0-03 so F3 can bind Options to them. Enemies (F9) come before the Stage Director (F10) so the Director is integrated against real Waves. The sprint's lane queues, checkpoints and kickoff prompts are in [SPRINT.md](SPRINT.md).
 
@@ -139,6 +139,8 @@ Dependencies Claude has on scene and content work. These are needs by Feature, n
 | F14 | Nothing new; credits and licenses must already cover every integrated asset. F14-02 lists any gaps it finds. |
 
 ## Received from Astra
+
+2026-09-23: D-07 Part B rulings are in [PLANEJAMENTO.md](../PLANEJAMENTO.md) and the handoff log. The two-Phase HUD bar offsets are authored in `hud.tscn`; trunk's `Hud` follow-up must apply them.
 
 Stage 2 art revision: `.scratch/stage-02-area/issues/02-mountain-art-pass.md` — **done** (textures, terrain, vegetation and ambient visual motion; gameplay pending).
 
