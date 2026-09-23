@@ -71,6 +71,7 @@ func test_required_exports_resolve_to_the_authored_nodes() -> void:
 	assert_eq(_ship.camera_rig, _ship.get_node_or_null(^"CameraRig"), "camera_rig")
 	assert_eq(_ship.damage_core, _ship.get_node_or_null(^"DamageCore"), "damage_core")
 	assert_eq(_ship.graze_volume, _ship.get_node_or_null(^"GrazeVolume"), "graze_volume")
+	assert_eq(_ship.targeting, _ship.get_node_or_null(^"Targeting"), "targeting")
 	assert_eq(_ship.process_mode, Node.PROCESS_MODE_INHERIT, "a valid scene keeps processing")
 
 

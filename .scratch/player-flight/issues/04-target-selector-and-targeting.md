@@ -1,6 +1,6 @@
 # F1-04 TargetSelector core and targeting adapter
 
-Status: todo
+Status: done (2026-09-22; the physical keyboard and pad pass is still owed, as for 02 and 03)
 Type: core+adapter
 parallel-safe: no
 Depends on: F1-03
@@ -64,6 +64,20 @@ HUD marker (F4-02), Aim Assist shots (F6-03), enemy targets.
 ## Handoff notes for Astra
 
 Any future enemy prefab must join the `targetable` group and expose a `HitVolume` child for the occlusion ray to aim at. Targets without a `HitVolume` are skipped and logged once.
+
+## Outcome (2026-09-22)
+
+Delivered as specified, test-first for the core, with these differences:
+
+- **`select_next` orders the ring left to right on screen, not by screen angle.** The camera turns to frame every new lock; that turn slides every target sideways by the same amount and keeps their left-to-right order, while the locked target's own angle around the center is noise (a hair above center "next" goes right, a hair below it goes left).
+- **The screen radius gates a fresh lock only; the switch ring is every visible target in range.** Found by `test_next_target_visits_all_three_before_wrapping_while_the_camera_follows`: locked on High, the camera turns right and Low slides to x -0.965, on screen but outside the 0.85 radius, so a ring that kept the radius cycled Middle, High, Middle, High and never reached Low. `test_select_next_reaches_visible_targets_outside_the_screen_radius` pins the fix in the core.
+- Ids are resolved with `instance_from_id` instead of a stored id-to-node dictionary, so a target freed between two ticks reads as null rather than a dangling reference.
+- `build_candidates()` is public (the contract test and the validation tool call it; F6-03's Aim Assist is expected to).
+- `PlayerController` gains a required `targeting` export and makes the one `target_changed → CameraRig.set_lock_target` connection in `_ready`, not `setup()`, because owners call `setup()` again whenever the Flight Volume changes.
+- The harness's F1-03 lock stand-in is removed; its readout shows the real lock and its distance.
+- Manual checks were flown with simulated actions by `tools/validate_player_flight.gd`, not by a human. The arena's trees have no collision, so "a tree between camera and target" was measured with the shrine gate's beam, the only collidable scenery that can come between them.
+
+Tests: 14 in `tests/unit/player/test_target_selector.gd`, 10 in `tests/scene/test_targeting_contract.gd`, one reference added to `test_player_ship_contract.gd`; suite 93 green; 11 mutations each caught. F1 spec "Done when": all F1 tests pass, the three player scripts have complete registry rows, weapon untouched; the physical keyboard and gamepad half of the manual checklist is still open, and cannot be closed by an agent.
 
 ## Kickoff prompt
 

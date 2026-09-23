@@ -1,9 +1,9 @@
 extends SceneTree
 ## Offline flight QA for `scenes/dev/arena_harness.tscn` (Claude, F1-02, extended by
-## F1-03). Not gameplay code and not attached to any node: it drives the harness with
-## simulated input, measures what the ship and the camera actually did, and captures the
-## screenshots recorded in `docs/validation/player-flight.md`. Exits non-zero when a
-## measurement is off.
+## F1-03 and F1-04). Not gameplay code and not attached to any node: it drives the harness
+## with simulated input, measures what the ship, the camera and the Target Lock actually
+## did, and captures the screenshots recorded in `docs/validation/player-flight.md`. Exits
+## non-zero when a measurement is off.
 ##
 ## Run it with `tools/godot.ps1 --path . --script res://tools/validate_player_flight.gd`.
 ## With a display it also writes the PNGs; headless it skips them.
@@ -51,10 +51,19 @@ const PITCH_TICKS := 15
 const PITCH_LIMIT_TICKS := 200
 ## Ticks awaited for the lock framing to take hold: the blend plus the chase.
 const LOCK_TICKS := 60
-## The arena's three targets, in the order the harness cycles them, at the three heights
-## of GUIDE Section 13. The screenshot is taken on the highest one, the widest framing.
+## The arena's three targets, at the three heights of GUIDE Section 13. The screenshot is
+## taken on the highest one, the widest framing.
 const LOCK_TARGET_NAMES: Array[String] = ["Low", "Middle", "High"]
 const LOCK_SHOT_TARGET := "High"
+## The target a fresh lock takes from [constant OPEN_AIR] at the rest pose, worked by hand
+## from GUIDE Section 13's positions and camera: Middle is 0.13 of the half-screen from
+## the center, Low 0.24 and High 0.42, in the normalized units of the core.
+const FIRST_LOCK := "Middle"
+## Longest flight allowed for the range case: ten seconds, twice what the arena needs.
+const RANGE_TICKS := 600
+## Travel in one physics tick at full speed, the resolution the range release is
+## measured with.
+const RANGE_TOLERANCE := 0.25
 ## Camera tolerances: degrees for the aim, units for the distances, and a tight one for
 ## the roll, which is the invariant that must not move at all.
 const ANGLE_TOLERANCE := 2.0
@@ -66,9 +75,15 @@ const ROLL_TOLERANCE := 0.01
 const GATE_APPROACH := Vector3(0.0, 8.0, -12.0)
 const GATE_PAST := Vector3(0.0, 8.0, -31.0)
 const GATE_TICKS := 120
+## Past the gate and lower than [constant GATE_PAST], for the occlusion case: framing
+## Middle from here pitches the camera to about -22 degrees, which puts it near
+## (0, 12.6, -37.7) and its line to Middle through the beam's 9.95 to 11.05 band at z -27.
+## From GATE_PAST the steeper framing lifts that line over the beam.
+const BEHIND_THE_BEAM := Vector3(0.0, 6.5, -31.0)
 
 var _player: PlayerController
 var _rig: CameraRig
+var _targeting: Targeting
 var _arena: Node3D
 var _readout: Label
 var _base_speed: float = 0.0
@@ -96,8 +111,9 @@ func run() -> void:
 		quit(1)
 		return
 	_rig = _player.camera_rig
-	if _rig == null:
-		push_error("Harness PlayerShip has no CameraRig")
+	_targeting = _player.targeting
+	if _rig == null or _targeting == null:
+		push_error("Harness PlayerShip has no CameraRig or no Targeting")
 		quit(1)
 		return
 	_base_speed = _player.base_speed
@@ -116,6 +132,8 @@ func run() -> void:
 	await _orbit_stops_at_the_pitch_limits()
 	await _fly_where_the_camera_looks()
 	await _lock_frames_the_ship_and_the_target()
+	await _lock_is_released_out_of_range()
+	await _lock_holds_behind_the_shrine_gate()
 	await _camera_shortens_against_the_west_wall()
 	await _camera_under_the_shrine_gate()
 
@@ -262,25 +280,33 @@ func _fly_where_the_camera_looks() -> void:
 	await _press_for([&"camera_right"], QUARTER_TURN_TICKS)
 
 
-## PLANEJAMENTO Section 3: while locked, frame the player and the target together and
-## return smoothly to follow mode on release. `lock_target` reaches the rig through the
-## harness's dev target cycling, which F1-04 replaces with real selection.
+## PLANEJAMENTO Section 3: a fresh lock takes the target nearest the screen center, the
+## camera frames the player and the target together, `next_target` switches, and a
+## release returns smoothly to follow mode. The actions go through the real [Targeting]
+## and reach the rig through the ship's own connection.
 func _lock_frames_the_ship_and_the_target() -> void:
 	_player.reset_to(Transform3D(Basis(), OPEN_AIR))
 	await _ticks(SETTLE_TICKS)
+	await _tap(&"lock_target")
+	var first := _targeting.get_current_target()
+	_report_bool("lock_target acquires %s, the target nearest the screen center (got %s)" % [
+		FIRST_LOCK, _name_of(first),
+	], first != null and first.name == FIRST_LOCK)
 	# The arena's three targets are at three heights (GUIDE Section 13), which is the
 	# "orbit targets at different heights" the brief asks for evidence of.
-	await _tap(&"lock_target")
-	for target_name: String in LOCK_TARGET_NAMES:
-		if target_name != LOCK_TARGET_NAMES[0]:
+	var visited: PackedStringArray = []
+	for step: int in LOCK_TARGET_NAMES.size():
+		if step > 0:
 			await _tap(&"next_target")
 		await _ticks(LOCK_TICKS)
-		var target := _arena.get_node_or_null(NodePath("Targets/%s" % target_name)) as Node3D
+		var target := _targeting.get_current_target()
 		if target == null:
 			_failures += 1
-			print("FLIGHT FAIL lock: the arena has no Targets/%s" % target_name)
+			print("FLIGHT FAIL lock: step %d left no target locked" % step)
 			return
-		_report_bool("lock %s reached the rig through the harness" % target_name, _readout_lock() == target.name)
+		var target_name := String(target.name)
+		visited.append(target_name)
+		_report_bool("lock %s reached the rig and the readout" % target_name, _readout_lock() == target_name)
 		var aim := -_rig.camera.global_transform.basis.z
 		aim.y = 0.0
 		var to_target := target.global_position - _player.global_position
@@ -292,12 +318,96 @@ func _lock_frames_the_ship_and_the_target() -> void:
 		_report_value("lock %s roll" % target_name, _camera_degrees().z, 0.0, ROLL_TOLERANCE)
 		if target_name == LOCK_SHOT_TARGET:
 			await _capture("camera-lock")
+	await _tap(&"next_target")
+	await _ticks(LOCK_TICKS)
+	var wrapped := _targeting.get_current_target()
+	var distinct := {}
+	for target_name: String in visited:
+		distinct[target_name] = true
+	_report_bool("next_target visits all three once (%s) before wrapping to %s" % [
+		" -> ".join(visited), _name_of(wrapped),
+	], distinct.size() == LOCK_TARGET_NAMES.size() and wrapped == first)
 
 	var held := _rig.get_yaw()
 	await _tap(&"lock_target")
 	await _ticks(LOCK_TICKS)
-	_report_bool("the release reached the rig", _readout_lock().is_empty())
+	_report_bool("the release reached the rig", _readout_lock().is_empty() and _targeting.get_current_target() == null)
 	_report_value("released camera holds its heading", rad_to_deg(angle_difference(held, _rig.get_yaw())), 0.0, ANGLE_TOLERANCE)
+
+
+## PLANEJAMENTO Section 3: the lock is "invalidated by ... range". Flies away from a locked
+## target with the camera-relative actions — back is away from the target while the
+## camera frames it — and records the distance at the tick the lock let go.
+func _lock_is_released_out_of_range() -> void:
+	await _recentre_camera()
+	_player.reset_to(Transform3D(Basis(), OPEN_AIR))
+	await _ticks(SETTLE_TICKS)
+	await _tap(&"lock_target")
+	var target := _targeting.get_current_target()
+	if target == null:
+		_failures += 1
+		print("FLIGHT FAIL range: nothing was locked from the open-air start")
+		return
+	var flight: Array[StringName] = [&"move_back", &"move_right", &"ascend"]
+	for action: StringName in flight:
+		Input.action_press(action)
+	var last_held := 0.0
+	var released_at := -1.0
+	for _tick: int in RANGE_TICKS:
+		await physics_frame
+		var distance := target.global_position.distance_to(_player.global_position)
+		if _targeting.get_current_target() == null:
+			released_at = distance
+			break
+		last_held = distance
+	_release(flight)
+	if released_at < 0.0:
+		_failures += 1
+		print("FLIGHT FAIL range: the lock on %s held for %d ticks, farthest %.2f of %.1f" % [
+			target.name, RANGE_TICKS, last_held, _targeting.max_distance,
+		])
+		return
+	_report_value("lock on %s released out of range at" % target.name, released_at, _targeting.max_distance, RANGE_TOLERANCE)
+	_report_bool("lock on %s held while in range (last held at %.3f)" % [target.name, last_held], last_held <= _targeting.max_distance)
+	print("FLIGHT note: range release at ship %s" % _player.global_position)
+
+
+## ENGINEERING_BRIEF 4.B "scenery occlusion": a locked target that passes behind scenery
+## keeps the lock, and cannot be freshly acquired from there. The shrine gate's beam at
+## z -27 is the only overhead scenery with collision in the arena — the trees are meshes
+## only — so the ship is put past the gate with the camera looking back through it.
+func _lock_holds_behind_the_shrine_gate() -> void:
+	await _recentre_camera()
+	_player.reset_to(Transform3D(Basis(), OPEN_AIR))
+	await _ticks(SETTLE_TICKS)
+	await _tap(&"lock_target")
+	var target := _targeting.get_current_target()
+	if target == null or target.name != FIRST_LOCK:
+		_failures += 1
+		print("FLIGHT FAIL occlusion: expected a lock on %s, got %s" % [FIRST_LOCK, _name_of(target)])
+		return
+	_player.reset_to(Transform3D(Basis(), BEHIND_THE_BEAM))
+	await _ticks(LOCK_TICKS)
+	var candidate := _candidate_for(target)
+	# The same ray the adapter casts, repeated to name what is in the way.
+	var query := PhysicsRayQueryParameters3D.create(_rig.camera.global_position, target.global_position, _targeting.occlusion_mask)
+	var hit := _rig.camera.get_world_3d().direct_space_state.intersect_ray(query)
+	print("FLIGHT note: camera at %s, pitch %.1f; the line to %s hits %s" % [
+		_rig.camera.global_position, _camera_degrees().x, target.name,
+		"nothing" if hit.is_empty() else "%s at %s" % [(hit["collider"] as Node).name, hit["position"]],
+	])
+	_report_bool("%s is hidden behind the gate beam" % target.name, candidate != null and not candidate.visible)
+	_report_bool("the lock on %s holds behind scenery" % target.name, _targeting.get_current_target() == target)
+	await _capture("targeting-occluded")
+	await _tap(&"lock_target")
+	await _tap(&"lock_target")
+	var reacquired := _targeting.get_current_target()
+	_report_bool("a fresh lock behind the gate does not take the hidden %s (got %s)" % [
+		target.name, _name_of(reacquired),
+	], reacquired != target)
+	if reacquired != null:
+		await _tap(&"lock_target")
+	await _ticks(LOCK_TICKS)
 
 
 ## ENGINEERING_BRIEF 4.B "camera behavior near geometry": turned into the west wall, the
@@ -399,14 +509,14 @@ func _recentre_camera() -> void:
 	await _press_for(pitch_actions, _orbit_ticks_for(pitch_degrees))
 
 
-## One press and release of an action the harness reads with `is_action_just_pressed`,
-## which is only true during the frame the press lands in.
+## One press and release of an action [Targeting] reads with `is_action_just_pressed` in
+## `_physics_process`. The press is held across two physics ticks, so it lands on a step
+## however many render frames fall between them.
 func _tap(action: StringName) -> void:
-	await process_frame
 	Input.action_press(action)
-	await process_frame
+	await _ticks(2)
 	Input.action_release(action)
-	await process_frame
+	await _ticks(1)
 
 
 func _release(actions: Array[StringName]) -> void:
@@ -431,15 +541,28 @@ func _readout_edge() -> float:
 	return -1.0
 
 
-## The locked target's name as the harness label shows it, or an empty string while the
-## rig is in follow mode. Reading the readout is how the action path is checked end to end.
+## The locked target's name as the harness label shows it, or an empty string while
+## nothing is locked. Reading the readout is how the action path is checked end to end.
 func _readout_lock() -> String:
 	for line: String in _readout.text.split("\n"):
 		if not line.begins_with("lock "):
 			continue
-		var value := line.trim_prefix("lock ").strip_edges()
-		return "" if value.begins_with("none") or value.begins_with("unavailable") else value
+		var value := line.trim_prefix("lock ").get_slice(" ", 0)
+		return "" if value == "none" else value
 	return ""
+
+
+func _name_of(node: Node) -> String:
+	return "nothing" if node == null else String(node.name)
+
+
+## The candidate [Targeting] builds for [param target] right now, or null when it builds
+## none. Only valid during a physics step, which is where the awaits above resume.
+func _candidate_for(target: Node3D) -> TargetSelector.Candidate:
+	for candidate: TargetSelector.Candidate in _targeting.build_candidates():
+		if candidate.id == target.get_instance_id():
+			return candidate
+	return null
 
 
 ## Camera offset from the ship for a yaw and a pitch, from the geometry the rig documents:

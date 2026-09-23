@@ -1,11 +1,11 @@
-# Player flight validation — 2026-09-22 (F1-02, F1-03)
+# Player flight validation — 2026-09-22 (F1-02, F1-03, F1-04)
 
 Engine: Godot 4.7.2.stable.official.ed1daf0bf, Windows 11, D3D12 Forward+ on an AMD
 Radeon RX 9070 XT. Scene under test: `scenes/dev/arena_harness.tscn`, which instances
 Astra's `scenes/tests/combat_arena.tscn` and adds a debug readout.
 
-The flight sections are F1-02's and were re-run unchanged against the F1-03 code; the
-camera sections at the bottom are F1-03's.
+The flight sections are F1-02's and were re-run unchanged against the F1-03 and F1-04
+code; the camera sections are F1-03's; the targeting section at the bottom is F1-04's.
 
 ## Automated
 
@@ -13,7 +13,12 @@ camera sections at the bottom are F1-03's.
 tools/test.ps1
 ```
 
-69 passed, 0 failed. Eleven of them are `tests/scene/test_player_ship_contract.gd` (body
+F1-04: 93 passed, 0 failed — the 69 below plus 14 in
+`tests/unit/player/test_target_selector.gd` and 10 in
+`tests/scene/test_targeting_contract.gd`. Mutation checks for those are listed in
+[engineering/player-flight.md](../engineering/player-flight.md) "Invariants and tests".
+
+F1-03: 69 passed, 0 failed. Eleven of them are `tests/scene/test_player_ship_contract.gd` (body
 wiring, exports, the loud failure on a missing reference, banking against the combat
 volumes, `reset_to`, `set_controls_enabled`, `focus_changed`, the injected Flight Volume,
 and the camera-yaw round trip) and eleven the new
@@ -97,18 +102,57 @@ consecutive runs printed the same values.
 - [Turned into the west wall](player-flight-camera-obstruction.png) — yaw -90, distance 0.75 of 9.1, the hull filling the frame; the extreme end of the obstruction rule, recorded as an open issue.
 - [Past the shrine gate](player-flight-camera-gate.png) — parked at z -31 with the beam between ship and camera: distance 3.53 of 9.1, yaw 0, horizon still level.
 
+## Measured targeting — F1-04
+
+Same command. Since F1-04 `lock_target` and `next_target` go through the ship's real
+`Targeting` adapter, and the lock reaches the rig through the ship's own connection; the
+harness's F1-03 stand-in is gone, so the three `lock Low / Middle / High` camera rows above
+were re-measured through real selection in this run (aim 0.010° / 0.000° / 0.005°, both
+ends in view, roll 0.000°). The ticket's manual checks are the rows below, flown with
+simulated actions. Two runs: one headless, one in a real window that also wrote the
+screenshots; both printed `FLIGHT_OK`, and every targeting number below matched between them
+to the digits shown except where noted.
+
+| Case | Measured | Expected | Source of the expectation |
+| --- | --- | --- | --- |
+| lock from the open-air start | Middle | Middle | Worked by hand from GUIDE 13's positions and the rest camera: Middle is 0.13 from the screen center in the core's normalized units, Low 0.24, High 0.42. PLANEJAMENTO 3 "near the screen center" |
+| cycle | Middle → High → Low, then back to Middle | all three once, then wrap | left to right on screen, with the camera turning to frame each new lock in between (60 ticks per step) |
+| each lock reaches the rig and the readout | Middle, High, Low | the locked name | the readout's `lock <name> at <d> of 60.0` line |
+| release | readout `lock none`, heading held to -0.001° | released, no snap | PLANEJAMENTO 3 "return smoothly to follow mode" |
+| fly out of range | released at 60.047; last tick still held at 59.980 | 60.0 ± one tick of travel (0.25) | `max_distance` 60. Flown with `move_back` + `move_right` + `ascend` while locked on Middle, which the camera-relative controls turn into flying away; released with the ship at (21.97, 29.60, 31.95), near the far corner |
+| lock behind scenery | held on Middle; Middle's candidate `visible` false | held | PLANEJAMENTO 3 "stable until explicitly switched, released, or invalidated by target death/range"; ENGINEERING_BRIEF 4.B "scenery occlusion". Ship at (0, 6.5, -31), past the shrine gate: the lock turns the camera back through the gate, to (-0.06, 12.53, -37.79) at -21.1° pitch, and its line to Middle hits `BeamBody` at y 10.55 on the beam's z -27.8 face |
+| fresh lock from behind the gate | High (windowed), nothing (headless) | anything but Middle | a hidden target cannot be freshly locked. Low is behind the beam too; High clears it, and sits close enough to the 0.85 radius that the few hundredths of camera difference between the two runs decide whether it qualifies |
+
+The arena's trees have no collision — they are meshes in `Environment/Backdrop` — so the
+ticket's "put a tree between camera and target" cannot hide anything in this scene: the
+occlusion ray only sees layer 1 bodies. The shrine gate's beam is the only collidable
+scenery that can come between the camera and a target, which is why the case uses it.
+
+- [Locked on Middle behind the shrine gate](player-flight-targeting-occluded.png) — readout
+  `lock Middle at 11.3 of 60.0`, the orb hidden behind the beam while its ring still shows
+  above and below it: occlusion is one ray to the center, recorded as an open issue.
+- [Locked on High](player-flight-camera-lock.png) — re-captured through real selection;
+  readout `lock High at 32.7 of 60.0`.
+
+The first windowed attempt of this session hung in the first screenshot readback
+(`player-flight-floor.png`, before any targeting code ran) with the window "Not Responding";
+it was killed after five minutes. The headless run and the second windowed run went
+through. The flight and camera screenshots that run rewrote were restored to the committed
+F1-02/F1-03 captures, since nothing in them changed.
+
 ## The harness as the running game
 
 ```powershell
 tools/godot.ps1 --path . res://scenes/dev/arena_harness.tscn --quit-after 240
 ```
 
-Four seconds windowed, no errors and no warnings, re-run on the F1-03 code: the harness
-resolves the ship and its rig, reads the `FlightBounds` metadata (`min_corner`
-(-39, 0, -45), `max_corner` (39, 30, 33)), hands the Flight Volume to the controller, and
-collects the three `targetable` markers for the dev lock actions. A missing metadata key
-would have printed the documented warning and left the ship on collision alone; an arena
-without `Targets` would have warned and left the lock actions inert.
+Four seconds windowed, no errors and no warnings, re-run on the F1-04 code: the harness
+resolves the ship, its rig and its targeting, reads the `FlightBounds` metadata
+(`min_corner` (-39, 0, -45), `max_corner` (39, 30, 33)), and hands the Flight Volume to the
+controller. A missing metadata key would have printed the documented warning and left the
+ship on collision alone. Since F1-04 the harness no longer collects targets itself: the
+ship's `Targeting` finds the `targetable` group on its own, and an arena without targets
+simply has nothing to lock.
 
 - [Parked on the platform](player-flight-floor.png) — y 0.400, level, readout edge 0.90.
 - [Held by the clamp past the rim](player-flight-clamp.png) — y 0.000 over open void at (30, 0, 25), readout edge 1.00.
@@ -117,7 +161,7 @@ without `Targets` would have warned and left the lock actions inert.
 
 ## Not verified
 
-- **No physical input device was pressed, in F1-02 or in F1-03.** Every case above was
+- **No physical input device was pressed, in F1-02, F1-03 or F1-04.** Every case above was
   driven with `Input.action_press`, which ENGINEERING_BRIEF Section 8 explicitly says
   does not replace a real device. What was actually pressed in this session: nothing —
   the sessions that produced this page ran the utility and the test suite from the
@@ -129,10 +173,16 @@ without `Targets` would have warned and left the lock actions inert.
   `joypads connected: 0:DualSense Wireless Controller (standard mapping: true)`, so this
   host does have a controller and Godot has a standard mapping for it, which is what
   makes the Xbox-named bindings land on the right buttons. That is a device inventory,
-  not a device test. The human pass still owed is: fly the six movement axes and Focus on
-  the keyboard and on that pad, orbit with the arrow keys and with the right stick, lock
-  with `K` and with `Y`, cycle with `Tab` and with `X`, and say whether the camera reads
-  well in motion.
+  not a device test. Both F1-04 runs printed `no joypad connected on this host`: the pad
+  was not plugged in this time. The human pass still owed is: fly the six movement axes
+  and Focus on the keyboard and on that pad, orbit with the arrow keys and with the right
+  stick, lock and release with `K` and with `Y`, switch through the three targets with
+  `Tab` and with `X`, fly out of range until the readout drops the lock, park behind the
+  shrine gate with a lock held, and say whether the camera and the switch order read well
+  in motion.
+- Target Lock feel — whether 60 units of range and the 0.85 acquisition radius read well,
+  and whether switching left to right, wrapping to the far left, is what a player expects
+  from `Tab` / `X` — is Astra's and the user's judgement, not a measurement.
 - Feel judgements — whether 12.0 units per second, a 25° bank, a 4-unit edge margin,
   120°/s of orbit, the -60 to +35 pitch range and the three damping rates read well in
   motion — are Astra's, not measurements.

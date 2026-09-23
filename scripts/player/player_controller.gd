@@ -45,6 +45,9 @@ signal focus_changed(active: bool)
 @export var damage_core: Area3D
 ## Near-miss volume, on the same terms as [member damage_core]; F5 owns graze.
 @export var graze_volume: Area3D
+## Target Lock selection. Not driven from here — it reads its own actions — but the ship
+## owns it and its camera, so this is where the one connection between them is made.
+@export var targeting: Targeting
 
 var _model: FlightModel
 var _controls_enabled: bool = true
@@ -57,6 +60,11 @@ func _ready() -> void:
 	_model.edge_proximity_changed.connect(_on_model_edge_proximity_changed)
 	if not _validate_exports():
 		process_mode = Node.PROCESS_MODE_DISABLED
+		return
+	# The camera frames whatever the targeting locks, null included, which clears it. Made
+	# here rather than in setup(), because an owner calls setup() again every time the
+	# Flight Volume changes and _ready runs once.
+	targeting.target_changed.connect(camera_rig.set_lock_target)
 
 
 func _physics_process(_delta: float) -> void:
@@ -140,6 +148,8 @@ func _validate_exports() -> bool:
 		missing.append("damage_core")
 	if graze_volume == null:
 		missing.append("graze_volume")
+	if targeting == null:
+		missing.append("targeting")
 	for field: String in missing:
 		push_error("%s: required export '%s' is not set" % [get_path(), field])
 	return missing.is_empty()
