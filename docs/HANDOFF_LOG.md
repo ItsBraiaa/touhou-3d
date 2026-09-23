@@ -15,6 +15,22 @@ Action required by <other agent>: <what they must do, or "none">
 
 ---
 
+## 2026-09-23 20:05 — Claude (path) — F5-02 ProjectileField Core sweep and Graze rules
+State: CODE_READY
+Files:
+- Edited: `scripts/combat/projectile_field.gd`, `docs/engineering/projectile-field.md`, `docs/engineering/README.md` (one line), `docs/engineering/ROADMAP.md` (F5-02 row), `.scratch/projectile-field/issues/02-core-hit-sweep-and-graze-rules.md` (Status, Outcome).
+
+Change:
+- `set_player(previous_center, center, core_radius, graze_radius, invulnerable)` and `clear_player()`, with signals `player_hit(projectile_id, damage)` and `grazed(projectile_id)`, buffered during the pass and emitted after it in slot order.
+- The HOSTILE sweep uses the relative segment's closest distance. A hit removes the Projectile and never grazes. Graze happens at most once per life. Invulnerability passes Core contacts through and spends Graze on any contact (the strict reading). The first hit of a tick makes the rest of that tick invulnerable.
+- `spawn` now also asserts a positive damage, because `CombatState.take_hit` asserts it.
+- **No unit tests,** by the user's no-new-tests rule, which arrived mid-ticket. The ticket's "Tests required" list is not delivered. The existing 12 F5-01 tests pass against the extended core, and a reviewer found no defects.
+- **Ruling 5 pending:** D-07 Part B had not landed. If Astra chooses the lenient reading, the Graze spend moves into the `grazed` branch of `tick`.
+
+Why: F5-02 unblocks F5-03, and then F6-02 and F7-01, which wire these signals.
+
+Action required by Astra: none (code only). D-07 Part B ruling 5 decides strict or lenient Graze under Invulnerability.
+
 ## 2026-09-23 19:40 — Claude (path) — F5-01 ProjectileField spawn, move and cull
 State: CODE_READY
 Files:
