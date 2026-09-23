@@ -7,6 +7,13 @@
 - Supplied license: CC0, preserved at `assets/licenses/quaternius-ultimate-monsters.txt`; source license heading reads Ultimate Platformer Pack.
 - Changes: scene-level material tint, visual normalization, and original magic-ring meshes. Source models preserved.
 
+## Boss models
+
+- Creator: Quaternius; Ultimate Monsters, Flying/glTF. Source: https://quaternius.com/packs/ultimatemonsters.html.
+- Stage 1 Lantern Guardian: approved `All models/Ultimate Monsters/Flying/glTF/Ghost.gltf`, copied byte-for-byte to `assets/models/bosses/Ghost.gltf`. Its atlas is embedded in the glTF; an unchanged source atlas copy is preserved at `assets/models/bosses/Ghost_Atlas_Monsters.png`.
+- License: CC0, preserved at `assets/licenses/quaternius-ultimate-monsters.txt` (the supplied file's heading says Ultimate Platformer Pack).
+- Changes: imported model scale 2.6 and original amber lantern meshes/orbit are authored in `scenes/enemies/lantern_guardian.tscn`; the source glTF and atlas are unchanged.
+
 ## Player ship
 
 - Creator: Kenney.

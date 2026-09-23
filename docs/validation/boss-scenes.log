@@ -1,0 +1,4 @@
+D-03 Lantern Guardian: Ghost model, eight amber lanterns, orbit animation, 3.0 hit radius at (0, 4.3, 0), scale 2.6.
+Imported clips: idle Flying_Idle (loop/autoplay), step Punch, phase Yes, defeat Death (non-looping).
+Windowed render: S1-07 dusk palette, approach camera 35 units ahead; lantern-guardian.png.
+BOSS_SCENES_QA failures=0

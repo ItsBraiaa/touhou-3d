@@ -21,6 +21,24 @@ Files: `scripts/combat/weapon_model.gd`, `.scratch/weapon-rendering/issues/03-we
 Change: Added the Node-free WeaponModel cadence, per-source cooldown, Power Level Familiar count and static Aim Assist direction rules. No tests were added per the sprint rule.
 Why: This is F6-03's oc-a part 1; part 2 in trunk owns PlayerWeapon and scene integration.
 Action required by Astra: None for part 1; shot values remain tuning proposals.
+## 2026-09-23 23:10 — Claude (plan) — lane.ps1 handles Godot .uid and .import sidecars
+State: docs
+Files: `tools/lane.ps1`, `docs/engineering/SPRINT.md` ("Git worktrees", Conflicts); the missing `scripts/definitions/enemy_definition.gd.uid`, `scripts/enemies/enemy_model.gd.uid` and `tools/validate_boss_scenes.gd.uid`, committed by the new land step.
+Change:
+- **The fault.** Godot writes a random-uid sidecar the first time any worktree imports a new script or asset. Landings were blocked by untracked sidecars (oc-a on F6-03 part 1), and the next `sync` in trunk and oc-b would fail on untracked copies of files `dev-01` now tracks.
+- **The fix.** `sync` and `land` delete a local sidecar that `dev-01` already tracks, commit one whose source is tracked, and resolve sidecar-only merge conflicts with `dev-01`'s copy. The three uids missing on `dev-01` are now tracked, using oc-a's and sol's copies.
+
+Why: a tooling fault, not a lane's. No escalation was needed.
+
+Action required by Astra: none. Your untracked `enemy_definition.gd.uid` and `enemy_model.gd.uid` are replaced by `dev-01`'s at your next sync. Your boss-model files are untouched.
+
+## 2026-09-23 20:32 — Astra (sol) — Lantern Guardian scene (D-03) [shared]
+State: SCENE_READY
+Files: `scenes/enemies/lantern_guardian.tscn`, `assets/models/bosses/Ghost.gltf` and copied atlas plus `.import` files, `tools/validate_boss_scenes.gd`, `docs/validation/boss-scenes.log`, `docs/validation/lantern-guardian.png`, `docs/ENEMY_VISUAL_HANDOFF.md`, `docs/ASSET_CREDITS.md`, `docs/engineering/ROADMAP.md`, and D-03's ticket.
+Change: `Enemy` is an identity Node3D with no script; `VisualRoot/Model` is the imported Ghost at scale `(2.6, 2.6, 2.6)`. Eight amber `VisualRoot/Lanterns/Lantern1..8` meshes orbit through `VisualRoot/LanternMotion` clip `orbit` (loop/autoplay). `HitVolume/Collision` is a sphere of radius 3.0, centered at `(0, 4.3, 0)` relative to Enemy, with layer 16, mask 0 and both monitoring flags off. `Emitters/Main` is `(0, 5, -1.5)`. The model player is `VisualRoot/Model/AnimationPlayer`: idle `Flying_Idle` (loop/autoplay), step `Punch`, Phase gesture `Yes` (recorded for later `phase_clip`), defeat `Death` (non-looping). The validator passed headless and windowed; the S1-07 dusk screenshot was inspected at 35 units.
+Why: F12-03 can use the approved Stage 1 boss art without changing its gameplay model or markers.
+Action required by Claude: trunk F12-03 attaches `boss_controller.gd` to Enemy; sets `visual_root`, `hit_volume`, `emitter`, `animation_player`, `idle_clip`, `step_clip`, and `defeat_clip`; and replaces the dev boss in `stage_01.tscn`'s `actor_scenes[&"lantern_guardian"]`. The root currently has no script. A future `phase_clip` may use `Yes`.
+
 
 ## 2026-09-23 20:29 — OpenCode (oc-a) — Generated script UIDs
 State: docs

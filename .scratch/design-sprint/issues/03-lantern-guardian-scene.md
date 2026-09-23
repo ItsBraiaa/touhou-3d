@@ -1,11 +1,15 @@
 # D-03 Lantern Guardian scene
 
-Status: todo
+Status: done
 Type: design
 Owner: Astra (GPT Sol)
 Lane: sol
 Model: GPT Sol (Codex)
 Depends on: none
+
+## Outcome
+
+`scenes/enemies/lantern_guardian.tscn` uses the approved Ghost at model scale 2.6 with eight amber lanterns on a separate 12 s orbit. The root has no script; its hit sphere is radius 3.0 centered at `(0, 4.3, 0)`. The imported model player uses `Flying_Idle` (loop/autoplay), `Punch` for the step cue, `Yes` as a possible Phase gesture, and `Death` (non-looping). The Godot scene validator reported zero failures headless and windowed. The Stage 1 dusk approach capture was inspected: the Ghost silhouette and lantern ring read at 35 units, with the model's face clear after rotating the ring half a step.
 
 ## Goal
 
