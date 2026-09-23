@@ -56,6 +56,7 @@ No two agents ever share a working tree or a branch.
    5. `tools/lane.ps1 land`, which merges `dev-01` in, runs the existing suite and a boot smoke of the main scene (a red run, `SCRIPT ERROR`, parse error or failed script load stops it, and so does any `ERROR:` line during the boot), and fast-forwards the primary tree. It retries if another lane landed first.
 4. **Conflicts.**
    - `docs/HANDOFF_LOG.md` and `docs/engineering/README.md` merge with the union driver: add entries, never reorder.
+   - **Godot sidecars** (`.uid` next to scripts, `.import` next to assets) are handled by `sync` and `land`. An untracked sidecar that `dev-01` already tracks is deleted, because `dev-01`'s copy wins. One whose source file is tracked is committed for you. A conflict limited to sidecars takes `dev-01`'s copy. Commit your own sidecars with your ticket when you can.
    - Any other conflict is resolved in your lane branch, never in the primary tree, and the file is named in your handoff entry.
 5. **No pushes, no rebases, no amends.** The user pushes when they choose.
 

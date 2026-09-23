@@ -21,6 +21,22 @@ Files: `scenes/enemies/tempest_sentinel.tscn`, `scenes/enemies/storm_guardian.ts
 Change: Both scenes have an identity `Enemy` Node3D root with no script; `VisualRoot/Model`, `HitVolume/Collision`, and `Emitters/Main`; no collision object under `VisualRoot`. HitVolume is layer 16, mask 0, and both monitoring flags off. `tempest_sentinel.tscn` uses Goleling at scale `(3.1, 3.1, 3.1)`, hit radius 2.5 at `(0, 6.9, 0)`, and emitter `(0, 7.1, -1.7)`. Its three storm rings spin through independent `VisualRoot/OrnamentPlayer` clip `storm_orbit` (loop/autoplay). `storm_guardian.tscn` uses Dragon_Evolved at scale `(5, 5, 5)`, hit radius 5.0 at `(0, 8.8, 0)`, and emitter `(0, 9.5, -3.5)`. Each model player is `VisualRoot/Model/AnimationPlayer`: idle `Flying_Idle` (loop/autoplay), step `Punch`, Phase gesture `Yes` (for later `phase_clip`), defeat `Death` (non-looping). The headless and windowed QA reported zero failures; S2-04 and S2-07 approach renders were inspected.
 Why: F12-06 and F12-07 can integrate the approved Stage 2 boss art without changing encounter geometry or content values.
 Action required by Claude: F12-06 attaches `boss_controller.gd` to the Tempest root, sets its exports, and points `stage_02.tscn`'s `actor_scenes[&"tempest_sentinel"]` at it. F12-07 does the same for Storm Guardian and `actor_scenes[&"storm_guardian"]`. Both roots currently have no script.
+## 2026-09-23 20:35 — OpenCode (oc-b) — F8-02 EncounterMachine core
+State: CODE_READY
+Files: `scripts/progression/encounter_machine.gd`, `docs/engineering/progression-core.md`, `docs/engineering/README.md`, `docs/engineering/ROADMAP.md`, `.scratch/progression-core/issues/02-encounter-machine-core.md`, `docs/HANDOFF_LOG.md`
+Change: Added the `EncounterMachine` Rules Core (ADR-0001): Encounter lifecycle with route-ordered entry behind activated Checkpoints, Wave scheduling with delays, idempotent completion emitting `gate_opened` → `rewards_requested` → `encounter_completed` → `stage_cleared`, Objective and Checkpoint flags, and `capture`/`restore`/`reset`. Documented its contract in `progression-core.md`. No tests were written per the sprint rule.
+Why: F8-02 gives trunk's F10-01 the progression core it drives; the capture/restore slice feeds F8-03's CheckpointStore.
+Action required by Astra: none. For trunk (F10-01): call `setup` in the Director's `setup()`, connect the six signals there, tick from `_physics_process` while the tree runs; CP1-B sits inside S1-06, so a Retry from CP1-B restores S1-06 as completed.
+## 2026-09-23 23:10 — Claude (plan) — lane.ps1 handles Godot .uid and .import sidecars
+State: docs
+Files: `tools/lane.ps1`, `docs/engineering/SPRINT.md` ("Git worktrees", Conflicts); the missing `scripts/definitions/enemy_definition.gd.uid`, `scripts/enemies/enemy_model.gd.uid` and `tools/validate_boss_scenes.gd.uid`, committed by the new land step.
+Change:
+- **The fault.** Godot writes a random-uid sidecar the first time any worktree imports a new script or asset. Landings were blocked by untracked sidecars (oc-a on F6-03 part 1), and the next `sync` in trunk and oc-b would fail on untracked copies of files `dev-01` now tracks.
+- **The fix.** `sync` and `land` delete a local sidecar that `dev-01` already tracks, commit one whose source is tracked, and resolve sidecar-only merge conflicts with `dev-01`'s copy. The three uids missing on `dev-01` are now tracked, using oc-a's and sol's copies.
+
+Why: a tooling fault, not a lane's. No escalation was needed.
+
+Action required by Astra: none. Your untracked `enemy_definition.gd.uid` and `enemy_model.gd.uid` are replaced by `dev-01`'s at your next sync. Your boss-model files are untouched.
 
 ## 2026-09-23 20:32 — Astra (sol) — Lantern Guardian scene (D-03) [shared]
 State: SCENE_READY

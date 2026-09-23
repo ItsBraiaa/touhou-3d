@@ -24,6 +24,11 @@ land                    From a lane worktree with everything committed: merges t
                         branch, retrying while another lane lands first. During the sprint
                         this gate is the only automated check: nobody writes new tests.
 
+Godot sidecars (.uid for scripts, .import for assets) are handled for you by sync and land:
+an untracked sidecar the integration branch already tracks is deleted (its copy wins), one
+whose source file is tracked is committed ("chore: track Godot-generated sidecars"), and a
+merge conflict limited to sidecars takes the integration branch's copy.
+
 .EXAMPLE
 tools/lane.ps1 setup oc-a
 
@@ -144,12 +149,61 @@ function Assert-LaneBranch {
     return $branch
 }
 
-function Invoke-MergeBase([string]$Base) {
-    git merge --no-edit $Base
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "lane: merging $Base stopped on a conflict. Resolve it (keep both sides of any HANDOFF_LOG.md or README.md entry), commit the merge, then run land again."
-        exit 1
+# Godot writes a sidecar next to every new script (.uid) and imported asset (.import) the first
+# time any worktree imports it, with a random uid. The repo tracks them. So each lane can hold
+# an untracked copy of a sidecar its commit forgot, or a different copy of one another lane
+# already landed. These helpers keep that from blocking or conflicting a landing: the
+# integration branch's copy always wins, and a missing one is committed for its tracked source.
+$sidecarPattern = '\.(uid|import)$'
+
+function Get-UntrackedSidecars {
+    return @(git ls-files --others --exclude-standard | Where-Object { $_ -match $sidecarPattern })
+}
+
+function Remove-ShadowedSidecars([string]$Base) {
+    foreach ($file in (Get-UntrackedSidecars)) {
+        git cat-file -e "${Base}:$file" 2>$null
+        if ($LASTEXITCODE -eq 0) {
+            Remove-Item -LiteralPath $file -Force
+            Write-Host "lane: removed local $file; $Base already tracks its own copy."
+        }
     }
+}
+
+function Add-GeneratedSidecars {
+    $tracked = @{}
+    git ls-files | ForEach-Object { $tracked[$_] = $true }
+    $added = @()
+    foreach ($file in (Get-UntrackedSidecars)) {
+        $source = $file -replace $sidecarPattern, ''
+        if ($tracked.ContainsKey($source)) {
+            git add -- $file
+            $added += $file
+        }
+    }
+    if ($added.Count -gt 0) {
+        git commit -q -m "chore: track Godot-generated sidecars" -m ($added -join "`n")
+        Write-Host "lane: committed $($added.Count) Godot-generated sidecar(s): $($added -join ', ')."
+    }
+}
+
+function Invoke-MergeBase([string]$Base) {
+    Remove-ShadowedSidecars $Base
+    git merge --no-edit $Base
+    if ($LASTEXITCODE -eq 0) { return }
+    $conflicts = @(git diff --name-only --diff-filter=U)
+    $others = @($conflicts | Where-Object { $_ -notmatch $sidecarPattern })
+    if ($conflicts.Count -gt 0 -and $others.Count -eq 0) {
+        foreach ($file in $conflicts) {
+            git checkout --theirs -- $file
+            git add -- $file
+        }
+        git commit -q --no-edit
+        Write-Host "lane: took $Base's copy of $($conflicts.Count) conflicting Godot sidecar(s)."
+        return
+    }
+    Write-Host "lane: merging $Base stopped on a conflict. Resolve it (keep both sides of any HANDOFF_LOG.md or README.md entry; take $Base's copy of any .uid or .import file), commit the merge, then run land again."
+    exit 1
 }
 
 # The suite deliberately provokes push_error ("ERROR: ... required export ... is not set") in
@@ -184,6 +238,8 @@ function Invoke-BootSmoke {
 
 function Invoke-Land([string]$Primary, [string]$Base) {
     $branch = Assert-LaneBranch
+    Remove-ShadowedSidecars $Base
+    Add-GeneratedSidecars
     $dirty = git status --porcelain
     if ($dirty) {
         Write-Host 'lane: commit your work before landing. Uncommitted:'
@@ -196,6 +252,7 @@ function Invoke-Land([string]$Primary, [string]$Base) {
             Invoke-Tests
             Invoke-BootSmoke
         }
+        Add-GeneratedSidecars
         if ((Get-BaseBranch $Primary) -ne $Base) {
             Write-Host "lane: the primary tree switched away from $Base during the landing. Ask the user; nothing landed."
             exit 1
