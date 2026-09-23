@@ -47,13 +47,13 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | | | | 01 field-core-spawn-move-cull | core | yes | path | done |
 | | | | 02 core-hit-sweep-and-graze-rules | core | yes (after 01, same file) | path | done (no unit tests, by the sprint rule; ruling 5 pending) |
 | | | | 03 bomb-phase-clears-and-hit-spheres | core | yes (after 02, same file) | path | done (no unit tests, by the sprint rule) |
-| | | | 04 pattern-emitter-core | core | yes | oc-a | todo |
+| | | | 04 pattern-emitter-core | core | yes | oc-a | done (no new tests, by the sprint rule) |
 | F6 | Weapon and rendering | `weapon-rendering` | 00 plan | docs | no | — | done (one-pass planning) |
 | | | | 01 rendering-spike | spike | no | — | cut (folded into 02 by the sprint plan: MultiMesh by default, benchmark inside 02) |
 | | | | 02 projectile-system-adapter | adapter | no | trunk | done (2026-09-23: MultiMesh ProjectileSystem on ProjectileRoot, capacity 2048; 3000 Projectiles at 1118 FPS with other lanes running; swap pending D-02) |
 | | | | 03 weapon-model-and-player-weapon | core+adapter | no | trunk (part 1: oc-a) | todo |
 | F7 | Damage, bomb, pickups | `damage-pickups` | 00 plan | docs | no | — | done (one-pass planning) |
-| | | | 01 hit-to-combat-state-and-defeat | integration | no | trunk | todo |
+| | | | 01 hit-to-combat-state-and-defeat | integration | no | trunk | done (2026-09-23: hits, Graze, Invulnerability blink and Defeat wired in GameSession; `tools/validate_combat.gd` COMBAT_OK; Retry restarts the stage until F10-03) |
 | | | | 02 bomb-clear-and-invulnerability | integration | no | trunk | todo |
 | | | | 03 pickup-adapter-and-rewards | adapter | no | path | todo |
 | F8 | Progression cores and content | `progression-core` | 00 plan | docs | no | — | done (one-pass planning) |
@@ -62,7 +62,7 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | | | | 03 snapshot-capture-restore | core | yes | oc-b | todo |
 | | | | 04 stage-01-content-draft | content | yes | oc-b | todo |
 | F9 | Enemies | `enemies` | 00 plan | docs | no | — | done (one-pass planning) |
-| | | | 01 enemy-model-core | core | yes | oc-a | todo |
+| | | | 01 enemy-model-core | core | yes | oc-a | done (no new tests, by the sprint rule) |
 | | | | 02 dev-prefabs-and-enemy-actor | adapter | no | path | todo |
 | | | | 03 seal-and-guard-rules | core+adapter | no | oc-a | todo (consumed by F12-05, Stage 2 S2-03) |
 | F10 | Stage Director in Stage 1 | `stage-director` | 00 plan | docs | no | — | done (one-pass planning) |
@@ -91,7 +91,7 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | | | | 02 package-and-acceptance-record | tooling | no | oc-b | todo |
 | D | Design sprint (Astra) | `design-sprint` | 01 sfx-selection-and-import | design | — | sol | todo |
 | | | | 02 combat-visuals | design | — | sol | todo |
-| | | | 03 lantern-guardian-scene | design | — | sol | todo |
+| | | | 03 lantern-guardian-scene | design | — | sol | done (2026-09-23: Ghost prefab, clips and dusk render verified) |
 | | | | 04 stage-2-boss-scenes | design | — | sol | todo |
 | | | | 05 stage-1-tuning-and-pacing | design | — | sol | todo |
 | | | | 06 stage-2-content-review | design | — | sol | todo |
@@ -139,6 +139,8 @@ Dependencies Claude has on scene and content work. These are needs by Feature, n
 | F14 | Nothing new; credits and licenses must already cover every integrated asset. F14-02 lists any gaps it finds. |
 
 ## Received from Astra
+
+2026-09-23: D-03 Lantern Guardian prefab is SCENE_READY at `scenes/enemies/lantern_guardian.tscn`; tree, clip names, hit sphere and emitter are in [ENEMY_VISUAL_HANDOFF.md](../ENEMY_VISUAL_HANDOFF.md). Trunk F12-03 owns the script attachment and scene export wiring.
 
 2026-09-23: D-07 Part B rulings are in [PLANEJAMENTO.md](../PLANEJAMENTO.md) and the handoff log. The two-Phase HUD bar offsets are authored in `hud.tscn`; trunk's `Hud` follow-up must apply them.
 

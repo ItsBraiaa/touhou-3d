@@ -7,6 +7,13 @@
 - Supplied license: CC0, preserved at `assets/licenses/quaternius-ultimate-monsters.txt`; source license heading reads Ultimate Platformer Pack.
 - Changes: scene-level material tint, visual normalization, and original magic-ring meshes. Source models preserved.
 
+## Boss models
+
+- Creator: Quaternius; Ultimate Monsters, Flying/glTF. Source: https://quaternius.com/packs/ultimatemonsters.html.
+- Stage 1 Lantern Guardian: approved `All models/Ultimate Monsters/Flying/glTF/Ghost.gltf`, copied byte-for-byte to `assets/models/bosses/Ghost.gltf`. Its atlas is embedded in the glTF; an unchanged source atlas copy is preserved at `assets/models/bosses/Ghost_Atlas_Monsters.png`.
+- License: CC0, preserved at `assets/licenses/quaternius-ultimate-monsters.txt` (the supplied file's heading says Ultimate Platformer Pack).
+- Changes: imported model scale 2.6 and original amber lantern meshes/orbit are authored in `scenes/enemies/lantern_guardian.tscn`; the source glTF and atlas are unchanged.
+
 ## Player ship
 
 - Creator: Kenney.
@@ -28,6 +35,23 @@ The test arena's geometry and materials are authored primitives. No monster mode
 ## HUD icons
 
 - `assets/ui/shield.svg`, `bomb.svg`, `power.svg`, `target.svg`, and `threat.svg`: original vector icons authored for this project.
+
+## Sound effects
+
+Creator: Kenney. The 16 selected Ogg Vorbis files under `assets/audio/sfx/` are unchanged byte-for-byte; there are no trims or conversions. Each selected pack is CC0 and its supplied license is preserved:
+
+| Pack | Source | Runtime folder | Supplied license |
+| --- | --- | --- | --- |
+| Interface Sounds | https://kenney.nl/assets/interface-sounds | `assets/audio/sfx/interface/` | `assets/licenses/kenney-interface-sounds.txt` |
+| Digital Audio | https://kenney.nl/assets/digital-audio | `assets/audio/sfx/digital/` | `assets/licenses/kenney-digital-audio.txt` |
+| Sci-fi Sounds | https://kenney.nl/assets/sci-fi-sounds | `assets/audio/sfx/scifi/` | `assets/licenses/kenney-sci-fi-sounds.txt` |
+| Impact Sounds | https://kenney.nl/assets/impact-sounds | `assets/audio/sfx/impact/` | `assets/licenses/kenney-impact-sounds.txt` |
+
+The [event-to-file table](validation/audio-selection.md) records every selected filename and its use.
+
+## Music
+
+No music ships in this delivery. The five files in the ignored `Music/` source folder have *Touhou 10* composition titles, but their source and redistribution permission are not documented. They remain references only and were not copied to runtime assets. A new permitted track requires a separate selection and credit decision.
 
 ## Stage 2 mountain environment
 
