@@ -1,6 +1,6 @@
 # F12-01 BossMachine core and boss Definitions
 
-Status: todo
+Status: done
 Type: core
 parallel-safe: yes
 Depends on: F5-04
@@ -83,3 +83,15 @@ Attack names are Portuguese literals in the Definitions (F12-03 content). Clip c
 ```
 Read CLAUDE.md, docs/engineering/ROADMAP.md and .scratch/bosses/issues/01-boss-machine-core.md, then implement that ticket with /mattpocock-skills:tdd. Finish with its Definition of Done and commit.
 ```
+
+## Outcome (2026-09-23)
+
+Delivered solo in lane path: the four Definitions and `scripts/enemies/boss_machine.gd`, with the contract in `docs/engineering/bosses.md`. **No unit tests:** the sprint's no-new-tests rule voids the "Tests required" list and the named-test line of the Definition of Done. The five scripts pass Godot's `--check-only` parse check with warnings as errors, and the land gate runs the existing suite and the boot smoke. Nothing runs the machine until F12-02.
+
+- **Ruling 1 applied.** D-07 Part B confirmed no damage during a Phase transition, bounded to 0.75 s. `BossPhaseDefinition.MAX_TRANSITION_SECONDS` is 0.75, and `validate()` rejects anything above it. Damage is accepted in the entry window and in every step state.
+- **Entry reading.** `entry_seconds` is a window before step 0's own Anticipation, so every shot, the first included, follows a `step_started` cue. Recorded as an Open issue.
+- **`follow_player_height`** emits at `(origin.x, sampled player y, origin.z)` and ignores `height_offset`. The Pattern's own per-volley `height_offsets` still apply on top.
+- **Signal order on depletion:** `phase_health_changed(i, 0.0)`, `hostile_clear_requested`, then `phase_changed(i + 1, name)` or `defeated`. The state has already moved on when they fire, so a re-entrant `take_damage` returns 0.
+- **Added beyond the ticket, both small:**
+  - `AttackStepDefinition.get_duration()`, used by a new `AttackDefinition.validate()` rule: one cycle must take time, or `tick` would loop forever.
+  - `start()` resets every Phase, so calling it again restarts the fight.

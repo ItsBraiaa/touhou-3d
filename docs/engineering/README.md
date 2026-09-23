@@ -23,6 +23,7 @@ Claude's engineering documentation for this Godot 4.7.2 project: how the GDScrip
 | [audio.md](audio.md) | Module doc for Feature F13 audio: the `AudioLimiter` Rules Core's event intervals, per-event and global voice caps, priority-based steals, deterministic tick clock and clear behavior; the `AudioController` follows in F13-02. |
 | [spikes/projectile-rendering.md](spikes/projectile-rendering.md) | The folded F6-01 measurement: FPS, frame time, the system's physics step and the ray cost at 300, 1000 and 3000 Projectiles, 1280 × 720, with other lanes running. |
 | [damage-pickups.md](damage-pickups.md) | Module doc for Feature F7, damage, Bomb and Pickups: the Session combat wiring (Core hits to `CombatState`, Grazes and their score to `RunState`, Invulnerability to the field and the ship's blink, excess-Power score) and Defeat under its overlay with Retry restarting the stage (F7-01); the Bomb clear (F7-02) and Pickups (F7-03) follow. |
+| [bosses.md](bosses.md) | Module doc for Feature F12, Bosses: the Boss, Phase, Attack and Attack-step Definitions with their validation (2 or 3 Phases, transitions capped at 0.75 s), and the `BossMachine` Rules Core — entry window, cycling steps with their own Anticipation and fire-time aim and altitude samples, per-Phase health where excess damage never skips a Phase, the hostile clear and next-Attack announcement on each depletion, and exactly-once defeat; the `BossController` adapter follows in F12-02. |
 
 ## Module docs
 

@@ -21,6 +21,24 @@ Files: `scenes/combat/visuals/*`, `assets/combat/*`, `assets/ui/menu_theme.tres`
 Change: Player Projectile is a cyan unit octahedron (6 vertices); hostile Projectile is a coral unit sphere (54 vertices); the dev sphere uses 104 vertices. `familiar.tscn` is a cyan/gold star of radius 0.58 with looping `hover`; `power_pickup_visual.tscn` is a gold crystal of radius 0.78; `shield_pickup_visual.tscn` is a blue orb of radius 0.76; each Pickup loops `float`. `bomb_blast_visual.tscn` uses see-through cyan rings with a unit outer edge and a non-looping/autoplay `blast` clip of 0.4 s that hides them. All scenes have no script or collision. Offline QA passed headless and windowed; the gallery was inspected. The Options slider focus fill is gold, distinct from unfocused teal, and its focused screenshot was recaptured.
 Why: Friendly shots, hostile patterns, Familiars and Pickups have distinct silhouettes while the Bomb shows its clear radius without hiding the next pattern.
 Action required by Claude: Trunk F6-02 sets `Main/ProjectileRoot`'s `player_projectile_mesh` and `hostile_projectile_mesh` exports to the two resources; trunk F6-03 sets `PlayerShip/Weapon.familiar_scene` to `familiar.tscn`; trunk F7-02 instances `bomb_blast_visual.tscn` inside its Bomb wrapper, scales it by `bomb_radius`, and frees it after `blast`; path F7-03 instances the Power and Shield scenes as `Visual` under its existing `Pickup` roots. Full paths are in `docs/validation/combat-visuals.md`.
+## 2026-09-23 20:56 — Claude (path) — F12-01 BossMachine core and boss Definitions
+State: CODE_READY
+Files:
+- New: `scripts/definitions/boss_definition.gd`, `boss_phase_definition.gd`, `attack_definition.gd`, `attack_step_definition.gd`, `scripts/enemies/boss_machine.gd` (and their `.uid`), `docs/engineering/bosses.md`.
+- Edited: `docs/engineering/README.md` (one line), `docs/engineering/ROADMAP.md` (the F12-01 row, and the F5-02 row now says ruling 5 is confirmed), `docs/engineering/projectile-field.md` (ruling 5 confirmed), `.scratch/bosses/issues/01-boss-machine-core.md` (Status, Outcome).
+
+Change:
+- **Definitions.** `BossDefinition` has 2 or 3 `BossPhaseDefinition`s. Each Phase has health, an `AttackDefinition` and `transition_seconds`, which is capped at 0.75 by `validate()` (D-07 ruling 1). An `AttackDefinition` is a Portuguese name, cycling `AttackStepDefinition`s and `reposition_seconds`. A step is a Pattern, its Anticipation, its height or `follow_player_height`, and `pause_after`.
+- **`BossMachine`** runs, in order:
+  - the entry window;
+  - each step: `step_started`, then its Anticipation, then an aim and altitude sample at fire time, then the Pattern, then the pause;
+  - the reposition window, then the steps again.
+  - A hit is capped at the Phase's remaining health, and damage is refused only during the transition. A depleted Phase emits `phase_health_changed(i, 0.0)`, `hostile_clear_requested`, then `phase_changed(i + 1, name)`, or `defeated` exactly once for the last Phase.
+- **No unit tests,** by the sprint rule. The five scripts pass `--check-only` with warnings as errors.
+
+Why: F12-01 unblocks F12-02 (path) and F12-03 part 1 (oc-a).
+
+Action required by Astra: when writing boss `.tres` content (D-07 Part C, D-06), keep each `transition_seconds` at or below 0.75, and keep every Attack's cycle above zero seconds; `validate()` enforces both. Attack names are Portuguese literals in the Definitions.
 
 ## 2026-09-23 20:32 — OpenCode (oc-a) — F6-03 part 1 WeaponModel
 State: CODE_READY
