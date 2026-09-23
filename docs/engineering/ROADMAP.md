@@ -69,11 +69,11 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | | | | 01 stage-director-adapter | adapter | no | trunk | todo |
 | | | | 02 gate-and-checkpoint-adapters | adapter | no | trunk | todo |
 | | | | 03 retry-restart-flow | integration | no | trunk | todo |
-| | | | 04 stage-01-contract-smoke-test | test | yes (one new test file) | oc-a | todo |
+| | | | 04 stage-01-contract-smoke-test | test | yes (one new test file) | — | cut (the user's no-tests rule, 2026-09-23) |
 | F11 | Run flow | `run-flow` | 00 plan | docs | no | — | done (one-pass planning) |
 | | | | 01 defeat-results-retry-restart-screens | integration | no | trunk | todo |
 | | | | 02 campaign-continuation-and-direct-stage | integration | no | trunk | todo |
-| | | | 03 active-and-clear-time-verification | test | no | path | todo |
+| | | | 03 active-and-clear-time-verification | test | no | path | todo (manual protocol only; no tests) |
 | F12 | Bosses and Stage 2 | `bosses` | 00 plan | docs | no | — | done (one-pass planning; Stage 2 reinstated by the sprint plan) |
 | | | | 01 boss-machine-core | core | yes | path | todo |
 | | | | 02 boss-controller-adapter | adapter | no | path | todo |
@@ -106,6 +106,7 @@ Order rationale: Player before Menus (highest UX risk and GUIDE Section 13's ass
 If a SPRINT.md checkpoint slips by more than an hour, the proposed cut order is: music, then F3-03's prompt icons, then the Storm Guardian's final art, then Stage 2 entirely, with D-05's Stage 1 pacing raised to five minutes. The user confirms each step. PLANEJAMENTO Section 11 still cuts decorative density, secondary animation and enemy variants before approved mechanics. Scope changes are raised in the ticket or at a checkpoint, never decided inside a session.
 
 Other risks:
+- **No new tests (the user's rule, 2026-09-23).** The only automated gate is `tools/lane.ps1 land`: the existing suite plus a headless boot of the main scene. Regressions in code without coverage surface only in game runs, the reviewers and the human pass.
 - **Projectiles.** One physics ray per projectile per tick at 1000 to 3000 bullets. F6-02's folded benchmark measures it while other lanes run, so the numbers are pessimistic; no ticket mitigates the ray cost yet.
 - **Heavy tickets.** F6-03 is the heaviest; split the WeaponModel core out if it overruns. F10-03 is a refactor: it moves the per-ship setup from F4-02, F6-02, F6-03 and F7-02 into one `_spawn_player()`.
 - **Cross-lane edits.** Four files are edited by two lanes with no dependency between them (SPRINT.md "Shared files"); the second to land merges both.

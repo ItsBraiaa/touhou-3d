@@ -72,12 +72,16 @@ Names in `project.godot`; bindings from PLANEJAMENTO.md Section 8. Dead zone 0.2
 
 ## Tests
 
+**Sprint override (the user's rule, 2026-09-23): no new tests, ever.** Nobody writes unit or scene tests or does TDD. `tools/lane.ps1 land` (the existing suite plus a boot smoke of the main scene) is the only automated gate, and adapters are also checked by running the game. The rest of this section describes the existing suite. See [SPRINT.md](SPRINT.md) "Product decisions".
+
 - Runner: `tests/run_tests.gd` (extends `SceneTree`), executed by `tools/test.ps1`, which wraps `tools/godot.ps1 --headless --path . --script res://tests/run_tests.gd`. Non-zero exit on any failure.
 - Framework: `tests/framework/test_case.gd` with `assert_*` helpers and `before_each`/`after_each`.
 - Layout: `tests/unit/<area>/test_<core>.gd` mirrors `scripts/`; `tests/scene/test_<scene>_contract.gd` instances a `.tscn` headless and checks its contract only.
 - Cores are tested directly. Scene tests are smoke tests, never gameplay tests.
 
 ## Definition of Done for CODE_READY
+
+During the sprint, items 1 and 2 become "`tools/lane.ps1 land` passes"; no new tests are written.
 
 1. `tools/test.ps1` passes.
 2. Every ENGINEERING_BRIEF Section 8 invariant that belongs to the ticket has a named test.

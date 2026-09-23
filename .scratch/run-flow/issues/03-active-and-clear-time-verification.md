@@ -7,6 +7,8 @@ Depends on: F11-02
 Lane: path
 Model: Claude Opus 5.5, solo
 
+> **No new tests (SPRINT.md, the user's rule):** skip every test this ticket lists. Deliver only the manual protocol and `docs/validation/clear-time.md`: the Active Time and Clear Time checks run by hand in the game, and the uninterrupted-clear measurement for Stage 1, then Stage 2 once F12-07 has landed.
+
 > **Sprint note:** Stage 2 is reinstated, so item 5 is no longer "not verified (cut)":
 > - If F12-07 has landed, measure Stage 2 with this protocol.
 > - If it has not, record "pending F12-07" and leave the measurement to F14-02's human pass. Do not wait for F12-07.
