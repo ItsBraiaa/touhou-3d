@@ -6,7 +6,7 @@ Deadline: 2026-09-24 (academic delivery). Baseline: 2026-09-20; F4 to F14 planne
 
 ## How to run a session
 
-**During the sprint, [SPRINT.md](SPRINT.md) replaces steps 1 and 2.** Each lane (trunk, sol, glm-a, glm-b) works its own queue in its own git worktree, on its own `lane/<name>` branch, and lands each ticket with `tools/lane.ps1 land`. Nobody works in the primary tree.
+**During the sprint, [SPRINT.md](SPRINT.md) replaces steps 1 and 2.** Each lane (trunk, path, oc-a, oc-b, sol, and rescue or terra on demand) works its own queue in its own git worktree, on its own `lane/<name>` branch, and lands each ticket with `tools/lane.ps1 land`. Nobody works in the primary tree.
 
 1. Pick the first ticket whose Status is `todo` and whose dependencies are `done` (or a `parallel-safe: yes` ticket if another session is already running).
 2. Paste its kickoff line into a fresh session. One ticket per session, never two.
@@ -35,60 +35,60 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | | | | 03 run-state-core | core | yes | — | done |
 | | | | 04 game-session-start-pause-quit | integration | no | — | done (menu-to-flight flow scripted on keyboard and gamepad; physical-device pass owed; Stage 2 wired too) |
 | F3 | Settings | `settings` | 00 plan | docs | no | — | done (cut, then reinstated by the sprint plan, 2026-09-23) |
-| | | | 01 settings-core-and-configfile | core | yes | glm-b | todo |
-| | | | 02 options-screen-binding | adapter | no | glm-b | todo |
-| | | | 03 input-device-mode-and-controller-disconnect | adapter | no | glm-b | todo |
-| | | | 04 settings-to-camera-wiring | integration | no | trunk | todo |
+| | | | 01 settings-core-and-configfile | core | yes | oc-b | todo |
+| | | | 02 options-screen-binding | adapter | no | oc-b | todo |
+| | | | 03 input-device-mode-and-controller-disconnect | adapter | no | oc-b | todo |
+| | | | 04 settings-to-camera-wiring | integration | no | trunk (part 1: path) | todo |
 | F4 | Combat state and HUD | `combat-hud` | 00 plan | docs | no | — | done (one-pass planning, 2026-09-23; 01 was written and delivered separately) |
 | | | | 01 combat-state-core | core | yes | — | done |
 | | | | 02 hud-binding-and-target-marker | adapter | no | trunk | todo |
-| | | | 03 boss-panel-and-attack-cue-api | adapter | no | sol | todo |
+| | | | 03 boss-panel-and-attack-cue-api | adapter | no | trunk | todo |
 | F5 | Projectile Field | `projectile-field` | 00 plan | docs | no | — | done (one-pass planning) |
-| | | | 01 field-core-spawn-move-cull | core | yes | trunk | todo |
-| | | | 02 core-hit-sweep-and-graze-rules | core | yes (after 01, same file) | glm-a | todo |
-| | | | 03 bomb-phase-clears-and-hit-spheres | core | yes (after 02, same file) | glm-a | todo |
-| | | | 04 pattern-emitter-core | core | yes | glm-a | todo |
+| | | | 01 field-core-spawn-move-cull | core | yes | path | todo |
+| | | | 02 core-hit-sweep-and-graze-rules | core | yes (after 01, same file) | path | todo |
+| | | | 03 bomb-phase-clears-and-hit-spheres | core | yes (after 02, same file) | path | todo |
+| | | | 04 pattern-emitter-core | core | yes | oc-a | todo |
 | F6 | Weapon and rendering | `weapon-rendering` | 00 plan | docs | no | — | done (one-pass planning) |
 | | | | 01 rendering-spike | spike | no | — | cut (folded into 02 by the sprint plan: MultiMesh by default, benchmark inside 02) |
 | | | | 02 projectile-system-adapter | adapter | no | trunk | todo |
-| | | | 03 weapon-model-and-player-weapon | core+adapter | no | trunk | todo |
+| | | | 03 weapon-model-and-player-weapon | core+adapter | no | trunk (part 1: oc-a) | todo |
 | F7 | Damage, bomb, pickups | `damage-pickups` | 00 plan | docs | no | — | done (one-pass planning) |
 | | | | 01 hit-to-combat-state-and-defeat | integration | no | trunk | todo |
 | | | | 02 bomb-clear-and-invulnerability | integration | no | trunk | todo |
-| | | | 03 pickup-adapter-and-rewards | adapter | no | glm-b | todo |
+| | | | 03 pickup-adapter-and-rewards | adapter | no | path | todo |
 | F8 | Progression cores and content | `progression-core` | 00 plan | docs | no | — | done (one-pass planning) |
-| | | | 01 definition-schemas-and-content-validation | core | yes | glm-b | todo |
-| | | | 02 encounter-machine-core | core | yes | glm-b | todo |
-| | | | 03 snapshot-capture-restore | core | yes | glm-b | todo |
-| | | | 04 stage-01-content-draft | content | yes | glm-b | todo |
+| | | | 01 definition-schemas-and-content-validation | core | yes | oc-b | todo |
+| | | | 02 encounter-machine-core | core | yes | oc-b | todo |
+| | | | 03 snapshot-capture-restore | core | yes | oc-b | todo |
+| | | | 04 stage-01-content-draft | content | yes | oc-b | todo |
 | F9 | Enemies | `enemies` | 00 plan | docs | no | — | done (one-pass planning) |
-| | | | 01 enemy-model-core | core | yes | glm-a | todo |
-| | | | 02 dev-prefabs-and-enemy-actor | adapter | no | sol | todo |
-| | | | 03 seal-and-guard-rules | core+adapter | no | glm-a | todo (consumed by F12-05, Stage 2 S2-03) |
+| | | | 01 enemy-model-core | core | yes | oc-a | todo |
+| | | | 02 dev-prefabs-and-enemy-actor | adapter | no | path | todo |
+| | | | 03 seal-and-guard-rules | core+adapter | no | oc-a | todo (consumed by F12-05, Stage 2 S2-03) |
 | F10 | Stage Director in Stage 1 | `stage-director` | 00 plan | docs | no | — | done (one-pass planning) |
 | | | | 01 stage-director-adapter | adapter | no | trunk | todo |
 | | | | 02 gate-and-checkpoint-adapters | adapter | no | trunk | todo |
 | | | | 03 retry-restart-flow | integration | no | trunk | todo |
-| | | | 04 stage-01-contract-smoke-test | test | yes (one new test file) | glm-a | todo |
+| | | | 04 stage-01-contract-smoke-test | test | yes (one new test file) | oc-a | todo |
 | F11 | Run flow | `run-flow` | 00 plan | docs | no | — | done (one-pass planning) |
 | | | | 01 defeat-results-retry-restart-screens | integration | no | trunk | todo |
 | | | | 02 campaign-continuation-and-direct-stage | integration | no | trunk | todo |
-| | | | 03 active-and-clear-time-verification | test | no | glm-a | todo |
+| | | | 03 active-and-clear-time-verification | test | no | path | todo |
 | F12 | Bosses and Stage 2 | `bosses` | 00 plan | docs | no | — | done (one-pass planning; Stage 2 reinstated by the sprint plan) |
-| | | | 01 boss-machine-core | core | yes | glm-a | todo |
-| | | | 02 boss-controller-adapter | adapter | no | sol | todo |
-| | | | 03 lantern-guardian-in-s1-07 | integration | no | trunk | todo |
-| | | | 04 stage-02-content-draft | content | yes | glm-b | todo |
+| | | | 01 boss-machine-core | core | yes | path | todo |
+| | | | 02 boss-controller-adapter | adapter | no | path | todo |
+| | | | 03 lantern-guardian-in-s1-07 | integration | no | trunk (part 1: oc-a) | todo |
+| | | | 04 stage-02-content-draft | content | yes | oc-b | todo |
 | | | | 05 stage-02-director-integration | adapter | no | sol | todo |
 | | | | 06 tempest-sentinel-miniboss | integration | no | sol | todo |
 | | | | 07 storm-guardian | integration | no | sol | todo |
 | F13 | Audio | `audio` | 00 plan | docs | no | — | done (cut, then reinstated by the sprint plan, 2026-09-23) |
-| | | | 01 audio-limiter-core | core | yes | glm-a | todo |
-| | | | 02 audio-controller-adapter | adapter | no | glm-a | todo |
+| | | | 01 audio-limiter-core | core | yes | oc-a | todo |
+| | | | 02 audio-controller-adapter | adapter | no | oc-a | todo |
 | | | | 03 audio-event-wiring | integration | no | trunk | todo |
 | F14 | Delivery | `delivery` | 00 plan | docs | no | — | done (one-pass planning) |
 | | | | 01 export-and-run-outside-editor | integration | no | trunk | todo (blocks itself until the user installs the Godot 4.7.2 export templates) |
-| | | | 02 package-and-acceptance-record | tooling | no | glm-b | todo |
+| | | | 02 package-and-acceptance-record | tooling | no | oc-b | todo |
 | D | Design sprint (Astra) | `design-sprint` | 01 sfx-selection-and-import | design | — | sol | todo |
 | | | | 02 combat-visuals | design | — | sol | todo |
 | | | | 03 lantern-guardian-scene | design | — | sol | todo |
@@ -101,7 +101,7 @@ Order rationale: Player before Menus (highest UX risk and GUIDE Section 13's ass
 
 ## Risk
 
-48 tickets are `todo` for about one day across four lanes (trunk 15, sol 13, glm-a 10, glm-b 10). The trunk lane is the critical path, because every `game_session.gd` edit is serialized there.
+48 tickets are `todo` for about one day across five standing lanes (trunk 15, path 8, oc-a 6, oc-b 9, sol 10), with rescue on demand. OpenCode tickets carry a per-ticket `Model:` line (SPRINT.md "Model budgets"). The trunk lane is the critical path, because every `game_session.gd` edit is serialized there.
 
 If a SPRINT.md checkpoint slips by more than an hour, the proposed cut order is: music, then F3-03's prompt icons, then the Storm Guardian's final art, then Stage 2 entirely, with D-05's Stage 1 pacing raised to five minutes. The user confirms each step. PLANEJAMENTO Section 11 still cuts decorative density, secondary animation and enemy variants before approved mechanics. Scope changes are raised in the ticket or at a checkpoint, never decided inside a session.
 

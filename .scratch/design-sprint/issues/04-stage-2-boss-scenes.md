@@ -4,6 +4,7 @@ Status: todo
 Type: design
 Owner: Astra (GPT Sol)
 Lane: sol
+Model: GPT Sol (Codex)
 Depends on: none
 
 ## Goal

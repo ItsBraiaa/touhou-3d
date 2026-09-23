@@ -4,6 +4,7 @@ Status: todo
 Type: design
 Owner: Astra (GPT Sol)
 Lane: sol
+Model: GPT Sol (Codex)
 Depends on: none
 
 > **Sprint note (PO, 2026-09-23):** D-02 also delivers the focused-slider fix in `assets/ui/menu_theme.tres` (roadmap request F2-02): a gold `HSlider/icons/grabber_highlight`, or a distinct `grabber_area_highlight`, so a focused slider is visibly selected. PLANEJAMENTO Section 7 requires visible selection focus, and F3-02 makes the Options sliders live. Check it with `tools/validate_menu_handoff.gd` and a re-captured `docs/validation/menus-options-entry.png`.

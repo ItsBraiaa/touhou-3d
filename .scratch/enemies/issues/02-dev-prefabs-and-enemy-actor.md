@@ -4,7 +4,8 @@ Status: todo
 Type: adapter
 parallel-safe: no
 Depends on: F9-01, F6-02
-Lane: sol
+Lane: path
+Model: Claude Opus 5.5, 2-agent workflow (implementer, reviewer)
 
 ## Goal
 

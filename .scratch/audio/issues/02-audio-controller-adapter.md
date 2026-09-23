@@ -4,7 +4,8 @@ Status: todo
 Type: adapter
 parallel-safe: no
 Depends on: F13-01
-Lane: glm-a
+Lane: oc-a
+Model: Qwen3.8 Max (fallback GPT 5.6 Luna); run a 5-request check first
 
 ## Goal
 

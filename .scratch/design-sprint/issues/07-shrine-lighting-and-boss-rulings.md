@@ -4,6 +4,11 @@ Status: todo
 Type: design
 Owner: Astra (GPT Sol)
 Lane: sol
+Model: GPT Sol (Codex)
+
+> **Order (SPRINT.md):**
+> - **Part B (the rulings) comes first in lane sol,** by about T0 + 0.8 h, as its own commit `(D-07 part B)`. F5-02 waits at most until T0 + 1 h for ruling 5.
+> - **Parts A and C** run after F12-03 has landed. They close the ticket.
 Depends on: F12-03
 
 ## Goal

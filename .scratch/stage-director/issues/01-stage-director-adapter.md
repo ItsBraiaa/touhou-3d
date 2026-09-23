@@ -5,6 +5,7 @@ Type: adapter
 parallel-safe: no
 Depends on: F8-02, F8-04, F9-02, F7-03, F4-03
 Lane: trunk
+Model: Claude Opus 5.5, 3-agent workflow (implementer, test-writer, reviewer)
 
 ## Goal
 

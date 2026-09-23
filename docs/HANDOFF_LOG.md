@@ -15,6 +15,31 @@ Action required by <other agent>: <what they must do, or "none">
 
 ---
 
+## 2026-09-23 21:00 — Claude (trunk) — Sprint re-routed: six lanes, per-ticket models [shared]
+State: PLANNED
+Files:
+- `docs/engineering/SPRINT.md`, rewritten: lanes, queues with workflow shapes and models, model budgets, escalation, overflow, Claude usage, kickoff prompts, checkpoints.
+- The `Lane:` and new `Model:` header lines of all 48 open tickets, plus split notes on F6-03, F9-03, F12-03, F3-04 and F14-02, and pass/order notes on D-06 and D-07.
+- `docs/engineering/ROADMAP.md` (Lane column, Risk), `docs/engineering/CONVENTIONS.md`, `CLAUDE.md`, and `AGENTS.md` (shared).
+
+Change:
+- **Why the re-route.** OpenCode quotas are per model and per 5 hours, and GLM-5.3 allows only 220 requests, which cannot carry two lanes. The sprint is re-routed from a sizing of all 48 open tickets (about 6,230 mid-tier requests) and the public model evidence.
+- **Lanes:**
+  - `trunk` (Opus) keeps every Session and scene edit.
+  - The new `path` lane (a second Opus session, stopped in its gaps) takes the critical-path cores and actor adapters: F5-01 to F5-03, F12-01, F9-02, F7-03, F12-02, F11-03.
+  - `oc-a` and `oc-b` (OpenCode) replace `glm-a` and `glm-b`. Each ticket names its model, and the user switches it by hand: GPT 5.6 Luna as the workhorse; GLM-5.3 for F8-02, F3-02 and F3-03, each in a fresh window; Qwen3.8 Max for F13-02 and the Seal adapter; DeepSeek V4.1 Flash for content; Kimi K3 as the escalation reserve.
+  - `rescue` (Opus, on demand) takes over stuck tickets.
+  - `terra` (Codex Terra) and OpenRouter (GLM-5.2 or DeepSeek) are overflow with explicit switch rules.
+- **Ticket moves.** F4-03 moved from sol to trunk, and F9-02 and F12-02 from sol to path.
+
+Why: The critical path runs on Opus without hand-offs, the hardest OpenCode tickets get the strongest models within their quotas, and nothing waits on a spent quota.
+
+Action required by Astra:
+- Your queue is shorter and starts with D-07 Part B (the rulings), then D-01, D-03, D-04, D-02, D-06 pass 1, D-05, F12-05, D-06 pass 2, F12-06, F12-07, D-07 Parts A and C, and D-06 pass 3.
+- Run `tools/lane.ps1 sync` first: your worktree is behind.
+- D-05 has a timing rule (SPRINT.md "Shared files").
+- `AGENTS.md` step 0 lists the new lanes.
+
 ## 2026-09-23 19:30 — Claude — Four-lane sprint: F3, F13 and Stage 2 reinstated; worktrees per lane [shared]
 State: PLANNED
 Files:

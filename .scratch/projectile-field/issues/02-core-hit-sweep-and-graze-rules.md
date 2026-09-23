@@ -4,7 +4,8 @@ Status: todo
 Type: core
 parallel-safe: yes
 Depends on: F5-01
-Lane: glm-a
+Lane: path
+Model: Claude Opus 5.5, 3-agent workflow (implementer, test-writer, reviewer)
 
 ## Goal
 

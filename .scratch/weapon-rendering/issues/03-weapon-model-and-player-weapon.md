@@ -4,7 +4,12 @@ Status: todo
 Type: core+adapter
 parallel-safe: no
 Depends on: F6-02, F4-01, F4-02
-Lane: trunk
+Lane: trunk (part 1: oc-a)
+Model: part 1 GPT 5.6 Luna (fallback DeepSeek V4.1 Flash); part 2 Claude Opus 5.5, 2-agent workflow (implementer, reviewer)
+
+> **Split (SPRINT.md):**
+> - **Part 1, lane oc-a** (depends only on F4-01): the WeaponModel core `scripts/combat/weapon_model.gd` and its unit tests only. No scene, no `player_weapon.gd`, and no `docs/engineering/weapon-rendering.md`: put its contract in doc comments and the handoff entry. Commit with `(F6-03 part 1)`.
+> - **Part 2, lane trunk** (after F6-02 and part 1): PlayerWeapon, `player_ship.tscn` `[shared]`, the arena harness and the module-doc section. It closes the ticket.
 
 > **Sprint note (D-02, F13):** if D-02's `scenes/combat/visuals/familiar.tscn` (Node3D root, no collision) has landed, set `familiar_scene` to it; otherwise ship the dev Familiar and log "swap pending: D-02". F13 is reinstated: F13-03 adds `shots_fired(count: int)` to this script later, so keep the fire path in one function.
 

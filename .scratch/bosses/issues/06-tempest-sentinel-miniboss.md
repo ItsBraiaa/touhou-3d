@@ -5,6 +5,7 @@ Type: integration
 parallel-safe: no
 Depends on: F12-05, F12-02, F12-03, D-04
 Lane: sol
+Model: GPT Sol (Codex)
 
 ## Goal
 

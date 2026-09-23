@@ -5,6 +5,7 @@ Type: adapter
 parallel-safe: no
 Depends on: F10-03, F9-03, F12-04
 Lane: sol
+Model: GPT Sol (Codex)
 
 ## Goal
 

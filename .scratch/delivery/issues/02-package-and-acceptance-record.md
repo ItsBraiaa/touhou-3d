@@ -4,7 +4,12 @@ Status: todo
 Type: tooling
 parallel-safe: no
 Depends on: F14-01
-Lane: glm-b
+Lane: oc-b
+Model: part 1 GPT 5.6 Luna (fallback DeepSeek V4.1 Flash); part 2 DeepSeek V4.1 Flash (fallback GLM-5.3-Flash)
+
+> **Split (SPRINT.md):**
+> - **Part 1, lane oc-b** (no dependency): write and test `tools/package.ps1`. Commit with `(F14-02 part 1)`.
+> - **Part 2, lane oc-b** (after F14-01): sync, re-export with the command F14-01 recorded, package, and write the acceptance record. It closes the ticket.
 
 > **Sprint note:** F3, F13 and Stage 2 are reinstated (docs/engineering/SPRINT.md). Nothing is "not verified (cut)" unless the user cuts it at a checkpoint.
 > - Verify Options persistence, controller-disconnect recovery, sound effects (a human listening pass) and every Stage 2 item, including the five-minute measurement.

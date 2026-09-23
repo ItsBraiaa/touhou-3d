@@ -4,7 +4,12 @@ Status: todo
 Type: integration
 parallel-safe: no
 Depends on: F12-02, F10-03
-Lane: trunk
+Lane: trunk (part 1: oc-a)
+Model: part 1 GPT 5.6 Luna (fallback DeepSeek V4.1 Flash); part 2 Claude Opus 5.5, 3-agent workflow (implementer, test-writer, reviewer)
+
+> **Split (SPRINT.md):**
+> - **Part 1, lane oc-a** (depends on F12-01, F5-04 and F6-03 part 1): `content/bosses/lantern_guardian.tres`, the three `content/patterns/lantern_*.tres` and the content unit test only. Commit with `(F12-03 part 1)`.
+> - **Part 2, lane trunk** (after F12-02, F10-03 and part 1): the Director boss branch, the Session wiring, the `stage_01.tscn` exports and the integration test. It closes the ticket. Part 2 only references part 1's files; a needed value change becomes a note.
 
 > **Sprint notes:**
 > 1. **D-03** (lane sol) delivers `scenes/enemies/lantern_guardian.tscn` with no root script. If it has landed, attach `boss_controller.gd` to it `[shared]`, set its references and D-03's clip names, and point `actor_scenes[&"lantern_guardian"]` at it. Otherwise ship the dev boss and log "swap pending: D-03". Do not wait for D-03.

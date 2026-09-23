@@ -4,6 +4,14 @@ Status: todo
 Type: design
 Owner: Astra (GPT Sol)
 Lane: sol
+Model: GPT Sol (Codex)
+
+> **Three passes (SPRINT.md):**
+> 1. The values review and the 300 s estimate, after F12-04.
+> 2. The Seal health exports, after F12-05.
+> 3. The boss values, after F12-07. This pass closes the ticket.
+>
+> Commit each pass with `(D-06 pass N)`.
 Depends on: F12-04
 
 ## Goal

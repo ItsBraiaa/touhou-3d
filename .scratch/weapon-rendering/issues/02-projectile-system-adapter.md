@@ -5,6 +5,7 @@ Type: adapter
 parallel-safe: no
 Depends on: F5-03
 Lane: trunk
+Model: Claude Opus 5.5, 3-agent workflow (implementer, test-writer, reviewer)
 
 > **Sprint note (D-02):** if `scenes/combat/visuals/projectile_player_mesh.tres` and `projectile_hostile_mesh.tres` are on the integration branch, point the two mesh exports at them; otherwise ship the dev meshes and log "swap pending: D-02".
 

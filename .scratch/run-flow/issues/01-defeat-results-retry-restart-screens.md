@@ -5,6 +5,7 @@ Type: integration
 parallel-safe: no
 Depends on: F10-03
 Lane: trunk
+Model: Claude Opus 5.5, solo
 
 ## Goal
 

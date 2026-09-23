@@ -4,7 +4,8 @@ Status: todo
 Type: content
 parallel-safe: yes
 Depends on: F8-01, F9-01
-Lane: glm-b
+Lane: oc-b
+Model: DeepSeek V4.1 Flash (fallback GPT 5.6 Luna)
 
 ## Goal
 

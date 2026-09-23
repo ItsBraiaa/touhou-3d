@@ -4,7 +4,8 @@ Status: todo
 Type: test
 parallel-safe: no (drives the whole Session headless; runs after every Session edit it verifies)
 Depends on: F11-02
-Lane: glm-a
+Lane: path
+Model: Claude Opus 5.5, solo
 
 > **Sprint note:** Stage 2 is reinstated, so item 5 is no longer "not verified (cut)":
 > - If F12-07 has landed, measure Stage 2 with this protocol.

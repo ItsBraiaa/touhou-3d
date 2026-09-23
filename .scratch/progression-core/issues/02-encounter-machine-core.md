@@ -4,7 +4,8 @@ Status: todo
 Type: core
 parallel-safe: yes
 Depends on: F8-01
-Lane: glm-b
+Lane: oc-b
+Model: GLM-5.3 (fallback GPT 5.6 Luna)
 
 ## Goal
 

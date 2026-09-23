@@ -4,7 +4,8 @@ Status: todo
 Type: adapter
 parallel-safe: no
 Depends on: F3-02
-Lane: glm-b
+Lane: oc-b
+Model: GLM-5.3 (fallback GPT 5.6 Luna), after GLM-5.3's second window resets
 
 ## Goal
 

@@ -4,7 +4,8 @@ Status: todo
 Type: core
 parallel-safe: yes
 Depends on: F5-04
-Lane: glm-a
+Lane: path
+Model: Claude Opus 5.5, solo
 
 > **Sprint note:** Stage 2 is reinstated, so the Sentinel (F12-06, two Phases) and the Storm Guardian (F12-07, three Phases) will use this core; keep both configurations fully tested. D-07 Part B rules on damage during a Phase transition. Until that ruling lands, keep this ticket's reading, in one named test, so a different ruling flips one assertion.
 

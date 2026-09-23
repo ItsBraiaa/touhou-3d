@@ -4,7 +4,8 @@ Status: todo
 Type: core
 parallel-safe: yes
 Depends on: F0-02
-Lane: trunk
+Lane: path
+Model: Claude Opus 5.5, solo
 
 ## Goal
 

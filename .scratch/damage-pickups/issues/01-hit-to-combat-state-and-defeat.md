@@ -5,6 +5,7 @@ Type: integration
 parallel-safe: no
 Depends on: F6-02, F4-02 (F4-01 done)
 Lane: trunk
+Model: Claude Opus 5.5, 3-agent workflow (implementer, test-writer, reviewer)
 
 ## Goal
 
