@@ -1,11 +1,13 @@
 # F10-04 Stage 1 contract smoke test
 
-Status: todo
+Status: cut (the user's no-tests rule, 2026-09-23)
 Type: test
 parallel-safe: yes (one new test file; reads the scene and the content, writes neither)
 Depends on: F8-04
-Lane: oc-a
-Model: GPT 5.6 Luna (fallback DeepSeek V4.1 Flash)
+Lane: —
+Model: —
+
+> **Cut (SPRINT.md "No new tests"):** this ticket is a test and nothing else, so the user's rule removes it. The Director's runtime `check_setup()` (F10-01) still refuses a stage whose content and scene disagree, and reports why.
 
 ## Goal
 
