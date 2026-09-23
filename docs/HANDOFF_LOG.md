@@ -38,6 +38,13 @@ Action required by Astra:
 - `PlayerShip` has a new Inspector export, `invulnerability_flicker_hz` (12.0, "Feedback" group), yours to tune.
 - Keep `CoreVisual` under `DamageCore`, outside `VisualRoot`, or the Core would blink too.
 - Defeat has no animation yet.
+## 2026-09-23 20:21 — Astra (sol) — D-01 SFX selection and import [shared]
+State: SCENE_READY
+Files: `assets/audio/sfx/` (16 Ogg files and their `.import` settings), four `assets/licenses/kenney-*.txt` pack licenses, `docs/ASSET_CREDITS.md`, `scenes/ui/credits.tscn`, `docs/validation/audio-selection.md`, `docs/validation/menu-credits.png`, `tools/validate_audio_selection.gd`, and D-01's ticket.
+Change: All 17 F13 events have a selected non-looping CC0 Kenney stream and proposed `volume_db` in [audio-selection.md](validation/audio-selection.md). The Credits screen now names the four packs. No music is shipped: the local Touhou-titled files lack documented redistribution permission. Godot import and 17-stream validation exited zero, the menu QA rendered the credit with zero failures, and the 16 copied streams match their originals byte for byte. No F13 event rule values are requested to change.
+Why: F13 needs a concrete event-to-stream mapping and distributable credits. The menu credit names only packs used.
+Action required by Claude: F13-03 copies the table's paths and `volume_db` values into `Main/Audio`. No music track table applies. Human listening approval is still needed before D-01 can be marked done; this agent cannot hear the selected files, so the ticket is blocked on that perceptual pass.
+
 ## 2026-09-23 20:18 — OpenCode (oc-b) — F8-01 progression Definitions
 State: CODE_READY
 Files: `scripts/definitions/encounter_definition.gd`, `wave_definition.gd`, `reward_definition.gd`, `checkpoint_definition.gd`, `stage_definition.gd`, `docs/engineering/progression-core.md`, `docs/engineering/README.md`, `docs/engineering/ROADMAP.md`, `.scratch/progression-core/issues/01-definition-schemas-and-content-validation.md`
