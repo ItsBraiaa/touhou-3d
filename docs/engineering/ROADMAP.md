@@ -44,7 +44,7 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | | | | 02 hud-binding-and-target-marker | adapter | no | trunk | done (2026-09-23: `Hud` bound to the Session's `CombatState` and each ship's `Targeting`; marker verified in the harness) |
 | | | | 03 boss-panel-and-attack-cue-api | adapter | no | trunk | todo |
 | F5 | Projectile Field | `projectile-field` | 00 plan | docs | no | — | done (one-pass planning) |
-| | | | 01 field-core-spawn-move-cull | core | yes | path | todo |
+| | | | 01 field-core-spawn-move-cull | core | yes | path | done |
 | | | | 02 core-hit-sweep-and-graze-rules | core | yes (after 01, same file) | path | todo |
 | | | | 03 bomb-phase-clears-and-hit-spheres | core | yes (after 02, same file) | path | todo |
 | | | | 04 pattern-emitter-core | core | yes | oc-a | todo |
