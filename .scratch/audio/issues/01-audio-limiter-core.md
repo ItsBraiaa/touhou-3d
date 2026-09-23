@@ -1,6 +1,6 @@
 # F13-01 AudioLimiter core
 
-Status: todo
+Status: done
 Type: core
 parallel-safe: yes
 Depends on: F0-02
@@ -86,6 +86,10 @@ Playback, streams, buses and the event catalogue with its values (F13-02). Pitch
 ## Handoff notes for Astra
 
 None for this ticket. The rule values live in F13-02's table and are Claude's proposals. After the D-01 listening pass, tell Claude which sounds feel too dense or too sparse.
+
+## Outcome
+
+Implemented `AudioLimiter` with deterministic event intervals and voice lifetimes, per-event and global voice caps, strict lower-priority stealing of the oldest eligible voice, and monotonically increasing ids retained across `clear()`. Added the audio module contract and updated the README and roadmap. No tests were added under the sprint rule; validation is through `tools/lane.ps1 land`.
 
 ## Kickoff prompt
 

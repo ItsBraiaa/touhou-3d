@@ -83,7 +83,7 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | | | | 06 tempest-sentinel-miniboss | integration | no | sol | todo |
 | | | | 07 storm-guardian | integration | no | sol | todo |
 | F13 | Audio | `audio` | 00 plan | docs | no | — | done (cut, then reinstated by the sprint plan, 2026-09-23) |
-| | | | 01 audio-limiter-core | core | yes | oc-a | todo |
+| | | | 01 audio-limiter-core | core | yes | oc-a | done |
 | | | | 02 audio-controller-adapter | adapter | no | oc-a | todo |
 | | | | 03 audio-event-wiring | integration | no | trunk | todo |
 | F14 | Delivery | `delivery` | 00 plan | docs | no | — | done (one-pass planning) |
