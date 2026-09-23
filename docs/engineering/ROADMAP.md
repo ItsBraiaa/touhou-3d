@@ -25,6 +25,7 @@ Status values: `todo`, `doing`, `done`, `blocked`. Tickets live in `.scratch/<fe
 | | | | 02 player-controller-adapter | adapter | no | done |
 | | | | 03 camera-rig | adapter | no | done |
 | | | | 04 target-selector-and-targeting | core+adapter | no | done (physical-device pass still owed, as for 02 and 03) |
+| | | | 05 astra-design-pass | design | no | blocked (decisions recorded; Inspector flight pass interrupted by Computer Use stop) |
 | F2 | Menus and Session skeleton | `menus-session` | 01 screen-router-core | core | yes | todo |
 | | | | 02 interface-and-menu-controller | adapter | no | todo |
 | | | | 03 run-state-core | core | yes | todo |
@@ -72,12 +73,12 @@ Dependencies Claude has on scene and content work. These are needs by Feature, n
 | Needed by | Request |
 | --- | --- |
 | F0-03 | None. Claude takes ownership of `project.godot`, `export_presets.cfg`, `default_bus_layout.tres`, `scenes/main.tscn` and `scenes/dev/`, plus script attachment, exported values, collision layers, masks, monitoring flags and the instancing of Claude's prefabs inside any `.tscn`. Do not edit them afterwards without a log entry. See GUIDE Section 3. |
-| F0-03 onward | Do not rerun `tools/build_scene_handoff.py`, `build_menu_handoff.py`, or `build_stage_01.py` over integrated scenes without reconciling first. |
+| F0-03 onward | `build_scene_handoff.py` is retired to `docs/archive/build_scene_handoff.py.txt` (reference only). Do not rerun `build_menu_handoff.py` or `build_stage_01.py` over integrated scenes without reconciling first. |
 | F0-03 onward | Every `.gd` compiles with `untyped_declaration`, `unused_variable`, `unused_parameter`, `shadowed_variable` as errors: type `for` iterators over untyped arrays (`for path: String in paths`). Claude typed the ones in `tools/validate_*.gd` on 2026-09-21; behavior unchanged. |
-| F1-02 onward | Fly `scenes/dev/arena_harness.tscn` and tune the three proposals on `PlayerShip`: `edge_margin` 4.0, `max_bank_angle_degrees` 25.0, `bank_smoothing` 8.0. `base_speed` 12.0 and `focus_multiplier` 0.45 are pinned by `tests/scene/test_player_ship_contract.gd`, so tell Claude before changing those two. Also decide whether the rectangular Flight Volume should keep the open void in its corners past the circular platform rim (see `docs/validation/player-flight.md`), and note that `tools/build_scene_handoff.py` now diverges from the integrated `player_ship.tscn` by five lines. |
-| F1-03 onward | Tune the camera in the same harness. Everything on `PlayerShip/CameraRig` except `follow_distance` 8.5 and `follow_height` 3.2 (your authored offset) is Claude's first guess: `default_pitch_degrees` -9, `pitch_limits_degrees` (-60, 35), `orbit_speed_degrees` 120, the three damping rates and `obstruction_margin` 0.4. The `Camera3D` node's transform is now written by the rig every frame — move the camera with those exports, not by dragging the node; its FOV, near and far are still read from the node. Two judgements are yours: whether the camera collapsing onto the ship when it is turned into a wall needs a minimum distance or the ship transparency PLANEJAMENTO Section 3 mentions, and whether the 6.5-unit single-frame shortening under the shrine gate reads as a pop. `tools/build_scene_handoff.py` now also misses the `CameraRig` wiring. |
+| F1-02 onward | F1-05: Inspector tuning blocked by stopped Computer Use; all numeric proposals and pinned values unchanged. Accept rectangular open corners for the dev harness only. Generator retired. See player-flight.md Open issues. |
+| F1-03 onward | F1-05: camera tuning blocked. Choose proximity-driven ship transparency; reject the 6.5-unit gate pop as final production presentation. Claude to investigate obstruction transition; implementation and motion acceptance pending. See player-flight.md Open issues. |
 | F1-03 onward | A human pass on a physical keyboard and on the DualSense pad this host has: the six movement axes, Focus, the arrow keys and right stick for the camera, `K`/`Y` to lock and `Tab`/`X` to cycle in the harness. Everything measured so far is simulated input, which ENGINEERING_BRIEF Section 8 says is not the same thing. |
-| F1-04 onward | Tune Target Lock in the harness: `max_distance` 60 and `max_screen_radius` 0.85 on `PlayerShip/Targeting` are Claude's proposals, and whether `Tab`/`X` switching left to right (wrapping to the far left) feels right is your call. Every targetable prefab (F9 enemies, F12 bosses, Stage 2 seals if they are lockable) must be a `Node3D` in the `targetable` group with a `HitVolume` child, its own volumes off layer 1. Only layer-1 scenery hides a target: the arena's trees have no collision, so trees in the stages that should block acquisition and Aim Assist need layer-1 collision. `tools/build_scene_handoff.py` now also misses the `targeting` wiring on the root and on the `Targeting` node. |
+| F1-04 onward | F1-05: keep left-to-right wrap as the design rule; feel/range/radius tuning still pending. Stage solid trunks/branches should occlude with fitted layer-1 collision; foliage should not. Collision authoring is a follow-up. Every lockable prefab remains a Node3D in targetable with a HitVolume child and its own volumes off layer 1. |
 | F6 | Projectile visual presets (bullet meshes and materials for player and enemy shots) if final art is wanted; Claude ships `scenes/dev/` placeholders otherwise. |
 | F7 | Pickup visuals (Power Pickup, Shield Pickup) following the `pickup.gd` root `Area3D` contract; dev placeholders otherwise. |
 | F8-04 onward | Review and tune the Stage 1 `content/*.tres` draft that Claude transcribes from STAGE_DESIGN.md. Values are yours. |
@@ -97,6 +98,7 @@ Stage 2 scene ticket: `.scratch/stage-02-area/issues/01-mountain-route.md` — *
 
 | Date | Deliverable | Where | State |
 | --- | --- | --- | --- |
+| 2026-09-22 | F1 design decisions, retired generator, lossless enemy atlas imports; Inspector flight tuning blocked by stopped Computer Use | `.scratch/player-flight/issues/05-astra-design-pass.md`, `docs/engineering/player-flight.md` Open issues | PARTIAL / BLOCKED |
 | 2026-09-21 | Stage 2 textured mountain route, vegetation, ambient motion, seven encounters, seals and checkpoints | `scenes/stages/stage_02.tscn`, `docs/STAGE_02_HANDOFF.md` | SCENE_READY_STATIC |
 | 2026-09-20 | Player ship and static arena | `scenes/player/player_ship.tscn`, `scenes/tests/combat_arena.tscn`, GUIDE Section 13 | SCENE_READY |
 | 2026-09-20 | Eight menu scenes and theme | `scenes/ui/*.tscn`, GUIDE Section 14 | SCENE_READY |

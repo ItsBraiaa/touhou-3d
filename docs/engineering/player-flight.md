@@ -251,9 +251,52 @@ Manual and measured results, with screenshots, are in [docs/validation/player-fl
 - Only scenery with collision on layer 1 hides a target. The arena's trees, lanterns and backdrop peaks are meshes without collision, so a target behind a tree stays visible to targeting; the shrine gate, the floor and the walls are what can hide one there. Trees that should block Aim Assist and acquisition in the stages need layer-1 collision.
 - `PlayerShip/CameraRig` now carries the `CameraRig` script's values: `camera` points at `Camera3D`, and `follow_distance` 8.5 and `follow_height` 3.2 are your authored camera offset moved onto the rig. The `Camera3D` node keeps its authored transform as the documented rest pose, but the rig writes that transform every frame at runtime, so moving the camera node in the editor no longer changes where the camera sits — change `follow_distance`, `follow_height` and `default_pitch_degrees` instead. Its FOV, near and far are still yours and are not touched.
 - The rig sets `top_level` on itself at run time, which is why the camera does not roll with the banking ship. Do not clear it.
-- `tools/build_scene_handoff.py` no longer reproduces the integrated `player_ship.tscn`: it still writes the two retired `metadata/*` entries and none of the `PlayerShip` exports, its `node_paths` marker or `motion_mode`, and since F1-03 none of the `CameraRig` exports or its own `node_paths` marker either. Since F1-04 it also misses `"targeting"` in the root's `node_paths` marker, the root's `targeting = NodePath("Targeting")`, and the `Targeting` node's `node_paths=PackedStringArray("camera")` with `camera = NodePath("../CameraRig/Camera3D")`. Reconcile it before any rerun (GUIDE Section 9 step 0), or the ship loses its wiring and the camera stops working.
+- `tools/build_scene_handoff.py` is retired (2026-09-22). Its unchanged contents are reference text at `docs/archive/build_scene_handoff.py.txt`. Edit the integrated scenes in Godot; do not run the archive. Retirement resolves the generator divergence without rewriting any scene or wiring.
 
 ## Open issues
+
+### Astra design decisions — 2026-09-22, F1-05
+
+The decisions below supersede the requests for a decision in the historical notes
+below. **Inspector tuning remains blocked**, not accepted: Computer Use was
+stopped by physical Escape during the live harness pass. The user subsequently
+authorized continuation on the secondary monitor; the editor and harness were
+relaunched with `--screen 1`, but Computer Use still returned the same stopped
+state. No Inspector values or scene files were changed. Live captures showed
+the start at (0, 6, 18), camera distance 9.08, pitch -9 and roll 0, then movement
+at speed 12 with banking. These observations do not establish a completed
+flight pass or human keyboard/gamepad acceptance. The obstruction decisions
+also use Claude's existing measurements and screenshots, not a new motion test.
+
+| Question | Design decision | Consequence / remaining work |
+| --- | --- | --- |
+| (a) Rectangular volume past the circular rim | Accept the open corners in this dev harness. It is an aerial test space, not the Stage 1 route. Keep the rectangular volume. | No cylinder or corner scenery in this ticket. This does not approve invisible floors in production encounters; stage boundaries still need scenery/feedback. |
+| (b) Camera at 0.75 units from the ship | Choose ship transparency. The recorded hull filling the frame is unacceptable for bullet readability. | Claude should expose proximity-driven visual fading; Astra owns its material treatment. Keep the Core readable and collision unchanged. A hard camera distance floor could put the camera behind the wall. Implementation and visual acceptance remain pending. |
+| (c) 6.5-unit gate shortening in one frame | Do not accept that jump as the production camera presentation. Retain the current collision-safe snap in the dev harness until a replacement is verified. | Claude should investigate earlier obstruction detection / a camera sweep and reproduce the gate crossing. Do not simply ease through solid geometry. Astra must judge the revised transition in motion; no camera script change was made here. |
+| (d) Left-to-right cycle and far-left wrap | Keep the current order as the design rule: it matches scanning the screen and gives a predictable next selection. | Runtime feel approval is still pending, including High-to-Low wrap and off-screen reacquisition. A visible selected-target marker in F4 should explain the jump. No selector change requested. |
+| Stage tree occlusion | Yes for solid trunks and substantial solid branches; no for decorative leaves, thin twigs or foliage cards. | Author fitted layer-1 solid-tree collision in a separately coordinated scene pass. This deliberately blocks ship, camera, acquisition and assisted shots. Do not enclose entire leafy crowns in opaque collision boxes. Existing arena trees remain non-colliding; this decision is not an implemented occlusion pass. |
+
+Every future lockable prefab must be a `Node3D` in `targetable`, with a child
+named `HitVolume`; keep all its own volumes off layer 1. A held lock can survive
+occlusion, but acquisition and Aim Assist must respect solid scenery.
+
+The numeric pass must resume with all proposals unchanged:
+
+| Inspector node | Current values awaiting a completed flight pass |
+| --- | --- |
+| PlayerShip | `edge_margin=4.0`, `max_bank_angle_degrees=25.0`, `bank_smoothing=8.0` |
+| CameraRig | `default_pitch_degrees=-9`, `pitch_limits_degrees=(-60,35)`, `orbit_speed_degrees=120`, `position_damping=10`, `rotation_damping=8`, `lock_blend_speed=4`, `obstruction_margin=0.4` |
+| Targeting / Selection | `max_distance=60`, `max_screen_radius=0.85` |
+
+No change is requested to the pinned values: `base_speed=12.0`,
+`focus_multiplier=0.45`, `follow_distance=8.5`, `follow_height=3.2`.
+
+Hywirl and Goleling atlas imports were reverted to lossless (`compress/mode=0`,
+`detect_3d/compress_to=0`) under the user's explicit alternative. This preserves
+the source colors without claiming an unperformed compressed-versus-lossless
+visual comparison, and prevents automatic VRAM compression on 3D detection.
+
+### Engineering observations preceding the design pass
 
 - `edge_margin` 4.0 and `max_bank_angle_degrees` 25.0 are still Claude's proposals; no design document fixes them. They are now visible: the feedback reads 0.75 one unit from a face and the roll is 24.5 degrees at full lateral speed. Astra tunes them.
 - The Flight Volume is the rectangular `AABB` Astra authored, but the Stage 1 platform is a circle of radius 39 centered at (0, 0, -6), so the rectangle's corners are open void inside the playable volume. Measured: past the rim the clamp is the only floor and holds the ship at y 0 over nothing, with the edge feedback at 1.0 ([screenshot](../validation/player-flight-clamp.png)). It is consistent, not pretty. Whether the volume should become a cylinder, or the scenery should fill the corners, is Astra's call.

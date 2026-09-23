@@ -1,0 +1,131 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+PASS res://tests/scene/test_camera_rig_contract.gd::test_the_authored_rig_places_the_authored_camera
+PASS res://tests/scene/test_camera_rig_contract.gd::test_the_rig_rests_behind_and_above_the_ship
+PASS res://tests/scene/test_camera_rig_contract.gd::test_get_yaw_is_finite_and_is_the_rig_node_rotation
+PASS res://tests/scene/test_camera_rig_contract.gd::test_the_camera_actions_orbit_the_rig
+PASS res://tests/scene/test_camera_rig_contract.gd::test_apply_settings_inverts_the_vertical_orbit
+PASS res://tests/scene/test_camera_rig_contract.gd::test_the_lock_framing_turns_the_yaw_toward_the_target
+PASS res://tests/scene/test_camera_rig_contract.gd::test_clearing_the_lock_returns_to_follow_mode
+PASS res://tests/scene/test_camera_rig_contract.gd::test_the_horizon_stays_level_in_every_state
+PASS res://tests/scene/test_camera_rig_contract.gd::test_the_rig_follows_the_body_position_but_not_its_rotation
+PASS res://tests/scene/test_camera_rig_contract.gd::test_scenery_between_the_ship_and_the_camera_shortens_the_rig
+ERROR: /root/@CharacterBody3D@3/CameraRig: required export 'camera' is not set
+   at: push_error (core/variant/variant_utility.cpp:1023)
+   GDScript backtrace (most recent call first):
+       [0] _validate_setup (res://scripts/player/camera_rig.gd:242)
+       [1] _ready (res://scripts/player/camera_rig.gd:84)
+       [2] test_a_missing_camera_is_reported_and_stops_the_rig (res://tests/scene/test_camera_rig_contract.gd:269)
+       [3] _run_test (res://tests/run_tests.gd:144)
+       [4] before_each (res://tests/scene/test_camera_rig_contract.gd:51)
+PASS res://tests/scene/test_camera_rig_contract.gd::test_a_missing_camera_is_reported_and_stops_the_rig
+PASS res://tests/scene/test_main_contract.gd::test_root_is_main_with_game_session_attached
+PASS res://tests/scene/test_main_contract.gd::test_four_children_with_the_documented_types
+PASS res://tests/scene/test_main_contract.gd::test_main_interface_and_audio_process_while_paused
+PASS res://tests/scene/test_main_contract.gd::test_world_and_projectile_roots_are_pausable
+PASS res://tests/scene/test_main_contract.gd::test_only_interface_and_audio_keep_processing_while_paused
+PASS res://tests/scene/test_main_contract.gd::test_main_menu_is_instanced_under_interface
+PASS res://tests/scene/test_player_ship_contract.gd::test_root_is_a_player_controller_with_the_authored_body_wiring
+PASS res://tests/scene/test_player_ship_contract.gd::test_required_exports_resolve_to_the_authored_nodes
+PASS res://tests/scene/test_player_ship_contract.gd::test_the_authored_flight_values_arrive_as_exports_not_metadata
+ERROR: /root/@CharacterBody3D@8: required export 'visual_root' is not set
+   at: push_error (core/variant/variant_utility.cpp:1023)
+   GDScript backtrace (most recent call first):
+       [0] _validate_exports (res://scripts/player/player_controller.gd:154)
+       [1] _ready (res://scripts/player/player_controller.gd:61)
+       [2] test_a_missing_visual_root_is_reported_and_stops_the_adapter (res://tests/scene/test_player_ship_contract.gd:95)
+       [3] _run_test (res://tests/run_tests.gd:144)
+       [4] before_each (res://tests/scene/test_player_ship_contract.gd:40)
+PASS res://tests/scene/test_player_ship_contract.gd::test_a_missing_visual_root_is_reported_and_stops_the_adapter
+PASS res://tests/scene/test_player_ship_contract.gd::test_banking_moves_the_visuals_and_leaves_the_combat_volumes_alone
+PASS res://tests/scene/test_player_ship_contract.gd::test_reset_to_teleports_the_ship_and_clears_its_motion
+PASS res://tests/scene/test_player_ship_contract.gd::test_the_input_actions_drive_the_body_through_the_core
+PASS res://tests/scene/test_player_ship_contract.gd::test_forward_input_follows_the_camera_yaw_instead_of_the_world_axis
+PASS res://tests/scene/test_player_ship_contract.gd::test_disabled_controls_ignore_the_input_and_hold_the_ship_still
+PASS res://tests/scene/test_player_ship_contract.gd::test_focus_changed_reports_the_edges_of_the_focus_input
+PASS res://tests/scene/test_player_ship_contract.gd::test_the_injected_flight_volume_clamps_the_ship_and_reports_the_edge
+PASS res://tests/scene/test_stage_02_contract.gd::test_stage_02_spatial_contract
+PASS res://tests/scene/test_stage_02_contract.gd::test_sculpted_terrain_keeps_spawns_and_checkpoints_clear
+PASS res://tests/scene/test_targeting_contract.gd::test_the_ship_carries_a_wired_targeting_adapter
+PASS res://tests/scene/test_targeting_contract.gd::test_the_adapter_builds_one_candidate_per_arena_target
+PASS res://tests/scene/test_targeting_contract.gd::test_lock_target_acquires_one_of_the_three_and_freeing_it_releases_within_one_tick
+PASS res://tests/scene/test_targeting_contract.gd::test_lock_target_again_releases_the_lock
+PASS res://tests/scene/test_targeting_contract.gd::test_next_target_visits_all_three_before_wrapping_while_the_camera_follows
+PASS res://tests/scene/test_targeting_contract.gd::test_a_target_that_leaves_range_releases_the_lock
+PASS res://tests/scene/test_targeting_contract.gd::test_scenery_hides_targets_from_acquisition_but_does_not_drop_a_held_lock
+PASS res://tests/scene/test_targeting_contract.gd::test_the_ship_frames_the_target_its_targeting_locks
+WARNING: /root/CombatArena/PlayerShip/Targeting: /root/CombatArena/BareTarget is in group 'targetable' but is not a Node3D with a HitVolume child; it cannot be targeted
+   at: push_warning (core/variant/variant_utility.cpp:1033)
+   GDScript backtrace (most recent call first):
+       [0] _hit_volume_of (res://scripts/player/targeting.gd:124)
+       [1] build_candidates (res://scripts/player/targeting.gd:104)
+       [2] test_a_target_without_a_hit_volume_is_skipped (res://tests/scene/test_targeting_contract.gd:234)
+       [3] _run_test (res://tests/run_tests.gd:144)
+       [4] before_each (res://tests/scene/test_targeting_contract.gd:54)
+       [5] _ticks (res://tests/scene/test_targeting_contract.gd:292)
+PASS res://tests/scene/test_targeting_contract.gd::test_a_target_without_a_hit_volume_is_skipped
+ERROR: /root/PlayerShip/Targeting: required export 'camera' is not set
+   at: push_error (core/variant/variant_utility.cpp:1023)
+   GDScript backtrace (most recent call first):
+       [0] _validate_setup (res://scripts/player/targeting.gd:144)
+       [1] _ready (res://scripts/player/targeting.gd:58)
+       [2] test_a_missing_camera_is_reported_and_stops_the_adapter (res://tests/scene/test_targeting_contract.gd:252)
+       [3] _run_test (res://tests/run_tests.gd:144)
+       [4] before_each (res://tests/scene/test_targeting_contract.gd:54)
+       [5] _ticks (res://tests/scene/test_targeting_contract.gd:292)
+PASS res://tests/scene/test_targeting_contract.gd::test_a_missing_camera_is_reported_and_stops_the_adapter
+PASS res://tests/unit/framework/test_self_check.gd::test_before_each_ran
+PASS res://tests/unit/framework/test_self_check.gd::test_assert_true_and_false
+PASS res://tests/unit/framework/test_self_check.gd::test_assert_eq_and_ne
+PASS res://tests/unit/framework/test_self_check.gd::test_assert_almost_eq
+PASS res://tests/unit/framework/test_self_check.gd::test_assert_null_and_not_null
+PASS res://tests/unit/framework/test_self_check.gd::test_assert_in
+PASS res://tests/unit/framework/test_self_check.gd::test_fail_records_and_returns_false
+PASS res://tests/unit/framework/test_self_check.gd::test_begin_test_resets_state
+PASS res://tests/unit/framework/test_self_check.gd::test_coroutine_is_awaited
+PASS res://tests/unit/framework/test_self_check.gd::test_tree_root_accepts_nodes
+PASS res://tests/unit/framework/test_self_check.gd::test_signal_recorder_records_arguments
+PASS res://tests/unit/framework/test_self_check.gd::test_signal_recorder_handles_zero_and_two_arguments
+PASS res://tests/unit/framework/test_self_check.gd::test_signal_recorder_reports_missing_signal
+PASS res://tests/unit/framework/test_self_check.gd::test_signal_recorder_survives_without_a_local_reference
+PASS res://tests/unit/player/test_flight_model.gd::test_configure_values_are_the_ones_the_model_uses
+PASS res://tests/unit/player/test_flight_model.gd::test_zero_input_gives_zero_velocity
+PASS res://tests/unit/player/test_flight_model.gd::test_single_axis_full_input_moves_at_base_speed
+PASS res://tests/unit/player/test_flight_model.gd::test_full_diagonal_on_three_axes_is_bounded_to_base_speed
+PASS res://tests/unit/player/test_flight_model.gd::test_partial_input_keeps_its_magnitude
+PASS res://tests/unit/player/test_flight_model.gd::test_focus_scales_every_axis_by_the_focus_multiplier
+PASS res://tests/unit/player/test_flight_model.gd::test_camera_yaw_rotates_the_horizontal_plane_only
+PASS res://tests/unit/player/test_flight_model.gd::test_vertical_input_ignores_camera_yaw
+PASS res://tests/unit/player/test_flight_model.gd::test_integration_is_frame_rate_independent
+PASS res://tests/unit/player/test_flight_model.gd::test_clamp_position_is_identity_before_bounds_are_set
+PASS res://tests/unit/player/test_flight_model.gd::test_clamp_position_keeps_points_inside_and_pulls_points_outside_to_the_nearest_face
+PASS res://tests/unit/player/test_flight_model.gd::test_edge_proximity_is_zero_at_the_center_and_one_at_a_face
+PASS res://tests/unit/player/test_flight_model.gd::test_edge_proximity_is_zero_without_bounds
+PASS res://tests/unit/player/test_flight_model.gd::test_edge_proximity_changed_fires_once_per_real_change
+PASS res://tests/unit/player/test_flight_model.gd::test_edge_proximity_changed_measures_drift_from_the_last_value_emitted
+PASS res://tests/unit/player/test_flight_model.gd::test_bank_angle_is_level_in_forward_flight_and_leans_with_lateral_motion
+PASS res://tests/unit/player/test_flight_model.gd::test_bank_angle_is_clamped_and_follows_the_camera
+PASS res://tests/unit/player/test_flight_model.gd::test_the_model_holds_no_position_state
+PASS res://tests/unit/player/test_target_selector.gd::test_best_pick_is_the_candidate_nearest_the_screen_center_not_the_nearest_in_distance
+PASS res://tests/unit/player/test_target_selector.gd::test_invisible_candidates_are_never_selected
+PASS res://tests/unit/player/test_target_selector.gd::test_candidates_beyond_range_are_never_selected
+PASS res://tests/unit/player/test_target_selector.gd::test_a_fresh_lock_never_lands_outside_the_screen_radius
+PASS res://tests/unit/player/test_target_selector.gd::test_distance_breaks_a_tie_in_screen_offset
+PASS res://tests/unit/player/test_target_selector.gd::test_configure_values_are_the_ones_the_selector_uses
+PASS res://tests/unit/player/test_target_selector.gd::test_select_next_visits_every_visible_candidate_in_range_once_left_to_right_before_wrapping
+PASS res://tests/unit/player/test_target_selector.gd::test_select_next_reaches_visible_targets_outside_the_screen_radius
+PASS res://tests/unit/player/test_target_selector.gd::test_select_next_with_one_candidate_returns_the_same_id
+PASS res://tests/unit/player/test_target_selector.gd::test_select_next_falls_back_to_the_best_pick_when_the_current_target_is_not_in_the_ring
+PASS res://tests/unit/player/test_target_selector.gd::test_validate_is_false_when_the_current_target_is_missing_or_beyond_range
+PASS res://tests/unit/player/test_target_selector.gd::test_validate_holds_a_lock_that_is_merely_occluded_or_off_screen
+PASS res://tests/unit/player/test_target_selector.gd::test_target_changed_fires_once_per_change_and_not_for_the_same_id
+PASS res://tests/unit/player/test_target_selector.gd::test_an_empty_list_selects_nothing
+PASS res://tests/unit/project/test_audio_buses.gd::test_three_buses_exist_in_order
+PASS res://tests/unit/project/test_audio_buses.gd::test_music_and_sfx_send_to_master
+PASS res://tests/unit/project/test_input_map.gd::test_every_action_exists_with_deadzone
+PASS res://tests/unit/project/test_input_map.gd::test_every_action_has_one_keyboard_and_one_joypad_event
+PASS res://tests/unit/project/test_input_map.gd::test_keyboard_bindings_match_the_table
+PASS res://tests/unit/project/test_input_map.gd::test_joypad_buttons_match_the_table
+PASS res://tests/unit/project/test_input_map.gd::test_joypad_axes_match_the_table
+TESTS_PASSED 93
+TESTS_FAILED 0

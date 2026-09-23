@@ -274,9 +274,9 @@ The core's unshaded material disables depth testing to make it visible through t
 
 ### Tools and integration boundaries
 
-`tools/build_scene_handoff.py` is an offline scene-authoring utility. It writes both scene files from scratch. Do not rerun it after manual or Claude integration changes without updating the generator; it would overwrite scene wiring. It is not runtime game logic.
+`tools/build_scene_handoff.py` was retired by Astra's 2026-09-22 F1 design pass. Its unchanged source is archived as `docs/archive/build_scene_handoff.py.txt`, reference text only. Edit the integrated scenes in Godot; do not restore or execute the archived generator.
 
-It already diverges from the integrated scene: since F1-02 the generator's `PlayerShip` props still carry the two retired `metadata/*` entries and none of the exports, the `node_paths=PackedStringArray("visual_root", "camera_rig", "damage_core", "graze_volume")` marker on the node line, or `motion_mode = 1`; since F1-03 its `CameraRig` node also lacks `node_paths=PackedStringArray("camera")`, `camera = NodePath("Camera3D")`, `follow_distance` and `follow_height`; since F1-04 the root's marker also lacks `"targeting"` and the root lacks `targeting = NodePath("Targeting")`, and the `Targeting` node lacks `node_paths=PackedStringArray("camera")` and `camera = NodePath("../CameraRig/Camera3D")`. Reconcile those lines before any rerun (Section 9 step 0); `tests/scene/test_player_ship_contract.gd` and `tests/scene/test_camera_rig_contract.gd` fail immediately if a rerun drops them, and without the `camera` reference the rig disables itself and the camera stops following.
+Retirement resolves the F1-02/F1-03/F1-04 divergence: the old source omits the PlayerShip exports, `node_paths` markers, `motion_mode`, CameraRig references and Targeting references. The integrated `.tscn` files remain authoritative. Neither scene was regenerated during retirement.
 
 `tools/validate_scene_handoff.gd` is an offline QA script that loads the scene, checks required nodes and imported mesh presence, and captures a rendered preview when a graphics display is available. It is not attached to gameplay nodes and does not implement player behavior.
 

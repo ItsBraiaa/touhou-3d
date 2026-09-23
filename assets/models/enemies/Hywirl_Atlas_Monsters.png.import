@@ -3,10 +3,9 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ckc2at0he7dtl"
-path.s3tc="res://.godot/imported/Hywirl_Atlas_Monsters.png-c3111523e39abb4ec32d78b945c3e1cf.s3tc.ctex"
+path="res://.godot/imported/Hywirl_Atlas_Monsters.png-c3111523e39abb4ec32d78b945c3e1cf.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
-"vram_texture": true
+"vram_texture": false
 }
 generator_parameters={
 "md5": "19edfe03ec2ac473b0a20d5684c8b79c"
@@ -15,11 +14,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/enemies/Hywirl_Atlas_Monsters.png"
-dest_files=["res://.godot/imported/Hywirl_Atlas_Monsters.png-c3111523e39abb4ec32d78b945c3e1cf.s3tc.ctex"]
+dest_files=["res://.godot/imported/Hywirl_Atlas_Monsters.png-c3111523e39abb4ec32d78b945c3e1cf.ctex"]
 
 [params]
 
-compress/mode=2
+compress/mode=0
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
