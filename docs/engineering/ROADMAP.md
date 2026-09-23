@@ -29,7 +29,7 @@ Status values: `todo`, `doing`, `done`, `blocked`. Tickets live in `.scratch/<fe
 | F2 | Menus and Session skeleton | `menus-session` | 01 screen-router-core | core | yes | done |
 | | | | 02 interface-and-menu-controller | adapter | no | done (scripted keyboard and gamepad pass; physical-device pass owed; gamepad A/B added to `ui_accept`/`ui_cancel`) |
 | | | | 03 run-state-core | core | yes | done |
-| | | | 04 game-session-start-pause-quit | integration | no | todo |
+| | | | 04 game-session-start-pause-quit | integration | no | done (menu-to-flight flow scripted on keyboard and gamepad; physical-device pass owed; Stage 2 wired too) |
 | F3 | Settings | `settings` | 00 plan | docs | no | todo |
 | F4 | Combat state and HUD | `combat-hud` | 00 plan | docs | no | todo |
 | F5 | Projectile Field | `projectile-field` | 00 plan | docs | no | todo |
@@ -80,6 +80,7 @@ Dependencies Claude has on scene and content work. These are needs by Feature, n
 | F1-03 onward | A human pass on a physical keyboard and on the DualSense pad this host has: the six movement axes, Focus, the arrow keys and right stick for the camera, `K`/`Y` to lock and `Tab`/`X` to cycle in the harness. Everything measured so far is simulated input, which ENGINEERING_BRIEF Section 8 says is not the same thing. |
 | F1-04 onward | F1-05: keep left-to-right wrap as the design rule; feel/range/radius tuning still pending. Stage solid trunks/branches should occlude with fitted layer-1 collision; foliage should not. Collision authoring is a follow-up. Every lockable prefab remains a Node3D in targetable with a HitVolume child and its own volumes off layer 1. |
 | F2-02 onward | Make a focused slider visible in `assets/ui/menu_theme.tres`: Godot 4.7's `Slider` never draws `HSlider/styles/focus`, and `grabber_area_highlight` is the same `SliderFill` as `grabber_area`, so a focused slider only has a slightly brighter grabber (`docs/validation/menus-options-entry.png`). A gold `HSlider/icons/grabber_highlight` or a distinct `grabber_area_highlight` would do. Optional: move Menu principal and Créditos up when Results hides both Continue and Replay (`menus-results-final.png`). |
+| F2-04 onward | Stage scenes: keep `PlayerStart` in every stage root (a stage without it is refused) and the Stage root at the origin. Optional: add Stage 2's `FlightBounds/Limits` marker (`min`/`max` metadata) to Stage 1 with X -45..45, Y 0..75, Z -570..35, so the scene is the single source of its flight interior instead of `Main`'s `stage_flight_bounds`. A new stage needs its id and bounds sent to Claude, who adds it to `Main`. |
 | F6 | Projectile visual presets (bullet meshes and materials for player and enemy shots) if final art is wanted; Claude ships `scenes/dev/` placeholders otherwise. |
 | F7 | Pickup visuals (Power Pickup, Shield Pickup) following the `pickup.gd` root `Area3D` contract; dev placeholders otherwise. |
 | F8-04 onward | Review and tune the Stage 1 `content/*.tres` draft that Claude transcribes from STAGE_DESIGN.md. Values are yours. |

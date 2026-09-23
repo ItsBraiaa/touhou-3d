@@ -1,6 +1,6 @@
 # F2-04 GameSession: start, pause, quit
 
-Status: todo
+Status: done (2026-09-23)
 Type: integration
 parallel-safe: no
 Depends on: F1-04, F2-02, F2-03
@@ -66,6 +66,21 @@ Defeat, results, checkpoints, HUD values, settings application, projectiles.
 ## Handoff notes for Astra
 
 Stage scenes are referenced from `Main`'s Inspector; when Stage 2 exists, add it there and tell Claude the flight interior bounds. `PlayerStart` must exist in every stage root.
+
+## Outcome (2026-09-23)
+
+Done. `scripts/session/game_session.gd` is the composition root's Session: every menu action, Campaign and Direct Stage start with the stage and the ship under `WorldRoot`, pause and resume, Options from Pause, Restart, Return to Menu and Quit. `scenes/main.tscn` sets `player_scene`, `stage_scenes` (Stage 1 and Stage 2) and `stage_flight_bounds` (Stage 1). Contract in `docs/engineering/menus-session.md` "GameSession contract". Evidence: `tests/scene/test_game_session_flow.gd` (20 tests; suite 172 green), sixteen mutants caught by assertion, `tools/validate_menus.gd` reworked to play the menu-to-flight flow through the real Session on keyboard and gamepad (`MENUS_OK`, headless and windowed, `docs/validation/menus-flight.png` and a re-captured `menus-pause-return.png`), a clean windowed boot of the real main scene, and Sair exiting with code 0. Recorded in `docs/validation/menus.md`.
+
+Differences from the text above, each listed in the module doc's Open issues:
+
+- **Stage 2 is wired, not null.** Its scene exists and records its flight interior on `FlightBounds/Limits`, so Direct Stage 2 flies. The null-scene refusal is tested by clearing the entry in the test.
+- **Bounds.** `FlightBounds/Limits` `min`/`max` metadata wins when present (Stage 2); otherwise `stage_flight_bounds[id]` (Stage 1: X -45..45, Y 0..75, Z -570..35, the inner faces of its walls). A stage without either, or without `PlayerStart`, is refused like a missing scene.
+- **Targeting to camera** stays connected once in `PlayerController._ready` (F1-04); the Session makes no connection.
+- **Resume acts only while the tree is paused, and `pause` only in `IN_STAGE` with the HUD or Pause on top**, so Start under Options from Pause is ignored and a Pause the Session did not open stays.
+- **`run_ended(false)` needs no handler work** (only `return_to_menu` produces it); `stage_completed` and a victory return to the menu with TODO(F11). `stage_started` and `paused_changed` are not connected yet.
+- **`get_run_state()`** added for tests and the validation tool.
+
+The B-as-bomb trap is only half solvable here: `Interface` consumes the B press that resumes, so an event-driven bomb reader never sees it (tested), but `Input.is_action_just_pressed(&"bomb")` still reads true on the first unpaused tick, and `Input.action_release` does not clear it in Godot 4.7. F7's Bomb request must come from the input event. The manual pass was synthetic: no person pressed a key and no pad was connected; the physical keyboard and DualSense pass is still owed. Stage 1 is flyable only up to its first closed Gate until F10.
 
 ## Kickoff prompt
 

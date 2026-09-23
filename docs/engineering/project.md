@@ -1,10 +1,10 @@
 # Project configuration and composition root
 
-The shared project files Claude took over with ticket F0-03 on 2026-09-21, and the `GameSession` skeleton that boots the game. CODE_READY except the Windows export, which is blocked on export templates (see Open issues).
+The shared project files Claude took over with ticket F0-03 on 2026-09-21, and the `GameSession` that boots the game; its full contract since F2-04 is in [menus-session.md](menus-session.md) "GameSession contract". CODE_READY except the Windows export, which is blocked on export templates (see Open issues).
 
 ## Purpose
 
-Owns `project.godot` (warnings as errors, input map, main scene, bus layout reference), `default_bus_layout.tres`, `export_presets.cfg`, `scenes/main.tscn`, and `scripts/session/game_session.gd`. It deliberately does not own screen navigation, Run state, pause, or stage loading (F2, F11), settings persistence (F3), or any gameplay.
+Owns `project.godot` (warnings as errors, input map, main scene, bus layout reference), `default_bus_layout.tres`, `export_presets.cfg`, `scenes/main.tscn`, and `scripts/session/game_session.gd`. This page keeps the project files and the composition root's shape; what `GameSession` does with the Run — menu actions, stage loading, pause — is documented with the rest of Feature F2 in [menus-session.md](menus-session.md). It does not own settings persistence (F3) or any gameplay.
 
 ## Files
 
@@ -12,7 +12,7 @@ Owns `project.godot` (warnings as errors, input map, main scene, bus layout refe
 - `default_bus_layout.tres`: buses `Master`, `Music` (send Master), `SFX` (send Master).
 - `export_presets.cfg`: preset "Windows Desktop", `build/Touhou-3D.exe`, embedded PCK, x86_64.
 - `scenes/main.tscn`: composition root (ADR-0002); tree in GUIDE.md Section 5. `Main`, `Interface`, and `Audio` are `PROCESS_MODE_ALWAYS`; `WorldRoot` and `ProjectileRoot` are `PROCESS_MODE_PAUSABLE`, so gameplay stops with the tree while menus, pause handling, and audio keep running. Since F2-02 `Interface` carries `scripts/ui/interface.gd` with `menu_scenes` (the eight `scenes/ui/` menus) and `hud_scene` (`scenes/ui/hud.tscn`); contract in [menus-session.md](menus-session.md).
-- `scripts/session/game_session.gd` (Adapter, attached to `Main`).
+- `scripts/session/game_session.gd` (Adapter, attached to `Main`). Since F2-04 `Main` also sets `player_scene`, `stage_scenes` and `stage_flight_bounds`.
 - `tests/scene/test_main_contract.gd`, `tests/unit/project/test_input_map.gd`, `tests/unit/project/test_audio_buses.gd`.
 
 ## Public contract
@@ -24,7 +24,7 @@ Owns `project.godot` (warnings as errors, input map, main scene, bus layout refe
 | `world_root` | Node3D | `Main/WorldRoot` | yes | Holds the loaded Stage instance; PAUSABLE, stops while the tree is paused |
 | `projectile_root` | Node3D | `Main/ProjectileRoot` | yes | Root of the projectile system; PAUSABLE, stops while the tree is paused |
 | `interface` | `Interface` (was `CanvasLayer` until F2-02) | `Main/Interface` | yes | Menus and HUD; processes while paused |
-| `audio` | Node | `Main/Audio` | yes | Audio controller root; processes while paused |
+| `player_scene`, `stage_scenes`, `stage_flight_bounds` | see [menus-session.md](menus-session.md) | set in `main.tscn` since F2-04 | `player_scene` only | The ship, the stage scenes by id, and Stage 1's Flight Volume |
 
 ### Signals
 
@@ -34,7 +34,7 @@ None yet.
 
 | Method | Called by | Effect |
 | --- | --- | --- |
-| `_ready()` | engine | Validates the four exports. On success calls `interface.show_home(ScreenRouter.MAIN_MENU)`; `Interface` has already instanced every menu (F2-02). On failure calls `push_error` with the node path and each missing field, then sets `process_mode = DISABLED`. |
+| `_ready()` | engine | Validates the four root exports and `player_scene`. On success connects `Interface.action_requested` and two `RunState` signals (F2-04) and calls `interface.show_home(ScreenRouter.MAIN_MENU)`; `Interface` has already instanced every menu (F2-02). On failure calls `push_error` with the node path and each missing field, then sets `process_mode = DISABLED`. |
 
 ### Input actions
 
@@ -60,7 +60,7 @@ Deadzone 0.2 on every action, `device = -1` (any device), no mouse bindings; the
 
 ## Dependencies
 
-None injected. `GameSession` receives its four children through the exports set in `scenes/main.tscn`.
+None injected. `GameSession` receives its four children, the ship and the stage scenes through the exports set in `scenes/main.tscn`.
 
 ## Invariants and tests
 

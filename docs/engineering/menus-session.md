@@ -1,6 +1,6 @@
 # Menus and Session
 
-Feature F2: which screen is shown, how Back returns to the caller, and, as later tickets land, the Run's state and the Session that starts, pauses and ends it. Started with ticket F2-01 on 2026-09-22, extended by F2-03 the same day and by F2-02 on 2026-09-23. `ScreenRouter`, `RunState`, `Interface` and `MenuController` are CODE_READY. `GameSession` (F2-04) adds its own section to this page.
+Feature F2: which screen is shown, how Back returns to the caller, and, as later tickets land, the Run's state and the Session that starts, pauses and ends it. Started with ticket F2-01 on 2026-09-22, extended by F2-03 the same day and by F2-02 and F2-04 on 2026-09-23. `ScreenRouter`, `RunState`, `Interface`, `MenuController` and `GameSession` are CODE_READY, which completes the Feature: from the main menu the player starts a Campaign or a Direct Stage, flies the static stage, pauses, opens Options from Pause, resumes, restarts, returns to the menu and quits.
 
 ## Purpose
 
@@ -12,6 +12,8 @@ It does not own any Node, any actual Control focus, input, pausing the tree, or 
 
 `RunState` owns the Run: its Run Mode and stage order, which stage is in play and whether it is complete, the Attempt count, the pause flag Active Time respects, the Active Time, score, Graze and bombs used of the current Attempt and what a Checkpoint committed, each stage's entry values (starting Power Level, carried score), the Snapshot slice of all that, and the four lifecycle signals the Session reacts to. It does not own combat resources (Health, Shield, Bombs held), Power Progress, the live Power Level, Encounter or Objective flags (F8-03 adds them to the Snapshot), pausing the tree, loading scenes, or deciding when a Checkpoint activates.
 
+`GameSession` (adapter on `Main`, the composition root of ADR-0002) owns the Run's lifecycle in the scene: it holds the one `RunState`, acts on every `Interface.action_requested`, loads the stage and the ship under `WorldRoot` and unloads them with every projectile, pauses and resumes the tree, the ship's controls and Active Time together, and ticks Active Time while the tree runs. It does not own navigation (the router), what a menu shows (the menus), flight or targeting (the ship's adapters), or any gameplay rule. Stage completion, defeat, Retry and Results are F10 and F11's; until then their handlers return to the menu.
+
 ## Files
 
 - `scripts/ui/screen_router.gd` (Rules Core, `class_name ScreenRouter extends RefCounted`).
@@ -22,6 +24,8 @@ It does not own any Node, any actual Control focus, input, pausing the tree, or 
 - `tools/validate_menus.gd`: offline navigation QA with keyboard and gamepad events, results in [validation/menus.md](../validation/menus.md).
 - `scripts/session/run_state.gd` (Rules Core, `class_name RunState extends RefCounted`, with the internal inner class `RunState.Tally`).
 - `tests/unit/session/test_run_state.gd` (19 tests).
+- `scripts/session/game_session.gd` (Adapter, `class_name GameSession extends Node`), attached to `Main` in `scenes/main.tscn`, which sets its seven exports.
+- `tests/scene/test_game_session_flow.gd` (20 tests), headless on `scenes/main.tscn`; `tools/validate_menus.gd` plays the menu-to-flight flow through it on both devices.
 
 ## ScreenRouter contract
 
@@ -234,13 +238,77 @@ Clear Time is committed Active Time plus the current Attempt's (CONTEXT "Clear T
 
 `restore(data)` copies those values back, discards the current Attempt's uncommitted values and puts the stage in play (`IN_STAGE`), also into a fresh `RunState`. It leaves the Attempt index and the pause flag alone and emits nothing. F8-03 turns this Dictionary into the `Snapshot` class and adds combat resources, Power Progress and Encounter flags beside it.
 
+## GameSession contract
+
+`class_name GameSession extends Node` on `Main` in `scenes/main.tscn`, which is `PROCESS_MODE_ALWAYS`, so it hears `pause` and the menus' requests while the tree is paused.
+
+### Exports
+
+| Export | Type | Set in `main.tscn` to | Required |
+| --- | --- | --- | --- |
+| `world_root` | `Node3D` | `WorldRoot` | yes |
+| `projectile_root` | `Node3D` | `ProjectileRoot` | yes |
+| `interface` | `Interface` | `Interface` | yes |
+| `audio` | `Node` | `Audio` | yes |
+| `player_scene` | `PackedScene` | `scenes/player/player_ship.tscn`; its root must be a `PlayerController` | yes |
+| `stage_scenes` | `Dictionary[StringName, PackedScene]` | `&"stage_01"` → `stage_01.tscn`, `&"stage_02"` → `stage_02.tscn` | no: a stage with no entry, or a null one, is refused when started |
+| `stage_flight_bounds` | `Dictionary[StringName, AABB]` | `&"stage_01"` → `AABB(-45, 0, -570, 90, 75, 605)` | no: only for a stage whose scene records no bounds |
+
+A missing required export is reported with `Main`'s path and the node stops processing, as before.
+
+### Actions
+
+| Action (`Interface.action_requested`) | From | Effect |
+| --- | --- | --- |
+| `open_stage_select`, `open_options`, `open_controls`, `open_credits` | main menu, Options, Pause, Results | `interface.show_screen(id)`: a full screen Back returns from. Options from Pause keeps the tree paused. |
+| `start_campaign` | main menu | Start (below) with `RunMode.CAMPAIGN` on `RunState.CAMPAIGN_ORDER[0]`, Stage 1. |
+| `start_direct_stage` | Stage Select, payload `{"stage": id}` | Start with `RunMode.DIRECT_STAGE` on `id`. |
+| `resume` | Pause's Continuar, `ui_cancel` on Pause | Resume (below). |
+| `restart_stage` | Pause | Unpause, `run_state.restart_stage()`, reload the stage and a new ship, `begin_attempt()`, HUD. |
+| `return_to_menu` | Pause (Defeat and Results in F11) | Unpause, unload, `run_state.end_run(false)`, `show_home(MAIN_MENU)`. |
+| `quit` | main menu | `get_tree().quit()`. |
+| `back_refused` | main menu, Defeat, Results | Nothing. |
+| anything else (`restore_defaults`, `retry`, `continue_campaign`, `replay_stage`) | Options, Defeat, Results | A warning naming the action; F3 and F11 implement them. |
+
+### Starting a stage
+
+`_load_stage(id)` checks everything before it touches what is loaded: the scene exists in `stage_scenes`, its root has a `PlayerStart` `Node3D` (GUIDE Section 5), a Flight Volume is known, and `player_scene`'s root is a `PlayerController`. Any failure is one `push_error` naming the stage and the reason; nothing is loaded, no Run starts and the menu stays (the same for Restart, which cannot fail on a stage it already loaded). Then it unloads, adds the stage under `WorldRoot`, places the new ship at `PlayerStart`'s global transform **before** adding it (so `CameraRig._ready` starts behind the ship at the marker instead of easing in from the origin), adds it, and calls `player.setup(bounds)`. Start then calls `run_state.start(mode, id)`, `begin_attempt()` and `interface.show_home(HUD)`.
+
+The Flight Volume is the `min`/`max` `Vector3` metadata on the stage's `FlightBounds/Limits` when the scene records it (Stage 2: X -55..55, Y 0..160, Z -760..40), else `stage_flight_bounds[id]`. Stage 1 records none; its entry is the inner faces of its `FlightBounds` walls (West and East at X ±47 with 4-unit depth, Ceiling at Y 77, Entrance at Z 37, End at Z -572): X -45..45, Y 0..75, Z -570..35, the handoff's "X=-45..45 and Y up to 75". Both are in stage coordinates, and so is `PlayerStart`: `WorldRoot` and every stage root stay at the origin, as the handoffs author them.
+
+`Targeting.target_changed` → `CameraRig.set_lock_target` is not the Session's: `PlayerController._ready` makes that one connection (F1-04), so every new ship is wired by instancing it and a restart cannot double-connect.
+
+### Unloading
+
+`_unload_stage()` removes every child of `WorldRoot` (the stage and the ship) and of `ProjectileRoot` from the tree at once, then `queue_free`s them. Removing them first keeps a stage loaded in the same frame from sharing the tree, the physics space or the `targetable` group with the old one, and keeps its name `Stage`. Today every caller runs from an input event or a button signal; F10 and F11 must defer the call when it is triggered from a physics callback (an `Area3D` `body_entered`), where removing collision objects is not allowed.
+
+### Pause
+
+- `_unhandled_input`: `pause` (Escape, gamepad Start) acts only while `run_state.get_phase() == IN_STAGE` and only with the HUD or Pause on top: from the HUD it pauses, on Pause it resumes, and anywhere else — Options or Controls opened from Pause — it is ignored, so Start cannot resume behind Options. Escape is `ui_cancel` as well, and `Interface` consumes it first wherever a menu is on top: on Pause that arrives here as `resume`.
+- Pause: `get_tree().paused = true`, `run_state.set_paused(true)`, `player.set_controls_enabled(false)` (which also releases a held Focus), then `interface.push_overlay(PAUSE, {"score": ..., "graze": ...})` from `run_state.stage_result()`.
+- Resume: only while the tree is paused, so a Pause the Session did not open is left alone. `interface.back()` removes Pause, then the three flags are reversed.
+- `_physics_process` ticks `run_state.tick_active(delta)` only while the tree is not paused. `Main` is `PROCESS_MODE_ALWAYS`, so without that check a paused tree would still add Active Time whenever `RunState`'s own flag was clear.
+- Options from Pause then Back returns to Pause with the tree still paused: the router keeps Pause on its stack, and nothing here unpauses on Back.
+
+### RunState signals
+
+`_ready` connects `stage_completed` and `run_ended`, once. `stage_completed` returns to the menu (TODO F11: Results). `run_ended(true)` returns to the menu (TODO F11: Results in its final-victory mode); `run_ended(false)` does nothing, because it only comes from `return_to_menu`, which has already left. `stage_started` and `paused_changed` have no listener yet: the HUD (F4) and audio (F13) will be connected by the Session.
+
+### Methods
+
+| Method | Called by | Effect |
+| --- | --- | --- |
+| `get_run_state() -> RunState` | tests, `tools/validate_menus.gd` | The Run's state, to read. Only the Session drives it. |
+
+Everything else is private and reached through `Interface.action_requested` and the `pause` action.
+
 ## Dependencies
 
 None. `ScreenRouter` imports nothing and holds no Node. `Interface` (F2-02) constructs it in `_ready` and connects both signals there, once.
 
-None for `RunState` either. `GameSession` (F2-04) constructs it in `_ready`, connects its four signals there, once, and ticks it from `_physics_process` only while the tree is not paused (`Main` is `PROCESS_MODE_ALWAYS`).
+None for `RunState` either. `GameSession` (F2-04) constructs it as a member, connects `stage_completed` and `run_ended` in `_ready`, once, and ticks it from `_physics_process` only while the tree is not paused (`Main` is `PROCESS_MODE_ALWAYS`).
 
-`Interface` depends on `ScreenRouter`, on `MenuController` (screen ids, `enter`, `leave`, `action_requested`) and on the nine scenes set in `main.tscn`. `MenuController` depends on `ScreenRouter`'s id constants and on the Section 14 node paths. `GameSession` holds `Interface` as its typed `interface` export and, until F2-04, only calls `show_home(ScreenRouter.MAIN_MENU)` from `_ready`; nothing is connected to `Interface.action_requested` yet.
+`Interface` depends on `ScreenRouter`, on `MenuController` (screen ids, `enter`, `leave`, `action_requested`) and on the nine scenes set in `main.tscn`. `MenuController` depends on `ScreenRouter`'s id constants and on the Section 14 node paths. `GameSession` depends on `Interface` (`action_requested`, connected once in `_ready`; `show_home`, `show_screen`, `push_overlay`, `back`, `current_screen`), on `RunState`, on `PlayerController` (`setup`, `set_controls_enabled`; its own `_ready` wires targeting to the camera), on each stage root's `PlayerStart` and optional `FlightBounds/Limits` metadata, and on the scenes set in `main.tscn`.
 
 ## Invariants and tests
 
@@ -307,6 +375,30 @@ Mutation-checked, thirteen mutants, each failing a named test above by assertion
 
 Mutation-checked, twelve mutants, each failing a named test above by assertion: a capture sharing the stage order, a restore keeping its input, `paused_changed` on no change, ticks ignoring the pause flag, an entry that drops the carried score, Graze counted after completion, `advance` outside `STAGE_COMPLETE`, a commit that keeps the Attempt's values, a Restart that keeps the committed ones, `advance` ignoring its Power Level, the Attempt index counted per Run, and `begin_attempt` leaving the flag paused.
 
+| Invariant (ticket F2-04, GUIDE Sections 5, 7 and 14, CONVENTIONS "Time and randomness") | Test (`test_game_session_flow.gd`) |
+| --- | --- |
+| After ready, the main menu is shown alone over an empty `WorldRoot`, no Run | `test_startup_shows_the_main_menu_over_an_empty_world` |
+| `open_*` shows its screen, each over the previous one | `test_open_actions_show_their_screen` |
+| A Direct Stage puts a `Stage` and a `PlayerShip` under `WorldRoot`, the ship at `PlayerStart`, the HUD alone, `IN_STAGE` on Attempt 1 | `test_a_direct_stage_loads_the_stage_and_the_ship_at_player_start` |
+| Iniciar plays Campaign Stage 1, not final | `test_start_campaign_plays_stage_1_of_the_campaign` |
+| Stage 1's Flight Volume comes from the Session export: the ship is clamped to X 45 and Y 75 | `test_stage_1_keeps_the_ship_inside_its_flight_interior` |
+| Stage 2's comes from its `FlightBounds/Limits`: clamped to X -55; Direct Stage 2 starts at Power Level 2 | `test_stage_2_takes_its_flight_interior_from_the_scene` |
+| `pause` pauses the tree and RunState under Pause over the HUD; 30 paused ticks add no Active Time; `resume` removes Pause and time runs again | `test_pause_freezes_the_tree_and_active_time_until_resume` |
+| A paused tree adds no Active Time even with RunState's flag clear (`Main` is ALWAYS) | `test_a_paused_tree_adds_no_active_time_even_with_the_run_unpaused` |
+| Paused mid-flight with the input held, the ship holds still; a second `pause` resumes and it flies again | `test_pausing_mid_flight_freezes_the_ship_and_resuming_hands_it_back` |
+| Pause takes the ship's controls (Focus released) and resume returns them | `test_pausing_releases_focus_and_resuming_restores_the_controls` |
+| Options from Pause keeps the game paused, `pause` under Options is ignored, Back returns to Pause still paused | `test_options_from_pause_keeps_the_game_paused` |
+| `ui_cancel` on Pause resumes and removes Pause | `test_cancel_on_pause_resumes_and_removes_pause` |
+| The gamepad B press that resumes never reaches gameplay as a `bomb` event, in `_input` or `_unhandled_input`; the next press does | `test_the_b_press_that_resumes_never_reaches_gameplay_as_a_bomb` |
+| Restart: a new stage and a new ship at `PlayerStart`, Clear Time 0 even after a Checkpoint commit, Attempt 2, unpaused, HUD alone | `test_restart_reloads_the_stage_with_a_new_ship_at_player_start` |
+| Return to Menu empties `WorldRoot` and `ProjectileRoot`, unpauses, ends the Run, shows the main menu | `test_return_to_menu_unloads_everything_and_shows_the_main_menu` |
+| A stage with a null scene is refused: nothing loaded, still on the menu, no Run; the other stage still plays | `test_a_stage_without_a_scene_is_refused_and_the_menu_stays` |
+| A stage with no Flight Volume or no `PlayerStart` is refused the same way | `test_a_stage_without_player_start_or_flight_volume_is_refused` |
+| A completed stage returns to the menu until F11 | `test_a_completed_stage_returns_to_the_menu_until_results_exist` |
+| Pause and resume need a stage in play; a Pause the Session did not open stays | `test_pause_and_resume_need_a_stage_in_play` |
+
+Mutation-checked, sixteen mutants, each failing a named test above by assertion: the tick ignoring the paused tree, `pause` resuming under any screen, resume not removing Pause, resume without its paused guard, pause leaving the controls on, the ship placed at the origin, projectiles not cleared, stages freed without leaving the tree, Stage 2's metadata ignored, Restart without `run_state.restart_stage()`, Return to Menu leaving the tree paused, Start without `begin_attempt()`, a completed stage kept on screen, `pause` acting with no stage in play, and the missing-bounds and missing-`PlayerStart` refusals. Two of them survived the first draft of the tests — the controls one (the paused tree already freezes the ship) and the Restart one (with nothing committed, Retry and Restart agree) — which is why the Focus test and the Checkpoint commit in the Restart test exist.
+
 ## Setup for Astra
 
 Nothing to attach: `ScreenRouter` is code only. The screen ids are code; which scene root maps to which id is `MenuController`'s job (F2-02).
@@ -320,12 +412,23 @@ Nothing to attach for `Interface` or `MenuController`: the eight menu roots alre
 - Tree order decides the initial focus (the first visible focusable control), so reordering nodes can move it.
 - Slider focus is not visible: see Open issues.
 
+Nothing to attach for `GameSession`: `Main` is Claude's. What it needs from the stage scenes:
+
+- Every stage root has a `PlayerStart` `Node3D`; the ship spawns at its global transform, and a stage without one is refused.
+- A stage's Flight Volume is read from `FlightBounds/Limits` `min`/`max` metadata when present, as Stage 2 records it. Stage 1 has none, so `Main` carries X -45..45, Y 0..75, Z -570..35 for it; adding the same marker to Stage 1 would make the scene the single source.
+- Stage roots stay at the origin: `PlayerStart` and the bounds are used in stage coordinates.
+- A new stage is added to `Main`'s `stage_scenes` by Claude; tell Claude its id and bounds.
+
+
 ## Open issues
 
 - **Resolved by F2-02: Back from Pause.** `Interface` turns `ui_cancel` on Pause into `action_requested(&"resume", {})` instead of calling `back()`, and leaves Pause up; the Session unpauses and removes it (`interface.back()`).
 - **Slider focus is not visible (theme, Astra).** A focused `HSlider` shows only a slightly brighter grabber: Godot 4.7's `Slider` draws no `focus` stylebox, so `menu_theme.tres`'s `HSlider/styles/focus` is never used, and `grabber_area_highlight` is the same `SliderFill` as `grabber_area`. Options opens on the Geral slider (`docs/validation/menus-options-entry.png`), so its entry focus is hard to see. Buttons, `OptionButton` and `CheckButton` show the gold border. Requested from Astra in the roadmap: a distinct `HSlider/icons/grabber_highlight` or `grabber_area_highlight`.
-- **For F2-04 and F7: gamepad B is both `ui_cancel` and `bomb`.** B on Pause requests `resume`; if the weapon reads `is_action_just_pressed(&"bomb")` on the first physics tick after the unpause, that press can also fire a bomb. Resume on release, or have the weapon ignore a press that began while paused.
-- **For F2-04: Start while Options is open from Pause.** Start is `pause` only, so `Interface` does not see it; a Session that toggles pause on every `pause` press would resume with Options still on screen. Toggle only when `interface.current_screen()` is `HUD` or `PAUSE`.
+- **For F7: gamepad B is both `ui_cancel` and `bomb` (F2-04 finding).** B on Pause resumes, and `Interface` consumes that press, so a bomb read as an input event (`_input` or `_unhandled_input`) never sees it: pinned by `test_the_b_press_that_resumes_never_reaches_gameplay_as_a_bomb`. A poll does see it: `Input.is_action_just_pressed(&"bomb")` is still true on the first unpaused physics tick, and `Input.action_release(&"bomb")` from the Session does not clear it, because Godot 4.7 keeps "just pressed" for the frame of the press even after a release (`input_devices/compatibility/legacy_just_pressed_behavior` is off). Measured by a first draft of that test, which failed. So the weapon (F6-03 / F7-02) must take its Bomb request from the event, not from a poll.
+- **Resolved by F2-04: Start while Options is open from Pause.** The Session toggles pause only with the HUD or Pause on top (`test_options_from_pause_keeps_the_game_paused`).
+- **F2-04 decisions beyond the ticket text:** (a) Stage 2 is wired in `main.tscn` now: its scene exists and records its bounds, so Direct Stage 2 flies instead of being refused; the refusal is tested with a null entry. (b) `stage_scenes` and `stage_flight_bounds` are typed dictionaries. (c) A stage is refused not only without a scene but also without `PlayerStart` or a Flight Volume, or with a ship scene that is not a `PlayerController`, all checked before anything loaded is touched. (d) The targeting-to-camera connection stays in `PlayerController._ready` (F1-04); the Session makes none. (e) Resume acts only while the tree is paused, and `pause` only in `IN_STAGE`, so a Pause shown without a Run (as the Interface tests do) is left alone. (f) `run_ended(false)` needs no handler work, since only `return_to_menu` produces it; `stage_started` and `paused_changed` are not connected yet. (g) Unimplemented actions warn instead of passing silently. (h) `get_run_state()` exists for tests and the validation tool. (i) Unload removes nodes from the tree before freeing them; F10 and F11 must defer it when called from physics callbacks.
+- **Stage 1 is flyable up to its first Gate.** All four Gates are closed in the static scene, so from `PlayerStart` (Z 20) the route ends at `Gate_S1_02` (Z -140) until F10 opens them.
+- **The flow pass is synthetic.** `tools/validate_menus.gd` flew Stage 1 from the main menu on keyboard and gamepad events through the real bindings, paused, opened Options and returned, resumed and went back to the menu, and Sair was checked to exit with code 0; but no person has pressed a key or a pad button. The physical keyboard and DualSense pass is still owed, as for F1 and F2-02.
 - **F2-02 decisions beyond the ticket text:** (a) initial focus is the first visible focusable *control* in tree order, not the first button, so Options starts on its first slider, the top of its authored focus loop; (b) `back` is resolved inside `Interface` and never reaches the Session, which F2-04's action list already assumes; (c) `ui_cancel` is ignored while the HUD is on top, and consumed whenever a menu is; (d) `current_screen()` was added for the Session; (e) the footer is `Layout/NavigationHint`, the authored name, and its absence on the three overlays is by design, so a test pins it instead of a runtime log; (f) a Results `mode` missing from the params means the authored Campaign layout; (g) Defeat shows the raw Checkpoint id (`Último checkpoint · CP1-A`) — a player-facing name per Checkpoint is a design call; (h) `GameSession.interface` is typed `Interface`; (i) `ScreenRouter` now emits every hide before the stack changes (see "Focus memory"); (j) gamepad A and B were added to `ui_accept` and `ui_cancel`.
 - **Results with neither Continue nor Replay** leaves the empty slot where they sit above Menu principal (`docs/validation/menus-results-final.png`). Moving the two remaining buttons up is a layout call for Astra; the focus loop already skips the slot.
 - **The navigation pass is synthetic.** `tools/validate_menus.gd` sends key and joypad events through the real bindings and focus search; no person has pressed a key or a pad button on these menus yet, and no pad was connected during the run. A physical keyboard and DualSense pass is still owed, as for F1.

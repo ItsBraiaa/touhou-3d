@@ -8,10 +8,12 @@ extends SceneTree
 ## Run it with `tools/godot.ps1 --path . --script res://tools/validate_menus.gd`.
 ## With a display it also writes the PNGs; headless it skips them.
 ##
-## Until F2-04 the Session reacts to no menu action, so this tool plays its navigation
-## part: the `open_*` actions open their screen and `resume` removes Pause. Everything
-## else it only records. The events are synthetic: they go through the real `ui_*`
-## bindings and the real focus search, but no key or button is pressed by a person.
+## Since F2-04 the Session acts on every request, so the tool only records them. Two
+## passes play the menu-to-flight flow through the real Session: start a stage, fly it,
+## pause, open Options from Pause, resume, and return to the main menu, once on the
+## keyboard and once on the gamepad. The events are synthetic: they go through the real
+## bindings, the real focus search and the real ship, but no key or button is pressed by
+## a person.
 
 
 const MAIN_SCENE_PATH := "res://scenes/main.tscn"
@@ -36,16 +38,15 @@ const PAD_BUTTONS: Dictionary[StringName, int] = {
 	&"ui_accept": JOY_BUTTON_A,
 	&"ui_cancel": JOY_BUTTON_B,
 }
-## The Session's navigation part, played here until F2-04 exists.
-const OPENS: Dictionary[StringName, StringName] = {
-	&"open_stage_select": ScreenRouter.STAGE_SELECT,
-	&"open_options": ScreenRouter.OPTIONS,
-	&"open_controls": ScreenRouter.CONTROLS,
-	&"open_credits": ScreenRouter.CREDITS,
-}
+const STAGE_01_PATH := "res://scenes/stages/stage_01.tscn"
+## Physics ticks of held movement input in each flight pass: one second.
+const FLIGHT_TICKS := 60
+## Physics ticks observed while paused, as in the F2-04 ticket.
+const PAUSED_TICKS := 30
 
+var _session: GameSession
 var _interface: Interface
-## Actions other than the `open_*` ones, in order, for the checks to read.
+## Every action the menus requested, in order, for the checks to read.
 var _requested: Array[StringName] = []
 var _failures: int = 0
 var _use_pad: bool = false
@@ -64,9 +65,10 @@ func run() -> void:
 	var main := packed.instantiate()
 	root.add_child(main)
 	current_scene = main
+	_session = main as GameSession
 	_interface = main.get_node_or_null(^"Interface") as Interface
-	if _interface == null:
-		push_error("Main has no Interface node with the Interface script")
+	if _session == null or _interface == null:
+		push_error("Main needs the GameSession script and an Interface node with the Interface script")
 		quit(1)
 		return
 	_interface.action_requested.connect(_on_action_requested)
@@ -76,7 +78,8 @@ func run() -> void:
 	await _every_control_is_reachable()
 	await _walk_the_menus_with_the_keyboard()
 	await _walk_the_menus_with_the_gamepad()
-	await _pause_options_and_back()
+	await _fly_pause_and_return_with_the_keyboard()
+	await _fly_pause_and_return_with_the_gamepad()
 	await _defeat_refuses_back()
 	await _results_credits_and_back()
 
@@ -161,9 +164,6 @@ func _walk_the_menus_with_the_gamepad() -> void:
 	await _send(&"ui_accept")
 	_expect(ScreenRouter.STAGE_SELECT, "Layout/ForestCard/SelectButton", "gamepad: A opens StageSelect")
 	_expect_footer(false, "gamepad: footer stays hidden on the next screen")
-	_requested.clear()
-	await _send(&"ui_accept")
-	_report(_requested == [&"start_direct_stage"], "gamepad: A on the forest card requests start_direct_stage (%s)" % [_requested])
 	await _send(&"ui_cancel")
 	_expect(ScreenRouter.MAIN_MENU, "Layout/StageSelectButton", "gamepad: B returns on Selecionar fase")
 	await _capture("main-gamepad")
@@ -172,24 +172,110 @@ func _walk_the_menus_with_the_gamepad() -> void:
 	_expect_footer(true, "keyboard again: footer shown")
 
 
-## "Open Options without unpausing combat": Options from Pause returns to Pause, and Back
-## on Pause asks the Session to resume.
-func _pause_options_and_back() -> void:
+## The menu-to-flight flow on the keyboard: Iniciar starts the Campaign on Stage 1, W
+## flies the ship, Escape pauses it and freezes the ship and Active Time with W still
+## held, Options from Pause keeps the game paused ("Open Options without unpausing
+## combat"), Escape resumes, and Menu principal ends the Run.
+func _fly_pause_and_return_with_the_keyboard() -> void:
 	_use_pad = false
-	_interface.show_home(ScreenRouter.HUD)
-	_interface.push_overlay(ScreenRouter.PAUSE, {"score": 4200, "graze": 17})
-	_expect(ScreenRouter.PAUSE, "Layout/ResumeButton", "pause: opens on Continuar over the HUD")
+	_interface.show_home(ScreenRouter.MAIN_MENU)
+	await _send(&"ui_accept")
+	_expect(ScreenRouter.HUD, "<none>", "keyboard: Enter on Iniciar starts the Campaign on the HUD")
+	var ship := _ship()
+	_report(ship != null and _stage_path() == STAGE_01_PATH, "keyboard: Stage 1 and the ship are under WorldRoot (%s)" % _stage_path())
+	if ship == null:
+		return
+	_report(_session.get_run_state().stage_result()["mode"] == RunState.RunMode.CAMPAIGN, "keyboard: and the Run is a Campaign")
+	await _fly(ship, _key_event(KEY_W, true), _key_event(KEY_W, false), "keyboard: W")
 	await _send(&"ui_down")
 	await _send(&"ui_down")
 	await _send(&"ui_accept")
 	_expect(ScreenRouter.OPTIONS, "Layout/Audio/MasterVolume", "pause: Opções opens Options")
+	_report(paused, "pause: the game stays paused under Options")
 	await _send(&"ui_cancel")
 	_expect(ScreenRouter.PAUSE, "Layout/OptionsButton", "pause: Escape returns to Pause on Opções")
+	_report(paused, "pause: and it is still paused")
 	await _capture("pause-return")
-	_requested.clear()
 	await _send(&"ui_cancel")
-	_report(_requested == [&"resume"], "pause: Escape on Pause requests resume (%s)" % [_requested])
-	_report(_interface.current_screen() == ScreenRouter.HUD, "pause: and the HUD is left alone")
+	_expect(ScreenRouter.HUD, "<none>", "pause: Escape on Pause resumes on the HUD")
+	_report(not paused, "pause: and unpauses the tree")
+	await _return_to_menu_from_pause("keyboard")
+
+
+## The same flow on the gamepad through Stage Select: A on the forest card starts Direct
+## Stage 1, the left stick flies, Start pauses, B resumes, and Start under Options opened
+## from Pause is ignored, so it cannot resume behind Options.
+func _fly_pause_and_return_with_the_gamepad() -> void:
+	_use_pad = true
+	_interface.show_home(ScreenRouter.MAIN_MENU)
+	await _send(&"ui_down")
+	await _send(&"ui_accept")
+	_requested.clear()
+	await _send(&"ui_accept")
+	_report(_requested == [&"start_direct_stage"], "gamepad: A on the forest card requests start_direct_stage (%s)" % [_requested])
+	_expect(ScreenRouter.HUD, "<none>", "gamepad: and the Session starts it on the HUD")
+	var ship := _ship()
+	_report(ship != null and _stage_path() == STAGE_01_PATH, "gamepad: Stage 1 and the ship are under WorldRoot (%s)" % _stage_path())
+	if ship == null:
+		return
+	_report(_session.get_run_state().stage_result()["mode"] == RunState.RunMode.DIRECT_STAGE, "gamepad: and the Run is a Direct Stage")
+	await _fly(ship, _stick_event(-1.0), _stick_event(0.0), "gamepad: left stick up")
+	await _send(&"ui_cancel")
+	_expect(ScreenRouter.HUD, "<none>", "gamepad: B on Pause resumes on the HUD")
+	_report(not paused, "gamepad: and unpauses the tree")
+	await _send_button(JOY_BUTTON_START)
+	await _send(&"ui_down")
+	await _send(&"ui_down")
+	await _send(&"ui_accept")
+	_expect(ScreenRouter.OPTIONS, "Layout/Audio/MasterVolume", "gamepad: Opções from Pause opens Options")
+	await _send_button(JOY_BUTTON_START)
+	_expect(ScreenRouter.OPTIONS, "Layout/Audio/MasterVolume", "gamepad: Start under Options is ignored")
+	_report(paused, "gamepad: and the game stays paused")
+	await _send(&"ui_cancel")
+	_expect(ScreenRouter.PAUSE, "Layout/OptionsButton", "gamepad: B returns to Pause on Opções")
+	await _send(&"ui_up")
+	await _send(&"ui_up")
+	await _return_to_menu_from_pause("gamepad")
+
+
+## Holds [param press] for [constant FLIGHT_TICKS] and checks the ship flew toward -Z,
+## then pauses with the `pause` binding of the device in use and checks that the ship
+## and Active Time hold still for [constant PAUSED_TICKS] with the input still held.
+## Leaves the game paused on Pause, input released.
+func _fly(ship: PlayerController, press: InputEvent, release: InputEvent, label: String) -> void:
+	var start := ship.global_position
+	Input.parse_input_event(press)
+	Input.flush_buffered_events()
+	await _physics_ticks(FLIGHT_TICKS)
+	var flown := start.z - ship.global_position.z
+	_report(flown > 1.0, "%s flies the ship %.2f units along -Z in %d ticks" % [label, flown, FLIGHT_TICKS])
+	if not _use_pad:
+		await _capture("flight")
+	await _send_pause()
+	_expect(ScreenRouter.PAUSE, "Layout/ResumeButton", "%s: %s pauses on Continuar" % [_device(), "Start" if _use_pad else "Escape"])
+	var frozen := ship.global_position
+	var time := _session.get_run_state().clear_time()
+	await _physics_ticks(PAUSED_TICKS)
+	var still := ship.global_position == frozen and _session.get_run_state().clear_time() == time
+	_report(paused and still, "%s: input still held, the ship and Active Time (%.3f s) hold still for %d paused ticks" % [_device(), time, PAUSED_TICKS])
+	Input.parse_input_event(release)
+	Input.flush_buffered_events()
+	await process_frame
+
+
+## From Pause on Continuar, Down three times to Menu principal and accept: the Run ends,
+## the world is empty, the tree runs, and the main menu opens on Iniciar.
+func _return_to_menu_from_pause(device: String) -> void:
+	if _interface.current_screen() == ScreenRouter.HUD:
+		await _send_pause()
+	_expect(ScreenRouter.PAUSE, "Layout/ResumeButton", "%s: Pause again, on Continuar" % device)
+	for _step: int in 3:
+		await _send(&"ui_down")
+	_expect(ScreenRouter.PAUSE, "Layout/MenuButton", "%s: Down three times reaches Menu principal" % device)
+	await _send(&"ui_accept")
+	_expect(ScreenRouter.MAIN_MENU, "Layout/StartButton", "%s: Menu principal returns to the main menu on Iniciar" % device)
+	var emptied := _session.world_root.get_child_count() == 0
+	_report(emptied and not paused, "%s: with WorldRoot empty and the tree running" % device)
 
 
 func _defeat_refuses_back() -> void:
@@ -310,6 +396,46 @@ static func _key_event(keycode: int, pressed: bool) -> InputEventKey:
 	return event
 
 
+## The left stick's vertical axis at [param value]: -1 is fully up, which is `move_forward`.
+static func _stick_event(value: float) -> InputEventJoypadMotion:
+	var event := InputEventJoypadMotion.new()
+	event.axis = JOY_AXIS_LEFT_Y
+	event.axis_value = value
+	return event
+
+
+## Presses and releases [param button] through the root viewport, like [method _send].
+func _send_button(button: JoyButton) -> void:
+	for pressed: bool in [true, false]:
+		var event := InputEventJoypadButton.new()
+		event.button_index = button
+		event.pressed = pressed
+		root.push_input(event)
+	await process_frame
+
+
+## The `pause` binding of the device in use: Start, or Escape, which is `ui_cancel` too.
+func _send_pause() -> void:
+	if _use_pad:
+		await _send_button(JOY_BUTTON_START)
+	else:
+		await _send(&"ui_cancel")
+
+
+func _physics_ticks(count: int) -> void:
+	for _tick: int in count:
+		await physics_frame
+
+
+func _ship() -> PlayerController:
+	return _session.world_root.get_node_or_null(^"PlayerShip") as PlayerController
+
+
+func _stage_path() -> String:
+	var stage := _session.world_root.get_node_or_null(^"Stage")
+	return stage.scene_file_path if stage != null else "<no Stage>"
+
+
 func _device() -> String:
 	return "gamepad" if _use_pad else "keyboard"
 
@@ -330,13 +456,9 @@ func _report(passed: bool, label: String) -> void:
 	print("MENUS %s %s" % ["ok  " if passed else "FAIL", label])
 
 
+## Records only: the Session connected first, so it has already acted.
 func _on_action_requested(action: StringName, _payload: Dictionary) -> void:
-	if action in OPENS:
-		_interface.show_screen(OPENS[action])
-		return
 	_requested.append(action)
-	if action == &"resume":
-		_interface.back()
 
 
 ## A synthetic event proves nothing about a pad (ENGINEERING_BRIEF Section 8), so the

@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene load_steps=15 format=3]
 
 [ext_resource type="Script" path="res://scripts/session/game_session.gd" id="1_session"]
 [ext_resource type="Script" path="res://scripts/ui/interface.gd" id="2_interface"]
@@ -11,6 +11,9 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/defeat.tscn" id="9_defeat"]
 [ext_resource type="PackedScene" path="res://scenes/ui/results.tscn" id="10_results"]
 [ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="11_hud"]
+[ext_resource type="PackedScene" path="res://scenes/player/player_ship.tscn" id="12_player_ship"]
+[ext_resource type="PackedScene" path="res://scenes/stages/stage_01.tscn" id="13_stage_01"]
+[ext_resource type="PackedScene" path="res://scenes/stages/stage_02.tscn" id="14_stage_02"]
 
 [node name="Main" type="Node" node_paths=PackedStringArray("world_root", "projectile_root", "interface", "audio")]
 process_mode = 3
@@ -19,6 +22,14 @@ world_root = NodePath("WorldRoot")
 projectile_root = NodePath("ProjectileRoot")
 interface = NodePath("Interface")
 audio = NodePath("Audio")
+player_scene = ExtResource("12_player_ship")
+stage_scenes = Dictionary[StringName, PackedScene]({
+&"stage_01": ExtResource("13_stage_01"),
+&"stage_02": ExtResource("14_stage_02")
+})
+stage_flight_bounds = Dictionary[StringName, AABB]({
+&"stage_01": AABB(-45, 0, -570, 90, 75, 605)
+})
 
 [node name="WorldRoot" type="Node3D" parent="."]
 process_mode = 1

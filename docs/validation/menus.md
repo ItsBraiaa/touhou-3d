@@ -1,9 +1,72 @@
-# Menu navigation validation — 2026-09-23 (F2-02)
+# Menu and session validation
 
 Engine: Godot 4.7.2.stable.official.ed1daf0bf, Windows 11, D3D12 Forward+ on an AMD
 Radeon RX 9070 XT. Scene under test: `scenes/main.tscn`, where `Interface` instances
-Astra's eight `scenes/ui/` menus and the HUD. Contract in
+Astra's eight `scenes/ui/` menus and the HUD, and `GameSession` (since F2-04) loads
+the stage and the ship. Contract in
 [engineering/menus-session.md](../engineering/menus-session.md).
+
+# Session flow — 2026-09-23 (F2-04)
+
+## Automated
+
+`tools/test.ps1`: 172 passed, 0 failed, no `SCRIPT ERROR`. F2-04 added the 20 tests of
+`tests/scene/test_game_session_flow.gd`, which instance `main.tscn` headless and play the
+flow through `Interface.action_requested` and the `pause` action. Three new `ERROR:
+/root/Main: ...` lines in the output belong to the tests that refuse a stage on purpose
+(no scene, no Flight Volume, no `PlayerStart`). Sixteen mutants of `game_session.gd`,
+listed in the module doc, each fail a named test by assertion.
+
+## Scripted menu-to-flight pass
+
+```powershell
+tools/godot.ps1 --path . --script res://tools/validate_menus.gd
+```
+
+`MENUS_OK`, 83 checks, headless and in a window. The tool no longer plays the Session's
+part: every action reaches the real `GameSession`. Two new passes:
+
+| Device | Steps | Result |
+| --- | --- | --- |
+| Keyboard | Enter on Iniciar | HUD alone; `Stage` (`stage_01.tscn`) and `PlayerShip` under `WorldRoot`; Campaign |
+| Keyboard | W held 60 ticks | the ship flew 11.80 units along -Z (12 units/s, from rest) |
+| Keyboard | Escape, W still held, 30 ticks | Pause on Continuar; ship position and Active Time (1.017 s) unchanged |
+| Keyboard | Down, Down, Enter; Escape | Options with the tree still paused; back to Pause on Opções, still paused |
+| Keyboard | Escape | Pause removed, HUD alone, tree running |
+| Keyboard | Escape, Down ×3, Enter | Pause, Voltar ao menu, then the main menu on Iniciar with `WorldRoot` empty and the tree running |
+| Gamepad | D-pad Down, A, A on the forest card | `start_direct_stage` requested; HUD; Stage 1 and the ship loaded; Direct Stage |
+| Gamepad | left stick up 60 ticks, Start, 30 ticks | flew 11.80 units; Pause on Continuar; ship and Active Time (0.983 s) frozen with the stick held |
+| Gamepad | B | resumed on the HUD, tree running |
+| Gamepad | Start, Down, Down, A, Start | Options from Pause; Start under Options ignored, still paused |
+| Gamepad | B, Up, Up, Down ×3, A | back to Pause on Opções; Voltar ao menu; the main menu on Iniciar, `WorldRoot` empty |
+
+The earlier walks (below) still pass unchanged, with the Session now opening the screens.
+
+## Real project boot and Quit
+
+- `tools/godot.ps1 --path . --quit-after 300` runs the project through
+  `run/main_scene` in a window: D3D12 device line only, no error or warning.
+- A throwaway driver (not committed) focused `MainMenu/Layout/QuitButton`, pressed Enter
+  through the root viewport and waited 120 frames for a `QUIT_FAILED` line: the process
+  exited with code 0 before it, so Sair quits the application.
+
+## Screenshots (F2-04)
+
+| File | What it shows |
+| --- | --- |
+| `menus-flight.png` | Stage 1 after one second of W from `PlayerStart`: the ship ahead of the camera on the forest route, the closed `Gate_S1_02` portal ahead, the HUD's static values bottom left. |
+| `menus-pause-return.png` | Re-captured: Pause over the live, dimmed Stage 1 after returning from Options, focus on Opções, `Pontos  0     Graze  0` from `RunState`. |
+
+## Manual pass: still owed
+
+**No person has played this flow.** Every key and pad event above is synthetic, and the
+run printed `no joypad connected on this host`. The ticket's manual items — fly the Stage 1
+route from the main menu on keyboard and gamepad, pause mid-flight, Options and back, quit
+from the main menu — were played by the tool, not by hand. Stage 1's route also ends at
+the first closed Gate (Z -140) until F10 opens them. A physical keyboard and DualSense
+pass remains owed, as for F1 and F2-02.
+
+# Menu navigation — 2026-09-23 (F2-02)
 
 ## Automated
 
@@ -77,7 +140,7 @@ the four D-pad buttons, reached every visible focusable control: 20 of 20 cases.
 | `menus-main-keyboard.png` | Main menu after two arrow presses: gold focus on Opções, keyboard footer visible. |
 | `menus-main-gamepad.png` | Main menu after the gamepad walk: focus restored on Selecionar fase, footer hidden. |
 | `menus-options-entry.png` | Options on entry, focused on the Geral slider. The focus is barely visible: see finding 3. |
-| `menus-pause-return.png` | Pause over the HUD after returning from Options: focus on Opções, `Pontos  4200     Graze  17`. |
+| `menus-pause-return.png` | Replaced by the F2-04 capture above. It showed Pause over the bare HUD after returning from Options: focus on Opções, `Pontos  4200     Graze  17` passed by the tool. |
 | `menus-results-final.png` | Final victory: `Jornada concluída`, Continue and Replay hidden, focus on Menu principal. |
 
 ## Findings
