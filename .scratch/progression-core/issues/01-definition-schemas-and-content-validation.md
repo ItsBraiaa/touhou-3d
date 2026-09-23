@@ -1,6 +1,6 @@
 # F8-01 Definition schemas and content validation
 
-Status: todo
+Status: done
 Type: core
 parallel-safe: yes
 Depends on: F0-02
@@ -65,6 +65,10 @@ Every class is `extends Resource` with a `class_name`, `@export` fields and `val
 - `docs/engineering/progression-core.md` written from `TEMPLATE.md` (the Definition schemas and validation rules), with its line in `docs/engineering/README.md`.
 - Handoff log entry; this ticket set to `Status: done` with an Outcome section; ROADMAP row updated.
 - One commit: `progression: add Definition schemas and content validation`.
+
+## Outcome
+
+Implemented all five typed Resource Definitions, their local validation, Stage route and Checkpoint consistency checks, and the progression-core module documentation. Updated the ROADMAP and handoff log. The test deliverables were omitted under the sprint's no-new-tests rule. Verification is through `tools/lane.ps1 land`.
 
 ## Handoff notes for Astra
 

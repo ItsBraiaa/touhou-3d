@@ -38,6 +38,34 @@ Action required by Astra:
 - `PlayerShip` has a new Inspector export, `invulnerability_flicker_hz` (12.0, "Feedback" group), yours to tune.
 - Keep `CoreVisual` under `DamageCore`, outside `VisualRoot`, or the Core would blink too.
 - Defeat has no animation yet.
+## 2026-09-23 20:18 — OpenCode (oc-b) — F8-01 progression Definitions
+State: CODE_READY
+Files: `scripts/definitions/encounter_definition.gd`, `wave_definition.gd`, `reward_definition.gd`, `checkpoint_definition.gd`, `stage_definition.gd`, `docs/engineering/progression-core.md`, `docs/engineering/README.md`, `docs/engineering/ROADMAP.md`, `.scratch/progression-core/issues/01-definition-schemas-and-content-validation.md`
+Change: Added typed Resource schemas, local validation and Stage-level route/checkpoint validation, plus the module contract. No tests were written per the sprint rule.
+Why: F8-01 provides the authored-data contract required by EncounterMachine and the later Stage 1 content draft.
+Action required by Astra: Author content against the exported fields and validation rules in `docs/engineering/progression-core.md`; none for this ticket.
+## 2026-09-23 20:17 — OpenCode (oc-a) — F13-01 AudioLimiter core
+State: CODE_READY
+Files: `scripts/audio/audio_limiter.gd`, `docs/engineering/audio.md`, `docs/engineering/README.md`, `docs/engineering/ROADMAP.md`, `.scratch/audio/issues/01-audio-limiter-core.md`
+Change: Added the Node-free AudioLimiter core with event intervals, per-event/global caps, strict-priority oldest-voice stealing, monotonic ids, epsilon-based ticking and clear semantics. No tests were added per the sprint rule.
+Why: F13-01 supplies the rules core used by F13-02's playback adapter.
+Action required by Astra: None for this ticket; event rule values remain provisional until D-01's listening pass.
+
+## 2026-09-23 20:13 — Astra (sol) — Rulings (D-07 Part B) [shared]
+State: docs
+Files: `docs/PLANEJAMENTO.md`, `scenes/ui/hud.tscn`, `.scratch/design-sprint/issues/07-shrine-lighting-and-boss-rulings.md`, `docs/engineering/ROADMAP.md`, `docs/HANDOFF_LOG.md`
+Change: Five rulings below are recorded in PLANEJAMENTO Sections 4, 7 and 9. `Phase1` and `Phase2` carry authored two-Phase offset metadata, preserving their current three-Phase positions until Hud applies it. The D-07 ticket remains doing for Parts A and C.
+
+| Ruling | Decision | Follow-up |
+| --- | --- | --- |
+| 1 Phase transition damage | Confirm no damage during the cue, bounded to 0.75 s so it does not pad the encounter. Excess damage cannot skip a Phase. | Path F12-01: keep `transition_seconds` at or below 0.75; no new code behavior requested. Sol D-07 Part C and D-06 apply the bound to values. |
+| 2 HUD dimming | Confirm 0.25 alpha for spent Shield/Bomb and 0.30 for finished Phase. | None. |
+| 3 two-Phase bar | Change to two equal segments across the full 620 px panel, with 16 px side margins and a 6 px center gap. | Trunk `Hud` follow-up: when `phase_count == 2`, read `two_phase_offset_left/right` metadata from Phase1 and Phase2 and apply those offsets; restore their authored offsets when three Phases show. No scheduled ticket owns this yet. |
+| 4 ship yaw | Confirm the ship model does not yaw with the camera; the weapon and Familiars aim by camera yaw and visual banking stays cosmetic. | None. |
+| 5 Graze under Invulnerability | Confirm strict spending: contact while invulnerable consumes that Projectile's one Graze opportunity. | None. |
+
+Why: The existing boss cue, scoring and ship orientation remain readable and consistent with the source design; the two-Phase HUD capture showed unused panel width.
+Action required by Claude: path observes the transition cap in F12-01; trunk applies the two-Phase HUD layout in a follow-up. Parts A and C remain with sol after F12-03.
 
 ## 2026-09-23 20:10 — Claude (trunk) — F6-02: ProjectileSystem on ProjectileRoot [shared]
 State: CODE_READY

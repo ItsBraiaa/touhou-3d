@@ -114,6 +114,10 @@ Initial score values: 10 per graze, 100 per common enemy, 50 per excess power pi
 
 Two final bosses, each with three phases. Each phase has its own pattern and health-bar segment. When a segment is depleted, clear the previous bullets, briefly announce the next attack, and start after a short readable transition. Excess damage does not skip phases.
 
+During a Phase transition the boss takes no damage for at most 0.75 seconds; this fixed cue is for readability, never a timer used to lengthen the encounter.
+
+A projectile that touches the Graze volume during Invulnerability spends its one Graze opportunity even if it remains alive after Invulnerability ends.
+
 Patterns need reachable gaps, readable speeds, and reaction time. Include attacks at different heights so that flying above the boss cannot solve every encounter. Defeating the boss causes victory; artificial invulnerability timers must not pad stage duration.
 
 ## 5. Stage design
@@ -181,6 +185,10 @@ Pause menu: Continue, Restart Stage, Options, and Return to Menu, localized into
 
 Persistent combat HUD: health bar with percentage, one shield icon, bomb icons/charges, and a compact power indicator. Targets and destinations use world-space or screen-edge markers. Show score and total graze in pause/results instead of persistent combat counters; graze uses subtle light and sound feedback. During bosses, add a segmented health bar and short boss name. Briefly display attack names during transitions. Off-screen threat warnings use simple directional indicators.
 
+Spent Shield and Bomb icons retain 25% opacity, and completed boss Phase bars retain 30% opacity.
+
+A two-Phase boss bar expands its two segments across the full panel width with the same margins and gap as the three-Phase bar.
+
 Credits are accessible through a small button inside Options and on the final screen, preserving the four requested main menu entries.
 
 Every menu supports keyboard and gamepad navigation with visible selection focus. Disconnecting a controller pauses the game and permits keyboard recovery; a mouse is not required.
@@ -207,6 +215,8 @@ Validate simultaneous ascent/descent, firing, and focus on a physical gamepad. F
 Use a coherent low-poly palette: green/amber forest and blue/violet mountain. Differentiate hostile bullets, friendly shots, and pickups by shape and color. Fog and bloom must preserve dodge-path readability.
 
 **Player ship:** one distinctive low-poly model with a compact silhouette and luminous core. Proposed appearance: a spiritual craft with origami-inspired fins, talisman details, and magical propulsion. Build it from simple forms or adapt a permitted base. Selectable ships are outside scope. Keep animation minimal: gentle movement banking, core pulses, and propulsion effects. A complex rig is unnecessary. Banking is visual only; it does not rotate the camera or modify the vulnerable volume.
+
+The ship model keeps its authored forward orientation when the camera yaws; camera-relative shots and Familiars aim independently, while visual banking alone tilts the model.
 
 **Bosses:** concentrate animation effort here. Each needs hover/idle, attack anticipation, execution, and defeat, with gestures or moving parts that communicate the patterns. They may share base rigs and clips but should differ in silhouette, color, and ornaments. Their animation is more elaborate than the ship's without requiring cinematics or motion capture. At least one boss must visibly animate its model beyond movement to satisfy the assignment.
 

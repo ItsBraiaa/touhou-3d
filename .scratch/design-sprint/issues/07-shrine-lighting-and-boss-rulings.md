@@ -1,6 +1,6 @@
 # D-07 Shrine lighting and boss rulings
 
-Status: todo
+Status: doing
 Type: design
 Owner: Astra (GPT Sol)
 Lane: sol
@@ -10,6 +10,10 @@ Model: GPT Sol (Codex)
 > - **Part B (the rulings) comes first in lane sol,** by about T0 + 0.8 h, as its own commit `(D-07 part B)`. F5-02 waits at most until T0 + 1 h for ruling 5.
 > - **Parts A and C** run after F12-03 has landed. They close the ticket.
 Depends on: F12-03
+
+## Part B outcome
+
+Five rulings landed on lane sol: a 0.75 s maximum invulnerable Phase cue, the existing HUD dimming values, a full-width two-Phase boss bar with authored offsets awaiting a trunk Hud follow-up, the fixed ship visual heading, and strict Graze spending under Invulnerability. Parts A and C remain after F12-03.
 
 ## Goal
 
