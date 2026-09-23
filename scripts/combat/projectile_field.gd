@@ -1,15 +1,18 @@
 class_name ProjectileField
 extends RefCounted
 ## Rules Core that holds every Projectile of both factions in one set of packed arrays,
-## moves them each physics tick, removes them, and sweeps the hostile ones against the
-## player's Core and Graze Volume (ADR-0004).
+## moves them each physics tick, removes them, sweeps the hostile ones against the
+## player's Core and Graze Volume and the player's ones against the hit spheres enemies
+## register, and clears hostile fire for Bombs, Gates, Checkpoints and boss Phases
+## (ADR-0004).
 ##
 ## Node-free (ADR-0001): no Node, SceneTree, physics or timer. F6-02's ProjectileSystem
 ## ticks it from `_physics_process`, feeds [method set_player] before every tick,
-## implements the obstacle query with a physics ray against collision layer 1 and draws
-## it from [method get_positions] and [method get_radii]. The field only decides
-## contact: F7-01 turns [signal player_hit] into [method CombatState.take_hit] and
-## [signal grazed] into Graze and score.
+## forwards the enemies' [method register_target] calls, implements the obstacle query
+## with a physics ray against collision layer 1 and draws it from [method get_positions]
+## and [method get_radii]. The field only decides contact: F7-01 turns
+## [signal player_hit] into [method CombatState.take_hit] and [signal grazed] into Graze
+## and score, and the enemy adapters turn [signal enemy_hit] into damage.
 ##
 ## [b]Tick order.[/b] [method tick] makes one pass over the alive Projectiles in
 ## ascending slot order. For each one:
@@ -17,12 +20,13 @@ extends RefCounted
 ## [br]2. Otherwise its segment runs from its position to position + velocity × delta.
 ## [br]3. When the obstacle query says scenery or a closed Gate blocks that segment, it
 ## is removed where it stands, before any Core or target sweep: a wall between a bullet
-## and the player protects the player, and the error is under one tick of travel and
-## never in the bullet's favor.
-## [br]4. A HOSTILE Projectile is swept against the player (below); F5-03 adds the target
-## sweep for PLAYER ones.
+## and the player protects the player, an Aim Assist shot dies on scenery for its whole
+## travel, and the error is under one tick of travel and never in the bullet's favor.
+## [br]4. A HOSTILE Projectile is swept against the player, a PLAYER one against the
+## registered targets (both below).
 ## [br]5. It moves to the segment's end, and is removed when that end is outside the
 ## bounds (the Flight Volume).
+## [br]After the pass the target registry is emptied, then the tick's events are emitted.
 ##
 ## [b]Core sweep and Graze.[/b] With a player set, each HOSTILE Projectile's segment is
 ## taken in the player's frame, from `from - previous_center` to `to - center`, and its
@@ -42,12 +46,28 @@ extends RefCounted
 ## Core contacts in higher slots of the same pass pass through, their contacts are spent,
 ## and the tick queues no further Graze. A Graze already queued by a lower slot stands.
 ##
+## [b]Hit spheres.[/b] An enemy calls [method register_target] every physics tick; the
+## sphere is valid for the next [method tick] only, so a target that stops registering
+## (defeated, freed) cannot be hit afterwards. Each PLAYER Projectile's segment is tested
+## against the spheres, held still for the tick; contact is distance <= target radius +
+## Projectile radius. The Projectile hits only the target it reaches first along its
+## segment (ties go to the earlier registration): it is removed and [signal enemy_hit]
+## queued. HOSTILE Projectiles never hit targets.
+##
+## [b]Clears.[/b] [method clear_hostile_in_radius] (a Bomb) and [method clear_hostile_all]
+## (a Gate opening, a Checkpoint activating, a boss Phase ending) remove HOSTILE
+## Projectiles only and award nothing: a cleared Projectile never grazes, and one cleared
+## from a listener loses the Graze it queued in the current pass. [method clear_all]
+## removes both factions.
+##
 ## [b]Events rule.[/b] Events decided during the pass are buffered and emitted after it,
-## in ascending slot order. A listener may call [method spawn], [method despawn] or a
-## clear; a Projectile spawned then is first moved on the next tick. [method clear_all]
-## from a listener also drops the tick's events not yet emitted. Neither a listener nor
-## the obstacle query may call [method tick], and the obstacle query must not call back
-## into the field at all.
+## in ascending slot order. A listener may call [method spawn], [method despawn],
+## [method register_target] or a clear; a Projectile spawned then is first moved on the
+## next tick, and a sphere registered then is valid for the next tick. [method clear_all]
+## from a listener also drops the tick's events not yet emitted; the hostile clears drop
+## only the Graze of the Projectiles they remove. Neither a listener nor the obstacle
+## query may call [method tick], and the obstacle query must not call back into the field
+## at all.
 ##
 ## [b]Capacity.[/b] Fixed at [method setup]. When every slot is alive a new request is
 ## refused and counted ([method get_refused_count]); an existing Projectile is never
@@ -67,11 +87,15 @@ signal player_hit(projectile_id: int, damage: int)
 ## Core, while the player was not invulnerable, for the first time in its life. Emitted
 ## after the pass.
 signal grazed(projectile_id: int)
+## A PLAYER Projectile reached the hit sphere registered as [param target_id] (the
+## actor's `get_instance_id()`) before any other along its segment, and was removed.
+## [param damage] is its [member ProjectileSpawn.damage]. Emitted after the pass.
+signal enemy_hit(target_id: int, projectile_id: int, damage: int)
 
 ## What the player sweep found for one Projectile in one tick.
 enum _Contact { NONE, GRAZE, CORE }
-## A buffered event.
-enum _Event { PLAYER_HIT, GRAZED }
+## A buffered event. DROPPED marks a Graze a hostile clear took back.
+enum _Event { PLAYER_HIT, GRAZED, ENEMY_HIT, DROPPED }
 
 ## Returned by [method spawn] when the field is full. Never a valid id.
 const NO_PROJECTILE := -1
@@ -115,16 +139,22 @@ var _core_radius: float = 0.0
 var _graze_radius: float = 0.0
 var _player_invulnerable: bool = false
 
-## The events of the current tick, in slot order: one [enum _Event], the Projectile id
-## and the damage (0 for a Graze) per entry.
+## The hit spheres registered for the coming tick, in registration order.
+var _target_ids := PackedInt64Array()
+var _target_centers := PackedVector3Array()
+var _target_radii := PackedFloat32Array()
+
+## The events of the current tick, in slot order: one [enum _Event], the Projectile id,
+## the damage (0 for a Graze) and the target id (0 unless an enemy hit) per entry.
 var _event_kinds := PackedInt32Array()
 var _event_ids := PackedInt64Array()
 var _event_damages := PackedInt32Array()
+var _event_targets := PackedInt64Array()
 
 
 ## Sizes the field for [param capacity] Projectiles (1 to [constant MAX_CAPACITY]),
-## empties it and resets the refusal counter. Ids handed out before stay dead. The player
-## set by [method set_player] is kept.
+## empties it and the target registry, and resets the refusal counter. Ids handed out
+## before stay dead. The player set by [method set_player] is kept.
 ## [param bounds] is the Flight Volume as an AABB (a position and a size, which must be
 ## positive). [param obstacle_query] is `func(from: Vector3, to: Vector3) -> bool`,
 ## true when scenery or a closed Gate blocks the segment; an invalid Callable means
@@ -145,14 +175,15 @@ func setup(capacity: int, bounds: AABB, obstacle_query: Callable) -> void:
 	_alive.resize(capacity)
 	_graze_spent.resize(capacity)
 	_refused_count = 0
+	_clear_targets()
 	clear_all()
 
 
 ## Spawns a Projectile from a copy of [param request] and returns its id, or
 ## [constant NO_PROJECTILE] when every slot is alive (the request is refused and
-## counted). The request's lifetime and radius must be above 0. A request outside the
-## bounds is accepted and culled on its first [method tick]. The new Projectile first
-## moves on the next [method tick], with its Graze unspent.
+## counted). The request's lifetime, radius and damage must be above 0. A request outside
+## the bounds is accepted and culled on its first [method tick]. The new Projectile
+## first moves on the next [method tick], with its Graze unspent.
 func spawn(request: ProjectileSpawn) -> int:
 	# Constant messages: an assert message is built on every call, and spawn is hot.
 	assert(_capacity > 0, "ProjectileField: setup() must run before spawn()")
@@ -182,12 +213,14 @@ func spawn(request: ProjectileSpawn) -> int:
 
 
 ## Advances every alive Projectile by one physics step of [param delta] seconds, in the
-## tick order of the class description (lifetime, obstacle, player sweep, move, bounds),
-## then emits the tick's events in slot order.
+## tick order of the class description (lifetime, obstacle, player or target sweep,
+## move, bounds), empties the target registry, then emits the tick's events in slot
+## order.
 func tick(delta: float) -> void:
 	# A hit this tick reaches CombatState only after the pass, so the rest of the pass
 	# treats the player as invulnerable (class description).
 	var invulnerable := _player_invulnerable
+	var has_targets := not _target_ids.is_empty()
 	var last_alive := -1
 	for slot: int in _high_water:
 		if _alive[slot] == 0:
@@ -202,23 +235,31 @@ func tick(delta: float) -> void:
 		if _obstacle_query.is_valid() and _obstacle_query.call(from, to):
 			_remove(slot)
 			continue
-		if _has_player and _factions[slot] == ProjectileSpawn.Faction.HOSTILE:
-			var contact := _player_contact(from, to, _radii[slot])
-			if contact == _Contact.CORE and not invulnerable:
-				_queue_event(_Event.PLAYER_HIT, _ids[slot], _damages[slot])
+		if _factions[slot] == ProjectileSpawn.Faction.HOSTILE:
+			if _has_player:
+				var contact := _player_contact(from, to, _radii[slot])
+				if contact == _Contact.CORE and not invulnerable:
+					_queue_event(_Event.PLAYER_HIT, _ids[slot], _damages[slot], 0)
+					_remove(slot)
+					invulnerable = true
+					continue
+				if contact != _Contact.NONE and _graze_spent[slot] == 0:
+					_graze_spent[slot] = 1
+					if contact == _Contact.GRAZE and not invulnerable:
+						_queue_event(_Event.GRAZED, _ids[slot], 0, 0)
+		elif has_targets:
+			var target := _first_target_along(from, to, _radii[slot])
+			if target != -1:
+				_queue_event(_Event.ENEMY_HIT, _ids[slot], _damages[slot], _target_ids[target])
 				_remove(slot)
-				invulnerable = true
 				continue
-			if contact != _Contact.NONE and _graze_spent[slot] == 0:
-				_graze_spent[slot] = 1
-				if contact == _Contact.GRAZE and not invulnerable:
-					_queue_event(_Event.GRAZED, _ids[slot], 0)
 		_positions[slot] = to
 		if not _bounds.has_point(to):
 			_remove(slot)
 			continue
 		last_alive = slot
 	_high_water = last_alive + 1
+	_clear_targets()
 	_emit_events()
 
 
@@ -244,6 +285,53 @@ func clear_player() -> void:
 	_has_player = false
 
 
+## Registers a hit sphere for the next [method tick] only, at [param center] with
+## [param radius] world units (above 0). [param target_id] is the actor's
+## `get_instance_id()`; the field never holds a Node. Registering the same id again
+## before that tick replaces its sphere and keeps its place in the registration order.
+func register_target(target_id: int, center: Vector3, radius: float) -> void:
+	assert(radius > 0.0, "ProjectileField: a target's radius must be positive")
+	var index := _target_ids.find(target_id)
+	if index == -1:
+		_target_ids.append(target_id)
+		_target_centers.append(center)
+		_target_radii.append(radius)
+		return
+	_target_centers[index] = center
+	_target_radii[index] = radius
+
+
+## Ids of the hit spheres registered for the coming tick that overlap the sphere at
+## [param center] of [param radius] (distance <= [param radius] + target radius), in
+## registration order. Reads the registry and changes nothing. F7-02 uses it to find
+## the enemies inside a Bomb blast.
+func targets_in_radius(center: Vector3, radius: float) -> PackedInt64Array:
+	assert(radius >= 0.0, "ProjectileField: a query's radius must not be negative")
+	var found := PackedInt64Array()
+	for index: int in _target_ids.size():
+		var reach := radius + _target_radii[index]
+		if center.distance_squared_to(_target_centers[index]) <= reach * reach:
+			found.append(_target_ids[index])
+	return found
+
+
+## Removes every HOSTILE Projectile whose sphere overlaps the blast at [param center] of
+## [param radius] world units (distance <= [param radius] + Projectile radius) and
+## returns how many it removed. PLAYER Projectiles and hostile ones outside the blast are
+## untouched. Awards nothing and emits nothing. For a Bomb.
+func clear_hostile_in_radius(center: Vector3, radius: float) -> int:
+	assert(radius >= 0.0, "ProjectileField: a clear's radius must not be negative")
+	return _clear_hostile(center, radius)
+
+
+## Removes every HOSTILE Projectile and returns how many it removed. PLAYER Projectiles
+## are untouched. Awards nothing and emits nothing. For a Gate opening, a Checkpoint
+## activating and the end of a boss Phase.
+func clear_hostile_all() -> int:
+	# An infinite blast reaches every Projectile.
+	return _clear_hostile(Vector3.ZERO, INF)
+
+
 ## Removes the Projectile [param id] and returns true. An unknown, dead or recycled id
 ## changes nothing and returns false.
 func despawn(id: int) -> bool:
@@ -255,15 +343,14 @@ func despawn(id: int) -> bool:
 
 
 ## Removes every Projectile of both factions, awarding nothing. The id counter is kept,
-## so an old id stays dead after its slot is reused. Called from a listener, it also
-## drops the tick's events not yet emitted (a defeat that unloads the stage).
+## so an old id stays dead after its slot is reused; the target registry is kept too.
+## Called from a listener, it also drops the tick's events not yet emitted (a defeat
+## that unloads the stage).
 func clear_all() -> void:
 	_alive.fill(0)
-	_free_slots.resize(_capacity)
-	for slot: int in _capacity:
-		_free_slots[slot] = slot
 	_counts.fill(0)
 	_high_water = 0
+	_rebuild_free_slots()
 	_clear_events()
 
 
@@ -339,10 +426,56 @@ func _slot_of(id: int) -> int:
 	return slot
 
 
+## Removes one Projectile and returns its slot to the free list.
 func _remove(slot: int) -> void:
+	_kill(slot)
+	_free_slots.insert(_free_slots.bsearch(slot), slot)
+
+
+## Marks one Projectile dead without touching the free list; a bulk removal rebuilds the
+## list once afterwards with [method _rebuild_free_slots].
+func _kill(slot: int) -> void:
 	_alive[slot] = 0
 	_counts[_factions[slot]] -= 1
-	_free_slots.insert(_free_slots.bsearch(slot), slot)
+
+
+func _rebuild_free_slots() -> void:
+	_free_slots.clear()
+	for slot: int in _capacity:
+		if _alive[slot] == 0:
+			_free_slots.append(slot)
+
+
+## Removes every HOSTILE Projectile within [param radius] of [param center] (see
+## [method clear_hostile_in_radius]), takes back any Graze a removed one queued in the
+## current tick, and returns how many it removed.
+func _clear_hostile(center: Vector3, radius: float) -> int:
+	# The buffer holds events from the pass until emission ends, and nothing may clear
+	# during the pass, so pending events mean a listener called this clear.
+	var events_pending := not _event_ids.is_empty()
+	var removed := 0
+	for slot: int in _high_water:
+		if _alive[slot] == 0 or _factions[slot] != ProjectileSpawn.Faction.HOSTILE:
+			continue
+		var reach := radius + _radii[slot]
+		if center.distance_squared_to(_positions[slot]) > reach * reach:
+			continue
+		if events_pending:
+			_drop_pending_graze(_ids[slot])
+		_kill(slot)
+		removed += 1
+	if removed > 0:
+		_rebuild_free_slots()
+	return removed
+
+
+## Turns a [signal grazed] of Projectile [param id] still waiting in the event buffer
+## into a dropped event.
+func _drop_pending_graze(id: int) -> void:
+	# A Projectile has at most one event per tick.
+	var index := _event_ids.find(id)
+	if index != -1 and _event_kinds[index] == _Event.GRAZED:
+		_event_kinds[index] = _Event.DROPPED
 
 
 ## Which of the player's spheres a Projectile of [param radius] touches while it moves
@@ -364,14 +497,52 @@ func _player_contact(from: Vector3, to: Vector3, radius: float) -> _Contact:
 	return _Contact.NONE
 
 
-func _queue_event(kind: _Event, id: int, damage: int) -> void:
+## The registry index of the target a Projectile of [param radius] moving from
+## [param from] to [param to] reaches first, or -1. First means the smallest fraction of
+## the segment travelled at contact (0 when it starts inside a sphere); a tie keeps the
+## earlier registration.
+func _first_target_along(from: Vector3, to: Vector3, radius: float) -> int:
+	var travel := to - from
+	var travel_length_squared := travel.length_squared()
+	var first := -1
+	var first_along := INF
+	for index: int in _target_ids.size():
+		var reach := _target_radii[index] + radius
+		var offset := from - _target_centers[index]
+		# Solves |offset + travel × t| = reach for the entry fraction t in [0, 1].
+		var start_excess := offset.length_squared() - reach * reach
+		var along := 0.0
+		if start_excess > 0.0:
+			if travel_length_squared <= 0.0:
+				continue
+			var half_b := offset.dot(travel)
+			var discriminant := half_b * half_b - travel_length_squared * start_excess
+			if discriminant < 0.0:
+				continue
+			along = (-half_b - sqrt(discriminant)) / travel_length_squared
+			if along < 0.0 or along > 1.0:
+				continue
+		if along < first_along:
+			first_along = along
+			first = index
+	return first
+
+
+func _clear_targets() -> void:
+	_target_ids.clear()
+	_target_centers.clear()
+	_target_radii.clear()
+
+
+func _queue_event(kind: _Event, id: int, damage: int, target_id: int) -> void:
 	_event_kinds.append(kind)
 	_event_ids.append(id)
 	_event_damages.append(damage)
+	_event_targets.append(target_id)
 
 
-## Emits the buffered events in order. A listener's [method clear_all] empties the
-## buffer, which ends the loop.
+## Emits the buffered events in order, skipping dropped ones. A listener's
+## [method clear_all] empties the buffer, which ends the loop.
 func _emit_events() -> void:
 	var index := 0
 	while index < _event_ids.size():
@@ -381,6 +552,8 @@ func _emit_events() -> void:
 				player_hit.emit(id, _event_damages[index])
 			_Event.GRAZED:
 				grazed.emit(id)
+			_Event.ENEMY_HIT:
+				enemy_hit.emit(_event_targets[index], id, _event_damages[index])
 		index += 1
 	_clear_events()
 
@@ -389,3 +562,4 @@ func _clear_events() -> void:
 	_event_kinds.clear()
 	_event_ids.clear()
 	_event_damages.clear()
+	_event_targets.clear()

@@ -15,6 +15,22 @@ Action required by <other agent>: <what they must do, or "none">
 
 ---
 
+## 2026-09-23 20:30 — Claude (path) — F5-03 ProjectileField clears and hit spheres
+State: CODE_READY
+Files:
+- Edited: `scripts/combat/projectile_field.gd`, `docs/engineering/projectile-field.md`, `docs/engineering/README.md` (one line), `docs/engineering/ROADMAP.md` (F5-03 row), `.scratch/projectile-field/issues/03-bomb-phase-clears-and-hit-spheres.md` (Status, Outcome).
+
+Change:
+- `clear_hostile_in_radius(center, radius) -> int` is the Bomb; `clear_hostile_all() -> int` covers Gates, Checkpoints and boss Phases. Both remove HOSTILE Projectiles only, award and emit nothing, and from a listener take back a removed Projectile's pending `grazed`.
+- `register_target(target_id, center, radius)` adds a hit sphere for the next tick only, keyed by `get_instance_id()`. `targets_in_radius(center, radius) -> PackedInt64Array` lists the registered spheres a blast reaches.
+- PLAYER Projectiles are swept against the registered spheres and hit only the first target along their segment, reported as `enemy_hit(target_id, projectile_id, damage)` after the pass. The obstacle check still comes first.
+- **No unit tests,** by the sprint rule. A reviewer found no defects.
+- The projectile-field core chain (F5-01 to F5-03) is complete: F6-02 can wrap it, F7-01 and F7-02 can connect its signals and clears, and F9-02 can register spheres.
+
+Why: F5-03 is the last Projectile Field core ticket before F6-02, the trunk critical path.
+
+Action required by Astra: none (code only). Each enemy's hit sphere comes from its `HitVolume` shape, read by its adapter.
+
 ## 2026-09-23 20:05 — Claude (path) — F5-02 ProjectileField Core sweep and Graze rules
 State: CODE_READY
 Files:

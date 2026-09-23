@@ -1,18 +1,18 @@
 # Projectile Field
 
-Feature F5: the Node-free cores that own every Projectile (ADR-0004). Started with ticket F5-01 on 2026-09-23. `ProjectileSpawn` and the spawn, move and cull part of `ProjectileField` are CODE_READY (F5-01), and so are the Core sweep and Graze rules (F5-02). The hostile clears and enemy hit spheres (F5-03) and the `PatternEmitter` (F5-04) are not built yet.
+Feature F5: the Node-free cores that own every Projectile (ADR-0004). Started with ticket F5-01 on 2026-09-23. `ProjectileSpawn` and the spawn, move and cull part of `ProjectileField` are CODE_READY (F5-01), and so are the Core sweep and Graze rules (F5-02) and the hostile clears and enemy hit spheres (F5-03). The `PatternEmitter` (F5-04) is oc-a's.
 
 ## Purpose
 
-`ProjectileField` holds every Projectile of both factions in packed arrays indexed by slot. It spawns them from a `ProjectileSpawn` request with a stable id, moves them each physics tick, and removes them when their lifetime ends, when they meet scenery or a closed Gate (through an injected obstacle query), and when they leave the Flight Volume. It sweeps every hostile Projectile against the player's moving Core and Graze Volume and reports `player_hit` and `grazed`. Its capacity is fixed, and it exposes a per-faction read-out for rendering.
+`ProjectileField` holds every Projectile of both factions in packed arrays indexed by slot. It spawns them from a `ProjectileSpawn` request with a stable id, moves them each physics tick, and removes them when their lifetime ends, when they meet scenery or a closed Gate (through an injected obstacle query), and when they leave the Flight Volume. It sweeps every hostile Projectile against the player's moving Core and Graze Volume and reports `player_hit` and `grazed`, and every player Projectile against the hit spheres enemies register for the tick, reporting `enemy_hit`. It clears hostile fire, awarding nothing, locally for a Bomb and entirely for Gates, Checkpoints and boss Phases, and lists the targets inside a blast. Its capacity is fixed, and it exposes a per-faction read-out for rendering.
 
-It does not own any Node, the physics ray behind the obstacle query, reading the ship's Core and Graze radii, rendering, or the `_physics_process` that ticks it (all F6-02's `ProjectileSystem`); what a hit or a Graze does to `CombatState`, `RunState` or an enemy (F7, F9); patterns (F5-04). Acceleration, homing and curved paths are not in PLANEJAMENTO and not supported: a Projectile's velocity is constant.
+It does not own any Node, the physics ray behind the obstacle query, reading the ship's Core and Graze radii or an enemy's `HitVolume`, rendering, or the `_physics_process` that ticks it (all F6-02's `ProjectileSystem`); what a hit or a Graze does to `CombatState`, `RunState` or an enemy (F7, F9); patterns (F5-04). Acceleration, homing and curved paths are not in PLANEJAMENTO and not supported: a Projectile's velocity is constant.
 
 ## Files
 
 - `scripts/combat/projectile_spawn.gd` (value, `class_name ProjectileSpawn extends RefCounted`).
 - `scripts/combat/projectile_field.gd` (Rules Core, `class_name ProjectileField extends RefCounted`).
-- `tests/unit/combat/test_projectile_field.gd` (12 tests for F5-01; F5-02 added none, by the sprint's no-new-tests rule).
+- `tests/unit/combat/test_projectile_field.gd` (12 tests for F5-01; F5-02 and F5-03 added none, by the sprint's no-new-tests rule).
 
 ## ProjectileSpawn
 
@@ -26,12 +26,13 @@ None. A Rules Core has no exports (ADR-0001); capacity and the Flight Volume mar
 
 ### Signals
 
-Both are emitted after the tick's pass, in ascending slot order (see "Events rule"). F5-03 adds `enemy_hit`.
+All three are emitted after the tick's pass, in ascending slot order (see "Events rule").
 
 | Signal | Payload | Emitted when |
 | --- | --- | --- |
 | `player_hit` | `projectile_id: int, damage: int` | A HOSTILE Projectile met the Core while the player was not invulnerable, and was removed. `damage` is its `ProjectileSpawn.damage`. At most once per tick. F7-01 calls `CombatState.take_hit(damage)`. |
 | `grazed` | `projectile_id: int` | A HOSTILE Projectile passed through the Graze Volume without touching the Core, while the player was not invulnerable, for the first time in its life. F7-01 adds Graze and score. |
+| `enemy_hit` | `target_id: int, projectile_id: int, damage: int` | A PLAYER Projectile reached the registered hit sphere `target_id` (the actor's `get_instance_id()`) before any other along its segment, and was removed. The enemy adapter (F9-02, F12-02, F6-03's dummy) applies `damage`. |
 
 ### Methods
 
@@ -42,8 +43,12 @@ Both are emitted after the tick's pass, in ascending slot order (see "Events rul
 | `tick(delta: float)` | F6-02, every physics tick | One pass in ascending slot order (see "Tick order"), then the tick's events. |
 | `set_player(previous_center: Vector3, center: Vector3, core_radius: float, graze_radius: float, invulnerable: bool)` | F6-02, before every tick | The Core's center at the previous tick and now, the Core and Graze radii (`0 < core <= graze`, asserted), and `CombatState.is_invulnerable()`. Holds until called again; `setup` keeps it. |
 | `clear_player()` | F6-02 between stages, after the ship is freed | No player: later ticks sweep nothing. A new field starts with no player. |
+| `register_target(target_id: int, center: Vector3, radius: float)` | F6-02's `ProjectileSystem.register_target`, for each enemy every physics tick | A hit sphere for the next tick only (radius above 0, asserted). The same id again before that tick replaces the sphere and keeps its registration place. |
+| `targets_in_radius(center: Vector3, radius: float) -> PackedInt64Array` | F7-02 (the Bomb) | Ids of the spheres registered for the coming tick with `distance <= radius + target radius`, in registration order. Changes nothing. |
+| `clear_hostile_in_radius(center: Vector3, radius: float) -> int` | F7-02 (the Bomb) | Removes every HOSTILE Projectile with `distance <= radius + projectile radius`; returns how many. Awards and emits nothing. |
+| `clear_hostile_all() -> int` | F10 (a Gate opens, a Checkpoint activates), F12 (between boss Phases) | Removes every HOSTILE Projectile; returns how many. Awards and emits nothing. |
 | `despawn(id: int) -> bool` | anyone holding an id | Removes the Projectile; an unknown, dead or recycled id returns false and changes nothing. |
-| `clear_all()` | F6-02, F10 when a stage unloads | Removes every Projectile of both factions, awarding nothing; keeps the id counter. |
+| `clear_all()` | F6-02, F10 when a stage unloads | Removes every Projectile of both factions, awarding nothing; keeps the id counter and the target registry. |
 | `set_bounds(bounds: AABB)` | F6-02 | Replaces the Flight Volume; Projectiles outside it are removed on the next tick. |
 | `count(faction) -> int` | HUD debug, tests | Alive Projectiles of one faction. |
 | `is_alive(id) -> bool`, `get_position(id) -> Vector3` | anyone holding an id | `get_position` returns `Vector3.ZERO` for a dead id. |
@@ -57,8 +62,10 @@ For each alive Projectile, in ascending slot order:
 1. Its lifetime goes down by `delta`. At 0 or below, it is removed without moving.
 2. Otherwise its segment is `from = position` to `to = position + velocity × delta`.
 3. When `obstacle_query.call(from, to)` returns true, it is removed at `from`. This comes before any Core or target sweep: a wall between the bullet and the player protects the player. The error is under one tick of travel and never in the bullet's favor.
-4. A HOSTILE Projectile is swept against the player (see "Core sweep and Graze"); F5-03 inserts the target sweep for PLAYER ones here.
+4. A HOSTILE Projectile is swept against the player (see "Core sweep and Graze"), a PLAYER one against the registered targets (see "Hit spheres").
 5. It moves to `to`, and is removed when `to` is outside the bounds.
+
+After the pass the target registry is emptied, then the tick's events are emitted.
 
 ### Core sweep and Graze
 
@@ -72,9 +79,22 @@ With a player set, each HOSTILE Projectile's tick segment is taken in the player
 
 The ship's authored spheres set the scale: Core radius 0.18 and Graze radius 0.55 in `player_ship.tscn`. F6-02 reads them from the shapes, so changing a sphere changes contact exactly.
 
+### Hit spheres
+
+- **Registry lifetime.** An enemy registers its sphere every physics tick (CONVENTIONS "Collision": center and radius from its `HitVolume`). A registration is valid for the next `tick` only and is emptied after that tick's pass, so a target that stops registering (defeated, freed) cannot be hit afterwards. A registration made by a listener during emission counts for the following tick. `setup` empties the registry; `clear_all` keeps it.
+- **Sweep.** Each PLAYER Projectile's segment `from → to` is tested against every registered sphere, held still for the tick. Contact is `distance <= target radius + projectile radius`. The Projectile hits only the target it reaches first along the segment: the smallest fraction of the segment at entry, 0 when it starts inside a sphere, with a tie going to the earlier registration. It is then removed and `enemy_hit(target_id, projectile_id, damage)` is queued. One Projectile hits at most one target.
+- HOSTILE Projectiles never hit targets. The obstacle check comes first, so an Aim Assist shot dies on scenery for its whole travel (ADR-0004).
+
+### Clears
+
+- `clear_hostile_in_radius` (a Bomb) removes HOSTILE Projectiles whose sphere overlaps the blast. PLAYER Projectiles and hostile ones outside the blast stay: a local Bomb does not clear the entire stage (ENGINEERING_BRIEF 8).
+- `clear_hostile_all` removes every HOSTILE Projectile: STAGE_DESIGN "Shared encounter rules" (a combat Gate opens, before a Checkpoint activates, between boss Phases).
+- Both return the count, emit nothing and award nothing. A cleared Projectile never grazes. Called from a listener, for example the Session reacting to `player_hit`, a hostile clear also takes back the `grazed` that a removed Projectile queued in the current pass, and nothing else.
+- Both rebuild the free list once after the removals, so a full clear of thousands of Projectiles costs one pass over the capacity.
+
 ### Events rule
 
-F5-02's `player_hit` and `grazed` follow it, and F5-03's `enemy_hit` must. Events decided during the pass are buffered and emitted after it, in ascending slot order. A listener may call `spawn`, `despawn` or a clear; a Projectile spawned then is first moved on the next tick. `clear_all()` from a listener also drops the tick's events not yet emitted (a defeat that unloads the stage); the hostile clears of F5-03 do not. Neither a listener nor the obstacle query may call `tick`, and the obstacle query must not call back into the field at all.
+`player_hit`, `grazed` and `enemy_hit` follow it. Events decided during the pass are buffered and emitted after it, in ascending slot order. A listener may call `spawn`, `despawn`, `register_target` or a clear; a Projectile spawned then is first moved on the next tick. `clear_all()` from a listener also drops the tick's events not yet emitted (a defeat that unloads the stage). The hostile clears drop only the `grazed` of the Projectiles they remove. Neither a listener nor the obstacle query may call `tick`, and the obstacle query must not call back into the field at all.
 
 ### Full-field policy
 
@@ -86,7 +106,7 @@ An id is never handed out twice in the field's lifetime: not after its slot is r
 
 ## Dependencies
 
-`setup` receives the capacity, the Flight Volume and the obstacle query from F6-02's `ProjectileSystem`, which implements the query as a physics-server segment query against collision layer 1 (scenery, Flight Volume walls, closed Gate barriers). `ProjectileSpawn` reads `CombatState.HIT_DAMAGE` for its default damage.
+`setup` receives the capacity, the Flight Volume and the obstacle query from F6-02's `ProjectileSystem`, which implements the query as a physics-server segment query against collision layer 1 (scenery, Flight Volume walls, closed Gate barriers). `register_target` receives each enemy's hit sphere (its `HitVolume`, layer 5, monitoring off) through `ProjectileSystem`, keyed by the actor's `get_instance_id()`. `ProjectileSpawn` reads `CombatState.HIT_DAMAGE` for its default damage.
 
 ## Invariants and tests
 
@@ -108,7 +128,10 @@ An id is never handed out twice in the field's lifetime: not after its slot is r
 | Hit takes precedence over Graze on the same contact (ENGINEERING_BRIEF 8) | None (same rule). A Core contact returns before the Graze branch. |
 | Each hostile Projectile grazes at most once (ENGINEERING_BRIEF 8) | None (same rule). The per-slot `_graze_spent` flag, reset only by `spawn`. |
 | Invulnerability does not enable Graze farming (ENGINEERING_BRIEF 8) | None (same rule). Any contact while invulnerable spends the Graze; the strict reading above. |
-| Cleared Projectiles award no Graze (ENGINEERING_BRIEF 8) | `clear_all` emits nothing and drops the tick's pending events; F5-03 covers the hostile clears. |
+| Cleared Projectiles award no Graze (ENGINEERING_BRIEF 8) | None (same rule). Every clear emits nothing; `clear_all` from a listener drops the pending events, and a hostile clear from a listener marks the removed Projectiles' pending `grazed` as dropped. |
+| A local Bomb does not clear the entire stage (ENGINEERING_BRIEF 8) | None (same rule). `clear_hostile_in_radius` tests each HOSTILE Projectile's overlap with the blast. |
+| A fast player Projectile does not tunnel through a target; it hits only the first target along its path | None (same rule). Entry fraction along the segment in `_first_target_along`. |
+| A registration lasts one tick | None (same rule). The registry is emptied after each pass. |
 
 ## Setup for Astra
 
@@ -116,7 +139,8 @@ None: code only. Capacity and the Flight Volume margin become Inspector values o
 
 ## Open issues
 
-- **F5-02's rules have no unit tests.** The sprint's no-new-tests rule (2026-09-23) landed while F5-02 was in progress; the sweep, the Graze rules and the events rule were verified by review only, and first run for real in F6-02 and F7-01.
+- **F5-02's and F5-03's rules have no unit tests.** The sprint's no-new-tests rule (2026-09-23) landed while F5-02 was in progress. The sweeps, the Graze rules, the clears, the registry and the events rule were verified by review only; they first run for real in F6-02, F7-01, F7-02 and F9-02.
+- **Targets are static for one tick.** A moving enemy's sphere is tested where it was registered, which is accurate enough at enemy speeds (F5-03 out of scope). A fast boss dash could let a shot pass where the boss was a tick later; a relative sweep like the player's would fix it.
 - **Ruling 5 pending.** The strict Invulnerability reading holds until D-07 Part B rules on it. The lenient alternative (a Projectile touched while invulnerable may still graze once afterwards) is a one-line change in `tick`: spend the Graze only when `grazed` is queued.
-- **Hot-path cost is unmeasured.** Each tick calls the obstacle query once per moving Projectile, and the player sweep once per hostile one; `_remove` keeps the free list sorted with a native binary search and insert. F6-02's benchmark measures both at 1000 to 3000 Projectiles.
+- **Hot-path cost is unmeasured.** Each tick calls the obstacle query once per moving Projectile, the player sweep once per hostile one, and tests every registered sphere for each player one; `_remove` keeps the free list sorted with a native binary search and insert. F6-02's benchmark measures both at 1000 to 3000 Projectiles.
 - The read-out allocates two new arrays per faction per call. F6-02 may add a buffer-shaped read-out if its benchmark asks for one.
