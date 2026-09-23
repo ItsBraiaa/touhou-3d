@@ -15,6 +15,13 @@ Action required by <other agent>: <what they must do, or "none">
 
 ---
 
+## 2026-09-22 23:53 — Claude — ScreenRouter core (F2-01)
+State: CODE_READY
+Files: `scripts/ui/screen_router.gd` and `tests/unit/ui/test_screen_router.gd` (new), `docs/engineering/menus-session.md` (new), `docs/engineering/README.md`, `docs/engineering/ROADMAP.md` (the F2-01 row), `.scratch/menus-session/issues/01-screen-router-core.md`, `.scratch/menus-session/issues/02-interface-and-menu-controller.md` (one added note).
+Change: `ScreenRouter` is a Node-free Rules Core for menu navigation. Everything shown is one stack: a full screen (main menu, stage select, options, controls, credits, HUD) covers everything below it, an overlay (pause, defeat, results) leaves it visible. `home(id)` starts a new stack, `replace(id, params)` opens a full screen and `push(id, params)` an overlay over the current one, and `back()` removes the top entry: Options from the main menu returns to it, Options from Pause returns to Pause with the HUD under it and `has_overlay(PAUSE)` true throughout, Credits from Results returns to Results with its original params. `back()` returns false on a single screen and on Defeat or Results, which GUIDE Section 14 gives no Back row. Each transition emits `screen_hidden` for every screen that stops being visible, then `screen_shown(id, params)` for every one that becomes visible. Focus memory lives on the stack entry, so it survives while a screen waits for Back and is forgotten when it leaves: a Pause reopened after Resume starts on its initial button, not on "End run". No scene, no attached script and no Astra-owned file changed. Verified: 13 new tests written test-first, suite green, and five mutations each caught by a named test.
+Why: F2-01, the first ticket of Feature F2. F2-02's `Interface` needs the navigation rules in a testable core so it only has to show, hide and focus.
+Action required by Astra: none. The screen ids are code; which scene root maps to which id arrives with `MenuController` in F2-02.
+
 ## 2026-09-22 23:36 — Astra — F1 design decisions and generator retirement; flight tuning blocked [shared]
 State: docs
 Files: `docs/engineering/player-flight.md` (Open issues and retired-generator notice), `docs/engineering/ROADMAP.md`, `docs/GUIDE.md` Section 13, `.scratch/player-flight/issues/05-astra-design-pass.md`, `docs/HANDOFF_LOG.md`, `docs/validation/player-flight-design-tests.log`, both `assets/models/enemies/{Hywirl,Goleling}_Atlas_Monsters.png.import`, `tools/build_scene_handoff.py` moved unchanged to `docs/archive/build_scene_handoff.py.txt`, `docs/archive/README.md`.

@@ -1,6 +1,6 @@
 # F2-01 ScreenRouter core
 
-Status: todo
+Status: done (2026-09-22)
 Type: core
 parallel-safe: yes
 Depends on: F0-02
@@ -54,6 +54,20 @@ Any Node, any actual Control focus, input handling.
 ## Handoff notes for Astra
 
 None.
+
+## Outcome (2026-09-22)
+
+Delivered test-first as specified, with these additions, each pinned by a test and listed in `docs/engineering/menus-session.md` Open issues:
+
+- **Back never dismisses Defeat or Results.** GUIDE Section 14 gives them no Back row, and F2-02 calls `back()` on every `ui_cancel`, so without this Escape on Defeat would uncover the HUD of a finished Attempt. `back()` returns false there.
+- **Focus memory lives on the stack entry**, so it lasts exactly while the screen waits for Back. A Pause reopened after Resume starts on its initial button instead of on "End run"; `home()` forgets everything. `remember_focus` for a screen not on the stack does nothing, which makes the adapter's remember-on-`screen_hidden` wiring correct for both covered and removed screens.
+- **A full screen hides everything below it, the HUD included.** Options from Pause emits hidden `pause`, hidden `hud`, shown `options`, so directional focus cannot reach Pause's buttons behind Options.
+- **Kind asserts:** `home` and `replace` take full screens, `push` takes overlays, and `replace(HUD)` is refused so Back can never leave a running stage for the menus' history.
+- `params` are stored as given and re-emitted when Back uncovers the screen; not copied.
+
+Open for F2-02/F2-04: Back from Pause removes Pause in the router but cannot unpause the tree; `Interface` must turn `ui_cancel` on Pause into the Session's `resume`.
+
+Tests: 13 in `tests/unit/ui/test_screen_router.gd`; suite green; five mutations each caught.
 
 ## Kickoff prompt
 

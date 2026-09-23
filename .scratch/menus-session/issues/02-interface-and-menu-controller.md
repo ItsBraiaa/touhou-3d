@@ -33,6 +33,7 @@ Depends on: F0-03, F2-01
 - `_ready`: instance all, hide all, connect each `MenuController.action_requested` to a single `_on_action_requested` that re-emits `action_requested(action, payload)` upward to the Session. Create the `ScreenRouter`, connect `screen_shown`/`screen_hidden` to show, `enter`, `leave`, hide.
 - Public: `show_home(id)`, `show_screen(id, params)`, `push_overlay(id, params)`, `back() -> bool`, `is_gameplay_covered() -> bool`, `get_hud() -> Control`.
 - `_unhandled_input`: `ui_cancel` calls `back()`; if false, emits `action_requested(&"back_refused", {})` so the Session can decide (for example, Escape on the main menu does nothing).
+  - Added by F2-01: when `router.current()` is `PAUSE`, emit `action_requested(&"resume", {})` instead of calling `back()`. The router's `back()` would remove Pause but cannot unpause the tree, leaving the game frozen with no menu. `back()` already returns false on Defeat and Results. Wire focus as `docs/engineering/menus-session.md` "Focus memory" describes: remember on `screen_hidden`, restore on `screen_shown`.
 - Runs with `PROCESS_MODE_ALWAYS` (set in F0-03) so menus work while paused.
 
 ## Tests required
