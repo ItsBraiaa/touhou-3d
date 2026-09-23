@@ -6,9 +6,13 @@ extends Node
 ## resumes, restarts the stage, returns to the main menu and quits. Owns the [RunState]
 ## and ticks its Active Time from `_physics_process` while the tree runs, and owns the
 ## [CombatState], started at every stage entry and bound to the HUD with each new ship.
+## It is also the combat adapter the combat cores name: it turns the [ProjectileSystem]'s
+## Core hits and Grazes into [CombatState] and [RunState] changes, mirrors Invulnerability
+## to the field and the ship, forwards excess-Power score, and freezes the Attempt under
+## Defeat when the player is defeated.
 ##
 ## Nothing here decides gameplay: movement, targeting and the Run's accounting belong to
-## their cores. Stage completion, defeat and results arrive with F10 and F11.
+## their cores. Stage completion and results arrive with F10 and F11.
 
 
 ## Marker every stage root has, where the player enters (GUIDE Section 5 "Stages").
@@ -16,6 +20,8 @@ const PLAYER_START_PATH := ^"PlayerStart"
 ## Marker whose `min` and `max` Vector3 metadata hold a stage's Flight Volume, in stage
 ## coordinates, when its scene records one (`docs/STAGE_02_HANDOFF.md`).
 const FLIGHT_LIMITS_PATH := ^"FlightBounds/Limits"
+## Score one Graze is worth (PLANEJAMENTO Section 4 "Graze and score").
+const GRAZE_SCORE := 10
 ## Menu actions that only open a full screen, which Back returns from.
 const SCREEN_BY_ACTION: Dictionary[StringName, StringName] = {
 	&"open_stage_select": ScreenRouter.STAGE_SELECT,
@@ -59,15 +65,26 @@ func _ready() -> void:
 		return
 	_run_state.stage_completed.connect(_on_stage_completed)
 	_run_state.run_ended.connect(_on_run_ended)
+	# The Session, the CombatState and the ProjectileSystem live as long as each other, so
+	# these are made once and a Restart can never double them. The handlers read _player
+	# when they run.
+	projectile_system.player_hit.connect(_on_player_hit)
+	projectile_system.grazed.connect(_on_grazed)
+	_combat_state.invulnerability_changed.connect(_on_invulnerability_changed)
+	_combat_state.score_awarded.connect(_on_score_awarded)
+	_combat_state.defeated.connect(_on_player_defeated)
 	interface.action_requested.connect(_on_action_requested)
 	interface.show_home(ScreenRouter.MAIN_MENU)
 
 
 ## `Main` processes while the tree is paused, so the tree has to be checked here: Active
-## Time only runs while gameplay does (CONVENTIONS "Time and randomness").
+## Time and the Invulnerability window only run while gameplay does (CONVENTIONS "Time and
+## randomness"). `Main` ticks before `ProjectileRoot`, so a window that ends this tick is
+## already off in the field's sweep.
 func _physics_process(delta: float) -> void:
 	if not get_tree().paused:
 		_run_state.tick_active(delta)
+		_combat_state.tick(delta)
 
 
 ## `pause` (Escape, gamepad Start) pauses a stage in play from the HUD and resumes it from
@@ -112,6 +129,10 @@ func _on_action_requested(action: StringName, payload: Dictionary) -> void:
 			_resume()
 		&"restart_stage":
 			_restart_stage()
+		&"retry":
+			# TODO(F10-03): retry from the latest Checkpoint; until then Retry restarts the
+			# stage (PLANEJAMENTO Section 6, "before any intermediate checkpoint").
+			_restart_stage()
 		&"return_to_menu":
 			_return_to_menu()
 		&"quit":
@@ -133,7 +154,8 @@ func _start_run(mode: RunState.RunMode, stage: StringName) -> void:
 	interface.show_home(ScreenRouter.HUD)
 
 
-## Pause's Restart: the stage from its entry values, with a new stage and a new ship.
+## Pause's Restart, and Defeat's Retry until F10-03: the stage from its entry values, with
+## a new stage and a new ship.
 func _restart_stage() -> void:
 	if not _is_in_stage():
 		return
@@ -146,7 +168,7 @@ func _restart_stage() -> void:
 	interface.show_home(ScreenRouter.HUD)
 
 
-## Leaves the Run for the main menu, from Pause today and from Defeat and Results in F11.
+## Leaves the Run for the main menu, from Pause and Defeat today and from Results in F11.
 func _return_to_menu() -> void:
 	_set_paused(false)
 	_unload_stage()
@@ -246,6 +268,40 @@ func _flight_bounds(stage_id: StringName, stage: Node) -> AABB:
 
 func _is_in_stage() -> bool:
 	return _run_state.get_phase() == RunState.Phase.IN_STAGE
+
+
+## A hostile Projectile met the Core. The field reports at most one per tick, and treats
+## the rest of that tick as Invulnerable itself; the core rejects any hit it receives
+## while Invulnerable.
+func _on_player_hit(_projectile_id: int, damage: int) -> void:
+	_combat_state.take_hit(damage)
+
+
+## The field awards no Graze during Invulnerability, so nothing is filtered here.
+func _on_grazed(_projectile_id: int) -> void:
+	_run_state.add_graze(1)
+	_run_state.add_score(GRAZE_SCORE)
+
+
+func _on_invulnerability_changed(invulnerable: bool) -> void:
+	projectile_system.set_player_invulnerable(invulnerable)
+	if _player != null:
+		_player.set_invulnerable_visual(invulnerable)
+
+
+## The only path from an excess Power Pickup (F7-03) to the Run's score.
+func _on_score_awarded(points: int) -> void:
+	_run_state.add_score(points)
+
+
+## Freezes the Attempt under Defeat: the tree, Active Time, the controls and the
+## [CombatState] stop, and nothing is unloaded, because this arrives inside the
+## ProjectileSystem's physics step. Once per life is the core's guarantee. Retry and
+## Return to Menu leave from the overlay.
+func _on_player_defeated() -> void:
+	_set_paused(true)
+	# TODO(F10-03): name the latest Checkpoint once there is one.
+	interface.push_overlay(ScreenRouter.DEFEAT, {"checkpoint": ""})
 
 
 func _on_stage_completed(_result: Dictionary) -> void:

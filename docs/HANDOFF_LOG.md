@@ -29,6 +29,42 @@ Change: Added typed pattern definitions and a Node-free emitter for timed hostil
 Why: F5-04 makes shared pattern data and emission reusable by the enemy and boss cores.
 Action required by Astra: Pattern field defaults are engineering proposals; authored `.tres` patterns remain with the content tickets.
 
+## 2026-09-23 20:22 — Claude (trunk) — F7-01: hits, Graze and Defeat wired into GameSession [shared]
+State: CODE_READY
+Files:
+- `scripts/session/game_session.gd`; `scripts/player/player_controller.gd` (on Astra's `scenes/player/player_ship.tscn`, which is unchanged).
+- New: `tools/validate_combat.gd`, `docs/engineering/damage-pickups.md`, `docs/validation/combat.md`, `combat-hit-flicker.png` and `combat-defeat.png`.
+- Docs: `docs/GUIDE.md` (Section 6 `game_session.gd` and `player_controller.gd` rows, Section 7 "Player defeated"), `docs/engineering/README.md`, and the ROADMAP F7-01 row.
+
+Change:
+- The ship can be hurt in the real game:
+  - Core hits reach `CombatState.take_hit`.
+  - A Graze adds 1 Graze and 10 score to `RunState`.
+  - Invulnerability reaches the `ProjectileSystem` (no Graze during it), and `VisualRoot` blinks at 12 Hz while the Core stays lit.
+  - Excess-Power score reaches `RunState`.
+  - Defeat pauses the tree, Active Time, the controls and the core, under the Defeat overlay with `Início da fase`.
+- `retry` restarts the stage until F10-03.
+- No test changed. Per the sprint rule there is no new test file; `tools/validate_combat.gd` checks the 13 behaviours in the real main scene (`COMBAT_OK` headless and windowed).
+
+Why: F7-01.
+
+Action required by Astra:
+- `PlayerShip` has a new Inspector export, `invulnerability_flicker_hz` (12.0, "Feedback" group), yours to tune.
+- Keep `CoreVisual` under `DamageCore`, outside `VisualRoot`, or the Core would blink too.
+- Defeat has no animation yet.
+## 2026-09-23 20:21 — Astra (sol) — D-01 SFX selection and import [shared]
+State: SCENE_READY
+Files: `assets/audio/sfx/` (16 Ogg files and their `.import` settings), four `assets/licenses/kenney-*.txt` pack licenses, `docs/ASSET_CREDITS.md`, `scenes/ui/credits.tscn`, `docs/validation/audio-selection.md`, `docs/validation/menu-credits.png`, `tools/validate_audio_selection.gd`, and D-01's ticket.
+Change: All 17 F13 events have a selected non-looping CC0 Kenney stream and proposed `volume_db` in [audio-selection.md](validation/audio-selection.md). The Credits screen now names the four packs. No music is shipped: the local Touhou-titled files lack documented redistribution permission. Godot import and 17-stream validation exited zero, the menu QA rendered the credit with zero failures, and the 16 copied streams match their originals byte for byte. No F13 event rule values are requested to change.
+Why: F13 needs a concrete event-to-stream mapping and distributable credits. The menu credit names only packs used.
+Action required by Claude: F13-03 copies the table's paths and `volume_db` values into `Main/Audio`. No music track table applies. Human listening approval is still needed before D-01 can be marked done; this agent cannot hear the selected files, so the ticket is blocked on that perceptual pass.
+
+## 2026-09-23 20:18 — OpenCode (oc-b) — F8-01 progression Definitions
+State: CODE_READY
+Files: `scripts/definitions/encounter_definition.gd`, `wave_definition.gd`, `reward_definition.gd`, `checkpoint_definition.gd`, `stage_definition.gd`, `docs/engineering/progression-core.md`, `docs/engineering/README.md`, `docs/engineering/ROADMAP.md`, `.scratch/progression-core/issues/01-definition-schemas-and-content-validation.md`
+Change: Added typed Resource schemas, local validation and Stage-level route/checkpoint validation, plus the module contract. No tests were written per the sprint rule.
+Why: F8-01 provides the authored-data contract required by EncounterMachine and the later Stage 1 content draft.
+Action required by Astra: Author content against the exported fields and validation rules in `docs/engineering/progression-core.md`; none for this ticket.
 ## 2026-09-23 20:17 — OpenCode (oc-a) — F13-01 AudioLimiter core
 State: CODE_READY
 Files: `scripts/audio/audio_limiter.gd`, `docs/engineering/audio.md`, `docs/engineering/README.md`, `docs/engineering/ROADMAP.md`, `.scratch/audio/issues/01-audio-limiter-core.md`

@@ -29,6 +29,23 @@ The test arena's geometry and materials are authored primitives. No monster mode
 
 - `assets/ui/shield.svg`, `bomb.svg`, `power.svg`, `target.svg`, and `threat.svg`: original vector icons authored for this project.
 
+## Sound effects
+
+Creator: Kenney. The 16 selected Ogg Vorbis files under `assets/audio/sfx/` are unchanged byte-for-byte; there are no trims or conversions. Each selected pack is CC0 and its supplied license is preserved:
+
+| Pack | Source | Runtime folder | Supplied license |
+| --- | --- | --- | --- |
+| Interface Sounds | https://kenney.nl/assets/interface-sounds | `assets/audio/sfx/interface/` | `assets/licenses/kenney-interface-sounds.txt` |
+| Digital Audio | https://kenney.nl/assets/digital-audio | `assets/audio/sfx/digital/` | `assets/licenses/kenney-digital-audio.txt` |
+| Sci-fi Sounds | https://kenney.nl/assets/sci-fi-sounds | `assets/audio/sfx/scifi/` | `assets/licenses/kenney-sci-fi-sounds.txt` |
+| Impact Sounds | https://kenney.nl/assets/impact-sounds | `assets/audio/sfx/impact/` | `assets/licenses/kenney-impact-sounds.txt` |
+
+The [event-to-file table](validation/audio-selection.md) records every selected filename and its use.
+
+## Music
+
+No music ships in this delivery. The five files in the ignored `Music/` source folder have *Touhou 10* composition titles, but their source and redistribution permission are not documented. They remain references only and were not copied to runtime assets. A new permitted track requires a separate selection and credit decision.
+
 ## Stage 2 mountain environment
 
 - `assets/environment/stage_02/`: original terrain, stream and crag OBJ meshes
