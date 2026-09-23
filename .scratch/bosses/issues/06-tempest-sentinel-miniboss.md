@@ -7,6 +7,8 @@ Depends on: F12-05, F12-02, F12-03, D-04
 Lane: sol
 Model: GPT Sol (Codex)
 
+> **Ruling 3 follow-up (D-07 Part B), part of this ticket:** Astra authored `metadata/two_phase_offset_left` and `metadata/two_phase_offset_right` on `Phase1` and `Phase2` in `hud.tscn`. In `Hud.show_boss`, when `phase_count == 2`, apply those offsets. Keep the default layout for three Phases. This is `scripts/ui/hud.gd`, edited here with SPRINT's sprint permission. Name it in the handoff entry.
+
 ## Goal
 
 The Sentinela da Tempestade replaces F12-05's stand-in in S2-04.

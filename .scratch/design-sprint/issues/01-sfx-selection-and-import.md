@@ -1,6 +1,6 @@
 # D-01 SFX selection and import
 
-Status: blocked
+Status: done (2026-09-23; the listening pass is owed by the human pass)
 Type: design
 Owner: Astra (GPT Sol)
 Lane: sol
@@ -8,6 +8,8 @@ Model: GPT Sol (Codex)
 Depends on: none
 
 ## Outcome
+
+**PO decision (2026-09-23):** every agent-deliverable part has landed, so the ticket is done. The perceptual listening pass moves to the human pass that F14-02 records, and F13-03 wires the sounds now instead of waiting. A sound the listener rejects is a one-line `event_streams` or `event_volume_db` change.
 
 The 17-event selection, 16 byte-identical Kenney clips, non-looping imports, four supplied licenses, credits screen, music decision, and handoff are delivered on lane sol. The headless Godot validator reported zero failures; the windowed menu validator reported zero failures and captured the revised credits screen. The required perceptual listening pass cannot be completed in this agent environment because audio input is unavailable. A human must audition the selected sounds and approve or adjust the proposed mix before this ticket can move to `done`.
 
