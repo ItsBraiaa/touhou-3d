@@ -34,6 +34,7 @@ Depends on: F1-04, F2-02, F2-03
 - `_unhandled_input`: `pause` action during `IN_STAGE` toggles pause. Pause: `get_tree().paused = true`, `run_state.set_paused(true)`, `player.set_controls_enabled(false)`, `interface.push_overlay(PAUSE, {"score": ..., "graze": ...})`. Resume reverses all four. Options from Pause: `interface.show_screen(OPTIONS)`; Back returns to Pause and the game stays paused (router guarantees the stack; the Session never unpauses on Back).
 - `restart_stage`: unpause, `run_state.restart_stage()`, reload the stage and player as in Start, `begin_attempt()`.
 - `return_to_menu`: unpause, `run_state.end_run(false)`, `_unload_stage()` (queue_free stage and player, clear `projectile_root` children), `interface.show_home(MAIN_MENU)`.
+  - Added by F2-03: `RunState` state is read through getters, so `RunState.phase == IN_STAGE` below means `run_state.get_phase() == RunState.Phase.IN_STAGE`; the Pause overlay's score and Graze are `run_state.stage_result()["score"]` and `["graze"]`; `advance()` takes the Power Level as a required argument. Every Attempt change is ignored outside `IN_STAGE`, and `start()` unpauses. Contract in `docs/engineering/menus-session.md` "RunState contract".
 - Stage completion and defeat are not reachable yet; leave the `stage_completed` and `run_ended` handlers returning to the menu with a TODO referencing F11.
 
 ## Tests required

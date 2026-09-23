@@ -28,7 +28,7 @@ Status values: `todo`, `doing`, `done`, `blocked`. Tickets live in `.scratch/<fe
 | | | | 05 astra-design-pass | design | no | blocked (decisions recorded; Inspector flight pass interrupted by Computer Use stop) |
 | F2 | Menus and Session skeleton | `menus-session` | 01 screen-router-core | core | yes | done |
 | | | | 02 interface-and-menu-controller | adapter | no | todo |
-| | | | 03 run-state-core | core | yes | todo |
+| | | | 03 run-state-core | core | yes | done |
 | | | | 04 game-session-start-pause-quit | integration | no | todo |
 | F3 | Settings | `settings` | 00 plan | docs | no | todo |
 | F4 | Combat state and HUD | `combat-hud` | 00 plan | docs | no | todo |

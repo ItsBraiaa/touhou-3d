@@ -1,6 +1,6 @@
 # F2-03 RunState core
 
-Status: todo
+Status: done (2026-09-22)
 Type: core
 parallel-safe: yes
 Depends on: F0-02
@@ -59,6 +59,20 @@ Snapshot of combat resources and Encounter flags (F8-03), results screen (F11), 
 ## Handoff notes for Astra
 
 None.
+
+## Outcome (2026-09-22)
+
+Delivered test-first as specified, with these additions and differences, each pinned by a test and listed in `docs/engineering/menus-session.md` Open issues:
+
+- **Score is carried, the rest is per stage.** Campaign Stage 2 starts with Stage 1's final score, and Restart there returns to it; Clear Time, Graze and bombs used start at zero in every stage. PLANEJAMENTO Section 6 names only power and score as carried.
+- **Only `Phase.IN_STAGE` accepts Attempt changes.** After `complete_stage()` the result is final: late Grazes, commits, rollbacks, restarts and `begin_attempt` do nothing, so replaying a completed Direct Stage (F11) calls `start()` again. `complete_stage`, `advance` and `end_run` are ignored out of phase, so each signal fires once per transition.
+- **The Attempt index is per stage** and resets to 0 when `advance()` enters Stage 2.
+- **`advance(power_level: int)` takes the Power Level as a required argument**, so the Session cannot silently drop the carry-over.
+- **`start()` unpauses**, so a Run ended from the Pause menu does not leak its pause into the next one.
+- **Getters instead of public fields:** `get_phase()`, `get_attempt_index()`, `is_paused()`; `committed_*` are `capture()` keys. F2-04 reads score and Graze for the Pause overlay from `stage_result()`.
+- `capture()` also records the stage-entry values (`entry_power_level`, `entry_score`), so a Restart after a restore still returns to the right entry score.
+
+Tests: 19 in `tests/unit/session/test_run_state.gd`; suite green at 125; twelve mutations each caught by a named assertion.
 
 ## Kickoff prompt
 
