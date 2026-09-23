@@ -1,2 +1,7 @@
 # Normalize EOL for all files that Git considers text files.
 * text=auto eol=lf
+
+# Sprint lanes (docs/engineering/SPRINT.md) all add entries at the top of these two files;
+# the union driver keeps both sides instead of reporting a conflict.
+docs/HANDOFF_LOG.md merge=union
+docs/engineering/README.md merge=union

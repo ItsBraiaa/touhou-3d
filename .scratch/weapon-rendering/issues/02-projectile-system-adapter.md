@@ -3,7 +3,17 @@
 Status: todo
 Type: adapter
 parallel-safe: no
-Depends on: F5-03, F6-01
+Depends on: F5-03
+Lane: trunk
+
+> **Sprint note (D-02):** if `scenes/combat/visuals/projectile_player_mesh.tres` and `projectile_hostile_mesh.tres` are on the integration branch, point the two mesh exports at them; otherwise ship the dev meshes and log "swap pending: D-02".
+
+> **Sprint change (2026-09-23, docs/engineering/SPRINT.md): F6-01 is folded in here.**
+> - Build one `MultiMeshInstance3D` per faction, with `capacity = 2048`.
+> - Do not build a `MeshInstance3D` pool. Wherever this ticket says "the approach F6-01 recommended" or "set from F6-01", read MultiMesh and 2048.
+> - Before the Definition of Done, run the measurement F6-01 describes (its "Goal" and measurement sections) once, windowed at 1280 × 720, with the dev spray at 300, 1000 and 3000 Projectiles. Record FPS, frame time, field tick time and ray cost in `docs/engineering/spikes/projectile-rendering.md`, noting that other lanes were running.
+> - If 3000 is under 60 FPS, record it and propose the mitigation (a lower capacity, or fewer rays per tick) in the Outcome; do not build it here.
+> - The buffer read-out stays optional, and only if the measurement shows per-instance `set_instance_transform` is the bottleneck.
 
 ## Goal
 
@@ -34,6 +44,7 @@ The Session sets it up on every stage load and clears it on unload, where it use
   - `scenes/dev/dev_spray.gd` (dev only: rings of hostile `ProjectileSpawn`s on a timer, with no pattern core)
   - `tests/scene/test_projectile_system_contract.gd`
   - `docs/engineering/weapon-rendering.md`
+  - `docs/engineering/spikes/projectile-rendering.md` (the folded F6-01 measurement)
 - **Edits:**
   - `scenes/main.tscn`: attach the script to `ProjectileRoot`, set its exports, and change the `Main` export `projectile_system = NodePath("ProjectileRoot")`.
   - `scripts/session/game_session.gd`: rename and retype `projectile_root: Node3D` to `projectile_system: ProjectileSystem` and validate it; add `projectile_system.setup(bounds, _player)` at the end of `_load_stage`; make `_unload_stage` free only `world_root`'s children and call `projectile_system.clear_all()`; update the doc comments.

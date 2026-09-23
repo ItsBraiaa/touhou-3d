@@ -15,6 +15,34 @@ Action required by <other agent>: <what they must do, or "none">
 
 ---
 
+## 2026-09-23 19:30 — Claude — Four-lane sprint: F3, F13 and Stage 2 reinstated; worktrees per lane [shared]
+State: PLANNED
+Files:
+- New: `docs/engineering/SPRINT.md`; `tools/lane.ps1`; `.scratch/settings/{spec.md,issues/01..04}`; `.scratch/audio/{spec.md,issues/01..03}`; `.scratch/bosses/issues/04..07`; `.scratch/design-sprint/{spec.md,issues/01..07}`.
+- Deleted: the F12-04 cut stub.
+- Edited:
+  - a `Lane:` line on every open ticket, and sprint notes in F6-02, F6-03, F7-02, F7-03, F12-01 to F12-03, F11-02, F11-03, F14-01 and F14-02;
+  - F6-01 marked `cut` (folded into F6-02);
+  - `.scratch/bosses/spec.md`, `.scratch/enemies/{spec.md,issues/03}`, and the settings, audio and bosses `00-plan.md`;
+  - `docs/engineering/ROADMAP.md` (Lane column, new rows, Risk, "Requests to Astra") and `docs/engineering/CONVENTIONS.md` ("Git", "Sessions", "Shared-file protocol");
+  - `.gitattributes` (union merge for this log and the engineering README), `CLAUDE.md`, and `AGENTS.md` (shared).
+
+Change:
+- **Scope.** The product decision reverses today's cuts in reduced but real form: Settings (F3-01 to F3-04), Audio (F13-01 to F13-03), and Stage 2 gameplay with its miniboss and final boss (F12-04 to F12-07, with F9-03 Seals).
+- **Lanes.** The work runs in four lanes, each in its own git worktree on its own `lane/<name>` branch: `trunk` (Claude, Opus), `sol` (Astra, on GPT Sol), `glm-a` and `glm-b` (OpenCode with GLM 5.3).
+  - Each lane lands ticket by ticket with `tools/lane.ps1 land` onto the integration branch that the primary tree has checked out (`dev-01`). The primary tree stays clean, and nobody works in it.
+- **Your open requests to Astra** became seven design tickets, D-01 to D-07, in lane `sol`, each naming its consumer ticket and its exact node and clip contract. The lane also takes the adapter tickets F4-03, F9-02, F12-02 and F12-05 to F12-07.
+- **Ownership during the sprint.** A ticket's Files section is its edit boundary, whoever runs it. SPRINT.md "Shared files" says which lane may touch the session, main, player and stage scenes.
+
+Why: Two of the cuts each broke an assignment requirement (sound effects; a stage of at least five minutes, which is Stage 2). Four tools in parallel make the reinstated scope reachable before 2026-09-24.
+
+Action required by Astra:
+1. Open Codex in `C:\Users\Braia\Documents\touhou-3d-sol` (run `tools/lane.ps1 setup sol` if it is missing).
+2. Paste the sol kickoff prompt from `docs/engineering/SPRINT.md`.
+3. Work the sol queue: D-01, D-02, then D-07 Part B (the rulings, early), then F4-03, and onward.
+4. Never edit `scenes/stages/stage_01.tscn` before F12-03 has landed.
+5. `AGENTS.md` gained step 0 (the sprint); nothing else in it changed.
+
 ## 2026-09-23 16:00 — Claude — F4 to F14 tickets written; F3, F13 and F12-04 cut pending the user
 State: PLANNED
 Files: `.scratch/{combat-hud,projectile-field,weapon-rendering,damage-pickups,progression-core,enemies,stage-director,run-flow,bosses,delivery}/spec.md` (new) and their `issues/NN-*.md` tickets (31 `todo` plus the F12-04 `cut` stub, new); every F4 to F14 `issues/00-plan.md` (`Status: done` and an Outcome); `.scratch/settings/issues/00-plan.md` and `.scratch/audio/issues/00-plan.md` (`Status: cut`); `docs/engineering/ROADMAP.md` (the ticket rows, a `cut` status, "Order to 2026-09-24", Risk, "Requests to Astra"). No code, scene, content or GUIDE change.

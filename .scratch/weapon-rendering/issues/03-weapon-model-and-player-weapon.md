@@ -4,6 +4,9 @@ Status: todo
 Type: core+adapter
 parallel-safe: no
 Depends on: F6-02, F4-01, F4-02
+Lane: trunk
+
+> **Sprint note (D-02, F13):** if D-02's `scenes/combat/visuals/familiar.tscn` (Node3D root, no collision) has landed, set `familiar_scene` to it; otherwise ship the dev Familiar and log "swap pending: D-02". F13 is reinstated: F13-03 adds `shots_fired(count: int)` to this script later, so keep the fire path in one function.
 
 ## Goal
 

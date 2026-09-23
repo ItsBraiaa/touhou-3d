@@ -4,6 +4,9 @@ Status: todo
 Type: integration
 parallel-safe: no
 Depends on: F11-01
+Lane: trunk
+
+> **Sprint note:** Stage 2 is reinstated (F12-05 to F12-07, lane sol). Keep the `RunState`-driven final-victory test, which is still the fast and deterministic proof; F12-07's integration test proves the real victory through play once it lands. The "Stage 2 has no gameplay" statements below describe the state at the time this ticket runs, not the delivery.
 
 ## Goal
 

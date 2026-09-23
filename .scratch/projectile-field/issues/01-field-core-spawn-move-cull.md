@@ -4,6 +4,7 @@ Status: todo
 Type: core
 parallel-safe: yes
 Depends on: F0-02
+Lane: trunk
 
 ## Goal
 

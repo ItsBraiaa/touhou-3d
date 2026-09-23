@@ -4,6 +4,15 @@ Status: todo
 Type: integration
 parallel-safe: no
 Depends on: F11-03, F12-03; and the Godot 4.7.2 export templates, which the user installs (see Precondition)
+Lane: trunk
+
+> **Sprint note:** before exporting, apply every pending swap as one `[shared]` commit. These are the lane-sol handoff entries marked "swap pending: D-0N", plus every value Astra asked trunk to set in a trunk-only file:
+> - D-02 meshes, Familiar, pickup visuals and Bomb blast;
+> - D-03 Lantern Guardian and D-04 boss scenes;
+> - D-05 weapon and Bomb values in `player_ship.tscn`;
+> - D-07 shrine exports on Stage 1's `Stage`.
+>
+> Measure the densest-boss FPS on the Storm Guardian if F12-07 has landed, otherwise on the Lantern Guardian.
 
 ## Goal
 

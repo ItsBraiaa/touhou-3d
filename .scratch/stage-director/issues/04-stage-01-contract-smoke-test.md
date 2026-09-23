@@ -4,6 +4,7 @@ Status: todo
 Type: test
 parallel-safe: yes (one new test file; reads the scene and the content, writes neither)
 Depends on: F8-04
+Lane: glm-a
 
 ## Goal
 

@@ -4,6 +4,12 @@ Status: todo
 Type: tooling
 parallel-safe: no
 Depends on: F14-01
+Lane: glm-b
+
+> **Sprint note:** F3, F13 and Stage 2 are reinstated (docs/engineering/SPRINT.md). Nothing is "not verified (cut)" unless the user cuts it at a checkpoint.
+> - Verify Options persistence, controller-disconnect recovery, sound effects (a human listening pass) and every Stage 2 item, including the five-minute measurement.
+> - A ticket that has not landed by delivery makes its items "not verified (not landed)".
+> - `tools/package.ps1` does not need F14-01: when this lane reaches the ticket early, write and test the script first, commit it, and leave the acceptance walk until F14-01 is done.
 
 ## Goal
 

@@ -4,6 +4,13 @@ Status: todo
 Type: integration
 parallel-safe: no
 Depends on: F12-02, F10-03
+Lane: trunk
+
+> **Sprint notes:**
+> 1. **D-03** (lane sol) delivers `scenes/enemies/lantern_guardian.tscn` with no root script. If it has landed, attach `boss_controller.gd` to it `[shared]`, set its references and D-03's clip names, and point `actor_scenes[&"lantern_guardian"]` at it. Otherwise ship the dev boss and log "swap pending: D-03". Do not wait for D-03.
+> 2. **`scripts/progression/stage_director.gd`** is also edited by F12-05 (lane sol), which may land first. Run `tools/lane.ps1 sync` before starting, and keep your additions in separate functions.
+> 3. **Shrine lighting.** Keep the `defeat_presentation` / `defeat_animation` exports empty by default: D-07 fills them through F14-01's swap step.
+> 4. **Results timing.** D-07 sets the shrine `AnimationPlayer` to `process_mode = ALWAYS`, because Results pauses the tree right after `boss_defeated`.
 
 ## Goal
 

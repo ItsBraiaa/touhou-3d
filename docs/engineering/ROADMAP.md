@@ -1,116 +1,115 @@
 # Engineering Roadmap
 
-The single "where are we" page for Claude's GDScript work. Every coding session reads this first, then its ticket. Astra reads "Requests to Astra" and "Received from Astra".
+The single "where are we" page for the project's code work. Every coding session reads this first, then its ticket. Astra reads "Requests to Astra" and "Received from Astra".
 
-Deadline: 2026-09-24 (academic delivery). Baseline: 2026-09-20; F4 to F14 planned 2026-09-23.
+Deadline: 2026-09-24 (academic delivery). Baseline: 2026-09-20; F4 to F14 planned 2026-09-23; the four-lane sprint started the same evening.
 
 ## How to run a session
+
+**During the sprint, [SPRINT.md](SPRINT.md) replaces steps 1 and 2.** Each lane (trunk, sol, glm-a, glm-b) works its own queue in its own git worktree, on its own `lane/<name>` branch, and lands each ticket with `tools/lane.ps1 land`. Nobody works in the primary tree.
 
 1. Pick the first ticket whose Status is `todo` and whose dependencies are `done` (or a `parallel-safe: yes` ticket if another session is already running).
 2. Paste its kickoff line into a fresh session. One ticket per session, never two.
 3. The session ends with: `tools/test.ps1` (`tools/test.sh` on Linux) green, ticket `Status: done` (or `blocked` with the blocker written in the ticket), this page's row updated, a `docs/HANDOFF_LOG.md` entry, one commit of the session's own files.
-4. The F4 to F14 tickets were all written in one planning pass on 2026-09-23. Each feature's `spec.md` lists, under "Cross-feature contracts", the class, method and signal names that later features rely on; a session that changes one records it in its ticket's Outcome and its module doc. F3, F13 and F12-04 are cut pending the user.
+4. The F4 to F14 tickets were written in one planning pass on 2026-09-23, and F3, F13, Stage 2 (F12-04 to F12-07) and the Astra design tickets (D-01 to D-07) followed in the sprint plan. Each feature's `spec.md` lists, under "Cross-feature contracts", the class, method and signal names that later features rely on. A session that changes one records it in its ticket's Outcome and its module doc.
 
-Status values: `todo`, `doing`, `done`, `blocked`, `cut` (removed from this delivery pending the user's decision; never picked while cut). Tickets live in `.scratch/<feature>/issues/NN-slug.md`. Rules are in [CONVENTIONS.md](CONVENTIONS.md), vocabulary in [CONTEXT.md](../../CONTEXT.md), decisions in [docs/adr/](../adr/).
+Status values: `todo`, `doing`, `done`, `blocked`, `cut` (removed from this delivery by a user decision; never picked while cut). Tickets live in `.scratch/<feature>/issues/NN-slug.md`; the design sprint lives in `.scratch/design-sprint/`. Rules are in [CONVENTIONS.md](CONVENTIONS.md), vocabulary in [CONTEXT.md](../../CONTEXT.md), decisions in [docs/adr/](../adr/).
 
 ## Features and tickets
 
-| # | Feature | Folder | Ticket | Type | Parallel-safe | Status |
-| --- | --- | --- | --- | --- | --- | --- |
-| F0 | Foundation | `foundation` | 01 git-init-and-ignores | docs | no | done |
-| | | | 02 godot-wrapper-and-test-runner | core | no | done |
-| | | | 03 project-config-main-scene-buses-export | integration | no | done (export step blocked: no export templates on this host; 2026-09-22 review fix: gameplay roots PAUSABLE) |
-| | | | 04 guide-ownership-and-protocol-docs | docs | no | done |
-| F1 | Player flight | `player-flight` | 01 flight-model-core | core | yes | done |
-| | | | 02 player-controller-adapter | adapter | no | done |
-| | | | 03 camera-rig | adapter | no | done |
-| | | | 04 target-selector-and-targeting | core+adapter | no | done (physical-device pass still owed, as for 02 and 03) |
-| | | | 05 astra-design-pass | design | no | blocked (decisions recorded; Inspector flight pass interrupted by Computer Use stop) |
-| F2 | Menus and Session skeleton | `menus-session` | 01 screen-router-core | core | yes | done |
-| | | | 02 interface-and-menu-controller | adapter | no | done (scripted keyboard and gamepad pass; physical-device pass owed; gamepad A/B added to `ui_accept`/`ui_cancel`) |
-| | | | 03 run-state-core | core | yes | done |
-| | | | 04 game-session-start-pause-quit | integration | no | done (menu-to-flight flow scripted on keyboard and gamepad; physical-device pass owed; Stage 2 wired too) |
-| F3 | Settings | `settings` | 00 plan | docs | no | cut (pending the user, 2026-09-23: Options apply nothing, no `settings.cfg`, no disconnect pause) |
-| F4 | Combat state and HUD | `combat-hud` | 00 plan | docs | no | done (one-pass planning, 2026-09-23; 01 was written and delivered separately) |
-| | | | 01 combat-state-core | core | yes | done |
-| | | | 02 hud-binding-and-target-marker | adapter | no | todo |
-| | | | 03 boss-panel-and-attack-cue-api | adapter | no | todo |
-| F5 | Projectile Field | `projectile-field` | 00 plan | docs | no | done (one-pass planning) |
-| | | | 01 field-core-spawn-move-cull | core | yes | todo |
-| | | | 02 core-hit-sweep-and-graze-rules | core | yes (after 01, same file) | todo |
-| | | | 03 bomb-phase-clears-and-hit-spheres | core | yes (after 02, same file) | todo |
-| | | | 04 pattern-emitter-core | core | yes | todo |
-| F6 | Weapon and rendering | `weapon-rendering` | 00 plan | docs | no | done (one-pass planning) |
-| | | | 01 rendering-spike | spike | no (FPS measured alone; 1 h time-box) | todo |
-| | | | 02 projectile-system-adapter | adapter | no | todo |
-| | | | 03 weapon-model-and-player-weapon | core+adapter | no | todo |
-| F7 | Damage, bomb, pickups | `damage-pickups` | 00 plan | docs | no | done (one-pass planning) |
-| | | | 01 hit-to-combat-state-and-defeat | integration | no | todo |
-| | | | 02 bomb-clear-and-invulnerability | integration | no | todo |
-| | | | 03 pickup-adapter-and-rewards | adapter | no | todo |
-| F8 | Progression cores and content | `progression-core` | 00 plan | docs | no | done (one-pass planning) |
-| | | | 01 definition-schemas-and-content-validation | core | yes | todo |
-| | | | 02 encounter-machine-core | core | yes | todo |
-| | | | 03 snapshot-capture-restore | core | yes | todo |
-| | | | 04 stage-01-content-draft | content | yes | todo |
-| F9 | Enemies | `enemies` | 00 plan | docs | no | done (one-pass planning) |
-| | | | 01 enemy-model-core | core | yes | todo |
-| | | | 02 dev-prefabs-and-enemy-actor | adapter | no | todo |
-| | | | 03 seal-and-guard-rules | core+adapter | no | todo (lowest priority: its only consumer, Stage 2 S2-03, is cut with F12-04) |
-| F10 | Stage Director in Stage 1 | `stage-director` | 00 plan | docs | no | done (one-pass planning) |
-| | | | 01 stage-director-adapter | adapter | no | todo |
-| | | | 02 gate-and-checkpoint-adapters | adapter | no | todo |
-| | | | 03 retry-restart-flow | integration | no | todo |
-| | | | 04 stage-01-contract-smoke-test | test | yes (one new test file) | todo |
-| F11 | Run flow | `run-flow` | 00 plan | docs | no | done (one-pass planning) |
-| | | | 01 defeat-results-retry-restart-screens | integration | no | todo |
-| | | | 02 campaign-continuation-and-direct-stage | integration | no | todo |
-| | | | 03 active-and-clear-time-verification | test | no | todo |
-| F12 | Bosses | `bosses` | 00 plan | docs | no | done (one-pass planning) |
-| | | | 01 boss-machine-core | core | yes | todo |
-| | | | 02 boss-controller-adapter | adapter | no | todo |
-| | | | 03 lantern-guardian-in-s1-07 | integration | no | todo |
-| | | | 04 tempest-sentinel-and-storm-guardian | integration | no | cut (pending the user, 2026-09-23; carries Stage 2 gameplay integration too) |
-| F13 | Audio | `audio` | 00 plan | docs | no | cut (pending the user, 2026-09-23: the game ships silent) |
-| F14 | Delivery | `delivery` | 00 plan | docs | no | done (one-pass planning) |
-| | | | 01 export-and-run-outside-editor | integration | no | todo (blocks itself until the user installs the Godot 4.7.2 export templates) |
-| | | | 02 package-and-acceptance-record | tooling | no | todo |
+A lane edits only its own rows (SPRINT.md "Shared files").
 
-Order rationale: Player before Menus (highest UX risk and GUIDE Section 13's assignment). Audio buses are created in F0-03 so F3 can bind Options to them. Enemies (F9) come before the Stage Director (F10) so the Director is integrated against real Waves. Codex's own priority list in `docs/STAGE_01_HANDOFF.md` is compatible with this order.
+| # | Feature | Folder | Ticket | Type | Parallel-safe | Lane | Status |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| F0 | Foundation | `foundation` | 01 git-init-and-ignores | docs | no | — | done |
+| | | | 02 godot-wrapper-and-test-runner | core | no | — | done |
+| | | | 03 project-config-main-scene-buses-export | integration | no | — | done (export step blocked: no export templates on this host; 2026-09-22 review fix: gameplay roots PAUSABLE) |
+| | | | 04 guide-ownership-and-protocol-docs | docs | no | — | done |
+| F1 | Player flight | `player-flight` | 01 flight-model-core | core | yes | — | done |
+| | | | 02 player-controller-adapter | adapter | no | — | done |
+| | | | 03 camera-rig | adapter | no | — | done |
+| | | | 04 target-selector-and-targeting | core+adapter | no | — | done (physical-device pass still owed, as for 02 and 03) |
+| | | | 05 astra-design-pass | design | no | — | blocked (decisions recorded; Inspector flight pass interrupted by Computer Use stop) |
+| F2 | Menus and Session skeleton | `menus-session` | 01 screen-router-core | core | yes | — | done |
+| | | | 02 interface-and-menu-controller | adapter | no | — | done (scripted keyboard and gamepad pass; physical-device pass owed; gamepad A/B added to `ui_accept`/`ui_cancel`) |
+| | | | 03 run-state-core | core | yes | — | done |
+| | | | 04 game-session-start-pause-quit | integration | no | — | done (menu-to-flight flow scripted on keyboard and gamepad; physical-device pass owed; Stage 2 wired too) |
+| F3 | Settings | `settings` | 00 plan | docs | no | — | done (cut, then reinstated by the sprint plan, 2026-09-23) |
+| | | | 01 settings-core-and-configfile | core | yes | glm-b | todo |
+| | | | 02 options-screen-binding | adapter | no | glm-b | todo |
+| | | | 03 input-device-mode-and-controller-disconnect | adapter | no | glm-b | todo |
+| | | | 04 settings-to-camera-wiring | integration | no | trunk | todo |
+| F4 | Combat state and HUD | `combat-hud` | 00 plan | docs | no | — | done (one-pass planning, 2026-09-23; 01 was written and delivered separately) |
+| | | | 01 combat-state-core | core | yes | — | done |
+| | | | 02 hud-binding-and-target-marker | adapter | no | trunk | todo |
+| | | | 03 boss-panel-and-attack-cue-api | adapter | no | sol | todo |
+| F5 | Projectile Field | `projectile-field` | 00 plan | docs | no | — | done (one-pass planning) |
+| | | | 01 field-core-spawn-move-cull | core | yes | trunk | todo |
+| | | | 02 core-hit-sweep-and-graze-rules | core | yes (after 01, same file) | glm-a | todo |
+| | | | 03 bomb-phase-clears-and-hit-spheres | core | yes (after 02, same file) | glm-a | todo |
+| | | | 04 pattern-emitter-core | core | yes | glm-a | todo |
+| F6 | Weapon and rendering | `weapon-rendering` | 00 plan | docs | no | — | done (one-pass planning) |
+| | | | 01 rendering-spike | spike | no | — | cut (folded into 02 by the sprint plan: MultiMesh by default, benchmark inside 02) |
+| | | | 02 projectile-system-adapter | adapter | no | trunk | todo |
+| | | | 03 weapon-model-and-player-weapon | core+adapter | no | trunk | todo |
+| F7 | Damage, bomb, pickups | `damage-pickups` | 00 plan | docs | no | — | done (one-pass planning) |
+| | | | 01 hit-to-combat-state-and-defeat | integration | no | trunk | todo |
+| | | | 02 bomb-clear-and-invulnerability | integration | no | trunk | todo |
+| | | | 03 pickup-adapter-and-rewards | adapter | no | glm-b | todo |
+| F8 | Progression cores and content | `progression-core` | 00 plan | docs | no | — | done (one-pass planning) |
+| | | | 01 definition-schemas-and-content-validation | core | yes | glm-b | todo |
+| | | | 02 encounter-machine-core | core | yes | glm-b | todo |
+| | | | 03 snapshot-capture-restore | core | yes | glm-b | todo |
+| | | | 04 stage-01-content-draft | content | yes | glm-b | todo |
+| F9 | Enemies | `enemies` | 00 plan | docs | no | — | done (one-pass planning) |
+| | | | 01 enemy-model-core | core | yes | glm-a | todo |
+| | | | 02 dev-prefabs-and-enemy-actor | adapter | no | sol | todo |
+| | | | 03 seal-and-guard-rules | core+adapter | no | glm-a | todo (consumed by F12-05, Stage 2 S2-03) |
+| F10 | Stage Director in Stage 1 | `stage-director` | 00 plan | docs | no | — | done (one-pass planning) |
+| | | | 01 stage-director-adapter | adapter | no | trunk | todo |
+| | | | 02 gate-and-checkpoint-adapters | adapter | no | trunk | todo |
+| | | | 03 retry-restart-flow | integration | no | trunk | todo |
+| | | | 04 stage-01-contract-smoke-test | test | yes (one new test file) | glm-a | todo |
+| F11 | Run flow | `run-flow` | 00 plan | docs | no | — | done (one-pass planning) |
+| | | | 01 defeat-results-retry-restart-screens | integration | no | trunk | todo |
+| | | | 02 campaign-continuation-and-direct-stage | integration | no | trunk | todo |
+| | | | 03 active-and-clear-time-verification | test | no | glm-a | todo |
+| F12 | Bosses and Stage 2 | `bosses` | 00 plan | docs | no | — | done (one-pass planning; Stage 2 reinstated by the sprint plan) |
+| | | | 01 boss-machine-core | core | yes | glm-a | todo |
+| | | | 02 boss-controller-adapter | adapter | no | sol | todo |
+| | | | 03 lantern-guardian-in-s1-07 | integration | no | trunk | todo |
+| | | | 04 stage-02-content-draft | content | yes | glm-b | todo |
+| | | | 05 stage-02-director-integration | adapter | no | sol | todo |
+| | | | 06 tempest-sentinel-miniboss | integration | no | sol | todo |
+| | | | 07 storm-guardian | integration | no | sol | todo |
+| F13 | Audio | `audio` | 00 plan | docs | no | — | done (cut, then reinstated by the sprint plan, 2026-09-23) |
+| | | | 01 audio-limiter-core | core | yes | glm-a | todo |
+| | | | 02 audio-controller-adapter | adapter | no | glm-a | todo |
+| | | | 03 audio-event-wiring | integration | no | trunk | todo |
+| F14 | Delivery | `delivery` | 00 plan | docs | no | — | done (one-pass planning) |
+| | | | 01 export-and-run-outside-editor | integration | no | trunk | todo (blocks itself until the user installs the Godot 4.7.2 export templates) |
+| | | | 02 package-and-acceptance-record | tooling | no | glm-b | todo |
+| D | Design sprint (Astra) | `design-sprint` | 01 sfx-selection-and-import | design | — | sol | todo |
+| | | | 02 combat-visuals | design | — | sol | todo |
+| | | | 03 lantern-guardian-scene | design | — | sol | todo |
+| | | | 04 stage-2-boss-scenes | design | — | sol | todo |
+| | | | 05 stage-1-tuning-and-pacing | design | — | sol | todo |
+| | | | 06 stage-2-content-review | design | — | sol | todo |
+| | | | 07 shrine-lighting-and-boss-rulings | design | — | sol | todo (Part B, the rulings, lands early) |
 
-## Order to 2026-09-24
-
-31 tickets are `todo`. The `Depends on` line in each ticket is authoritative; this is the order that keeps both lanes busy.
-
-- **Integration lane.** One session at a time, in this order: F4-02 → F4-03 → F6-01 → F6-02 → F6-03 → F7-01 → F7-02 → F7-03 → F9-02 → F12-02 → F10-01 → F10-02 → F10-03 → F11-01 → F11-02 → F12-03 → F11-03 → F14-01 → F14-02.
-  - Every one of these edits `scripts/session/game_session.gd` or a scene. Never run two together, even where their `Depends on` lines would allow it (F6-03 with F7-01, F7-02 with F10-01, F11-01, F11-02 and F12-03).
-- **Core lane.** Parallel-safe tickets that run beside the integration lane: F5-01 → F5-02 → F5-03 → F5-04 → F9-01 → F8-01 → F8-02 → F8-04 → F8-03 → F12-01 → F10-04.
-  - F5-01 to F5-03 gate F6-01 and F6-02, so start them at once.
-  - F5-04 and F9-01 feed F9-02; F12-01 feeds F12-02; F8 feeds F10.
-- **F6-01 runs alone.** Its FPS measurement is invalid while another session runs.
-- **Last and optional: F9-03.** No scheduled scene hosts a Seal; cutting it is the user's call.
-- **Human steps:**
-  - Install the Godot 4.7.2 export templates (about 1 GB) before F14-01; F0-03 found none on this host.
-  - A person plays the physical keyboard and DualSense pass and the clear-time measurement (F11-03, F14).
+Order rationale: Player before Menus (highest UX risk and GUIDE Section 13's assignment). Audio buses are created in F0-03 so F3 can bind Options to them. Enemies (F9) come before the Stage Director (F10) so the Director is integrated against real Waves. The sprint's lane queues, checkpoints and kickoff prompts are in [SPRINT.md](SPRINT.md).
 
 ## Risk
 
-31 tickets remain for one day, most of them on a single serialized integration lane, so the deadline is at risk even with the cuts.
+48 tickets are `todo` for about one day across four lanes (trunk 15, sol 13, glm-a 10, glm-b 10). The trunk lane is the critical path, because every `game_session.gd` edit is serialized there.
 
-**Cut pending the user on 2026-09-23** to protect the Stage 1 loop. Two of the three cuts each break a requirement of the assignment (PLANEJAMENTO Section 2):
-- **F3 Settings.** The Options screen applies nothing.
-- **F13 Audio.** The game ships silent, but the assignment requires "graphical interfaces and sound effects".
-- **F12-04.** Stage 2 has no gameplay, so the Campaign's final victory is unreachable in play, and the stage chosen for the assignment's five-minute requirement (Stage 2, 5–6 min) cannot be measured. Stage 1's target is about four minutes.
-
-Reinstating any cut is the user's call. The cheapest ways to keep both requirements are a reduced F13 that plays a few SFX on existing events, and Stage 1 pacing tuned to at least five minutes.
+If a SPRINT.md checkpoint slips by more than an hour, the proposed cut order is: music, then F3-03's prompt icons, then the Storm Guardian's final art, then Stage 2 entirely, with D-05's Stage 1 pacing raised to five minutes. The user confirms each step. PLANEJAMENTO Section 11 still cuts decorative density, secondary animation and enemy variants before approved mechanics. Scope changes are raised in the ticket or at a checkpoint, never decided inside a session.
 
 Other risks:
-- **Projectiles.** The F6-01 rendering spike, and one physics ray per projectile per tick at 1000–3000 bullets (no ticket mitigates the ray cost yet).
-- **F6-03 is the heaviest ticket.** Split the WeaponModel core out if it overruns.
-- **F10-03 is a refactor.** It moves the per-ship setup that F4-02, F6-02, F6-03 and F7-02 added into one `_spawn_player()`.
-- **F14-01 is blocked** until the export templates are installed.
-
-If the schedule slips further, PLANEJAMENTO Section 11 cuts decorative density, secondary animation and enemy variants first; approved mechanics are not cut. Scope changes are raised in the ticket, not decided in a session.
+- **Projectiles.** One physics ray per projectile per tick at 1000 to 3000 bullets. F6-02's folded benchmark measures it while other lanes run, so the numbers are pessimistic; no ticket mitigates the ray cost yet.
+- **Heavy tickets.** F6-03 is the heaviest; split the WeaponModel core out if it overruns. F10-03 is a refactor: it moves the per-ship setup from F4-02, F6-02, F6-03 and F7-02 into one `_spawn_player()`.
+- **Cross-lane edits.** Four files are edited by two lanes with no dependency between them (SPRINT.md "Shared files"); the second to land merges both.
+- **Human steps.** F14-01 is blocked until the export templates are installed, and the listening pass, the physical-device pass and the five-minute measurement need a person.
 
 ## Requests to Astra
 
@@ -126,15 +125,16 @@ Dependencies Claude has on scene and content work. These are needs by Feature, n
 | F1-03 onward | A human pass on a physical keyboard and on the DualSense pad this host has: the six movement axes, Focus, the arrow keys and right stick for the camera, `K`/`Y` to lock and `Tab`/`X` to cycle in the harness. Everything measured so far is simulated input, which ENGINEERING_BRIEF Section 8 says is not the same thing. |
 | F1-04 onward | F1-05: keep left-to-right wrap as the design rule; feel/range/radius tuning still pending. Stage solid trunks/branches should occlude with fitted layer-1 collision; foliage should not. Collision authoring is a follow-up. Every lockable prefab remains a Node3D in targetable with a HitVolume child and its own volumes off layer 1. |
 | F2-02 onward | Make a focused slider visible in `assets/ui/menu_theme.tres`: Godot 4.7's `Slider` never draws `HSlider/styles/focus`, and `grabber_area_highlight` is the same `SliderFill` as `grabber_area`, so a focused slider only has a slightly brighter grabber (`docs/validation/menus-options-entry.png`). A gold `HSlider/icons/grabber_highlight` or a distinct `grabber_area_highlight` would do. Optional: move Menu principal and Créditos up when Results hides both Continue and Replay (`menus-results-final.png`). |
+| F2-02 onward | **D-02.** The focused-slider fix in `assets/ui/menu_theme.tres` described in the F2-02 row above; it matters now that F3-02 makes Options live. |
 | F2-04 onward | Stage scenes: keep `PlayerStart` in every stage root (a stage without it is refused) and the Stage root at the origin. Optional: add Stage 2's `FlightBounds/Limits` marker (`min`/`max` metadata) to Stage 1 with X -45..45, Y 0..75, Z -570..35, so the scene is the single source of its flight interior instead of `Main`'s `stage_flight_bounds`. A new stage needs its id and bounds sent to Claude, who adds it to `Main`. |
-| F4-02 onward | Review the HUD dimming values (0.25 for a spent slot, 0.3 for a finished Phase). Optional: a two-phase boss-bar layout, since with `Phase3` hidden the right third of the panel stays empty. The four Results value labels become load-bearing in F11-01. |
-| F6 | Projectile visual presets (radius-1 bullet meshes, one material per faction) and a final Familiar scene (Node3D root, no collision object); Claude ships `scenes/dev/` placeholders otherwise. Tune the weapon proposals in F6-03 (cadence, Familiar cadence, assist cones, shot speed, lifetime, damage) and the pattern defaults in F5-04. Solid scenery and closed Gate barriers must be layer-1 `StaticBody3D`; foliage stays off layer 1. F1 design call: the ship model never turns with the camera (the weapon compensates in code). |
-| F7 | Pickup visuals (Power Pickup, Shield Pickup) keeping the dev prefab's root `Area3D` setup; a final Bomb blast effect, plus tuning of the Bomb radius and damage; dev placeholders otherwise. |
-| F8-04 onward | Review and tune the Stage 1 `content/stages/stage_01/` draft that Claude transcribes from STAGE_DESIGN.md, including Portuguese place names for CP1-A and CP1-B (the Defeat screen shows the id text until then). Values are yours. |
-| F9 | Spirit, Sentry, and Tempest Sentinel prefabs matching GUIDE Section 5 (`Enemy` root, `VisualRoot`, `HitVolume`, `Emitters`, `AnimationPlayer`). Claude ships `scenes/dev/` placeholders with the same tree until then, using your `scenes/enemies/visuals/` scenes as `VisualRoot`. Tune the dev enemy and pattern `.tres` files and the `HitVolume` radii, and choose an Anticipation clip. |
+| F4-02 onward | **D-07 Part B.** Review the HUD dimming values (0.25 for a spent slot, 0.3 for a finished Phase). Optional: a two-phase boss-bar layout, since with `Phase3` hidden the right third of the panel stays empty. The four Results value labels become load-bearing in F11-01. |
+| F6 | **D-02 (meshes, Familiar), D-05 (values).** Projectile visual presets (radius-1 bullet meshes, one material per faction) and a final Familiar scene (Node3D root, no collision object); Claude ships `scenes/dev/` placeholders otherwise. Tune the weapon proposals in F6-03 (cadence, Familiar cadence, assist cones, shot speed, lifetime, damage) and the pattern defaults in F5-04. Solid scenery and closed Gate barriers must be layer-1 `StaticBody3D`; foliage stays off layer 1. F1 design call: the ship model never turns with the camera (the weapon compensates in code). |
+| F7 | **D-02 (visuals), D-05 (values).** Pickup visuals (Power Pickup, Shield Pickup) keeping the dev prefab's root `Area3D` setup; a final Bomb blast effect, plus tuning of the Bomb radius and damage; dev placeholders otherwise. |
+| F8-04 onward | **D-05.** Review and tune the Stage 1 `content/stages/stage_01/` draft that Claude transcribes from STAGE_DESIGN.md, including Portuguese place names for CP1-A and CP1-B (the Defeat screen shows the id text until then). Values are yours. |
+| F9 | **D-04 (Sentinel), D-05 (tuning).** Spirit, Sentry, and Tempest Sentinel prefabs matching GUIDE Section 5 (`Enemy` root, `VisualRoot`, `HitVolume`, `Emitters`, `AnimationPlayer`). Claude ships `scenes/dev/` placeholders with the same tree until then, using your `scenes/enemies/visuals/` scenes as `VisualRoot`. Tune the dev enemy and pattern `.tres` files and the `HitVolume` radii, and choose an Anticipation clip. |
 | F10 | Boss-arena retreat containment and any extra boundary presentation, using the Director's active-Encounter bounds (see `docs/STAGE_01_HANDOFF.md`). A checkpoint glow that reacts to `checkpoint_activated`. Keep the load-bearing names in `stage_01.tscn`: encounter roots and markers, `BarrierBody/Collision`, `ClosedVisual`, `Respawn`, and `Environment/PortalLinks/GuardLink1..3`. |
-| F12 | `scenes/enemies/lantern_guardian.tscn` with the GUIDE Section 5 tree and the actual clip names for idle, step cue and defeat; the shrine-lighting `AnimationPlayer` clip (corrupted to calm) in Stage 1, with its path and clip name sent to Claude; tuning of `lantern_guardian.tres` and its patterns. Confirm or reject F12-01's reading that a boss takes no damage during a Phase transition (PLANEJAMENTO forbids "artificial invulnerability timers"). F12-04, cut pending the user: Storm Guardian and Tempest Sentinel scenes, Stage 2 gameplay markers, seal and portal-light states. |
-| F13 | Cut pending the user. If reinstated: the event-to-sound selection from the Kenney packs, and a music decision that respects the fan-content guidelines. |
+| F12 | **D-03, D-04, D-06, D-07.** `scenes/enemies/lantern_guardian.tscn` with the GUIDE Section 5 tree and the actual clip names for idle, step cue and defeat; the shrine-lighting `AnimationPlayer` clip (corrupted to calm) in Stage 1, with its path and clip name sent to Claude; tuning of `lantern_guardian.tres` and its patterns. Confirm or reject F12-01's reading that a boss takes no damage during a Phase transition (PLANEJAMENTO forbids "artificial invulnerability timers"). Stage 2 (reinstated): Storm Guardian and Tempest Sentinel scenes (D-04), the Stage 2 content review (D-06), and a resolved portal-light material plus the storm-resolution clip in `stage_02.tscn`, which no D ticket covers yet. |
+| F13 | **D-01.** Reinstated. The event-to-sound selection from the Kenney packs, and a music decision that respects the fan-content guidelines. |
 | F14 | Nothing new; credits and licenses must already cover every integrated asset. F14-02 lists any gaps it finds. |
 
 ## Received from Astra

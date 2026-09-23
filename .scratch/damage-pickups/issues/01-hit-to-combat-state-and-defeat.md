@@ -4,6 +4,7 @@ Status: todo
 Type: integration
 parallel-safe: no
 Depends on: F6-02, F4-02 (F4-01 done)
+Lane: trunk
 
 ## Goal
 

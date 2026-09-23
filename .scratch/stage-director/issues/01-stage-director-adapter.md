@@ -4,6 +4,7 @@ Status: todo
 Type: adapter
 parallel-safe: no
 Depends on: F8-02, F8-04, F9-02, F7-03, F4-03
+Lane: trunk
 
 ## Goal
 

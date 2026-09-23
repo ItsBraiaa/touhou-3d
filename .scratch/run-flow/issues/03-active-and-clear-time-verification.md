@@ -4,6 +4,13 @@ Status: todo
 Type: test
 parallel-safe: no (drives the whole Session headless; runs after every Session edit it verifies)
 Depends on: F11-02
+Lane: glm-a
+
+> **Sprint note:** Stage 2 is reinstated, so item 5 is no longer "not verified (cut)":
+> - If F12-07 has landed, measure Stage 2 with this protocol.
+> - If it has not, record "pending F12-07" and leave the measurement to F14-02's human pass. Do not wait for F12-07.
+>
+> The four worktrees share one `user://`, so any test here that writes under `user://` uses a per-process file name.
 
 ## Goal
 

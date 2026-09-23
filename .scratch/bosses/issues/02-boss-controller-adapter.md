@@ -4,6 +4,9 @@ Status: todo
 Type: adapter
 parallel-safe: no
 Depends on: F12-01, F9-02, F4-03
+Lane: sol
+
+> **Sprint note (D-03, D-04):** add an optional `phase_clip: StringName` export, played on `phase_changed` for any index above 0, so the phase-change clip named by D-03 and D-04 has a consumer. Astra's boss scenes come without a root script; F12-03, F12-06 and F12-07 attach this controller to them.
 
 ## Goal
 
