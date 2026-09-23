@@ -21,6 +21,17 @@ Files: `scripts/progression/encounter_machine.gd`, `docs/engineering/progression
 Change: Added the `EncounterMachine` Rules Core (ADR-0001): Encounter lifecycle with route-ordered entry behind activated Checkpoints, Wave scheduling with delays, idempotent completion emitting `gate_opened` → `rewards_requested` → `encounter_completed` → `stage_cleared`, Objective and Checkpoint flags, and `capture`/`restore`/`reset`. Documented its contract in `progression-core.md`. No tests were written per the sprint rule.
 Why: F8-02 gives trunk's F10-01 the progression core it drives; the capture/restore slice feeds F8-03's CheckpointStore.
 Action required by Astra: none. For trunk (F10-01): call `setup` in the Director's `setup()`, connect the six signals there, tick from `_physics_process` while the tree runs; CP1-B sits inside S1-06, so a Retry from CP1-B restores S1-06 as completed.
+## 2026-09-23 23:10 — Claude (plan) — lane.ps1 handles Godot .uid and .import sidecars
+State: docs
+Files: `tools/lane.ps1`, `docs/engineering/SPRINT.md` ("Git worktrees", Conflicts); the missing `scripts/definitions/enemy_definition.gd.uid`, `scripts/enemies/enemy_model.gd.uid` and `tools/validate_boss_scenes.gd.uid`, committed by the new land step.
+Change:
+- **The fault.** Godot writes a random-uid sidecar the first time any worktree imports a new script or asset. Landings were blocked by untracked sidecars (oc-a on F6-03 part 1), and the next `sync` in trunk and oc-b would fail on untracked copies of files `dev-01` now tracks.
+- **The fix.** `sync` and `land` delete a local sidecar that `dev-01` already tracks, commit one whose source is tracked, and resolve sidecar-only merge conflicts with `dev-01`'s copy. The three uids missing on `dev-01` are now tracked, using oc-a's and sol's copies.
+
+Why: a tooling fault, not a lane's. No escalation was needed.
+
+Action required by Astra: none. Your untracked `enemy_definition.gd.uid` and `enemy_model.gd.uid` are replaced by `dev-01`'s at your next sync. Your boss-model files are untouched.
+
 ## 2026-09-23 20:32 — Astra (sol) — Lantern Guardian scene (D-03) [shared]
 State: SCENE_READY
 Files: `scenes/enemies/lantern_guardian.tscn`, `assets/models/bosses/Ghost.gltf` and copied atlas plus `.import` files, `tools/validate_boss_scenes.gd`, `docs/validation/boss-scenes.log`, `docs/validation/lantern-guardian.png`, `docs/ENEMY_VISUAL_HANDOFF.md`, `docs/ASSET_CREDITS.md`, `docs/engineering/ROADMAP.md`, and D-03's ticket.
