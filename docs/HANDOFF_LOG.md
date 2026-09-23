@@ -15,6 +15,13 @@ Action required by <other agent>: <what they must do, or "none">
 
 ---
 
+## 2026-09-23 20:32 — OpenCode (oc-a) — F6-03 part 1 WeaponModel
+State: CODE_READY
+Files: `scripts/combat/weapon_model.gd`, `.scratch/weapon-rendering/issues/03-weapon-model-and-player-weapon.md`
+Change: Added the Node-free WeaponModel cadence, per-source cooldown, Power Level Familiar count and static Aim Assist direction rules. No tests were added per the sprint rule.
+Why: This is F6-03's oc-a part 1; part 2 in trunk owns PlayerWeapon and scene integration.
+Action required by Astra: None for part 1; shot values remain tuning proposals.
+
 ## 2026-09-23 20:29 — OpenCode (oc-a) — Generated script UIDs
 State: docs
 Files: `scripts/combat/pattern_emitter.gd.uid`, `scripts/definitions/pattern_definition.gd.uid`, `scripts/definitions/checkpoint_definition.gd.uid`, `scripts/definitions/encounter_definition.gd.uid`, `scripts/definitions/reward_definition.gd.uid`, `scripts/definitions/stage_definition.gd.uid`, `scripts/definitions/wave_definition.gd.uid`, `tools/validate_audio_selection.gd.uid`, `docs/HANDOFF_LOG.md`
