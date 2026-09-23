@@ -47,13 +47,13 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | | | | 01 field-core-spawn-move-cull | core | yes | path | done |
 | | | | 02 core-hit-sweep-and-graze-rules | core | yes (after 01, same file) | path | done (no unit tests, by the sprint rule; ruling 5 pending) |
 | | | | 03 bomb-phase-clears-and-hit-spheres | core | yes (after 02, same file) | path | done (no unit tests, by the sprint rule) |
-| | | | 04 pattern-emitter-core | core | yes | oc-a | todo |
+| | | | 04 pattern-emitter-core | core | yes | oc-a | done (no new tests, by the sprint rule) |
 | F6 | Weapon and rendering | `weapon-rendering` | 00 plan | docs | no | — | done (one-pass planning) |
 | | | | 01 rendering-spike | spike | no | — | cut (folded into 02 by the sprint plan: MultiMesh by default, benchmark inside 02) |
 | | | | 02 projectile-system-adapter | adapter | no | trunk | done (2026-09-23: MultiMesh ProjectileSystem on ProjectileRoot, capacity 2048; 3000 Projectiles at 1118 FPS with other lanes running; swap pending D-02) |
 | | | | 03 weapon-model-and-player-weapon | core+adapter | no | trunk (part 1: oc-a) | todo |
 | F7 | Damage, bomb, pickups | `damage-pickups` | 00 plan | docs | no | — | done (one-pass planning) |
-| | | | 01 hit-to-combat-state-and-defeat | integration | no | trunk | todo |
+| | | | 01 hit-to-combat-state-and-defeat | integration | no | trunk | done (2026-09-23: hits, Graze, Invulnerability blink and Defeat wired in GameSession; `tools/validate_combat.gd` COMBAT_OK; Retry restarts the stage until F10-03) |
 | | | | 02 bomb-clear-and-invulnerability | integration | no | trunk | todo |
 | | | | 03 pickup-adapter-and-rewards | adapter | no | path | todo |
 | F8 | Progression cores and content | `progression-core` | 00 plan | docs | no | — | done (one-pass planning) |
@@ -62,7 +62,7 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | | | | 03 snapshot-capture-restore | core | yes | oc-b | todo |
 | | | | 04 stage-01-content-draft | content | yes | oc-b | todo |
 | F9 | Enemies | `enemies` | 00 plan | docs | no | — | done (one-pass planning) |
-| | | | 01 enemy-model-core | core | yes | oc-a | todo |
+| | | | 01 enemy-model-core | core | yes | oc-a | done (no new tests, by the sprint rule) |
 | | | | 02 dev-prefabs-and-enemy-actor | adapter | no | path | todo |
 | | | | 03 seal-and-guard-rules | core+adapter | no | oc-a | todo (consumed by F12-05, Stage 2 S2-03) |
 | F10 | Stage Director in Stage 1 | `stage-director` | 00 plan | docs | no | — | done (one-pass planning) |

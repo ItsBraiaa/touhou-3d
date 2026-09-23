@@ -1,18 +1,21 @@
 # Projectile Field
 
-Feature F5: the Node-free cores that own every Projectile (ADR-0004). Started with ticket F5-01 on 2026-09-23. `ProjectileSpawn` and the spawn, move and cull part of `ProjectileField` are CODE_READY (F5-01), and so are the Core sweep and Graze rules (F5-02) and the hostile clears and enemy hit spheres (F5-03). The `PatternEmitter` (F5-04) is oc-a's.
+Feature F5: the Node-free cores that own every Projectile (ADR-0004). Started with ticket F5-01 on 2026-09-23. `ProjectileSpawn` and the spawn, move and cull part of `ProjectileField` are CODE_READY (F5-01), as are the Core sweep and Graze rules (F5-02), the hostile clears and enemy hit spheres (F5-03), and the typed `PatternDefinition` and `PatternEmitter` (F5-04).
 
 ## Purpose
 
-`ProjectileField` holds every Projectile of both factions in packed arrays indexed by slot. It spawns them from a `ProjectileSpawn` request with a stable id, moves them each physics tick, and removes them when their lifetime ends, when they meet scenery or a closed Gate (through an injected obstacle query), and when they leave the Flight Volume. It sweeps every hostile Projectile against the player's moving Core and Graze Volume and reports `player_hit` and `grazed`, and every player Projectile against the hit spheres enemies register for the tick, reporting `enemy_hit`. It clears hostile fire, awarding nothing, locally for a Bomb and entirely for Gates, Checkpoints and boss Phases, and lists the targets inside a blast. Its capacity is fixed, and it exposes a per-faction read-out for rendering.
+`ProjectileField` holds every Projectile of both factions in packed arrays indexed by slot. It spawns them from a `ProjectileSpawn` request with a stable id, moves them each physics tick, and removes them when their lifetime ends, when they meet scenery or a closed Gate (through an injected obstacle query), and when they leave the Flight Volume. It sweeps every hostile Projectile against the player's moving Core and Graze Volume and reports `player_hit` and `grazed`, and every player Projectile against the hit spheres enemies register for the tick, reporting `enemy_hit`. It clears hostile fire, awarding nothing, locally for a Bomb and entirely for Gates, Checkpoints and boss Phases, and lists the targets inside a blast. Its capacity is fixed, and it exposes a per-faction read-out for rendering. `PatternDefinition` and `PatternEmitter` describe reusable ring, fan, spiral, burst and aimed hostile patterns without putting attack sequencing or Anticipation in the core.
 
-It does not own any Node, the physics ray behind the obstacle query, reading the ship's Core and Graze radii or an enemy's `HitVolume`, rendering, or the `_physics_process` that ticks it (all F6-02's `ProjectileSystem`); what a hit or a Graze does to `CombatState`, `RunState` or an enemy (F7, F9); patterns (F5-04). Acceleration, homing and curved paths are not in PLANEJAMENTO and not supported: a Projectile's velocity is constant.
+It does not own any Node, the physics ray behind the obstacle query, reading the ship's Core and Graze radii or an enemy's `HitVolume`, rendering, or the `_physics_process` that ticks it (all F6-02's `ProjectileSystem`); what a hit or a Graze does to `CombatState`, `RunState` or an enemy (F7, F9); or attack selection and Anticipation (F9-01, F12-01). Acceleration, homing and curved paths are not in PLANEJAMENTO and not supported: a Projectile's velocity is constant.
 
 ## Files
 
 - `scripts/combat/projectile_spawn.gd` (value, `class_name ProjectileSpawn extends RefCounted`).
 - `scripts/combat/projectile_field.gd` (Rules Core, `class_name ProjectileField extends RefCounted`).
+- `scripts/definitions/pattern_definition.gd` (authored Resource, `class_name PatternDefinition`).
+- `scripts/combat/pattern_emitter.gd` (Rules Core, `class_name PatternEmitter extends RefCounted`).
 - `tests/unit/combat/test_projectile_field.gd` (12 tests for F5-01; F5-02 and F5-03 added none, by the sprint's no-new-tests rule).
+- F5-04 adds no test files under the sprint's no-new-tests rule.
 
 ## ProjectileSpawn
 
@@ -104,9 +107,54 @@ The capacity is fixed at `setup`. When every slot is alive, `spawn` refuses the 
 
 An id is never handed out twice in the field's lifetime: not after its slot is recycled, not after `clear_all`, not after a new `setup`. An id packs the slot in its low 16 bits (`SLOT_BITS`) and a field-wide spawn serial above them, so it is a 64-bit int: keep ids in an `int` or a `PackedInt64Array`, never a `PackedInt32Array`. A dead id's slot may hold a newer Projectile, which the id check tells apart.
 
+## PatternDefinition
+
+`PatternDefinition` is a typed `Resource` (ADR-0003) kept separate from F8-01's content Definitions. Its Inspector values are proposals until Astra authors pattern `.tres` content.
+
+| Export | Default | Meaning |
+| --- | --- | --- |
+| `id: StringName` | empty | Authored identifier included in validation messages. |
+| `shape: Shape` | `RING` | `RING`, `FAN`, `SPIRAL`, `BURST` or `AIMED`. |
+| `projectiles_per_volley: int` | 12 | Count before any ring gap is applied. |
+| `volley_count: int` | 1 | Number of volleys in an emitter run. |
+| `volley_interval: float` | 0.2 s | Delay between volleys. |
+| `speed: float` | 8.0 | Projectile speed in units per second. |
+| `lifetime: float` | 6.0 s | Projectile lifetime. |
+| `projectile_radius: float` | 0.25 | Collision radius in world units. |
+| `damage: int` | 10 | Damage carried by each hostile request. |
+| `spread_degrees: float` | 60° | FAN/AIMED arc width and full BURST cone width. |
+| `gap_degrees: float` | 0° | RING's empty arc centered on its rotated base. |
+| `rotation_step_degrees: float` | 0° | World-up rotation per volley after volley zero. |
+| `pitch_degrees: float` | 0° | Additional elevation applied to directions. |
+| `height_offsets: PackedFloat32Array` | empty | World-up origin offsets cycled by volley; empty means zero. |
+| `speed_variance: float` | 0.0 | BURST speed variation fraction, from `1 - variance` to `1 + variance`. |
+
+`validate() -> PackedStringArray` returns a message naming `id` for each invalid value: counts must be at least one; repeated volleys require a positive interval; speed, lifetime and radius must be positive and damage at least one; spread and gap must be in 0..360, with positive BURST spread and at least one surviving RING projectile; speed variance must be in 0..1; SPIRAL requires nonzero rotation.
+
+## PatternEmitter
+
+`setup(definition, rng)` retains the non-null typed Resource and the Attempt's `RandomNumberGenerator`, then resets run state. `start()` restarts with volley zero due immediately. `reset()` clears elapsed time, the volley cursor, accumulated rotation state (derived from the cursor) and sampled aim. `tick(delta, origin, forward, aim_point) -> Array[ProjectileSpawn]` advances elapsed time and emits every due volley in order, including catch-up volleys after a long delta; due-time comparisons use a `1e-6` tolerance. Before start and after the last volley it returns an empty array. `is_finished()` becomes true once every volley has fired.
+
+Every request is `HOSTILE`, uses the definition's speed, lifetime, radius and damage, and starts at `origin + Vector3.UP * height_offsets[k % size]` (or `origin` when empty). The horizontal basis is `forward` flattened onto XZ, falling back to `Vector3.FORWARD` when vertical; volley `k` rotates it around world up by `k * rotation_step_degrees`, and `pitch_degrees` is then applied.
+
+- RING and SPIRAL emit evenly spaced directions around world up. RING omits directions in the gap around the rotated base; SPIRAL has no gap.
+- FAN emits evenly spaced directions across `spread_degrees` in the plane of forward and horizontal right, preserving forward pitch. One projectile points along the center direction.
+- BURST samples uniformly within its cone from the injected RNG and independently samples speed within the configured variance. It is the only shape that consumes randomness.
+- AIMED uses a FAN around `aim_point - origin`, sampled at the first volley and held for the run; it does not track later aim points.
+
+## STAGE_DESIGN pattern mapping
+
+| Source | PatternDefinition / caller |
+| --- | --- |
+| Spirit aimed bursts; Sentinela phase 1; Fios de Luz burst | AIMED, three volleys at a short interval. |
+| Sentry spaced fans; Fios de Luz paired fans | FAN; use two emitters or paired `height_offsets`. |
+| Ritual das Lanternas alternating-height rings with a rotating gap | RING with `gap_degrees`, `rotation_step_degrees` and alternating `height_offsets`. |
+| Sentinela phase 2 rotating fans; Espiral da Tempestade | FAN or SPIRAL with rotation; boss movement owns height drift. |
+| Círculos do Trovão high and low rings | RING with `height_offsets`; the caller owns the ring cue / Anticipation. |
+
 ## Dependencies
 
-`setup` receives the capacity, the Flight Volume and the obstacle query from F6-02's `ProjectileSystem`, which implements the query as a physics-server segment query against collision layer 1 (scenery, Flight Volume walls, closed Gate barriers). `register_target` receives each enemy's hit sphere (its `HitVolume`, layer 5, monitoring off) through `ProjectileSystem`, keyed by the actor's `get_instance_id()`. `ProjectileSpawn` reads `CombatState.HIT_DAMAGE` for its default damage.
+`ProjectileField.setup` receives the capacity, the Flight Volume and the obstacle query from F6-02's `ProjectileSystem`, which implements the query as a physics-server segment query against collision layer 1 (scenery, Flight Volume walls, closed Gate barriers). `register_target` receives each enemy's hit sphere (its `HitVolume`, layer 5, monitoring off) through `ProjectileSystem`, keyed by the actor's `get_instance_id()`. `ProjectileSpawn` reads `CombatState.HIT_DAMAGE` for its default damage. `PatternEmitter` receives one `PatternDefinition` and the Attempt's seeded `RandomNumberGenerator`; each returned request is passed to `ProjectileField.spawn` by its caller.
 
 ## Invariants and tests
 
@@ -132,6 +180,9 @@ An id is never handed out twice in the field's lifetime: not after its slot is r
 | A local Bomb does not clear the entire stage (ENGINEERING_BRIEF 8) | None (same rule). `clear_hostile_in_radius` tests each HOSTILE Projectile's overlap with the blast. |
 | A fast player Projectile does not tunnel through a target; it hits only the first target along its path | None (same rule). Entry fraction along the segment in `_first_target_along`. |
 | A registration lasts one tick | None (same rule). The registry is emptied after each pass. |
+| Authored patterns reject invalid dimensions and shape-specific constraints | None: no new tests during the sprint. |
+| Every due volley is emitted in order; AIMED holds its sampled point and BURST uses only the injected RNG | None: no new tests during the sprint. |
+| Every pattern result is a HOSTILE `ProjectileSpawn` with the authored damage, radius, speed and lifetime | None: no new tests during the sprint. |
 
 ## Setup for Astra
 

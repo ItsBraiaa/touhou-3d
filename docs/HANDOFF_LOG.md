@@ -23,6 +23,57 @@ Why: F12-03 can use the approved Stage 1 boss art without changing its gameplay 
 Action required by Claude: trunk F12-03 attaches `boss_controller.gd` to Enemy; sets `visual_root`, `hit_volume`, `emitter`, `animation_player`, `idle_clip`, `step_clip`, and `defeat_clip`; and replaces the dev boss in `stage_01.tscn`'s `actor_scenes[&"lantern_guardian"]`. The root currently has no script. A future `phase_clip` may use `Yes`.
 
 
+## 2026-09-23 20:29 — OpenCode (oc-a) — Generated script UIDs
+State: docs
+Files: `scripts/combat/pattern_emitter.gd.uid`, `scripts/definitions/pattern_definition.gd.uid`, `scripts/definitions/checkpoint_definition.gd.uid`, `scripts/definitions/encounter_definition.gd.uid`, `scripts/definitions/reward_definition.gd.uid`, `scripts/definitions/stage_definition.gd.uid`, `scripts/definitions/wave_definition.gd.uid`, `tools/validate_audio_selection.gd.uid`, `docs/HANDOFF_LOG.md`
+Change: Tracked eight stable Godot script UIDs generated while importing scripts already integrated from F5-04, F8-01 and D-01; no source scripts were changed.
+Why: Godot's import created these metadata files and the lane gate requires generated `.uid` files to be tracked beside their scripts.
+Action required by the owning lanes: No source changes; these generated UIDs are now tracked.
+
+## 2026-09-23 20:26 — OpenCode (oc-a) — F9-01 EnemyModel core
+State: CODE_READY
+Files: `scripts/definitions/enemy_definition.gd`, `scripts/enemies/enemy_model.gd`, `docs/engineering/enemies.md`, `docs/engineering/README.md`, `docs/engineering/ROADMAP.md`, `.scratch/enemies/issues/01-enemy-model-core.md`
+Change: Added EnemyDefinition validation and the EnemyModel core for bounded movement, exactly-once defeat, Anticipation, sampled-aim PatternEmitter attacks and cooldowns. No tests were added per the sprint rule.
+Why: F9-01 provides the reusable common Enemy rules core for F9-02's scene adapter.
+Action required by Astra: Tune the proposed DRIFT/HOVER movement values against the authored Spirit and Sentry scenes when they are available.
+
+## 2026-09-23 20:24 — OpenCode (oc-a) — AudioLimiter generated UID
+State: docs
+Files: `scripts/audio/audio_limiter.gd.uid`, `docs/HANDOFF_LOG.md`
+Change: Committed the stable Godot script UID generated during the F13-01 land import.
+Why: The lane gate requires generated `.uid` metadata to be tracked beside its script.
+Action required by Astra: None.
+
+## 2026-09-23 20:22 — OpenCode (oc-a) — F5-04 PatternDefinition and PatternEmitter
+State: CODE_READY
+Files: `scripts/definitions/pattern_definition.gd`, `scripts/combat/pattern_emitter.gd`, `docs/engineering/projectile-field.md`, `docs/engineering/README.md`, `docs/engineering/ROADMAP.md`, `.scratch/projectile-field/issues/04-pattern-emitter-core.md`
+Change: Added typed pattern definitions and a Node-free emitter for timed hostile ring, fan, spiral, burst and sampled-aim volleys. Documented the public contract and STAGE_DESIGN mapping. No tests were added per the sprint rule.
+Why: F5-04 makes shared pattern data and emission reusable by the enemy and boss cores.
+Action required by Astra: Pattern field defaults are engineering proposals; authored `.tres` patterns remain with the content tickets.
+
+## 2026-09-23 20:22 — Claude (trunk) — F7-01: hits, Graze and Defeat wired into GameSession [shared]
+State: CODE_READY
+Files:
+- `scripts/session/game_session.gd`; `scripts/player/player_controller.gd` (on Astra's `scenes/player/player_ship.tscn`, which is unchanged).
+- New: `tools/validate_combat.gd`, `docs/engineering/damage-pickups.md`, `docs/validation/combat.md`, `combat-hit-flicker.png` and `combat-defeat.png`.
+- Docs: `docs/GUIDE.md` (Section 6 `game_session.gd` and `player_controller.gd` rows, Section 7 "Player defeated"), `docs/engineering/README.md`, and the ROADMAP F7-01 row.
+
+Change:
+- The ship can be hurt in the real game:
+  - Core hits reach `CombatState.take_hit`.
+  - A Graze adds 1 Graze and 10 score to `RunState`.
+  - Invulnerability reaches the `ProjectileSystem` (no Graze during it), and `VisualRoot` blinks at 12 Hz while the Core stays lit.
+  - Excess-Power score reaches `RunState`.
+  - Defeat pauses the tree, Active Time, the controls and the core, under the Defeat overlay with `Início da fase`.
+- `retry` restarts the stage until F10-03.
+- No test changed. Per the sprint rule there is no new test file; `tools/validate_combat.gd` checks the 13 behaviours in the real main scene (`COMBAT_OK` headless and windowed).
+
+Why: F7-01.
+
+Action required by Astra:
+- `PlayerShip` has a new Inspector export, `invulnerability_flicker_hz` (12.0, "Feedback" group), yours to tune.
+- Keep `CoreVisual` under `DamageCore`, outside `VisualRoot`, or the Core would blink too.
+- Defeat has no animation yet.
 ## 2026-09-23 20:21 — Astra (sol) — D-01 SFX selection and import [shared]
 State: SCENE_READY
 Files: `assets/audio/sfx/` (16 Ogg files and their `.import` settings), four `assets/licenses/kenney-*.txt` pack licenses, `docs/ASSET_CREDITS.md`, `scenes/ui/credits.tscn`, `docs/validation/audio-selection.md`, `docs/validation/menu-credits.png`, `tools/validate_audio_selection.gd`, and D-01's ticket.
