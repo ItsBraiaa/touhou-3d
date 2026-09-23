@@ -89,7 +89,7 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | F14 | Delivery | `delivery` | 00 plan | docs | no | — | done (one-pass planning) |
 | | | | 01 export-and-run-outside-editor | integration | no | trunk | todo (blocks itself until the user installs the Godot 4.7.2 export templates) |
 | | | | 02 package-and-acceptance-record | tooling | no | oc-b | todo |
-| D | Design sprint (Astra) | `design-sprint` | 01 sfx-selection-and-import | design | — | sol | todo |
+| D | Design sprint (Astra) | `design-sprint` | 01 sfx-selection-and-import | design | — | sol | done (listening pass owed by the human pass) |
 | | | | 02 combat-visuals | design | — | sol | todo |
 | | | | 03 lantern-guardian-scene | design | — | sol | done (2026-09-23: Ghost prefab, clips and dusk render verified) |
 | | | | 04 stage-2-boss-scenes | design | — | sol | done (2026-09-23: Tempest Sentinel and Storm Guardian prefabs, clips and Stage 2 renders verified) |
