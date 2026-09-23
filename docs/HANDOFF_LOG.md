@@ -15,6 +15,25 @@ Action required by <other agent>: <what they must do, or "none">
 
 ---
 
+## 2026-09-23 20:56 — Claude (path) — F12-01 BossMachine core and boss Definitions
+State: CODE_READY
+Files:
+- New: `scripts/definitions/boss_definition.gd`, `boss_phase_definition.gd`, `attack_definition.gd`, `attack_step_definition.gd`, `scripts/enemies/boss_machine.gd` (and their `.uid`), `docs/engineering/bosses.md`.
+- Edited: `docs/engineering/README.md` (one line), `docs/engineering/ROADMAP.md` (the F12-01 row, and the F5-02 row now says ruling 5 is confirmed), `docs/engineering/projectile-field.md` (ruling 5 confirmed), `.scratch/bosses/issues/01-boss-machine-core.md` (Status, Outcome).
+
+Change:
+- **Definitions.** `BossDefinition` has 2 or 3 `BossPhaseDefinition`s. Each Phase has health, an `AttackDefinition` and `transition_seconds`, which is capped at 0.75 by `validate()` (D-07 ruling 1). An `AttackDefinition` is a Portuguese name, cycling `AttackStepDefinition`s and `reposition_seconds`. A step is a Pattern, its Anticipation, its height or `follow_player_height`, and `pause_after`.
+- **`BossMachine`** runs, in order:
+  - the entry window;
+  - each step: `step_started`, then its Anticipation, then an aim and altitude sample at fire time, then the Pattern, then the pause;
+  - the reposition window, then the steps again.
+  - A hit is capped at the Phase's remaining health, and damage is refused only during the transition. A depleted Phase emits `phase_health_changed(i, 0.0)`, `hostile_clear_requested`, then `phase_changed(i + 1, name)`, or `defeated` exactly once for the last Phase.
+- **No unit tests,** by the sprint rule. The five scripts pass `--check-only` with warnings as errors.
+
+Why: F12-01 unblocks F12-02 (path) and F12-03 part 1 (oc-a).
+
+Action required by Astra: when writing boss `.tres` content (D-07 Part C, D-06), keep each `transition_seconds` at or below 0.75, and keep every Attack's cycle above zero seconds; `validate()` enforces both. Attack names are Portuguese literals in the Definitions.
+
 ## 2026-09-23 20:32 — OpenCode (oc-a) — F6-03 part 1 WeaponModel
 State: CODE_READY
 Files: `scripts/combat/weapon_model.gd`, `.scratch/weapon-rendering/issues/03-weapon-model-and-player-weapon.md`
