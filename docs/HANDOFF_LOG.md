@@ -15,6 +15,32 @@ Action required by <other agent>: <what they must do, or "none">
 
 ---
 
+## 2026-09-23 20:10 — Claude (trunk) — F6-02: ProjectileSystem on ProjectileRoot [shared]
+State: CODE_READY
+Files:
+- New: `scripts/combat/projectile_system.gd`, `scenes/dev/dev_spray.gd`, `scenes/dev/projectile_player_mesh.tres` and `projectile_hostile_mesh.tres`, `docs/engineering/weapon-rendering.md`, `docs/engineering/spikes/projectile-rendering.md`, `docs/validation/weapon-rendering.md` and `weapon-rendering-spray.png`.
+- Edited: `scenes/main.tscn` (script and meshes on `ProjectileRoot`; `Main.projectile_system`), `scripts/session/game_session.gd`, `scenes/dev/arena_harness.gd` and `.tscn`, `tests/scene/test_game_session_flow.gd` (the Return to Menu case, adjusted), `docs/GUIDE.md` (Section 5 `ProjectileRoot` line, Section 6 `game_session.gd` and `projectile_system.gd` rows), `docs/engineering/menus-session.md`, `docs/engineering/project.md`, `docs/engineering/README.md`, and the ROADMAP F6-02 row.
+
+Change:
+- The F5 field now runs in the game:
+  - It ticks after the actors, with physics priority 100.
+  - A layer-1, bodies-only ray kills Projectiles on scenery.
+  - The ship's `DamageCore` and `GrazeVolume` spheres drive hits and Grazes (`player_hit` and `grazed` signals; nothing is fed to `CombatState` yet, that is F7-01).
+  - Registered targets get `on_damage(damage)` callbacks.
+  - Each faction is drawn by one `MultiMeshInstance3D`, capacity 2048.
+- `GameSession.projectile_root` is renamed and retyped to `projectile_system: ProjectileSystem`. The Session sets it up on every stage load and calls `clear_all()` on unload, instead of freeing `ProjectileRoot`'s children.
+- The arena harness sprays rings of hostile dev bullets.
+- **Test adjusted, as the sprint rule allows:** `test_game_session_flow.gd::test_return_to_menu_unloads_everything_and_shows_the_main_menu` now spawns a Projectile and expects `count() == 0`, because `ProjectileRoot`'s children are the renderers.
+- Measured with other lanes running: 3000 Projectiles at 1118 FPS, a 3.84 ms system physics step at 1280 × 720. No mitigation is needed.
+
+Why: F6-02, with F6-01 folded in.
+
+Action required by Astra:
+- **Swap pending: D-02.** Deliver unit-radius Projectile meshes, one material per faction. Trunk points `Main/ProjectileRoot`'s two mesh exports at them.
+- **Keep the ship's spheres as they are.** `DamageCore` and `GrazeVolume` stay `SphereShape3D` with monitoring off; their radii are the hit and Graze sizes.
+- **Keep barriers on layer 1.** Closed Gate barriers and solid scenery stay `StaticBody3D` on layer 1.
+- **D-07 Part B, a ruling to consider:** a bullet on a head-on path grazes a few ticks before it hits the Core, so every hit also scores a Graze. Should a hit cancel its own Graze?
+
 ## 2026-09-23 20:30 — Claude (path) — F5-03 ProjectileField clears and hit spheres
 State: CODE_READY
 Files:

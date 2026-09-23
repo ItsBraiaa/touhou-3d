@@ -247,7 +247,7 @@ Clear Time is committed Active Time plus the current Attempt's (CONTEXT "Clear T
 | Export | Type | Set in `main.tscn` to | Required |
 | --- | --- | --- | --- |
 | `world_root` | `Node3D` | `WorldRoot` | yes |
-| `projectile_root` | `Node3D` | `ProjectileRoot` | yes |
+| `projectile_system` | `ProjectileSystem` | `ProjectileRoot` | yes |
 | `interface` | `Interface` | `Interface` | yes |
 | `audio` | `Node` | `Audio` | yes |
 | `player_scene` | `PackedScene` | `scenes/player/player_ship.tscn`; its root must be a `PlayerController` | yes |
@@ -280,7 +280,7 @@ The Flight Volume is the `min`/`max` `Vector3` metadata on the stage's `FlightBo
 
 ### Unloading
 
-`_unload_stage()` removes every child of `WorldRoot` (the stage and the ship) and of `ProjectileRoot` from the tree at once, then `queue_free`s them. Removing them first keeps a stage loaded in the same frame from sharing the tree, the physics space or the `targetable` group with the old one, and keeps its name `Stage`. Today every caller runs from an input event or a button signal; F10 and F11 must defer the call when it is triggered from a physics callback (an `Area3D` `body_entered`), where removing collision objects is not allowed.
+`_unload_stage()` removes every child of `WorldRoot` (the stage and the ship) from the tree at once, then `queue_free`s them, and calls `projectile_system.clear_all()` (since F6-02; `ProjectileRoot`'s own children are the renderers and stay). `_load_stage()` ends with `projectile_system.setup(bounds, ship)` (contract in [weapon-rendering.md](weapon-rendering.md)). Removing them first keeps a stage loaded in the same frame from sharing the tree, the physics space or the `targetable` group with the old one, and keeps its name `Stage`. Today every caller runs from an input event or a button signal; F10 and F11 must defer the call when it is triggered from a physics callback (an `Area3D` `body_entered`), where removing collision objects is not allowed.
 
 ### Pause
 
@@ -391,7 +391,7 @@ Mutation-checked, twelve mutants, each failing a named test above by assertion: 
 | `ui_cancel` on Pause resumes and removes Pause | `test_cancel_on_pause_resumes_and_removes_pause` |
 | The gamepad B press that resumes never reaches gameplay as a `bomb` event, in `_input` or `_unhandled_input`; the next press does | `test_the_b_press_that_resumes_never_reaches_gameplay_as_a_bomb` |
 | Restart: a new stage and a new ship at `PlayerStart`, Clear Time 0 even after a Checkpoint commit, Attempt 2, unpaused, HUD alone | `test_restart_reloads_the_stage_with_a_new_ship_at_player_start` |
-| Return to Menu empties `WorldRoot` and `ProjectileRoot`, unpauses, ends the Run, shows the main menu | `test_return_to_menu_unloads_everything_and_shows_the_main_menu` |
+| Return to Menu empties `WorldRoot` and every Projectile, unpauses, ends the Run, shows the main menu | `test_return_to_menu_unloads_everything_and_shows_the_main_menu` |
 | A stage with a null scene is refused: nothing loaded, still on the menu, no Run; the other stage still plays | `test_a_stage_without_a_scene_is_refused_and_the_menu_stays` |
 | A stage with no Flight Volume or no `PlayerStart` is refused the same way | `test_a_stage_without_player_start_or_flight_volume_is_refused` |
 | A completed stage returns to the menu until F11 | `test_a_completed_stage_returns_to_the_menu_until_results_exist` |

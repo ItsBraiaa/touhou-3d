@@ -50,7 +50,7 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | | | | 04 pattern-emitter-core | core | yes | oc-a | todo |
 | F6 | Weapon and rendering | `weapon-rendering` | 00 plan | docs | no | — | done (one-pass planning) |
 | | | | 01 rendering-spike | spike | no | — | cut (folded into 02 by the sprint plan: MultiMesh by default, benchmark inside 02) |
-| | | | 02 projectile-system-adapter | adapter | no | trunk | todo |
+| | | | 02 projectile-system-adapter | adapter | no | trunk | done (2026-09-23: MultiMesh ProjectileSystem on ProjectileRoot, capacity 2048; 3000 Projectiles at 1118 FPS with other lanes running; swap pending D-02) |
 | | | | 03 weapon-model-and-player-weapon | core+adapter | no | trunk (part 1: oc-a) | todo |
 | F7 | Damage, bomb, pickups | `damage-pickups` | 00 plan | docs | no | — | done (one-pass planning) |
 | | | | 01 hit-to-combat-state-and-defeat | integration | no | trunk | todo |

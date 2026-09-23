@@ -39,7 +39,7 @@ const PAUSED_TICKS := 30
 var _main: GameSession
 var _interface: Interface
 var _world_root: Node3D
-var _projectile_root: Node3D
+var _projectile_system: ProjectileSystem
 
 
 func before_each() -> void:
@@ -50,7 +50,7 @@ func before_each() -> void:
 	tree.root.add_child(_main)
 	_interface = _main.interface
 	_world_root = _main.world_root
-	_projectile_root = _main.projectile_root
+	_projectile_system = _main.projectile_system
 	await tree.process_frame
 
 
@@ -332,11 +332,13 @@ func test_return_to_menu_unloads_everything_and_shows_the_main_menu() -> void:
 	if not assert_not_null(_main, "GameSession"):
 		return
 	_request(&"start_direct_stage", {"stage": &"stage_01"})
-	_projectile_root.add_child(Node3D.new())
+	var ahead := _ship().global_position + Vector3(0.0, 0.0, -10.0)
+	_projectile_system.spawn(ProjectileSpawn.new(ahead, Vector3.ZERO, ProjectileSpawn.Faction.HOSTILE, 5.0))
+	assert_eq(_projectile_system.count(ProjectileSpawn.Faction.HOSTILE), 1, "a hostile Projectile in flight")
 	_press_pause()
 	_request(&"return_to_menu")
 	assert_eq(_world_root.get_child_count(), 0, "WorldRoot empty")
-	assert_eq(_projectile_root.get_child_count(), 0, "ProjectileRoot empty")
+	assert_eq(_projectile_system.count(ProjectileSpawn.Faction.HOSTILE), 0, "every Projectile removed")
 	assert_eq(_interface.current_screen(), ScreenRouter.MAIN_MENU)
 	assert_eq(_visible_screens(), ["MainMenu"])
 	assert_false(tree.paused, "unpaused")

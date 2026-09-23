@@ -7,7 +7,9 @@ extends Node3D
 ## edge-proximity value, camera framing and Target Lock so a manual flight check has
 ## numbers to read. The lock itself is the ship's own: [Targeting] reads `lock_target` and
 ## `next_target`, and the ship hands the result to its [CameraRig] (F1-04). The combat HUD
-## shows a harness-owned [CombatState] and marks the locked target (F4-02). Dev only: it
+## shows a harness-owned [CombatState] and marks the locked target (F4-02). A
+## [ProjectileSystem] of its own carries the rings a [DevSpray] fires, and the readout
+## counts them, with the hits and Grazes on the ship (F6-02). Dev only: it
 ## is never loaded by `scenes/main.tscn` and holds no gameplay rule.
 
 
@@ -21,12 +23,16 @@ const MAX_CORNER_META := &"max_corner"
 @export var readout: Label
 ## The combat HUD instance under `HudLayer`.
 @export var hud: Hud
+## The harness's own ProjectileSystem, set up with the arena's Flight Volume.
+@export var projectile_system: ProjectileSystem
 
 var _player: PlayerController
 var _rig: CameraRig
 var _edge_proximity: float = 0.0
 ## Stands in for the Session's: started at Power Level 1, and reused by the weapon (F6-03).
 var _combat_state := CombatState.new()
+var _hits: int = 0
+var _grazes: int = 0
 
 
 func _ready() -> void:
@@ -40,12 +46,15 @@ func _ready() -> void:
 		push_warning("%s: FlightBounds metadata is missing; flying without a Flight Volume" % get_path())
 	else:
 		_player.setup(bounds)
+		projectile_system.setup(bounds, _player)
+	projectile_system.player_hit.connect(_on_player_hit)
+	projectile_system.grazed.connect(_on_grazed)
 	_combat_state.start(CombatState.MIN_POWER_LEVEL)
 	hud.bind(_combat_state, _player.targeting, _rig.camera)
 
 
 func _process(_delta: float) -> void:
-	readout.text = "\n".join(PackedStringArray([_flight_line(), _camera_line(), _lock_line()]))
+	readout.text = "\n".join(PackedStringArray([_flight_line(), _camera_line(), _lock_line(), _projectile_line()]))
 
 
 ## Finds the nodes this harness drives, reporting what is missing instead of failing on a
@@ -58,6 +67,8 @@ func _resolve_scene() -> bool:
 		missing.append("readout")
 	if hud == null:
 		missing.append("hud")
+	if projectile_system == null:
+		missing.append("projectile_system")
 	for field: String in missing:
 		push_error("%s: required export '%s' is not set" % [get_path(), field])
 	if not missing.is_empty():
@@ -119,5 +130,23 @@ func _lock_line() -> String:
 	]
 
 
+## Projectiles in flight, the hits and Grazes on the ship, and the spawns a full field
+## refused.
+func _projectile_line() -> String:
+	return "bullets hostile %d player %d\nhits %d grazes %d refused %d" % [
+		projectile_system.count(ProjectileSpawn.Faction.HOSTILE),
+		projectile_system.count(ProjectileSpawn.Faction.PLAYER),
+		_hits, _grazes, projectile_system.get_field().get_refused_count(),
+	]
+
+
 func _on_edge_proximity_changed(value: float) -> void:
 	_edge_proximity = value
+
+
+func _on_player_hit(_projectile_id: int, _damage: int) -> void:
+	_hits += 1
+
+
+func _on_grazed(_projectile_id: int) -> void:
+	_grazes += 1

@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3]
+[gd_scene load_steps=18 format=3]
 
 [ext_resource type="Script" path="res://scripts/session/game_session.gd" id="1_session"]
 [ext_resource type="Script" path="res://scripts/ui/interface.gd" id="2_interface"]
@@ -14,12 +14,15 @@
 [ext_resource type="PackedScene" path="res://scenes/player/player_ship.tscn" id="12_player_ship"]
 [ext_resource type="PackedScene" path="res://scenes/stages/stage_01.tscn" id="13_stage_01"]
 [ext_resource type="PackedScene" path="res://scenes/stages/stage_02.tscn" id="14_stage_02"]
+[ext_resource type="Script" path="res://scripts/combat/projectile_system.gd" id="15_projectile_system"]
+[ext_resource type="SphereMesh" path="res://scenes/dev/projectile_player_mesh.tres" id="16_player_bullet"]
+[ext_resource type="SphereMesh" path="res://scenes/dev/projectile_hostile_mesh.tres" id="17_hostile_bullet"]
 
-[node name="Main" type="Node" node_paths=PackedStringArray("world_root", "projectile_root", "interface", "audio")]
+[node name="Main" type="Node" node_paths=PackedStringArray("world_root", "projectile_system", "interface", "audio")]
 process_mode = 3
 script = ExtResource("1_session")
 world_root = NodePath("WorldRoot")
-projectile_root = NodePath("ProjectileRoot")
+projectile_system = NodePath("ProjectileRoot")
 interface = NodePath("Interface")
 audio = NodePath("Audio")
 player_scene = ExtResource("12_player_ship")
@@ -36,6 +39,9 @@ process_mode = 1
 
 [node name="ProjectileRoot" type="Node3D" parent="."]
 process_mode = 1
+script = ExtResource("15_projectile_system")
+player_projectile_mesh = ExtResource("16_player_bullet")
+hostile_projectile_mesh = ExtResource("17_hostile_bullet")
 
 [node name="Interface" type="CanvasLayer" parent="."]
 process_mode = 3

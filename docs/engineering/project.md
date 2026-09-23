@@ -22,7 +22,7 @@ Owns `project.godot` (warnings as errors, input map, main scene, bus layout refe
 | Export | Type | Default | Required | Meaning |
 | --- | --- | --- | --- | --- |
 | `world_root` | Node3D | `Main/WorldRoot` | yes | Holds the loaded Stage instance; PAUSABLE, stops while the tree is paused |
-| `projectile_root` | Node3D | `Main/ProjectileRoot` | yes | Root of the projectile system; PAUSABLE, stops while the tree is paused |
+| `projectile_system` | ProjectileSystem | `Main/ProjectileRoot` | yes | The projectile system (F6-02, [weapon-rendering.md](weapon-rendering.md)); PAUSABLE, stops while the tree is paused |
 | `interface` | `Interface` (was `CanvasLayer` until F2-02) | `Main/Interface` | yes | Menus and HUD; processes while paused |
 | `player_scene`, `stage_scenes`, `stage_flight_bounds` | see [menus-session.md](menus-session.md) | set in `main.tscn` since F2-04 | `player_scene` only | The ship, the stage scenes by id, and Stage 1's Flight Volume |
 

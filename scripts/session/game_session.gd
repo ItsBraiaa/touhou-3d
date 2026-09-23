@@ -28,8 +28,9 @@ const SCREEN_BY_ACTION: Dictionary[StringName, StringName] = {
 ## Holds the loaded stage and the player. Stays at the world origin: stage coordinates
 ## are world coordinates.
 @export var world_root: Node3D
-## Root of the projectile system (ADR-0004). Emptied whenever a stage is unloaded.
-@export var projectile_root: Node3D
+## The [ProjectileSystem] on `ProjectileRoot` (ADR-0004): set up for every stage load,
+## cleared on every unload.
+@export var projectile_system: ProjectileSystem
 ## Holds menus and the HUD. Processes while the tree is paused.
 @export var interface: Interface
 ## Root of the audio controller. Processes while the tree is paused.
@@ -215,18 +216,19 @@ func _load_stage(stage_id: StringName) -> bool:
 	world_root.add_child(_player)
 	_player.setup(bounds)
 	interface.get_hud().bind(_combat_state, _player.targeting, _player.camera_rig.camera)
+	projectile_system.setup(bounds, _player)
 	return true
 
 
-## Takes the stage, the ship and every projectile out of the tree at once, so a stage
-## loaded in the same frame never shares it with them, and frees them at the end of the
-## frame.
+## Takes the stage and the ship out of the tree at once, so a stage loaded in the same
+## frame never shares it with them, frees them at the end of the frame, and removes every
+## Projectile.
 func _unload_stage() -> void:
 	interface.get_hud().unbind()
-	for root: Node in [world_root, projectile_root]:
-		for child: Node in root.get_children():
-			root.remove_child(child)
-			child.queue_free()
+	for child: Node in world_root.get_children():
+		world_root.remove_child(child)
+		child.queue_free()
+	projectile_system.clear_all()
 	_player = null
 
 
@@ -264,8 +266,8 @@ func _validate_exports() -> bool:
 	var missing: PackedStringArray = []
 	if world_root == null:
 		missing.append("world_root")
-	if projectile_root == null:
-		missing.append("projectile_root")
+	if projectile_system == null:
+		missing.append("projectile_system")
 	if interface == null:
 		missing.append("interface")
 	if audio == null:
