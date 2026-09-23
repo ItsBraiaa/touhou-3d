@@ -15,6 +15,25 @@ Action required by <other agent>: <what they must do, or "none">
 
 ---
 
+## 2026-09-23 22:10 — Claude (trunk) — F4-02: HUD bound to CombatState and Targeting [shared]
+State: CODE_READY
+Files:
+- `scripts/ui/hud.gd`: Astra's placeholder replaced by `class_name Hud extends Control`, attached to the root of `scenes/ui/hud.tscn` (the scene itself is unchanged).
+- `scripts/ui/interface.gd` (`get_hud() -> Hud`; a non-`Hud` root is refused), `scripts/session/game_session.gd` (one `CombatState`, `get_combat_state()`, start, pause, HUD bind and unbind).
+- `scenes/dev/arena_harness.gd` and `.tscn`: new `HudLayer/HUD`, bound to a harness-owned `CombatState`.
+- New `tests/scene/test_hud_contract.gd`; four cases in `tests/scene/test_game_session_flow.gd`.
+- Docs: `docs/engineering/combat-hud.md` ("Hud contract"), new `docs/validation/combat-hud.md` and `combat-hud-marker.png`, `docs/GUIDE.md` Section 6 `hud.gd` row and Section 7 "Combat state changed" row, ROADMAP F4-02 row.
+
+Change:
+- The HUD renders the player panel from the Session's `CombatState` (Health bar and `"90%"`, Shield and Bomb icons lit or dim, Power Level, Power Progress) and centers `TargetMarker` on the locked target's projected `HitVolume`, hidden with no lock, a freed target or a target behind the camera. It calls no `CombatState` method but the getters.
+- A Run from the main menu now shows real entry values: 100 %, Shield, two Bombs, Power Level 1, or 2 for a Direct Stage 2.
+
+Why: F4-02. The HUD observes and never mutates (ENGINEERING_BRIEF 4.I); F4-03, F6-03 and F7 build on this binding.
+
+Action required by Astra:
+- None to integrate. Every GUIDE Section 15 path under `PlayerStatus`, and `TargetMarker`, is now load-bearing: renaming one needs a matching code change.
+- D-07 Part B, optional: review `dim_modulate` (alpha 0.25, an export on the HUD root) and say if Power Level 3 should read differently than a full `PowerProgress` bar.
+
 ## 2026-09-23 21:00 — Claude (trunk) — Sprint re-routed: six lanes, per-ticket models [shared]
 State: PLANNED
 Files:

@@ -405,6 +405,77 @@ func test_pause_and_resume_need_a_stage_in_play() -> void:
 	assert_eq(_interface.current_screen(), ScreenRouter.PAUSE, "a Pause the Session did not open stays")
 
 
+## F4-02: a Run starts the Session's CombatState at the stage's entry Power Level, and the
+## HUD shows it. Direct Stage 2 enters at Power Level 2 (PLANEJAMENTO Section 4).
+func test_a_run_starts_the_combat_state_and_binds_the_hud() -> void:
+	if not assert_not_null(_main, "GameSession"):
+		return
+	var combat := _main.get_combat_state()
+	_request(&"start_direct_stage", {"stage": &"stage_02"})
+	if not assert_not_null(_ship(), "PlayerShip in Stage 2"):
+		return
+	assert_eq(combat.get_power_level(), 2, "Direct Stage 2 starts at Power Level 2")
+	assert_eq([combat.get_health(), combat.has_shield(), combat.get_bombs()], [CombatState.MAX_HEALTH, true, CombatState.MAX_BOMBS])
+	var hud := _interface.get_hud()
+	assert_eq((hud.get_node(^"PlayerStatus/PowerValue") as Label).text, "2", "the HUD shows Power Level 2")
+	assert_eq((hud.get_node(^"PlayerStatus/HealthValue") as Label).text, "100%")
+	assert_eq(_connections(combat, &"power_changed", hud), 1, "the HUD observes the CombatState")
+	assert_eq(_connections(_ship().targeting, &"target_changed", hud), 1, "and the ship's Targeting")
+
+
+func test_pause_pauses_the_combat_state() -> void:
+	if not assert_not_null(_main, "GameSession"):
+		return
+	_request(&"start_direct_stage", {"stage": &"stage_01"})
+	var combat := _main.get_combat_state()
+	assert_false(combat.is_paused())
+	_press_pause()
+	assert_true(combat.is_paused(), "paused with the tree")
+	_request(&"resume")
+	assert_false(combat.is_paused(), "and resumed with it")
+
+
+## Restart gives a new ship and the stage's entry resources, and the HUD follows the new
+## ship's Targeting only.
+func test_restart_rebinds_the_hud_to_the_new_ship() -> void:
+	if not assert_not_null(_main, "GameSession"):
+		return
+	_request(&"start_direct_stage", {"stage": &"stage_01"})
+	var old_ship := _ship()
+	if not assert_not_null(old_ship, "PlayerShip"):
+		return
+	var combat := _main.get_combat_state()
+	combat.take_hit()
+	var hud := _interface.get_hud()
+	var shield := hud.get_node(^"PlayerStatus/Shield") as CanvasItem
+	assert_eq(shield.modulate, hud.dim_modulate, "the hit broke the Shield on the HUD")
+	_press_pause()
+	_request(&"restart_stage")
+	var ship := _ship()
+	if not assert_not_null(ship, "a PlayerShip after the restart"):
+		return
+	assert_eq(_connections(old_ship.targeting, &"target_changed", hud), 0, "the old ship is let go")
+	assert_eq(_connections(ship.targeting, &"target_changed", hud), 1, "the new one is followed once")
+	assert_eq(_connections(combat, &"shield_changed", hud), 1, "the CombatState still once")
+	assert_true(combat.has_shield(), "the stage's entry resources again")
+	assert_false(combat.is_paused())
+	assert_eq(shield.modulate, hud.lit_modulate, "and on the HUD")
+
+
+func test_return_to_menu_unbinds_the_hud() -> void:
+	if not assert_not_null(_main, "GameSession"):
+		return
+	_request(&"start_direct_stage", {"stage": &"stage_01"})
+	var hud := _interface.get_hud()
+	var combat := _main.get_combat_state()
+	_press_pause()
+	_request(&"return_to_menu")
+	for signal_name: StringName in [&"health_changed", &"shield_changed", &"bombs_changed", &"power_changed"]:
+		assert_eq(_connections(combat, signal_name, hud), 0, "%s disconnected" % signal_name)
+	assert_false((hud.get_node(^"TargetMarker") as CanvasItem).visible, "no marker left on screen")
+	assert_false(combat.is_paused(), "unpaused with the tree")
+
+
 func _request(action: StringName, payload: Dictionary = {}) -> void:
 	_interface.action_requested.emit(action, payload)
 
@@ -433,6 +504,15 @@ func _stage() -> Node3D:
 
 func _ship() -> PlayerController:
 	return _world_root.get_node_or_null(^"PlayerShip") as PlayerController
+
+
+## How many connections of [param source]'s [param signal_name] reach [param target].
+func _connections(source: Object, signal_name: StringName, target: Object) -> int:
+	var count := 0
+	for connection: Dictionary in source.get_signal_connection_list(signal_name):
+		if (connection["callable"] as Callable).get_object() == target:
+			count += 1
+	return count
 
 
 ## The names of the visible screens under `Interface`, in child order.
