@@ -1,6 +1,6 @@
 # F4-03 Boss panel, attack cue and threat API
 
-Status: todo
+Status: done
 Type: adapter
 parallel-safe: no
 Depends on: F4-02
@@ -69,6 +69,13 @@ Boss rules, Phase transitions and bullet clears (F12-01, F12-02); producing thre
 ## Handoff notes for Astra
 
 With two Phases, `Phase3` is hidden and the right third of `BossStatus` stays empty (bars at x 16, 214, 412). If that reads badly, author a two-Phase arrangement (for example `Phase1` and `Phase2` widened) and say which node positions the code should switch between; the code only toggles visibility today. `completed_phase_modulate` is Claude's proposal. Threat indicators are side warnings only; vertical and behind-the-player coverage stays as GUIDE Section 15 describes (not a full 3D warning system).
+
+## Outcome (2026-09-23)
+
+Delivered in lane trunk, solo, as specified: `show_boss`, `set_phase_health`, `show_attack_cue`, `hide_boss`, `show_threat` and the `completed_phase_modulate` export on `Hud`; `unbind()` clears the panel, the cue and both threats; cue and threat timers stand still while the tree is paused.
+
+- **No new tests.** The user's sprint rule of 2026-09-23 (relayed by the planning session) drops the "Tests required" section. The ten listed cases are covered instead by `scenes/dev/hud_harness.tscn`, a self-checking scripted run (26 checks, `HUD_HARNESS_OK` headless and windowed) that also captures `combat-hud-boss-3.png` and `combat-hud-boss-2.png`. The existing suite stays green at 225.
+- **Readings:** a Phase raised above 0 is lit again; a node's timer runs while it is visible, so a cue of 0 seconds hides on the next unpaused frame; with two Phases the right third of the panel stays empty (handoff note below).
 
 ## Kickoff prompt
 

@@ -15,6 +15,26 @@ Action required by <other agent>: <what they must do, or "none">
 
 ---
 
+## 2026-09-23 22:50 — Claude (trunk) — F4-03: HUD boss panel, attack cue and threat API [shared]
+State: CODE_READY
+Files:
+- `scripts/ui/hud.gd` (on the root of Astra's `scenes/ui/hud.tscn`, which is unchanged).
+- New `scenes/dev/hud_harness.tscn` and `.gd`; new `docs/validation/combat-hud-boss-3.png` and `combat-hud-boss-2.png`.
+- Docs: `docs/engineering/combat-hud.md`, `docs/validation/combat-hud.md`, `docs/GUIDE.md` Section 6 `hud.gd` row and Section 7 "Boss phase changed" row, ROADMAP F4-03 row.
+
+Change:
+- `Hud` gains `show_boss(display_name, phase_count)` (2 or 3 bars, else clamped), `set_phase_health(phase_index, ratio)` (dimmed at 0), `show_attack_cue(text, seconds)`, `hide_boss()`, and `show_threat(side, seconds)` (-1 left, +1 right, each on its own timer).
+- Cue and threat timers stand still while the tree is paused. `unbind()` clears all of it, so a stage unload leaves nothing on screen.
+- F10-01 (threats) and F12-03 (bosses) can now route to the HUD with no further HUD work.
+- No new test file: the user's no-new-tests rule for the sprint (relayed 2026-09-23) replaced the ticket's tests with the self-checking harness run.
+
+Why: F4-03.
+
+Action required by Astra (D-07 Part B, optional):
+- With two Phases, `Phase3` is hidden and the right third of `BossStatus` stays empty (`combat-hud-boss-2.png`). If that reads badly, author a two-Phase arrangement and say which node positions the code should switch between.
+- Review `completed_phase_modulate` (alpha 0.3, an export on the HUD root). A spent Phase currently reads as an empty track.
+- `BossStatus`, `BossName`, `Phase1`..`Phase3`, `AttackName`, `ThreatLeft` and `ThreatRight` are now load-bearing paths.
+
 ## 2026-09-23 22:10 — Claude (trunk) — F4-02: HUD bound to CombatState and Targeting [shared]
 State: CODE_READY
 Files:

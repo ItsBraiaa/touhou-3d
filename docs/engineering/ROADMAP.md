@@ -42,7 +42,7 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | F4 | Combat state and HUD | `combat-hud` | 00 plan | docs | no | — | done (one-pass planning, 2026-09-23; 01 was written and delivered separately) |
 | | | | 01 combat-state-core | core | yes | — | done |
 | | | | 02 hud-binding-and-target-marker | adapter | no | trunk | done (2026-09-23: `Hud` bound to the Session's `CombatState` and each ship's `Targeting`; marker verified in the harness) |
-| | | | 03 boss-panel-and-attack-cue-api | adapter | no | trunk | todo |
+| | | | 03 boss-panel-and-attack-cue-api | adapter | no | trunk | done (2026-09-23: boss panel, cue and threat API on `Hud`; verified by `scenes/dev/hud_harness.tscn`, no new tests per the sprint rule) |
 | F5 | Projectile Field | `projectile-field` | 00 plan | docs | no | — | done (one-pass planning) |
 | | | | 01 field-core-spawn-move-cull | core | yes | path | done |
 | | | | 02 core-hit-sweep-and-graze-rules | core | yes (after 01, same file) | path | todo |
