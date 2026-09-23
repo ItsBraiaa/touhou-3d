@@ -1,6 +1,6 @@
 # D-04 Stage 2 boss scenes
 
-Status: todo
+Status: done
 Type: design
 Owner: Astra (GPT Sol)
 Lane: sol
@@ -82,6 +82,10 @@ One `docs/HANDOFF_LOG.md` entry, `— Astra (sol) — Stage 2 boss scenes (D-04)
 | --- | --- |
 | F12-06 (sol) | Attach `boss_controller.gd` to `tempest_sentinel.tscn` and set its exports. Point `stage_02.tscn`'s `actor_scenes[&"tempest_sentinel"]` at it. |
 | F12-07 (sol) | The same for `storm_guardian.tscn` and `actor_scenes[&"storm_guardian"]`. |
+
+## Outcome
+
+Both scenes and the Dragon_Evolved runtime copy are delivered. `tools/validate_boss_scenes.gd` checked all three boss prefabs with `BOSS_SCENES_QA failures=0` in headless and windowed runs; the existing test suite and main-scene boot passed through `tools/lane.ps1 land`. The S2-04 and S2-07 approach screenshots were inspected against the Stage 2 palette. Exact tree paths, clip choices, sphere dimensions, emitter positions and the independent Sentinel ornament clip are recorded in `docs/ENEMY_VISUAL_HANDOFF.md` and the handoff log. Controller attachment and exported values remain F12-06/F12-07 integration work.
 
 ## Kickoff prompt
 

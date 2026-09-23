@@ -43,3 +43,16 @@ Original source files remain untouched. Selected runtime copies are under `asset
 | Defeat | `Death` | Non-looping collapse, 0.667 s. |
 
 Godot 4.7.2 imported the Ghost and the copied atlas. The offline QA in `tools/validate_boss_scenes.gd` reported zero failures headless and windowed; `docs/validation/boss-scenes.log` records the result. [The S1-07 dusk capture](validation/lantern-guardian.png) was inspected at a 35-unit approach distance: the silhouette, eyes, amber lanterns and central gap remain distinct. The lantern ring was shifted half a step so no lantern covers the face from this angle. Trunk F12-03 attaches `boss_controller.gd` and sets its exports; the dev boss remains untouched until then.
+
+### Stage 2 bosses (D-04, SCENE_READY)
+
+Both prefabs use the same `Enemy` tree as Lantern Guardian: identity `Node3D` root with no script or gameplay values, `VisualRoot/Model`, `HitVolume/Collision`, and `Emitters/Main`. Both `HitVolume` nodes are `Area3D` on layer 16, mask 0, with monitoring and monitorable off. No collision object sits under either `VisualRoot`. Their model players are at `VisualRoot/Model/AnimationPlayer`.
+
+| Scene | Model and visual scale | Hit sphere (radius; center relative to Enemy) | Emitter | Presentation |
+| --- | --- | --- | --- | --- |
+| `scenes/enemies/tempest_sentinel.tscn` | Goleling, `(3.1, 3.1, 3.1)` | 2.5; `(0, 6.9, 0)` | `(0, 7.1, -1.7)` | Slate body and three cyan/violet `VisualRoot/Ornaments/Ring1..3` meshes. `VisualRoot/OrnamentPlayer` loops and autoplays `storm_orbit` over 9 s, independently of the model player. |
+| `scenes/enemies/storm_guardian.tscn` | Dragon_Evolved, `(5, 5, 5)` | 5.0; `(0, 8.8, 0)` | `(0, 9.5, -3.5)` | Lavender-blue body with blue and violet `VisualRoot/StormSigils/Sigil1..2` meshes. |
+
+For each model player, idle is `Flying_Idle` (loop/autoplay), step cue is `Punch` (arm windup), Phase change gesture is `Yes` (head and wing lift, reserved for a later `phase_clip` export), and defeat is `Death` (non-looping). `Punch` is a visual cue only; the controller determines attack timing. The source glTFs are unchanged; the body colors and storm meshes live in these scenes.
+
+The validator reported zero failures for all three boss scenes headless and windowed. [The S2-04 capture](validation/tempest-sentinel.png) at 38 units shows a larger Sentry silhouette and distinct energy orbit against the Stage 2 gate palette. [The S2-07 capture](validation/storm-guardian.png) at 52 units shows the Dragon silhouette and restrained storm sigils against the summit palette; the wings stay above the near-player projectile space. F12-06 and F12-07 attach `boss_controller.gd`, set its exports, and point `stage_02.tscn` actor scene entries at these prefabs.

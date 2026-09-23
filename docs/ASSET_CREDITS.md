@@ -11,8 +11,11 @@
 
 - Creator: Quaternius; Ultimate Monsters, Flying/glTF. Source: https://quaternius.com/packs/ultimatemonsters.html.
 - Stage 1 Lantern Guardian: approved `All models/Ultimate Monsters/Flying/glTF/Ghost.gltf`, copied byte-for-byte to `assets/models/bosses/Ghost.gltf`. Its atlas is embedded in the glTF; an unchanged source atlas copy is preserved at `assets/models/bosses/Ghost_Atlas_Monsters.png`.
+- Stage 2 Storm Guardian: approved `All models/Ultimate Monsters/Flying/glTF/Dragon_Evolved.gltf`, copied byte-for-byte to `assets/models/bosses/Dragon_Evolved.gltf`. Its atlas is embedded in the glTF; an unchanged source atlas copy is preserved at `assets/models/bosses/Dragon_Evolved_Atlas_Monsters.png`.
+- Stage 2 Tempest Sentinel reuses the Goleling runtime copy credited above; no additional model source is introduced.
 - License: CC0, preserved at `assets/licenses/quaternius-ultimate-monsters.txt` (the supplied file's heading says Ultimate Platformer Pack).
 - Changes: imported model scale 2.6 and original amber lantern meshes/orbit are authored in `scenes/enemies/lantern_guardian.tscn`; the source glTF and atlas are unchanged.
+- Stage 2 changes: scene-level slate and lavender-blue materials, scales, and original storm rings and sigils are authored in `scenes/enemies/tempest_sentinel.tscn` and `scenes/enemies/storm_guardian.tscn`; the source glTFs and atlases are unchanged.
 
 ## Player ship
 

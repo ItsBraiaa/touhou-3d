@@ -58,7 +58,7 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | | | | 03 pickup-adapter-and-rewards | adapter | no | path | todo |
 | F8 | Progression cores and content | `progression-core` | 00 plan | docs | no | — | done (one-pass planning) |
 | | | | 01 definition-schemas-and-content-validation | core | yes | oc-b | done (typed schemas and validators landed 2026-09-23; no tests per sprint rule) |
-| | | | 02 encounter-machine-core | core | yes | oc-b | todo |
+| | | | 02 encounter-machine-core | core | yes | oc-b | done (2026-09-23: `EncounterMachine` Rules Core landed; no tests per sprint rule) |
 | | | | 03 snapshot-capture-restore | core | yes | oc-b | todo |
 | | | | 04 stage-01-content-draft | content | yes | oc-b | todo |
 | F9 | Enemies | `enemies` | 00 plan | docs | no | — | done (one-pass planning) |
@@ -92,7 +92,7 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | D | Design sprint (Astra) | `design-sprint` | 01 sfx-selection-and-import | design | — | sol | todo |
 | | | | 02 combat-visuals | design | — | sol | todo |
 | | | | 03 lantern-guardian-scene | design | — | sol | done (2026-09-23: Ghost prefab, clips and dusk render verified) |
-| | | | 04 stage-2-boss-scenes | design | — | sol | todo |
+| | | | 04 stage-2-boss-scenes | design | — | sol | done (2026-09-23: Tempest Sentinel and Storm Guardian prefabs, clips and Stage 2 renders verified) |
 | | | | 05 stage-1-tuning-and-pacing | design | — | sol | todo |
 | | | | 06 stage-2-content-review | design | — | sol | todo |
 | | | | 07 shrine-lighting-and-boss-rulings | design | — | sol | doing (Part B rulings delivered; Parts A and C await F12-03) |
@@ -139,6 +139,8 @@ Dependencies Claude has on scene and content work. These are needs by Feature, n
 | F14 | Nothing new; credits and licenses must already cover every integrated asset. F14-02 lists any gaps it finds. |
 
 ## Received from Astra
+
+2026-09-23: D-04 Tempest Sentinel and Storm Guardian prefabs are SCENE_READY at `scenes/enemies/tempest_sentinel.tscn` and `scenes/enemies/storm_guardian.tscn`; tree, clips, hit spheres, emitters and render notes are in [ENEMY_VISUAL_HANDOFF.md](../ENEMY_VISUAL_HANDOFF.md). Sol F12-06 and F12-07 own controller attachment and Stage 2 actor scene wiring.
 
 2026-09-23: D-03 Lantern Guardian prefab is SCENE_READY at `scenes/enemies/lantern_guardian.tscn`; tree, clip names, hit sphere and emitter are in [ENEMY_VISUAL_HANDOFF.md](../ENEMY_VISUAL_HANDOFF.md). Trunk F12-03 owns the script attachment and scene export wiring.
 
