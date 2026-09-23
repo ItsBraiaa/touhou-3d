@@ -15,6 +15,13 @@ Action required by <other agent>: <what they must do, or "none">
 
 ---
 
+## 2026-09-23 20:24 — OpenCode (oc-a) — AudioLimiter generated UID
+State: docs
+Files: `scripts/audio/audio_limiter.gd.uid`, `docs/HANDOFF_LOG.md`
+Change: Committed the stable Godot script UID generated during the F13-01 land import.
+Why: The lane gate requires generated `.uid` metadata to be tracked beside its script.
+Action required by Astra: None.
+
 ## 2026-09-23 20:22 — OpenCode (oc-a) — F5-04 PatternDefinition and PatternEmitter
 State: CODE_READY
 Files: `scripts/definitions/pattern_definition.gd`, `scripts/combat/pattern_emitter.gd`, `docs/engineering/projectile-field.md`, `docs/engineering/README.md`, `docs/engineering/ROADMAP.md`, `.scratch/projectile-field/issues/04-pattern-emitter-core.md`
