@@ -47,7 +47,7 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | | | | 01 field-core-spawn-move-cull | core | yes | path | done |
 | | | | 02 core-hit-sweep-and-graze-rules | core | yes (after 01, same file) | path | done (no unit tests, by the sprint rule; ruling 5 pending) |
 | | | | 03 bomb-phase-clears-and-hit-spheres | core | yes (after 02, same file) | path | done (no unit tests, by the sprint rule) |
-| | | | 04 pattern-emitter-core | core | yes | oc-a | todo |
+| | | | 04 pattern-emitter-core | core | yes | oc-a | done (no new tests, by the sprint rule) |
 | F6 | Weapon and rendering | `weapon-rendering` | 00 plan | docs | no | — | done (one-pass planning) |
 | | | | 01 rendering-spike | spike | no | — | cut (folded into 02 by the sprint plan: MultiMesh by default, benchmark inside 02) |
 | | | | 02 projectile-system-adapter | adapter | no | trunk | done (2026-09-23: MultiMesh ProjectileSystem on ProjectileRoot, capacity 2048; 3000 Projectiles at 1118 FPS with other lanes running; swap pending D-02) |

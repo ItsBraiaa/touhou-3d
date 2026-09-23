@@ -15,6 +15,13 @@ Action required by <other agent>: <what they must do, or "none">
 
 ---
 
+## 2026-09-23 20:22 — OpenCode (oc-a) — F5-04 PatternDefinition and PatternEmitter
+State: CODE_READY
+Files: `scripts/definitions/pattern_definition.gd`, `scripts/combat/pattern_emitter.gd`, `docs/engineering/projectile-field.md`, `docs/engineering/README.md`, `docs/engineering/ROADMAP.md`, `.scratch/projectile-field/issues/04-pattern-emitter-core.md`
+Change: Added typed pattern definitions and a Node-free emitter for timed hostile ring, fan, spiral, burst and sampled-aim volleys. Documented the public contract and STAGE_DESIGN mapping. No tests were added per the sprint rule.
+Why: F5-04 makes shared pattern data and emission reusable by the enemy and boss cores.
+Action required by Astra: Pattern field defaults are engineering proposals; authored `.tres` patterns remain with the content tickets.
+
 ## 2026-09-23 20:17 — OpenCode (oc-a) — F13-01 AudioLimiter core
 State: CODE_READY
 Files: `scripts/audio/audio_limiter.gd`, `docs/engineering/audio.md`, `docs/engineering/README.md`, `docs/engineering/ROADMAP.md`, `.scratch/audio/issues/01-audio-limiter-core.md`
