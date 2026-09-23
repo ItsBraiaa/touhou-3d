@@ -18,19 +18,25 @@ signal action_requested(action: StringName, payload: Dictionary)
 ## The eight scenes of GUIDE Section 14, each with a [MenuController] root. Order does
 ## not matter: each is identified by its root node name.
 @export var menu_scenes: Array[PackedScene] = []
-## GUIDE Section 15's combat HUD, drawn below every menu.
+## GUIDE Section 15's combat HUD, drawn below every menu. Its root must be a [Hud].
 @export var hud_scene: PackedScene
 
 var _router := ScreenRouter.new()
 var _menus: Dictionary[StringName, MenuController] = {}
-var _hud: Control
+var _hud: Hud
 
 
 func _ready() -> void:
 	if not _validate_exports():
 		process_mode = Node.PROCESS_MODE_DISABLED
 		return
-	_hud = hud_scene.instantiate()
+	var hud_node := hud_scene.instantiate()
+	_hud = hud_node as Hud
+	if _hud == null:
+		push_error("%s: 'hud_scene' %s does not have a Hud root" % [get_path(), hud_scene.resource_path])
+		hud_node.free()
+		process_mode = Node.PROCESS_MODE_DISABLED
+		return
 	# Added first, so every menu, overlays included, draws above it.
 	add_child(_hud)
 	_hud.hide()
@@ -90,8 +96,9 @@ func is_gameplay_covered() -> bool:
 	return _router.is_gameplay_covered()
 
 
-## The HUD instance, for the Session to bind (F4). Null when [member hud_scene] is unset.
-func get_hud() -> Control:
+## The HUD instance, for the Session to bind. Null when [member hud_scene] is unset or
+## its root is not a [Hud].
+func get_hud() -> Hud:
 	return _hud
 
 

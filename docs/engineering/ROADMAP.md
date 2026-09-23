@@ -41,7 +41,7 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | | | | 04 settings-to-camera-wiring | integration | no | trunk (part 1: path) | todo |
 | F4 | Combat state and HUD | `combat-hud` | 00 plan | docs | no | — | done (one-pass planning, 2026-09-23; 01 was written and delivered separately) |
 | | | | 01 combat-state-core | core | yes | — | done |
-| | | | 02 hud-binding-and-target-marker | adapter | no | trunk | todo |
+| | | | 02 hud-binding-and-target-marker | adapter | no | trunk | done (2026-09-23: `Hud` bound to the Session's `CombatState` and each ship's `Targeting`; marker verified in the harness) |
 | | | | 03 boss-panel-and-attack-cue-api | adapter | no | trunk | todo |
 | F5 | Projectile Field | `projectile-field` | 00 plan | docs | no | — | done (one-pass planning) |
 | | | | 01 field-core-spawn-move-cull | core | yes | path | done |

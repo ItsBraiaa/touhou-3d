@@ -4,7 +4,8 @@ extends Node
 ## menus' requests from [member interface]: opens their screens, starts a Campaign or a
 ## Direct Stage by loading the stage and the player under [member world_root], pauses and
 ## resumes, restarts the stage, returns to the main menu and quits. Owns the [RunState]
-## and ticks its Active Time from `_physics_process` while the tree runs.
+## and ticks its Active Time from `_physics_process` while the tree runs, and owns the
+## [CombatState], started at every stage entry and bound to the HUD with each new ship.
 ##
 ## Nothing here decides gameplay: movement, targeting and the Run's accounting belong to
 ## their cores. Stage completion, defeat and results arrive with F10 and F11.
@@ -45,6 +46,8 @@ const SCREEN_BY_ACTION: Dictionary[StringName, StringName] = {
 @export var stage_flight_bounds: Dictionary[StringName, AABB] = {}
 
 var _run_state := RunState.new()
+## One for the Session's lifetime, started again at every stage entry.
+var _combat_state := CombatState.new()
 ## The ship of the stage in play, or null while none is loaded.
 var _player: PlayerController
 
@@ -89,6 +92,12 @@ func get_run_state() -> RunState:
 	return _run_state
 
 
+## The player's combat resources, for tests and dev tools to read. The Session starts
+## and pauses it; the combat adapter (F7) feeds it.
+func get_combat_state() -> CombatState:
+	return _combat_state
+
+
 func _on_action_requested(action: StringName, payload: Dictionary) -> void:
 	if action in SCREEN_BY_ACTION:
 		interface.show_screen(SCREEN_BY_ACTION[action])
@@ -118,6 +127,7 @@ func _start_run(mode: RunState.RunMode, stage: StringName) -> void:
 	if not _load_stage(stage):
 		return
 	_run_state.start(mode, stage)
+	_combat_state.start(_run_state.starting_power_level())
 	_run_state.begin_attempt()
 	interface.show_home(ScreenRouter.HUD)
 
@@ -129,6 +139,7 @@ func _restart_stage() -> void:
 	var stage: StringName = _run_state.stage_result()["stage"]
 	_set_paused(false)
 	_run_state.restart_stage()
+	_combat_state.start(_run_state.starting_power_level())
 	_load_stage(stage)
 	_run_state.begin_attempt()
 	interface.show_home(ScreenRouter.HUD)
@@ -165,6 +176,7 @@ func _resume() -> void:
 func _set_paused(paused: bool) -> void:
 	get_tree().paused = paused
 	_run_state.set_paused(paused)
+	_combat_state.set_paused(paused)
 	if _player != null:
 		_player.set_controls_enabled(not paused)
 
@@ -202,6 +214,7 @@ func _load_stage(stage_id: StringName) -> bool:
 	_player.transform = start.global_transform
 	world_root.add_child(_player)
 	_player.setup(bounds)
+	interface.get_hud().bind(_combat_state, _player.targeting, _player.camera_rig.camera)
 	return true
 
 
@@ -209,6 +222,7 @@ func _load_stage(stage_id: StringName) -> bool:
 ## loaded in the same frame never shares it with them, and frees them at the end of the
 ## frame.
 func _unload_stage() -> void:
+	interface.get_hud().unbind()
 	for root: Node in [world_root, projectile_root]:
 		for child: Node in root.get_children():
 			root.remove_child(child)

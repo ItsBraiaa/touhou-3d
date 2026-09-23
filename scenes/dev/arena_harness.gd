@@ -6,7 +6,8 @@ extends Node3D
 ## [method PlayerController.setup], and shows the live position, speed, Focus state,
 ## edge-proximity value, camera framing and Target Lock so a manual flight check has
 ## numbers to read. The lock itself is the ship's own: [Targeting] reads `lock_target` and
-## `next_target`, and the ship hands the result to its [CameraRig] (F1-04). Dev only: it
+## `next_target`, and the ship hands the result to its [CameraRig] (F1-04). The combat HUD
+## shows a harness-owned [CombatState] and marks the locked target (F4-02). Dev only: it
 ## is never loaded by `scenes/main.tscn` and holds no gameplay rule.
 
 
@@ -18,10 +19,14 @@ const MAX_CORNER_META := &"max_corner"
 @export var arena: Node3D
 ## Label the live flight values are written to.
 @export var readout: Label
+## The combat HUD instance under `HudLayer`.
+@export var hud: Hud
 
 var _player: PlayerController
 var _rig: CameraRig
 var _edge_proximity: float = 0.0
+## Stands in for the Session's: started at Power Level 1, and reused by the weapon (F6-03).
+var _combat_state := CombatState.new()
 
 
 func _ready() -> void:
@@ -35,6 +40,8 @@ func _ready() -> void:
 		push_warning("%s: FlightBounds metadata is missing; flying without a Flight Volume" % get_path())
 	else:
 		_player.setup(bounds)
+	_combat_state.start(CombatState.MIN_POWER_LEVEL)
+	hud.bind(_combat_state, _player.targeting, _rig.camera)
 
 
 func _process(_delta: float) -> void:
@@ -49,6 +56,8 @@ func _resolve_scene() -> bool:
 		missing.append("arena")
 	if readout == null:
 		missing.append("readout")
+	if hud == null:
+		missing.append("hud")
 	for field: String in missing:
 		push_error("%s: required export '%s' is not set" % [get_path(), field])
 	if not missing.is_empty():
