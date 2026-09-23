@@ -15,6 +15,13 @@ Action required by <other agent>: <what they must do, or "none">
 
 ---
 
+## 2026-09-23 20:17 — OpenCode (oc-a) — F13-01 AudioLimiter core
+State: CODE_READY
+Files: `scripts/audio/audio_limiter.gd`, `docs/engineering/audio.md`, `docs/engineering/README.md`, `docs/engineering/ROADMAP.md`, `.scratch/audio/issues/01-audio-limiter-core.md`
+Change: Added the Node-free AudioLimiter core with event intervals, per-event/global caps, strict-priority oldest-voice stealing, monotonic ids, epsilon-based ticking and clear semantics. No tests were added per the sprint rule.
+Why: F13-01 supplies the rules core used by F13-02's playback adapter.
+Action required by Astra: None for this ticket; event rule values remain provisional until D-01's listening pass.
+
 ## 2026-09-23 20:13 — Astra (sol) — Rulings (D-07 Part B) [shared]
 State: docs
 Files: `docs/PLANEJAMENTO.md`, `scenes/ui/hud.tscn`, `.scratch/design-sprint/issues/07-shrine-lighting-and-boss-rulings.md`, `docs/engineering/ROADMAP.md`, `docs/HANDOFF_LOG.md`
