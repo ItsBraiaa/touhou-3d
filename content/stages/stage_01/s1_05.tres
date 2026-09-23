@@ -1,0 +1,33 @@
+[gd_resource type="Resource" script_class="EncounterDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/definitions/reward_definition.gd" id="1_s5i30"]
+[ext_resource type="Script" path="res://scripts/definitions/encounter_definition.gd" id="2_w7vhf"]
+[ext_resource type="Script" path="res://scripts/definitions/wave_definition.gd" id="3_mjg13"]
+
+[sub_resource type="Resource" id="Resource_m41tf"]
+script = ExtResource("1_s5i30")
+count = 5
+origin_marker = NodePath("RewardOrigin")
+
+[sub_resource type="Resource" id="Resource_hmwpj"]
+script = ExtResource("3_mjg13")
+spawn_markers = Array[NodePath]([NodePath("Spawns/Wave1_Spirit1"), NodePath("Spawns/Wave1_Spirit2"), NodePath("Spawns/Wave1_Sentry1")])
+enemy_kinds = Array[StringName]([&"spirit", &"spirit", &"sentry"])
+
+[sub_resource type="Resource" id="Resource_prebp"]
+script = ExtResource("3_mjg13")
+spawn_markers = Array[NodePath]([NodePath("Spawns/Wave2_Spirit1"), NodePath("Spawns/Wave2_Spirit2"), NodePath("Spawns/Wave2_Sentry1")])
+enemy_kinds = Array[StringName]([&"spirit", &"spirit", &"sentry"])
+activation = 1
+delay = 1.0
+
+[resource]
+script = ExtResource("2_w7vhf")
+id = &"S1-05"
+next_id = &"S1-06"
+completion = 1
+waves = Array[ExtResource("3_mjg13")]([SubResource("Resource_hmwpj"), SubResource("Resource_prebp")])
+rewards = Array[ExtResource("1_s5i30")]([SubResource("Resource_m41tf")])
+gate_id = &"Gate_S1_05"
+checkpoint_id = &"CP1-A"
+metadata/dev = true

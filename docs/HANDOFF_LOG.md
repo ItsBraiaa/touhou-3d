@@ -15,6 +15,13 @@ Action required by <other agent>: <what they must do, or "none">
 
 ---
 
+## 2026-09-23 20:56 — OpenCode (oc-b) — F8-04 Stage 1 content draft (dev) [shared]
+State: dev
+Files: `content/stages/stage_01/stage_01.tres`, `s1_01.tres` … `s1_07.tres`, `cp1_a.tres`, `cp1_b.tres`, `docs/engineering/progression-core.md`, `docs/engineering/ROADMAP.md`, `.scratch/progression-core/issues/04-stage-01-content-draft.md`, `docs/HANDOFF_LOG.md`
+Change: Transcribed STAGE_DESIGN's Stage 1 table into typed `.tres` Definitions that validate: seven Encounters in route order with the `next_id` chain, completion conditions (S1-03 with `requires_exit`), waves whose markers match `scenes/stages/stage_01.tscn` exactly (17 common enemies plus `Wave1_Boss1`), gates `Gate_S1_02` to `Gate_S1_05`, CP1-A guarding S1-05 and CP1-B guarding S1-07, and rewards of 5 + 5 POWER at `RewardOrigin` plus one SHIELD at `ShieldPickup`. Every file is flagged `metadata/dev = true`. Created once with a headless scratch script that is not committed; no generator may ever overwrite Astra's tuning. No tests were written per the sprint rule.
+Why: The Director (F10-01) loads `stage_01.tres`; Astra tunes the values while the approved structure stays.
+Action required by Astra: these files are yours. Free to change: the AFTER_PREVIOUS_WAVE delay (draft proposal 1.0 s) and the checkpoint `display_name`s (currently `"CP1-A"`/`"CP1-B"`, matching MenuController's `Último checkpoint · <id>`; Portuguese place names welcome). Must stay: the route order and completion conditions, wave counts and markers, 5 + 5 Power Pickups, one Shield Pickup, the gates and the resume points. Delete `metadata/dev` from a file once you have reviewed it.
+
 ## 2026-09-23 20:43 — Astra (sol) — Stage 2 boss scenes (D-04) [shared]
 State: SCENE_READY
 Files: `scenes/enemies/tempest_sentinel.tscn`, `scenes/enemies/storm_guardian.tscn`, `assets/models/bosses/Dragon_Evolved.gltf` and copied atlas plus `.import` files, `tools/validate_boss_scenes.gd`, `docs/validation/boss-scenes.log`, `docs/validation/tempest-sentinel.png`, `docs/validation/storm-guardian.png`, `docs/ENEMY_VISUAL_HANDOFF.md`, `docs/ASSET_CREDITS.md`, `docs/engineering/ROADMAP.md`, and D-04's ticket.

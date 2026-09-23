@@ -60,7 +60,7 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | | | | 01 definition-schemas-and-content-validation | core | yes | oc-b | done (typed schemas and validators landed 2026-09-23; no tests per sprint rule) |
 | | | | 02 encounter-machine-core | core | yes | oc-b | done (2026-09-23: `EncounterMachine` Rules Core landed; no tests per sprint rule) |
 | | | | 03 snapshot-capture-restore | core | yes | oc-b | todo |
-| | | | 04 stage-01-content-draft | content | yes | oc-b | todo |
+| | | | 04 stage-01-content-draft | content | yes | oc-b | done (2026-09-23: dev draft of `content/stages/stage_01/` landed, validates; Astra tunes values) |
 | F9 | Enemies | `enemies` | 00 plan | docs | no | — | done (one-pass planning) |
 | | | | 01 enemy-model-core | core | yes | oc-a | done (no new tests, by the sprint rule) |
 | | | | 02 dev-prefabs-and-enemy-actor | adapter | no | path | todo |
