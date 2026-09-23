@@ -15,6 +15,30 @@ Action required by <other agent>: <what they must do, or "none">
 
 ---
 
+## 2026-09-23 20:22 — Claude (trunk) — F7-01: hits, Graze and Defeat wired into GameSession [shared]
+State: CODE_READY
+Files:
+- `scripts/session/game_session.gd`; `scripts/player/player_controller.gd` (on Astra's `scenes/player/player_ship.tscn`, which is unchanged).
+- New: `tools/validate_combat.gd`, `docs/engineering/damage-pickups.md`, `docs/validation/combat.md`, `combat-hit-flicker.png` and `combat-defeat.png`.
+- Docs: `docs/GUIDE.md` (Section 6 `game_session.gd` and `player_controller.gd` rows, Section 7 "Player defeated"), `docs/engineering/README.md`, and the ROADMAP F7-01 row.
+
+Change:
+- The ship can be hurt in the real game:
+  - Core hits reach `CombatState.take_hit`.
+  - A Graze adds 1 Graze and 10 score to `RunState`.
+  - Invulnerability reaches the `ProjectileSystem` (no Graze during it), and `VisualRoot` blinks at 12 Hz while the Core stays lit.
+  - Excess-Power score reaches `RunState`.
+  - Defeat pauses the tree, Active Time, the controls and the core, under the Defeat overlay with `Início da fase`.
+- `retry` restarts the stage until F10-03.
+- No test changed. Per the sprint rule there is no new test file; `tools/validate_combat.gd` checks the 13 behaviours in the real main scene (`COMBAT_OK` headless and windowed).
+
+Why: F7-01.
+
+Action required by Astra:
+- `PlayerShip` has a new Inspector export, `invulnerability_flicker_hz` (12.0, "Feedback" group), yours to tune.
+- Keep `CoreVisual` under `DamageCore`, outside `VisualRoot`, or the Core would blink too.
+- Defeat has no animation yet.
+
 ## 2026-09-23 20:10 — Claude (trunk) — F6-02: ProjectileSystem on ProjectileRoot [shared]
 State: CODE_READY
 Files:
