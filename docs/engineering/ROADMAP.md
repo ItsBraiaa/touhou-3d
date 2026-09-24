@@ -72,7 +72,7 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | | | | 03 retry-restart-flow | integration | no | trunk | done (2026-09-23: Retry resumes in place from the latest Checkpoint, Restart reloads, Defeat names the Checkpoint; verified in the running game, no new tests per the sprint rule) |
 | | | | 04 stage-01-contract-smoke-test | test | yes (one new test file) | — | cut (the user's no-tests rule, 2026-09-23) |
 | | | | 05 retry-restores-checkpoint-pickups | adapter | no | path | todo |
-| | | | 06 stage-validators-accept-the-director | tooling | yes | oc-a | todo |
+| | | | 06 stage-validators-accept-the-director | tooling | yes | oc-a | done (2026-09-24: Stage 1 validator accepts no root script or the StageDirector script; all three validators passed headless, no new tests per sprint rule) |
 | F11 | Run flow | `run-flow` | 00 plan | docs | no | — | done (one-pass planning) |
 | | | | 01 defeat-results-retry-restart-screens | integration | no | trunk | todo |
 | | | | 02 campaign-continuation-and-direct-stage | integration | no | trunk | todo |

@@ -1,6 +1,6 @@
 # F10-06 Stage validators accept the Director
 
-Status: todo
+Status: done
 Type: tooling
 parallel-safe: yes
 Depends on: F10-01
@@ -93,6 +93,10 @@ Put this at line 39, in place of the old check:
 Handoff entry, `State: dev`, `Files:` `tools/validate_stage_01.gd`.
 - **For Astra:** the Stage 1 validator now accepts exactly two root scripts: none, or `res://scripts/progression/stage_director.gd`. Any other script still fails it. `validate_stage_02.gd` needed no change and stays valid after F12-05. When D-07 Part A adds its shrine step, sync first and keep the new line 39.
 - **For trunk:** the "now fails" bullet in `docs/engineering/stage-director.md` "Open issues" is resolved. Drop it in your next doc pass.
+
+## Outcome
+
+Implemented the exact StageDirector path check in `tools/validate_stage_01.gd`; Stage 2 and scene-handoff validators were intentionally unchanged. No F12-05 commit was present on `dev-01`, so the Stage 2 headless run used the preview without F12-05's Director. Headless results: Stage 1 `STAGE_01_QA_COMPLETE failures=0 encounters=7 spawns=18 checkpoints=2 gates=4` (exit 0); Stage 2 `STAGE_02_PREVIEW_LOAD_OK (no rendered evidence in headless mode)` (exit 0); scene handoff `SCENE_CONTRACT_OK: 10 required nodes; targets=3` (exit 0). No new tests written.
 
 ## Kickoff prompt
 

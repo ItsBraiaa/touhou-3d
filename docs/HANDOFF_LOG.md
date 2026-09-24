@@ -1,5 +1,13 @@
 # Handoff Log
 
+## 2026-09-24 — OpenCode (oc-a) — Stage validators accept the Director
+State: dev
+Files: `tools/validate_stage_01.gd`; `docs/engineering/ROADMAP.md`; F10-06 ticket.
+
+Change: The Stage 1 validator now accepts exactly no root script or `res://scripts/progression/stage_director.gd`; other root scripts still fail. Stage 2 and scene-handoff validators were unchanged.
+Verification: `validate_stage_01.gd` ended `STAGE_01_QA_COMPLETE failures=0 encounters=7 spawns=18 checkpoints=2 gates=4` (exit 0); `validate_stage_02.gd` ended `STAGE_02_PREVIEW_LOAD_OK (no rendered evidence in headless mode)` (exit 0; no F12-05 commit was present in `dev-01`); `validate_scene_handoff.gd` ended `SCENE_CONTRACT_OK: 10 required nodes; targets=3` (exit 0).
+Action required by Astra: none. Trunk may remove the resolved validator bullet from `docs/engineering/stage-director.md` in its next doc pass.
+
 ## 2026-09-24 — Astra (sol) — Stage 2 content review (D-06 pass 2) [shared]
 State: SCENE_READY
 Files: scenes/stages/stage_02.tscn; docs/validation/stage-02-pacing.md; docs/engineering/ROADMAP.md; D-06 ticket.
