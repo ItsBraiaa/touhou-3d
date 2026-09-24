@@ -11,7 +11,7 @@
 [ext_resource type="PackedScene" path="res://scenes/dev/power_pickup.tscn" id="9_power_pickup"]
 [ext_resource type="PackedScene" path="res://scenes/dev/shield_pickup.tscn" id="10_shield_pickup"]
 
-[node name="ArenaHarness" type="Node3D" node_paths=PackedStringArray("arena", "readout", "hud", "projectile_system", "dummy_root", "pickup_root")]
+[node name="ArenaHarness" type="Node3D" node_paths=PackedStringArray("arena", "readout", "hud", "projectile_system", "dummy_root", "pickup_root", "enemy_spawns")]
 script = ExtResource("2_harness")
 arena = NodePath("CombatArena")
 readout = NodePath("DebugLayer/Readout")
@@ -19,6 +19,7 @@ hud = NodePath("HudLayer/HUD")
 projectile_system = NodePath("ProjectileSystem")
 dummy_root = NodePath("Dummies")
 pickup_root = NodePath("Pickups")
+enemy_spawns = NodePath("EnemySpawns")
 power_pickup_scene = ExtResource("9_power_pickup")
 shield_pickup_scene = ExtResource("10_shield_pickup")
 
@@ -30,7 +31,7 @@ shield_pickup_scene = ExtResource("10_shield_pickup")
 offset_left = 16.0
 offset_top = 16.0
 offset_right = 452.0
-offset_bottom = 208.0
+offset_bottom = 440.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 6
@@ -62,3 +63,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 11, -10)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 14, -34)
 
 [node name="Pickups" type="Node3D" parent="."]
+
+[node name="EnemySpawns" type="Node3D" parent="."]
+
+[node name="Spirit" type="Marker3D" parent="EnemySpawns"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 9, -12)
+
+[node name="Sentry" type="Marker3D" parent="EnemySpawns"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 10, -16)

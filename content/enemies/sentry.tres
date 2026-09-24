@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="EnemyDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/definitions/enemy_definition.gd" id="1_enemy"]
+[ext_resource type="Resource" path="res://content/patterns/sentry_fan.tres" id="2_pattern"]
+
+[resource]
+script = ExtResource("1_enemy")
+kind = &"sentry"
+health = 30
+score = 100
+anticipation_seconds = 1.0
+pattern = ExtResource("2_pattern")
+attack_interval = 2.0
+movement = 1
+move_speed = 1.0
+move_range = 1.5
+metadata/dev = true

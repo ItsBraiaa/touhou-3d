@@ -59,11 +59,11 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | F8 | Progression cores and content | `progression-core` | 00 plan | docs | no | — | done (one-pass planning) |
 | | | | 01 definition-schemas-and-content-validation | core | yes | oc-b | done (typed schemas and validators landed 2026-09-23; no tests per sprint rule) |
 | | | | 02 encounter-machine-core | core | yes | oc-b | done (2026-09-23: `EncounterMachine` Rules Core landed; no tests per sprint rule) |
-| | | | 03 snapshot-capture-restore | core | yes | oc-b | todo |
+| | | | 03 snapshot-capture-restore | core | yes | oc-b | done (2026-09-24: `Snapshot` value object and `CheckpointStore` Rules Core landed; no tests per sprint rule) |
 | | | | 04 stage-01-content-draft | content | yes | oc-b | done (2026-09-23: dev draft of `content/stages/stage_01/` landed, validates; Astra tunes values) |
 | F9 | Enemies | `enemies` | 00 plan | docs | no | — | done (one-pass planning) |
 | | | | 01 enemy-model-core | core | yes | oc-a | done (no new tests, by the sprint rule) |
-| | | | 02 dev-prefabs-and-enemy-actor | adapter | no | path | todo |
+| | | | 02 dev-prefabs-and-enemy-actor | adapter | no | path | done (2026-09-23: `EnemyActor` and dev Spirit and Sentry fight in the arena harness; no new tests, by the sprint rule; locked-shot miss at close range logged for trunk) |
 | | | | 03 seal-and-guard-rules | core+adapter | no | oc-a | todo (consumed by F12-05, Stage 2 S2-03) |
 | F10 | Stage Director in Stage 1 | `stage-director` | 00 plan | docs | no | — | done (one-pass planning) |
 | | | | 01 stage-director-adapter | adapter | no | trunk | todo |
