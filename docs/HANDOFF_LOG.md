@@ -1,5 +1,24 @@
 # Handoff Log
 
+## 2026-09-24 — Claude (path) — F15-02: enemy feedback
+State: INTEGRATED_VERIFIED
+Files: `scripts/enemies/enemy_actor.gd`; `docs/engineering/enemies.md` (new "Presentation (F15-02)", signal and export rows, Setup for Astra, Open issues); `docs/GUIDE.md` (the `enemy_actor.gd` row); `docs/engineering/ROADMAP.md` (the F15-02 row).
+Change:
+- **Anticipation clip.** Each Anticipation plays the clip named by `VisualRoot`'s `metadata/anticipation_clip` (`Yes` for Spirits, `Punch` for Sentries) on `VisualRoot/Model/AnimationPlayer`, stretched to the Anticipation (1.167 s clip over 1.0 s, speed 1.167), then returns to `Flying_Idle`. The dev scale pulse is gone.
+- **Hit flash.** Each accepted hit flashes the meshes under `VisualRoot`. The flash is an additive, unshaded, fog-free overlay that fades from 0.85 grey to black in 0.12 s and is then removed. Each actor has its own material, so no other enemy lights up. `HitReact` is not used, because held fire would restart it on every shot.
+- **Death.** `defeated` still fires at once on the lethal hit. The actor leaves `targetable` and stops registering its hit sphere, and the Director scores and the Encounter advances. Then `Death` plays for 0.667 s, and the actor frees itself.
+- **Facing.** `VisualRoot` turns toward the player (yaw only, eased at rate 6 per second, snapped at spawn).
+- **Threats.** An Enemy warns once, on its first off-screen Anticipation. This is Astra's "new threat" rule.
+- A visual that lacks the player or a named clip gets one `push_warning`, and that cue is skipped.
+Verification: a headless throwaway driver (not in the repo), run after syncing F15-08's twilight and seal prefabs. Every check passed:
+- Arena harness: the clips and their speeds, the flash rising and then removed while the other enemy stays dark, the yaw target and the eased turn, one warning from three off-screen Anticipations, and a lethal hit. After that hit, `defeated` fired once at once, the actor was out of `targetable`, a Bomb at its center found 0 targets, it was still dying at 0.53 s and was freed by 0.73 s.
+- Retry: Stage 1 from CP1-A. Three S1-05 enemies were killed and died mid-Death; the score rose at once. A Defeat followed, all three were still dying under the pause, and after Retry none was left in the tree. The stage then cleared.
+- A Direct Stage 2 clear.
+- No `SCRIPT ERROR` and no clip warning.
+No tests (sprint rule).
+Action required by Astra: none required. To change the Anticipation gesture, edit `metadata/anticipation_clip` on a visual. The flash colour and length and the turn rate are Claude's proposals; send Claude values to change them.
+Action required by trunk: none. F15-01's victory beat will show a common enemy's `Death` too, since the actor now outlives its report by 0.667 s.
+
 ## 2026-09-24 — OpenCode (oc-a) — F15-09 HUD edge cues
 State: DELIVERED
 Files: `scripts/ui/hud.gd`, `tests/scene/test_hud_contract.gd` (obsolete expectation only), `docs/engineering/ROADMAP.md`.
