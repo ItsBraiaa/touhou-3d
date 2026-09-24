@@ -401,7 +401,7 @@ material = SubResource("WindCyan")
 size = Vector3(110, 160, 1)
 
 [sub_resource type="BoxMesh" id="GateVeil1"]
-size = Vector3(110, 160, 0.1)
+size = Vector3(110, 160, 4)
 material = SubResource("GateWisps")
 
 [sub_resource type="BoxShape3D" id="Shape62"]
@@ -459,7 +459,7 @@ material = SubResource("PrayerCloth")
 size = Vector3(110, 160, 1)
 
 [sub_resource type="BoxMesh" id="GateVeil2"]
-size = Vector3(110, 160, 0.1)
+size = Vector3(110, 160, 4)
 material = SubResource("GateWisps")
 
 [sub_resource type="BoxShape3D" id="Shape77"]
@@ -517,7 +517,7 @@ material = SubResource("PrayerCloth")
 size = Vector3(110, 160, 1)
 
 [sub_resource type="BoxMesh" id="GateVeil3"]
-size = Vector3(110, 160, 0.1)
+size = Vector3(110, 160, 4)
 material = SubResource("GateWisps")
 
 [sub_resource type="BoxShape3D" id="Shape92"]
@@ -575,7 +575,7 @@ material = SubResource("PrayerCloth")
 size = Vector3(110, 160, 1)
 
 [sub_resource type="BoxMesh" id="GateVeil4"]
-size = Vector3(110, 160, 0.1)
+size = Vector3(110, 160, 4)
 material = SubResource("GateWisps")
 
 [sub_resource type="BoxShape3D" id="Shape107"]
@@ -633,7 +633,7 @@ material = SubResource("PrayerCloth")
 size = Vector3(110, 160, 1)
 
 [sub_resource type="BoxMesh" id="GateVeil5"]
-size = Vector3(110, 160, 0.1)
+size = Vector3(110, 160, 4)
 material = SubResource("GateWisps")
 
 [sub_resource type="BoxShape3D" id="Shape122"]
@@ -6713,6 +6713,7 @@ shape = SubResource("Shape60")
 [node name="ClosedVisual" type="MeshInstance3D" parent="Gates/Gate_S2_01"]
 position = Vector3(0, 80, -90)
 mesh = SubResource("GateVeil1")
+instance_shader_parameters/arch_center_y = 27.0
 
 
 [node name="Arch" type="Node3D" parent="Gates/Gate_S2_01"]
@@ -6815,6 +6816,7 @@ shape = SubResource("Shape75")
 [node name="ClosedVisual" type="MeshInstance3D" parent="Gates/Gate_S2_02"]
 position = Vector3(0, 80, -195)
 mesh = SubResource("GateVeil2")
+instance_shader_parameters/arch_center_y = 38.0
 
 
 [node name="Arch" type="Node3D" parent="Gates/Gate_S2_02"]
@@ -6917,6 +6919,7 @@ shape = SubResource("Shape90")
 [node name="ClosedVisual" type="MeshInstance3D" parent="Gates/Gate_S2_03"]
 position = Vector3(0, 80, -330)
 mesh = SubResource("GateVeil3")
+instance_shader_parameters/arch_center_y = 48.27
 
 
 [node name="Arch" type="Node3D" parent="Gates/Gate_S2_03"]
@@ -7019,6 +7022,7 @@ shape = SubResource("Shape105")
 [node name="ClosedVisual" type="MeshInstance3D" parent="Gates/Gate_S2_04"]
 position = Vector3(0, 80, -450)
 mesh = SubResource("GateVeil4")
+instance_shader_parameters/arch_center_y = 78.0
 
 
 [node name="Arch" type="Node3D" parent="Gates/Gate_S2_04"]
@@ -7121,6 +7125,7 @@ shape = SubResource("Shape120")
 [node name="ClosedVisual" type="MeshInstance3D" parent="Gates/Gate_S2_05"]
 position = Vector3(0, 80, -570)
 mesh = SubResource("GateVeil5")
+instance_shader_parameters/arch_center_y = 96.0
 
 
 [node name="Arch" type="Node3D" parent="Gates/Gate_S2_05"]

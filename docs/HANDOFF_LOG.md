@@ -1,5 +1,12 @@
 # Handoff Log
 
+## 2026-09-24 — Astra (gate-fog) — closed gate clarity in both stages
+State: DELIVERED
+Files: `assets/environment/stage_01/gate_veil.gdshader`, `assets/environment/stage_02/gate_veil.gdshader`, visual mesh sizes and per-arch shader parameters in `scenes/stages/stage_01.tscn` and `scenes/stages/stage_02.tscn`, `.scratch/gate-clarity/issues/01-closed-gate-veils.md`, `docs/engineering/ROADMAP.md`.
+Change: Stage 1's closed arch has dense animated blue mist. Stage 2's closed arch has animated violet storm folds and subtle glints. Both veils are masked to their arch so they do not make a rectangle in the sky. No script attachment, collision, export, or prefab wiring changed.
+Verification: windowed Stage 1 and Stage 2 preview scripts completed with zero failures; rendered entrance and near-gate views were inspected. No new tests. `tools/lane.ps1 land` is the sprint integration gate.
+Action required by Claude: implement the separate target-death camera request from the user. On the current locked enemy's defeat, choose a surviving eligible target using existing targeting rules and retarget the camera; if none exists, clear the lock and recenter the camera to its authored follow yaw and pitch. Do not let unrelated enemy deaths steal an existing lock or treat movement Focus as Target Lock.
+
 ## 2026-09-24 — Claude lane oc-b (DeepSeek V4.1 Flash) — F16-10: the spec's API list now matches the shipped code [shared]
 State: CODE_READY
 Files: `.scratch/controls-expansion/spec.md` [shared] (only the API block, its heading line and the paragraph after it); `.scratch/controls-expansion/issues/10-spec-api-list-matches-shipped-code.md` (Status, Outcome); `docs/engineering/ROADMAP.md` (the F16-10 row).
