@@ -1,5 +1,14 @@
 # Handoff Log
 
+## 2026-09-24 — Claude (plan) — F16 follow-up: the scene tests no longer read the real settings file
+State: INTEGRATED_VERIFIED
+Files: `tests/framework/isolated_settings.gd` (new) and its `.uid`; `tests/scene/test_game_session_flow.gd`, `test_interface_contract.gd` and `test_main_contract.gd` (one line each in `before_each` and `after_each`); `docs/engineering/testing.md` (Files).
+Change: The three scene tests that instance `main.tscn` point its `Interface` at a per-process `user://test_settings_<pid>.cfg` before it enters the tree, and delete that file afterwards. Before this, the suite and every lane's gate loaded the player's real `user://settings.cfg`, which F16-03 lets the player remap. A remap could have changed what key-driven tests saw and failed the gate for everyone (the risk F16-02, F16-03 and F16-06 all recorded). No assertion changed and no test was added: the user asked for this harness fix.
+
+Why: the gate must not depend on the player's saved controls.
+
+Action required by trunk: a new test that instances `main.tscn` uses `IsolatedSettings.isolate()` and `clean()` the same way. The 300-frame boot smoke still reads the real file, which is harmless: loading never writes it (F16-02), and a remap only changes bindings.
+
 ## 2026-09-24 — Claude (trunk) — F16-06: review fixes [shared]
 State: CODE_READY
 Files: `scripts/session/game_session.gd`; `docs/PLANEJAMENTO.md` [shared] (the Section 3 camera-input paragraph); `docs/GUIDE.md` [shared] (the `game_session.gd` row); `docs/engineering/settings.md` and `docs/engineering/player-flight.md` (only their "F16 Session integration (F16-06)" sections); `docs/validation/controls-expansion.md` (only the F16-06 section); `.scratch/controls-expansion/issues/06-session-camera-and-controls-integration.md` (Outcome).
