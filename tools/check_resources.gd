@@ -1,7 +1,8 @@
-extends SceneTree
+﻿extends SceneTree
 ## Sprint gate (docs/engineering/SPRINT.md). Loads every .tres and .tscn under res://content
 ## and res://scenes, runs validate() on each loaded resource that defines it, and compiles
-## every .gd under res://scripts and res://tools.
+## every .gd under res://scripts, res://tools and res://tests (a test file that stops
+## compiling is otherwise skipped silently by the runner, which still reports 0 failures).
 ##
 ## A resource that does not load (a text parse error, a missing dependency) and a script that
 ## does not compile are always failures: a script no test or scene references is otherwise
@@ -11,7 +12,7 @@ extends SceneTree
 
 const RESOURCE_ROOTS: Array[String] = ["res://content", "res://scenes"]
 const RESOURCE_EXTENSIONS: Array[String] = ["tres", "tscn"]
-const SCRIPT_ROOTS: Array[String] = ["res://scripts", "res://tools"]
+const SCRIPT_ROOTS: Array[String] = ["res://scripts", "res://tools", "res://tests"]
 const SCRIPT_EXTENSIONS: Array[String] = ["gd"]
 
 
