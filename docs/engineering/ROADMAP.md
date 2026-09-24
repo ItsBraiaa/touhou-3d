@@ -37,8 +37,8 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | F3 | Settings | `settings` | 00 plan | docs | no | — | done (cut, then reinstated by the sprint plan, 2026-09-23) |
 | | | | 01 settings-core-and-configfile | core | yes | oc-b | done (2026-09-23: `Settings` core and explicit ConfigFile persistence landed; no tests per sprint rule) |
 | | | | 02 options-screen-binding | adapter | no | path | done (2026-09-23: `Interface` owns the one `Settings`; `OptionsScreen` binds the eight widgets, applies buses and window, saves on change and Defaults; no new tests, by the sprint rule; windowed display pass owed to F3-04 part 1) |
-| | | | 03 input-device-mode-and-controller-disconnect | adapter | no | path | todo |
-| | | | 04 settings-to-camera-wiring | integration | no | trunk (part 1: path) | todo |
+| | | | 03 input-device-mode-and-controller-disconnect | adapter | no | path | done (2026-09-23: one `InputDeviceState` in `Interface` drives every menu footer; a controller unplugged over the HUD pauses through `pause`; no new tests, by the sprint rule; physical unplug owed to the human pass) |
+| | | | 04 settings-to-camera-wiring | integration | no | trunk (part 1: path) | todo (part 1 landed 2026-09-24: the windowed F3 pass in `docs/validation/settings.md`; part 2, the Session camera wiring, closes it) |
 | F4 | Combat state and HUD | `combat-hud` | 00 plan | docs | no | — | done (one-pass planning, 2026-09-23; 01 was written and delivered separately) |
 | | | | 01 combat-state-core | core | yes | — | done |
 | | | | 02 hud-binding-and-target-marker | adapter | no | trunk | done (2026-09-23: `Hud` bound to the Session's `CombatState` and each ship's `Targeting`; marker verified in the harness) |
@@ -150,6 +150,8 @@ Dependencies Claude has on scene and content work. These are needs by Feature, n
 2026-09-23: D-03 Lantern Guardian prefab is SCENE_READY at `scenes/enemies/lantern_guardian.tscn`; tree, clip names, hit sphere and emitter are in [ENEMY_VISUAL_HANDOFF.md](../ENEMY_VISUAL_HANDOFF.md). Trunk F12-03 owns the script attachment and scene export wiring.
 
 2026-09-23: D-07 Part B rulings are in [PLANEJAMENTO.md](../PLANEJAMENTO.md) and the handoff log. The two-Phase HUD bar offsets are authored in `hud.tscn`; trunk's `Hud` follow-up must apply them.
+
+Stage 1 night and both-stage boundary rails: .scratch/stage-night-rails/issues/01-night-forest-and-boundary-rails.md — **done** (night palette, warm lanterns, low gate veil, textured forest detail, visible rails along existing flight walls).
 
 Stage 2 art revision: `.scratch/stage-02-area/issues/02-mountain-art-pass.md` — **done** (textures, terrain, vegetation and ambient visual motion; gameplay pending).
 

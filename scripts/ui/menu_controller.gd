@@ -3,8 +3,8 @@ extends Control
 ## Adapter shared by the eight menu scenes of GUIDE Section 14. Knows its screen from
 ## the root node name, turns the registry's buttons into [signal action_requested],
 ## takes focus in [method enter] and hands it back in [method leave], writes the
-## runtime text a screen is opened with, and hides the keyboard footer while a gamepad
-## is in use.
+## runtime text a screen is opened with, and shows or hides the keyboard footer when
+## [Interface] says which prompts to show ([method set_keyboard_prompts], F3-03).
 ##
 ## Navigation is not decided here: [Interface] drives [method enter] and
 ## [method leave] from its [ScreenRouter], and the Session decides what an action does.
@@ -96,9 +96,6 @@ const RESULTS_CAMPAIGN_STAGE := &"campaign_stage_1"
 const RESULTS_DIRECT_STAGE := &"direct_stage"
 ## Results `mode` param: the Campaign's last stage cleared; neither Continue nor Replay.
 const RESULTS_FINAL_VICTORY := &"final_victory"
-## A stick has to pass this far before it counts as gamepad use, so drift near the
-## center does not hide the keyboard hint. Godot's default for the `ui_*` actions.
-const JOYPAD_AXIS_THRESHOLD := 0.5
 
 var _screen: StringName = &""
 ## The registry buttons found in the scene, by path, in table order.
@@ -124,21 +121,14 @@ func _ready() -> void:
 		else:
 			_authored_label_text = _label.text
 	_footer = get_node_or_null(FOOTER_PATH) as Control
-	if _footer == null:
-		set_process_input(false)
-	else:
-		Input.joy_connection_changed.connect(_on_joy_connection_changed)
 
 
-## Tracks the last device used, for the footer. [method _input] rather than unhandled
-## input, because a focused button consumes the gamepad's accept press.
-func _input(event: InputEvent) -> void:
-	if event is InputEventJoypadButton:
-		_set_gamepad_active(true)
-	elif event is InputEventJoypadMotion and absf((event as InputEventJoypadMotion).axis_value) >= JOYPAD_AXIS_THRESHOLD:
-		_set_gamepad_active(true)
-	elif event is InputEventKey:
-		_set_gamepad_active(false)
+## Shows the keyboard hint when [param shown], hides it otherwise. [Interface] calls it on
+## every menu from its one [InputDeviceState] (F3-03), so the menus never disagree. Does
+## nothing on Pause, Defeat and Results, which are authored without a footer.
+func set_keyboard_prompts(shown: bool) -> void:
+	if _footer != null:
+		_footer.visible = shown
 
 
 ## The [ScreenRouter] id of this screen, from the root node name, or an empty
@@ -247,17 +237,6 @@ func _first_focusable() -> Control:
 
 static func _value_or_dash(params: Dictionary, key: String) -> String:
 	return str(params[key]) if key in params else "—"
-
-
-func _set_gamepad_active(active: bool) -> void:
-	_footer.visible = not active
-
-
-## A gamepad unplugged while it was the last device used would otherwise keep the
-## keyboard hint hidden until the next key press.
-func _on_joy_connection_changed(_device: int, _connected: bool) -> void:
-	if Input.get_connected_joypads().is_empty():
-		_set_gamepad_active(false)
 
 
 func _on_button_pressed(action: StringName, payload: Dictionary) -> void:

@@ -1015,6 +1015,26 @@ subdivide_width = 4
 subdivide_depth = 10
 material = SubResource("PrayerCloth")
 
+[sub_resource type="StandardMaterial3D" id="BoundaryRailWood"]
+albedo_color = Color(0.31, 0.115, 0.065, 1)
+roughness = 0.88
+
+[sub_resource type="StandardMaterial3D" id="BoundaryRailCap"]
+albedo_color = Color(0.52, 0.34, 0.13, 1)
+roughness = 0.78
+
+[sub_resource type="BoxMesh" id="BoundaryRailPost"]
+size = Vector3(0.72, 3.3, 0.72)
+material = SubResource("BoundaryRailWood")
+
+[sub_resource type="BoxMesh" id="BoundaryRailBeam"]
+size = Vector3(0.38, 0.34, 1)
+material = SubResource("BoundaryRailWood")
+
+[sub_resource type="BoxMesh" id="BoundaryRailFinial"]
+size = Vector3(0.94, 0.22, 0.94)
+material = SubResource("BoundaryRailCap")
+
 [node name="Stage" type="Node3D"]
 metadata/stage_id = "stage_02"
 metadata/handoff_state = "SCENE_READY_STATIC"
@@ -7995,3 +8015,925 @@ mesh = SubResource("SummitThresholdEastLantern")
 position = Vector3(-22, 22, 0)
 mesh = SubResource("SummitThresholdCloth")
 rotation_degrees = Vector3(90, 0, 0)
+
+[node name="BoundaryRails" type="Node3D" parent="Environment"]
+
+[node name="West0LowerBeam" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 1.32, -25.00)
+scale = Vector3(1, 1, 130.00)
+mesh = SubResource("BoundaryRailBeam")
+
+[node name="West0UpperBeam" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 2.68, -25.00)
+scale = Vector3(1, 1, 130.00)
+mesh = SubResource("BoundaryRailBeam")
+
+[node name="West0Post0" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 1.65, 40.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West0Cap0" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 3.35, 40.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West0Post1" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 1.65, 21.43)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West0Cap1" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 3.35, 21.43)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West0Post2" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 1.65, 2.86)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West0Cap2" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 3.35, 2.86)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West0Post3" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 1.65, -15.71)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West0Cap3" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 3.35, -15.71)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West0Post4" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 1.65, -34.29)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West0Cap4" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 3.35, -34.29)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West0Post5" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 1.65, -52.86)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West0Cap5" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 3.35, -52.86)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West0Post6" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 1.65, -71.43)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West0Cap6" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 3.35, -71.43)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West0Post7" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 1.65, -90.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West0Cap7" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 3.35, -90.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West1LowerBeam" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 15.32, -142.50)
+scale = Vector3(1, 1, 105.00)
+mesh = SubResource("BoundaryRailBeam")
+
+[node name="West1UpperBeam" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 16.68, -142.50)
+scale = Vector3(1, 1, 105.00)
+mesh = SubResource("BoundaryRailBeam")
+
+[node name="West1Post0" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 15.65, -90.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West1Cap0" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 17.35, -90.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West1Post1" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 15.65, -107.50)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West1Cap1" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 17.35, -107.50)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West1Post2" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 15.65, -125.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West1Cap2" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 17.35, -125.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West1Post3" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 15.65, -142.50)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West1Cap3" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 17.35, -142.50)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West1Post4" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 15.65, -160.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West1Cap4" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 17.35, -160.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West1Post5" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 15.65, -177.50)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West1Cap5" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 17.35, -177.50)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West1Post6" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 15.65, -195.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West1Cap6" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 17.35, -195.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West2LowerBeam" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 26.32, -270.00)
+scale = Vector3(1, 1, 150.00)
+mesh = SubResource("BoundaryRailBeam")
+
+[node name="West2UpperBeam" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 27.68, -270.00)
+scale = Vector3(1, 1, 150.00)
+mesh = SubResource("BoundaryRailBeam")
+
+[node name="West2Post0" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 26.65, -195.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West2Cap0" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 28.35, -195.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West2Post1" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 26.65, -213.75)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West2Cap1" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 28.35, -213.75)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West2Post2" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 26.65, -232.50)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West2Cap2" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 28.35, -232.50)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West2Post3" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 26.65, -251.25)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West2Cap3" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 28.35, -251.25)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West2Post4" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 26.65, -270.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West2Cap4" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 28.35, -270.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West2Post5" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 26.65, -288.75)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West2Cap5" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 28.35, -288.75)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West2Post6" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 26.65, -307.50)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West2Cap6" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 28.35, -307.50)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West2Post7" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 26.65, -326.25)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West2Cap7" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 28.35, -326.25)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West2Post8" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 26.65, -345.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West2Cap8" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 28.35, -345.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West3LowerBeam" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 49.32, -397.50)
+scale = Vector3(1, 1, 105.00)
+mesh = SubResource("BoundaryRailBeam")
+
+[node name="West3UpperBeam" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 50.68, -397.50)
+scale = Vector3(1, 1, 105.00)
+mesh = SubResource("BoundaryRailBeam")
+
+[node name="West3Post0" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 49.65, -345.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West3Cap0" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 51.35, -345.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West3Post1" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 49.65, -362.50)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West3Cap1" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 51.35, -362.50)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West3Post2" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 49.65, -380.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West3Cap2" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 51.35, -380.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West3Post3" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 49.65, -397.50)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West3Cap3" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 51.35, -397.50)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West3Post4" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 49.65, -415.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West3Cap4" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 51.35, -415.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West3Post5" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 49.65, -432.50)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West3Cap5" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 51.35, -432.50)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West3Post6" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 49.65, -450.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West3Cap6" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 51.35, -450.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West4LowerBeam" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 66.32, -510.00)
+scale = Vector3(1, 1, 120.00)
+mesh = SubResource("BoundaryRailBeam")
+
+[node name="West4UpperBeam" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 67.68, -510.00)
+scale = Vector3(1, 1, 120.00)
+mesh = SubResource("BoundaryRailBeam")
+
+[node name="West4Post0" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 66.65, -450.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West4Cap0" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 68.35, -450.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West4Post1" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 66.65, -467.14)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West4Cap1" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 68.35, -467.14)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West4Post2" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 66.65, -484.29)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West4Cap2" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 68.35, -484.29)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West4Post3" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 66.65, -501.43)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West4Cap3" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 68.35, -501.43)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West4Post4" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 66.65, -518.57)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West4Cap4" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 68.35, -518.57)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West4Post5" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 66.65, -535.71)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West4Cap5" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 68.35, -535.71)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West4Post6" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 66.65, -552.86)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West4Cap6" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 68.35, -552.86)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West4Post7" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 66.65, -570.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West4Cap7" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 68.35, -570.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West5LowerBeam" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 84.32, -665.00)
+scale = Vector3(1, 1, 190.00)
+mesh = SubResource("BoundaryRailBeam")
+
+[node name="West5UpperBeam" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 85.68, -665.00)
+scale = Vector3(1, 1, 190.00)
+mesh = SubResource("BoundaryRailBeam")
+
+[node name="West5Post0" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 84.65, -570.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West5Cap0" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 86.35, -570.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West5Post1" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 84.65, -589.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West5Cap1" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 86.35, -589.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West5Post2" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 84.65, -608.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West5Cap2" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 86.35, -608.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West5Post3" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 84.65, -627.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West5Cap3" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 86.35, -627.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West5Post4" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 84.65, -646.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West5Cap4" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 86.35, -646.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West5Post5" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 84.65, -665.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West5Cap5" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 86.35, -665.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West5Post6" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 84.65, -684.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West5Cap6" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 86.35, -684.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West5Post7" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 84.65, -703.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West5Cap7" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 86.35, -703.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West5Post8" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 84.65, -722.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West5Cap8" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 86.35, -722.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West5Post9" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 84.65, -741.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West5Cap9" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 86.35, -741.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West5Post10" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 84.65, -760.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West5Cap10" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-54.3, 86.35, -760.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East0LowerBeam" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 1.32, -25.00)
+scale = Vector3(1, 1, 130.00)
+mesh = SubResource("BoundaryRailBeam")
+
+[node name="East0UpperBeam" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 2.68, -25.00)
+scale = Vector3(1, 1, 130.00)
+mesh = SubResource("BoundaryRailBeam")
+
+[node name="East0Post0" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 1.65, 40.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East0Cap0" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 3.35, 40.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East0Post1" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 1.65, 21.43)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East0Cap1" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 3.35, 21.43)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East0Post2" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 1.65, 2.86)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East0Cap2" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 3.35, 2.86)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East0Post3" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 1.65, -15.71)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East0Cap3" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 3.35, -15.71)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East0Post4" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 1.65, -34.29)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East0Cap4" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 3.35, -34.29)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East0Post5" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 1.65, -52.86)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East0Cap5" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 3.35, -52.86)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East0Post6" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 1.65, -71.43)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East0Cap6" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 3.35, -71.43)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East0Post7" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 1.65, -90.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East0Cap7" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 3.35, -90.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East1LowerBeam" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 15.32, -142.50)
+scale = Vector3(1, 1, 105.00)
+mesh = SubResource("BoundaryRailBeam")
+
+[node name="East1UpperBeam" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 16.68, -142.50)
+scale = Vector3(1, 1, 105.00)
+mesh = SubResource("BoundaryRailBeam")
+
+[node name="East1Post0" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 15.65, -90.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East1Cap0" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 17.35, -90.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East1Post1" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 15.65, -107.50)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East1Cap1" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 17.35, -107.50)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East1Post2" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 15.65, -125.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East1Cap2" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 17.35, -125.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East1Post3" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 15.65, -142.50)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East1Cap3" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 17.35, -142.50)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East1Post4" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 15.65, -160.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East1Cap4" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 17.35, -160.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East1Post5" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 15.65, -177.50)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East1Cap5" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 17.35, -177.50)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East1Post6" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 15.65, -195.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East1Cap6" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 17.35, -195.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East2LowerBeam" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 26.32, -270.00)
+scale = Vector3(1, 1, 150.00)
+mesh = SubResource("BoundaryRailBeam")
+
+[node name="East2UpperBeam" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 27.68, -270.00)
+scale = Vector3(1, 1, 150.00)
+mesh = SubResource("BoundaryRailBeam")
+
+[node name="East2Post0" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 26.65, -195.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East2Cap0" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 28.35, -195.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East2Post1" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 26.65, -213.75)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East2Cap1" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 28.35, -213.75)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East2Post2" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 26.65, -232.50)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East2Cap2" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 28.35, -232.50)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East2Post3" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 26.65, -251.25)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East2Cap3" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 28.35, -251.25)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East2Post4" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 26.65, -270.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East2Cap4" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 28.35, -270.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East2Post5" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 26.65, -288.75)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East2Cap5" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 28.35, -288.75)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East2Post6" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 26.65, -307.50)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East2Cap6" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 28.35, -307.50)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East2Post7" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 26.65, -326.25)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East2Cap7" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 28.35, -326.25)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East2Post8" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 26.65, -345.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East2Cap8" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 28.35, -345.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East3LowerBeam" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 49.32, -397.50)
+scale = Vector3(1, 1, 105.00)
+mesh = SubResource("BoundaryRailBeam")
+
+[node name="East3UpperBeam" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 50.68, -397.50)
+scale = Vector3(1, 1, 105.00)
+mesh = SubResource("BoundaryRailBeam")
+
+[node name="East3Post0" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 49.65, -345.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East3Cap0" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 51.35, -345.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East3Post1" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 49.65, -362.50)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East3Cap1" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 51.35, -362.50)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East3Post2" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 49.65, -380.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East3Cap2" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 51.35, -380.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East3Post3" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 49.65, -397.50)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East3Cap3" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 51.35, -397.50)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East3Post4" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 49.65, -415.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East3Cap4" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 51.35, -415.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East3Post5" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 49.65, -432.50)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East3Cap5" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 51.35, -432.50)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East3Post6" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 49.65, -450.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East3Cap6" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 51.35, -450.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East4LowerBeam" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 66.32, -510.00)
+scale = Vector3(1, 1, 120.00)
+mesh = SubResource("BoundaryRailBeam")
+
+[node name="East4UpperBeam" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 67.68, -510.00)
+scale = Vector3(1, 1, 120.00)
+mesh = SubResource("BoundaryRailBeam")
+
+[node name="East4Post0" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 66.65, -450.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East4Cap0" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 68.35, -450.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East4Post1" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 66.65, -467.14)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East4Cap1" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 68.35, -467.14)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East4Post2" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 66.65, -484.29)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East4Cap2" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 68.35, -484.29)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East4Post3" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 66.65, -501.43)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East4Cap3" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 68.35, -501.43)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East4Post4" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 66.65, -518.57)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East4Cap4" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 68.35, -518.57)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East4Post5" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 66.65, -535.71)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East4Cap5" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 68.35, -535.71)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East4Post6" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 66.65, -552.86)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East4Cap6" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 68.35, -552.86)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East4Post7" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 66.65, -570.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East4Cap7" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 68.35, -570.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East5LowerBeam" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 84.32, -665.00)
+scale = Vector3(1, 1, 190.00)
+mesh = SubResource("BoundaryRailBeam")
+
+[node name="East5UpperBeam" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 85.68, -665.00)
+scale = Vector3(1, 1, 190.00)
+mesh = SubResource("BoundaryRailBeam")
+
+[node name="East5Post0" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 84.65, -570.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East5Cap0" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 86.35, -570.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East5Post1" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 84.65, -589.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East5Cap1" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 86.35, -589.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East5Post2" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 84.65, -608.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East5Cap2" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 86.35, -608.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East5Post3" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 84.65, -627.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East5Cap3" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 86.35, -627.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East5Post4" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 84.65, -646.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East5Cap4" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 86.35, -646.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East5Post5" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 84.65, -665.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East5Cap5" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 86.35, -665.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East5Post6" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 84.65, -684.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East5Cap6" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 86.35, -684.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East5Post7" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 84.65, -703.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East5Cap7" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 86.35, -703.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East5Post8" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 84.65, -722.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East5Cap8" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 86.35, -722.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East5Post9" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 84.65, -741.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East5Cap9" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 86.35, -741.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East5Post10" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 84.65, -760.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East5Cap10" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(54.3, 86.35, -760.00)
+mesh = SubResource("BoundaryRailFinial")

@@ -1,6 +1,6 @@
 # F3-03 Input device mode and controller disconnect
 
-Status: todo
+Status: done
 Type: adapter
 parallel-safe: no
 Depends on: F3-02
@@ -137,3 +137,13 @@ The tests:
 ```
 In your lane worktree, read AGENTS.md, docs/engineering/SPRINT.md (your lane section), docs/engineering/ROADMAP.md and .scratch/settings/issues/03-input-device-mode-and-controller-disconnect.md. Check its dependencies with tools/lane.ps1 status F3-02, implement it test-first, run tools/test.ps1 until green with no SCRIPT ERROR, finish its Definition of Done, commit, then run tools/lane.ps1 land.
 ```
+
+## Outcome (2026-09-23)
+
+Delivered solo in lane path: `scripts/ui/input_device_state.gd` (`InputDeviceState`), the `Interface` wiring (`_input`, the joypad connection handler, `_request_pause`, the prompt push) and `MenuController.set_keyboard_prompts`, with the device tracking removed from `MenuController` as listed. The contract is in `docs/engineering/settings.md` "Input device and disconnect". **No new tests** (sprint rule). A throwaway script checked every behavior the ticket lists, headless (26 checks, recorded in `settings.md`), and `tools/validate_menus.gd` still gives `MENUS_OK`.
+
+- **Existing test adjusted (SPRINT "No new tests"):** `test_menu_registry_contract.gd::test_the_footer_hides_on_gamepad_input_and_returns_on_keyboard_input` became `test_set_keyboard_prompts_shows_and_hides_the_footer`, the rename the ticket names. It now drives `set_keyboard_prompts` directly, because `MenuController` no longer reads devices; its three event helpers and two constants went with it. No new test file was written.
+- **As proposed:** the mode never filters input, and Teclado skips the disconnect pause.
+- **Owed:** a physical DualSense unplug in flight, for the human pass (`settings.md` Open issues).
+- **Shared-file note:** trunk's F11-01 has not landed, so there was nothing of it to keep in `menu_controller.gd` or the registry test. Whichever lands second keeps both (F11-01's label lookups, and this ticket's `_footer` lookup with no joypad connection).
+- The ticket's final line names the old `glm-b` lane; landed with `tools/lane.ps1 land` from lane path.

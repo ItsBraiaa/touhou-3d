@@ -3,7 +3,7 @@ extends TestCase
 ## Section 14, each instanced on its own: every registry button exists and requests its
 ## action, entering a screen gives focus to a control and returning restores it, the
 ## runtime text is written, Results shows Continue or Replay per run mode with a focus
-## loop that skips the hidden buttons, and the keyboard footer hides on gamepad input.
+## loop that skips the hidden buttons, and the keyboard footer follows set_keyboard_prompts.
 ##
 ## Expected paths, actions and texts come from GUIDE Section 14 "Scene and action
 ## registry" and "Runtime text and presentation"; action names are the ones F2-04's
@@ -89,9 +89,6 @@ const REPLAY := "Layout/ReplayButton"
 const MENU := "Layout/MenuButton"
 const CREDITS := "Layout/CreditsButton"
 const HEADING := "Layout/Heading"
-## A gamepad button and a key no `ui_*` action uses, so sending them moves no focus.
-const UNBOUND_JOYPAD_BUTTON := JOY_BUTTON_LEFT_STICK
-const UNBOUND_KEY := KEY_F12
 
 var _menu: MenuController
 
@@ -276,20 +273,18 @@ func test_the_five_full_screens_carry_the_keyboard_footer() -> void:
 		after_each()
 
 
-func test_the_footer_hides_on_gamepad_input_and_returns_on_keyboard_input() -> void:
+## Which prompts to show is decided by Interface's InputDeviceState since F3-03; the menu
+## only shows or hides its footer when told.
+func test_set_keyboard_prompts_shows_and_hides_the_footer() -> void:
 	if not _open("res://scenes/ui/main_menu.tscn"):
 		return
 	var footer := _menu.get_node(FOOTER_PATH) as Control
 	_menu.enter({}, NodePath())
 	assert_true(footer.visible, "keyboard hint shown by default")
-	_send_joypad_button()
-	assert_false(footer.visible, "hidden after a gamepad button")
-	_send_key()
-	assert_true(footer.visible, "shown again after a key")
-	_send_joypad_motion(0.1)
-	assert_true(footer.visible, "stick drift is not gamepad use")
-	_send_joypad_motion(-0.9)
-	assert_false(footer.visible, "hidden after a full stick push")
+	_menu.set_keyboard_prompts(false)
+	assert_false(footer.visible, "hidden for gamepad prompts")
+	_menu.set_keyboard_prompts(true)
+	assert_true(footer.visible, "shown again for keyboard prompts")
 	assert_eq(_focused_path(), "Layout/StartButton", "none of this moved focus")
 
 
@@ -330,28 +325,3 @@ func _assert_focus_loop(paths: Array[String]) -> void:
 		var expected_previous := _button(paths[index - 1])
 		assert_eq(next, expected_next, "%s focus_next" % paths[index])
 		assert_eq(previous, expected_previous, "%s focus_previous" % paths[index])
-
-
-func _send_joypad_button() -> void:
-	for pressed: bool in [true, false]:
-		var event := InputEventJoypadButton.new()
-		event.button_index = UNBOUND_JOYPAD_BUTTON
-		event.pressed = pressed
-		tree.root.push_input(event)
-
-
-func _send_key() -> void:
-	for pressed: bool in [true, false]:
-		var event := InputEventKey.new()
-		event.keycode = UNBOUND_KEY
-		event.physical_keycode = UNBOUND_KEY
-		event.pressed = pressed
-		tree.root.push_input(event)
-
-
-## Right stick, horizontal: the camera's axis, which no `ui_*` action reads.
-func _send_joypad_motion(value: float) -> void:
-	var event := InputEventJoypadMotion.new()
-	event.axis = JOY_AXIS_RIGHT_X
-	event.axis_value = value
-	tree.root.push_input(event)

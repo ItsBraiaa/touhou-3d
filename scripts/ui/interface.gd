@@ -13,6 +13,11 @@ extends CanvasLayer
 ## `_ready`, bound to the Options widgets through an [OptionsScreen] it creates under the
 ## Options root, and handed to the rest of the game by [method get_settings]. Defaults
 ## (`restore_defaults`) is resolved here and never reaches the Session.
+##
+## And it owns the one [InputDeviceState] (F3-03): every input event and joypad
+## connection change is noted there, every menu's keyboard hint follows its
+## [signal InputDeviceState.prompts_changed], and a controller leaving while the HUD is
+## on top pauses the game through the ordinary `pause` action.
 
 
 ## The Session should act on [param action]: every [signal MenuController.action_requested]
@@ -35,6 +40,7 @@ var _hud: Hud
 var _settings: Settings
 ## Null when the Options screen is missing (already reported).
 var _options_screen: OptionsScreen
+var _device_state := InputDeviceState.new()
 
 
 func _ready() -> void:
@@ -61,8 +67,16 @@ func _ready() -> void:
 		if id not in _menus:
 			push_error("%s: no scene in 'menu_scenes' has the %s screen" % [get_path(), id])
 	_bind_options()
+	_start_device_tracking()
 	_router.screen_hidden.connect(_on_screen_hidden)
 	_router.screen_shown.connect(_on_screen_shown)
+
+
+## Notes the device behind every event for the prompts. [method _input] rather than
+## unhandled input, because a focused button consumes the gamepad's accept press; the
+## event is never handled here.
+func _input(event: InputEvent) -> void:
+	_device_state.note_event(event)
 
 
 ## `ui_cancel` belongs to the menus only while one is on top. Over running gameplay the
@@ -176,6 +190,48 @@ func _bind_options() -> void:
 	_options_screen.name = &"OptionsScreen"
 	options.add_child(_options_screen)
 	_options_screen.setup(options, _settings)
+
+
+## Seeds the [InputDeviceState] with the saved mode and the pads already connected,
+## connects its three sources once, and pushes the first prompt state to every menu.
+func _start_device_tracking() -> void:
+	_device_state.set_mode(_settings.get_input_device())
+	for device: int in Input.get_connected_joypads():
+		_device_state.note_joypad(device, true)
+	_device_state.prompts_changed.connect(_on_prompts_changed)
+	_settings.changed.connect(_on_settings_changed)
+	Input.joy_connection_changed.connect(_on_joy_connection_changed)
+	_on_prompts_changed(_device_state.shows_keyboard_prompts())
+
+
+func _on_prompts_changed(keyboard: bool) -> void:
+	for menu: MenuController in _menus.values():
+		menu.set_keyboard_prompts(keyboard)
+
+
+func _on_settings_changed(key: StringName, value: Variant) -> void:
+	if key == Settings.INPUT_DEVICE:
+		_device_state.set_mode(value)
+
+
+## A controller leaving while the HUD is on top pauses (PLANEJAMENTO Section 7), unless
+## the mode is Teclado. Pause, Options from Pause, Defeat, Results and the menus are left
+## alone, so nothing is ever resumed or toggled by an unplug.
+func _on_joy_connection_changed(device: int, connected: bool) -> void:
+	_device_state.note_joypad(device, connected)
+	if not connected and _device_state.pauses_on_disconnect() and _router.current() == ScreenRouter.HUD:
+		_request_pause()
+
+
+## Sends a `pause` press and release through [Input], so it reaches
+## [method GameSession._unhandled_input] like Start or Escape: the Session pauses only
+## while a stage is in play, and the keyboard can then drive Pause.
+func _request_pause() -> void:
+	for pressed: bool in [true, false]:
+		var event := InputEventAction.new()
+		event.action = &"pause"
+		event.pressed = pressed
+		Input.parse_input_event(event)
 
 
 func _on_action_requested(action: StringName, payload: Dictionary) -> void:
