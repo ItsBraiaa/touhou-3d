@@ -1,5 +1,16 @@
 # Handoff Log
 
+## 2026-09-24 — Claude (plan) — F16-09 and F16-10: two small OpenCode follow-ups from the F16 reviews
+State: PLANNED
+Files: `.scratch/controls-expansion/issues/09-targeting-ignores-the-resume-press.md` (new), `.scratch/controls-expansion/issues/10-spec-api-list-matches-shipped-code.md` (new), `docs/engineering/ROADMAP.md` (two F16 rows).
+Change:
+- **F16-09 (oc-a).** Targeting polls `lock_target` and `next_target` with `is_action_just_pressed`, so with either remapped onto B, the B press that resumes from Pause locks or switches the target (the risk F16-06 recorded). Targeting gets the same release latch as the dash, `require_release()`, which `PlayerController.set_controls_enabled(true)` calls.
+- **F16-10 (oc-b).** The spec's "Proposed APIs" block is reconciled with the shipped code, since the F16-05 additions were missing. Docs only.
+
+Why: the user asked for both review gaps to go to OpenCode. Both run beside Astra's F16-07, whose files they do not touch.
+
+Action required by Astra: F16-10 edits only the spec's API block, its heading and the paragraph after it; your product rules and layout contract stay as written.
+
 ## 2026-09-24 — Claude (plan) — F16 follow-up: the scene tests no longer read the real settings file
 State: INTEGRATED_VERIFIED
 Files: `tests/framework/isolated_settings.gd` (new) and its `.uid`; `tests/scene/test_game_session_flow.gd`, `test_interface_contract.gd` and `test_main_contract.gd` (one line each in `before_each` and `after_each`); `docs/engineering/testing.md` (Files).
