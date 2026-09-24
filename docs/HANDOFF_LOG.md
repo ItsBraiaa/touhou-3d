@@ -867,3 +867,9 @@ Files: `CONTEXT.md`, `docs/adr/0001` to `0004`, `docs/engineering/CONVENTIONS.md
 Change: Recorded the accepted vocabulary, the four architectural decisions, the coding conventions, the ordered roadmap, and full tickets for Foundation, Player flight, and Menus/Session. No scene, script, or `project.godot` changes yet.
 Why: Result of the planning grill with the user; establishes how Claude writes and verifies GDScript for this project.
 Action required by Astra: read `docs/engineering/ROADMAP.md`, especially "Requests to Astra". From ticket F0-03 onward Claude owns `project.godot`, `export_presets.cfg`, `default_bus_layout.tres`, and `scenes/main.tscn`; the `tools/build_*.py` generators must not be rerun over integrated scenes without reconciling first. Astra's `.scratch/stage-01-area/` and `docs/STAGE_01_HANDOFF.md` were read and are reflected in the roadmap.
+
+## 2026-09-23 — OpenCode (oc-a) — F12-06 part 1
+
+Files: `content/bosses/tempest_sentinel.tres`, `content/patterns/sentinel_aimed_burst.tres`, `content/patterns/sentinel_rotating_fan.tres`.
+
+Change: Added the dev Tempest Sentinel BossDefinition with two proposed attacks and two health phases. Phase 1 uses alternating charged aimed bursts; Phase 2 uses rotating fans with alternating player-height tracking and fixed altitude shifts. All three resources carry `metadata/dev = true`. Proposed values and attack names remain for Astra's D-06 review. Part 1 only; scene integration remains with sol.
