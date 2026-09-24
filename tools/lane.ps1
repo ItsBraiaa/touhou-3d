@@ -19,8 +19,8 @@ sync                    Merges the integration branch into the current lane bran
 land                    From a lane worktree with everything committed: merges the
                         integration branch in, runs tools/test.ps1 (the existing suite), then a
                         300-frame headless boot of the main scene, then tools/check_resources.gd
-                        (every .tres and .tscn under content/ and scenes/ must load and pass its
-                        validate()). A red suite, a SCRIPT ERROR, parse error or failed script
+                        (every .gd under scripts/ and tools/ must compile, and every .tres and
+                        .tscn under content/ and scenes/ must load and pass its validate()). A red suite, a SCRIPT ERROR, parse error or failed script
                         load, any ERROR line in the boot, or a resource that fails to load or
                         validate stops the landing. Then it fast-forwards the primary tree to the lane
                         branch, retrying while another lane lands first. During the sprint
