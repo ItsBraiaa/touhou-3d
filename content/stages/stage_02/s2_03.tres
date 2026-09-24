@@ -19,17 +19,17 @@ origin_marker = NodePath("Seals/Seal3/RewardOrigin")
 [sub_resource type="Resource" id="Resource_agcg7"]
 script = ExtResource("3_ni5s1")
 spawn_markers = Array[NodePath]([NodePath("Spawns/Seal1_Sentry1"), NodePath("Spawns/Seal1_Sentry2")])
-enemy_kinds = Array[StringName]([&"sentry", &"sentry"])
+enemy_kinds = Array[StringName]([&"sentry_seal", &"sentry_seal"])
 
 [sub_resource type="Resource" id="Resource_d2v5t"]
 script = ExtResource("3_ni5s1")
 spawn_markers = Array[NodePath]([NodePath("Spawns/Seal2_Sentry1"), NodePath("Spawns/Seal2_Sentry2")])
-enemy_kinds = Array[StringName]([&"sentry", &"sentry"])
+enemy_kinds = Array[StringName]([&"sentry_seal", &"sentry_seal"])
 
 [sub_resource type="Resource" id="Resource_6kl0o"]
 script = ExtResource("3_ni5s1")
 spawn_markers = Array[NodePath]([NodePath("Spawns/Seal3_Sentry1"), NodePath("Spawns/Seal3_Sentry2")])
-enemy_kinds = Array[StringName]([&"sentry", &"sentry"])
+enemy_kinds = Array[StringName]([&"sentry_seal", &"sentry_seal"])
 
 [resource]
 script = ExtResource("2_7yqku")

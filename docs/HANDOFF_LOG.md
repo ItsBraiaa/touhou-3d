@@ -1,5 +1,12 @@
 # Handoff Log
 
+## 2026-09-24 — Astra (sol) — F15-08 enemy colour variants [shared]
+State: DELIVERED
+Files: `scenes/dev/spirit_twilight.tscn`, `scenes/dev/sentry_seal.tscn`, `scenes/stages/stage_01.tscn`, `scenes/stages/stage_02.tscn`, `content/stages/stage_01/s1_02.tres`, `s1_04.tres`, `s1_05.tres`, `content/stages/stage_02/s2_01.tres`, `s2_02.tres`, `s2_03.tres`, `s2_05.tres`, `docs/engineering/ROADMAP.md`.
+Change: New actor prefabs instance Astra's Twilight Spirit and seal Sentry visual roots with the original actor script, HitVolume radius, and emitter. Stage 1 assigns Lume to S1-02 wave 1, Twilight to wave 2, seal Sentries to S1-04, and mixed Spirit colors with lantern Sentries to S1-05. Stage 2's ordinary Spirit/Sentry waves use the violet pair. Each new kind maps to the same Spirit or Sentry EnemyDefinition resource, so health, score, pattern, collision and rewards remain unchanged. No tests added (sprint rule).
+Action required by Claude: none; scene wiring is declared here because it is Claude-owned under GUIDE Section 3.
+
+
 ## 2026-09-24 — Astra (sol) — F15-04 storm resolution [shared]
 State: DELIVERED
 Files: `scenes/stages/stage_02.tscn`, `scenes/stages/stage_01.tscn` (one export), `scripts/progression/stage_director.gd`, `docs/engineering/ROADMAP.md`.

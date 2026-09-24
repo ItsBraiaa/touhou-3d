@@ -4,6 +4,8 @@
 [ext_resource type="Resource" path="res://content/stages/stage_02/stage_02.tres" id="2_stage_definition"]
 [ext_resource type="PackedScene" path="res://scenes/dev/spirit.tscn" id="3_spirit"]
 [ext_resource type="PackedScene" path="res://scenes/dev/sentry.tscn" id="4_sentry"]
+[ext_resource type="PackedScene" path="res://scenes/dev/spirit_twilight.tscn" id="18_spirit_twilight"]
+[ext_resource type="PackedScene" path="res://scenes/dev/sentry_seal.tscn" id="19_sentry_seal"]
 [ext_resource type="Script" path="res://scripts/definitions/enemy_definition.gd" id="5_enemy_definition"]
 [ext_resource type="Resource" path="res://content/enemies/spirit.tres" id="6_spirit_definition"]
 [ext_resource type="Resource" path="res://content/enemies/sentry.tres" id="7_sentry_definition"]
@@ -1105,12 +1107,16 @@ stage_definition = ExtResource("2_stage_definition")
 actor_scenes = Dictionary[StringName, PackedScene]({
 &"spirit": ExtResource("3_spirit"),
 &"sentry": ExtResource("4_sentry"),
+&"spirit_twilight": ExtResource("18_spirit_twilight"),
+&"sentry_seal": ExtResource("19_sentry_seal"),
 &"tempest_sentinel": ExtResource("14_tempest"),
 &"storm_guardian": ExtResource("16_storm")
 })
 enemy_definitions = Dictionary[StringName, ExtResource("5_enemy_definition")]({
 &"spirit": ExtResource("6_spirit_definition"),
-&"sentry": ExtResource("7_sentry_definition")
+&"sentry": ExtResource("7_sentry_definition"),
+&"spirit_twilight": ExtResource("6_spirit_definition"),
+&"sentry_seal": ExtResource("7_sentry_definition")
 })
 boss_definitions = Dictionary[StringName, ExtResource("15_tempest_definition")]({
 &"tempest_sentinel": ExtResource("15_tempest_definition"),
