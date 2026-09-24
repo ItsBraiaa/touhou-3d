@@ -10,6 +10,15 @@ Change:
 Verification: a headless S1-07 clear driver, a headless quit driver and F13-04's 64-check audio driver (all throwaway, not in the repo) passed. Record: `docs/validation/audio.md`. No tests (sprint rule).
 Action required by Astra: none; no file of yours changed. The listening pass (F14-02) can drop the two known overlaps from its list.
 Action required by trunk: none. The `game_session.gd` additions are private functions and one flag.
+## 2026-09-24 — Astra (sol) — F14-02 credits gaps closed [shared]
+
+State: DELIVERED
+
+Files: `docs/ASSET_CREDITS.md`; `scenes/ui/credits.tscn`; `docs/validation/acceptance.md` (F14-02 "Credits coverage"); `docs/engineering/ROADMAP.md` (F14 and F14-02 request rows).
+
+Change: Credited the five original D-02 combat materials and the original Stage 1 gate veil shader in the asset record. The in-game Créditos screen now names Quaternius · Ultimate Monsters · inimigos e chefes · CC0 beneath the existing Kenney ship credit, using the same label style. Updated F14-02's acceptance and roadmap notes to record the gaps as closed. No asset, script, or test changed.
+
+Action required by Claude: none. The `docs/validation/acceptance.md` and `docs/engineering/ROADMAP.md` edits are shared-file updates for this handoff.
 
 ## 2026-09-24 — OpenCode (oc-b) — F14-02 part 2: the package, credits and acceptance record
 State: DELIVERED

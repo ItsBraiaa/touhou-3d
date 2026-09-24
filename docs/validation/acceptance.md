@@ -88,22 +88,15 @@ Créditos text in `scenes/ui/credits.tscn`.
 | `assets/models/player/craft_speederA.glb` | Kenney Space Kit | ASSET_CREDITS "Player ship" | `assets/licenses/kenney-space-kit.txt` (CC0) |
 | `assets/audio/sfx/interface/`, `digital/`, `scifi/`, `impact/` | 17 Kenney Ogg files | ASSET_CREDITS "Sound effects" | `assets/licenses/kenney-*.txt` (CC0) |
 | `assets/ui/*.svg`, `assets/ui/menu_theme.tres` | original project art | ASSET_CREDITS "Menu artwork", "HUD icons" | original, none needed |
+| `assets/combat/*.tres` | five original D-02 materials | ASSET_CREDITS "Combat materials" | original, none needed |
+| `assets/environment/stage_01/gate_veil.gdshader` | original Stage 1 gate veil shader | ASSET_CREDITS "Stage 1 gate veil" | original, none needed |
 | `assets/environment/stage_02/**` | original OBJ meshes and shaders | ASSET_CREDITS "Stage 2 mountain environment" | original, none needed |
 | `assets/licenses/*` | the six license texts | the credits above | — |
 
-**Gaps, requested from Astra** (F14-02 does not edit `ASSET_CREDITS.md` or
-`scenes/ui/credits.tscn`):
-
-- `assets/combat/*.tres` (the five D-02 materials: `player_shot`, `hostile_shot`, `bomb_ring`,
-  `power_gold`, `shield_blue`) are original scene art ([combat-visuals.md](combat-visuals.md))
-  but have no `ASSET_CREDITS.md` entry.
-- `assets/environment/stage_01/gate_veil.gdshader` is an original shader with no
-  `ASSET_CREDITS.md` entry (only `assets/environment/stage_02/` is credited).
-- The in-game Créditos text covers the ship (Kenney), "Arte original do projeto" and the sound
-  effects (Kenney), but **not the Quaternius enemy and boss models**, which `ASSET_CREDITS.md`
-  does credit.
-
-The same three gaps are added to the ROADMAP "Requests to Astra".
+**Credits gaps closed by Astra (sol):** `ASSET_CREDITS.md` now names the five
+original D-02 materials and the original Stage 1 gate veil shader. The in-game
+Créditos screen now credits Quaternius's Ultimate Monsters enemy and boss models
+alongside the Kenney ship and sound effects.
 
 ## Summary
 
@@ -123,5 +116,5 @@ The same three gaps are added to the ROADMAP "Requests to Astra".
   - the presentation-computer run and its 60 FPS reading (P16, P17), per
     [export.md](export.md);
   - the played campaign and boss fights for the in-motion judgements (P1, P4, P11, P14, S14).
-- **Open Astra requests (credits):** the three gaps above (D-02 materials, the Stage 1 gate
-  veil shader, the Quaternius models in the Créditos screen).
+- **Astra credits requests:** all three gaps above are closed in the asset record and the
+  in-game Créditos screen.
