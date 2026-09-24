@@ -1,0 +1,50 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/enemies/boss_controller.gd" id="1_boss"]
+
+[sub_resource type="StandardMaterial3D" id="BodyMaterial"]
+albedo_color = Color(0.45, 0.3, 0.7, 1)
+emission_enabled = true
+emission = Color(0.6, 0.4, 1, 1)
+emission_energy_multiplier = 0.6
+
+[sub_resource type="SphereMesh" id="BodyMesh"]
+material = SubResource("BodyMaterial")
+radius = 2.2
+height = 4.4
+
+[sub_resource type="TorusMesh" id="HaloMesh"]
+material = SubResource("BodyMaterial")
+inner_radius = 2.9
+outer_radius = 3.2
+
+[sub_resource type="SphereShape3D" id="HitShape"]
+radius = 2.5
+
+[node name="Enemy" type="Node3D" node_paths=PackedStringArray("visual_root", "hit_volume", "emitter")]
+script = ExtResource("1_boss")
+visual_root = NodePath("VisualRoot")
+hit_volume = NodePath("HitVolume")
+emitter = NodePath("Emitters/Main")
+
+[node name="VisualRoot" type="Node3D" parent="."]
+
+[node name="Body" type="MeshInstance3D" parent="VisualRoot"]
+mesh = SubResource("BodyMesh")
+
+[node name="Halo" type="MeshInstance3D" parent="VisualRoot"]
+transform = Transform3D(1, 0, 0, 0, 0.9659258, -0.25881904, 0, 0.25881904, 0.9659258, 0, 0, 0)
+mesh = SubResource("HaloMesh")
+
+[node name="HitVolume" type="Area3D" parent="."]
+collision_layer = 16
+collision_mask = 0
+monitoring = false
+monitorable = false
+
+[node name="Collision" type="CollisionShape3D" parent="HitVolume"]
+shape = SubResource("HitShape")
+
+[node name="Emitters" type="Node3D" parent="."]
+
+[node name="Main" type="Marker3D" parent="Emitters"]

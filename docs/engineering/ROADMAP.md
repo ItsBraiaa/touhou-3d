@@ -77,7 +77,7 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | | | | 03 active-and-clear-time-verification | test | no | path | todo (manual protocol only; no tests) |
 | F12 | Bosses and Stage 2 | `bosses` | 00 plan | docs | no | — | done (one-pass planning; Stage 2 reinstated by the sprint plan) |
 | | | | 01 boss-machine-core | core | yes | path | done (no unit tests, by the sprint rule; transition cap 0.75 s from D-07 ruling 1) |
-| | | | 02 boss-controller-adapter | adapter | no | path | todo |
+| | | | 02 boss-controller-adapter | adapter | no | path | done (2026-09-23: `BossController` and the dev boss run three Phases, clears and the HUD panel in the arena harness; no new tests, by the sprint rule; `lantern_guardian.tres` load failure reported for F12-03) |
 | | | | 03 lantern-guardian-in-s1-07 | integration | no | trunk (part 1: oc-a) | todo |
 | | | | 04 stage-02-content-draft | content | yes | oc-b | done (2026-09-23: dev draft of `content/stages/stage_02/` landed, validates and matches the scene; Astra tunes values in D-06) |
 | | | | 05 stage-02-director-integration | adapter | no | sol | todo |

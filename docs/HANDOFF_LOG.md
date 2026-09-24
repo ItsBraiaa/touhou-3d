@@ -27,6 +27,25 @@ Why: a core that nothing loads yet would otherwise break the first lane that use
 
 Action required by Astra: none.
 
+## 2026-09-23 23:05 — Claude (path) — F12-02: BossController and dev boss prefab
+State: CODE_READY
+Files:
+- New: `scripts/enemies/boss_controller.gd`, `scenes/dev/dev_boss.tscn`, `scenes/dev/dev_boss_definition.tres`, `docs/validation/bosses.md`, `docs/validation/bosses-dev-boss.png`.
+- Edited: `scenes/dev/arena_harness.gd` and `.tscn` (export `spawn_dev_boss`, marker `EnemySpawns/DevBoss`, HUD boss-panel wiring, readout lines; additions in their own functions).
+- Docs: `docs/engineering/bosses.md` (BossController contract, Setup for Astra), `docs/GUIDE.md` (Section 6 `boss_controller.gd`, Section 7 "Boss phase changed"), the ROADMAP F12-02 row.
+
+Change:
+- **`BossController`** on a boss's `Enemy` root. `spawn_setup(definition, enemy_id, encounter_id, rng, projectile_system, player, bounds) -> bool` works as for `EnemyActor`. Each physics tick at priority 0 it hovers the boss (placeholder bob), ticks the `BossMachine` from `Emitters/Main`, spawns its shots and registers its `HitVolume` sphere. It also:
+  - clears every hostile Projectile when a Phase is depleted;
+  - plays the optional clips `idle_clip`, `step_clip`, `phase_clip` (the sprint note) and `defeat_clip` only if `has_animation()` finds them, and otherwise warns once and skips them;
+  - emits `boss_started`, `phase_changed`, `phase_health_changed`, `threat_reported` and `defeated` once, shaped for the HUD boss panel;
+  - provides `get_score()`.
+- **Dev boss:** "Guardião (dev)", three Phases of 40, a primitive sphere, hit radius 2.5. In the harness, `spawn_dev_boss` spawns it and wires the HUD as GUIDE Section 7 says.
+- **Tests:** none added or changed (sprint rule). Scripted runs are in `docs/validation/bosses.md`.
+
+Why: F12-02; F12-03, F12-06 and F12-07 attach this controller to Astra's boss scenes.
+Action required by Claude (trunk): `content/bosses/lantern_guardian.tres` (F12-03 part 1) **does not load**. Line 14 references `SubResource("Attack_Ritual")` before it is declared, and Godot's parser refuses that. Reorder the sub-resources (steps, then attacks, then phases) before F12-03 part 2. To attach the controller to `lantern_guardian.tscn`, set `visual_root`, `hit_volume`, `emitter`, `animation_player` → `VisualRoot/Model/AnimationPlayer` and the clips `Flying_Idle`, `Punch`, `Yes`, `Death`. All four were checked at runtime.
+Action required by Astra: none. Your boss trees already fit, with `HitVolume` placed at the hit center.
 ## 2026-09-24 01:30 — Claude (plan) — lantern_guardian.tres loads again; land now loads every resource [shared]
 State: dev
 Files: `content/bosses/lantern_guardian.tres` (sub-resources reordered, values unchanged), `tools/check_resources.gd` (new gate tool), `tools/lane.ps1`, `docs/engineering/SPRINT.md`.
