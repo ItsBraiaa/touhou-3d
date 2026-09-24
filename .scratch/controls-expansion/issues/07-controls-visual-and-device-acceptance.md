@@ -1,6 +1,6 @@
 # F16-07 controls-visual-and-device-acceptance
 
-Status: todo
+Status: blocked
 Type: design+acceptance
 Owner: Astra; Claude coordinates code fixes
 Lane: sol
@@ -49,4 +49,6 @@ Write no new tests or disposable test drivers. Run the existing tools/lane.ps1 l
 
 ## Outcome
 
-Not started. Claude supplies engineering follow-ups and final convergence; no automatic export or package replacement.
+2026-09-24, Astra (sol): blocked pending an interactive pass. Inspected integrated source `40969f0` plus `40dd592` (test harness only). The user reported no physical checks yet; no keyboard/mouse or Xbox, DualShock or DualSense hardware result is passed. The sandbox opened Godot 4.7.2 in OpenGL Compatibility after a class-cache import, but could not capture its desktop window or operate a physical device. The complete not-verified matrix and the code-reading engineering follow-up are in `docs/validation/controls-expansion.md` under F16-07.
+
+Presentation change: added visible 15 px labels to the three existing Câmera slider rows in `scenes/ui/controls.tscn`, preserving Claude's paths and wiring. No dash/camera/HUD numeric tuning or `player_ship.tscn` change was justified. The F16-03, F16-05 and F16-06 physical walkthroughs remain open. Claude owns any code correction; no automatic export or package replacement is claimed.
