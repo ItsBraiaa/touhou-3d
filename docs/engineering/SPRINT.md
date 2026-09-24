@@ -165,7 +165,8 @@ Expected gaps (stop the session): about T0 + 4.0 to 5.9 h, T0 + 10.7 to 12.4 h, 
 | 7 | ~~F3-02~~: moved to path (shared OpenCode budget) | — | — |
 | 8 | F14-02 part 1: `tools/package.ps1` only | GPT 5.6 Luna (DeepSeek V4.1 Flash) | none |
 | 9 | ~~F3-03~~: moved to path (shared OpenCode budget) | — | — |
-| 10 | F14-02 part 2: re-export after sync, package, acceptance record; closes the ticket | DeepSeek V4.1 Flash (GLM-5.3-Flash) | F14-01 |
+| 9b | F14-02 part 1b: draft `docs/validation/acceptance.md`, one row per acceptance check in PLANEJAMENTO Section 12 and STAGE_DESIGN "Acceptance checks for stage progression", with its source line, the ticket that delivers it, and "not yet verified". No code. Commit with `(F14-02 part 1b)` | DeepSeek V4.1 Flash (GPT 5.6 Luna) | none |
+| 10 | F14-02 part 2: re-export after sync, package, acceptance record; closes the ticket. Fills in the part 1b table | DeepSeek V4.1 Flash (GLM-5.3-Flash) | F14-01 |
 
 ### sol (Codex, GPT Sol as Astra)
 
