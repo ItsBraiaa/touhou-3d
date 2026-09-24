@@ -74,6 +74,18 @@ mouse_filter = 2
 text = "CONTROLES"
 theme_override_font_sizes/font_size = 32
 
+[node name="BackButton" type="Button" parent="Layout"]
+layout_mode = 0
+offset_left = 1052.0
+offset_top = 634.0
+offset_right = 1232.0
+offset_bottom = 682.0
+text = "Voltar"
+alignment = 0
+focus_mode = 2
+focus_next = NodePath("../../Layout/BackButton")
+focus_previous = NodePath("../../Layout/BackButton")
+
 [node name="ControlsPanel" type="Panel" parent="Layout"]
 offset_left = 48.0
 offset_top = 158.0
@@ -312,18 +324,6 @@ offset_right = 1036.0
 offset_bottom = 682.0
 text = "Aplicar"
 focus_mode = 2
-
-[node name="BackButton" type="Button" parent="Layout"]
-layout_mode = 0
-offset_left = 1052.0
-offset_top = 634.0
-offset_right = 1232.0
-offset_bottom = 682.0
-text = "Voltar"
-alignment = 0
-focus_mode = 2
-focus_next = NodePath("../../Layout/BackButton")
-focus_previous = NodePath("../../Layout/BackButton")
 
 [node name="NavigationHint" type="Label" parent="Layout"]
 layout_mode = 0
