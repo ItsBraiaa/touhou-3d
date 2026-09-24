@@ -9,6 +9,8 @@
 [ext_resource type="Resource" path="res://content/enemies/sentry.tres" id="7_sentry_definition"]
 [ext_resource type="PackedScene" path="res://scenes/dev/power_pickup.tscn" id="8_power_pickup"]
 [ext_resource type="PackedScene" path="res://scenes/dev/shield_pickup.tscn" id="9_shield_pickup"]
+[ext_resource type="Script" path="res://scripts/progression/gate.gd" id="10_gate"]
+[ext_resource type="Script" path="res://scripts/progression/checkpoint.gd" id="11_checkpoint"]
 
 [sub_resource type="StandardMaterial3D" id="Stone"]
 albedo_color = Color(0.17, 0.25, 0.25, 1)
@@ -691,6 +693,11 @@ enemy_definitions = Dictionary[StringName, ExtResource("5_enemy_definition")]({
 })
 power_pickup_scene = ExtResource("8_power_pickup")
 shield_pickup_scene = ExtResource("9_shield_pickup")
+guard_links = Dictionary[StringName, NodePath]({
+&"S1-04/Wave1_Sentry1": NodePath("Environment/PortalLinks/GuardLink1"),
+&"S1-04/Wave1_Sentry2": NodePath("Environment/PortalLinks/GuardLink2"),
+&"S1-04/Wave1_Sentry3": NodePath("Environment/PortalLinks/GuardLink3")
+})
 metadata/stage_id = "stage_01"
 metadata/handoff_state = "SCENE_READY_STATIC"
 
@@ -5502,6 +5509,7 @@ mesh = SubResource("Cord")
 
 
 [node name="Gate_S1_02" type="Node3D" parent="Gates"]
+script = ExtResource("10_gate")
 metadata/encounter_id = "S1-02"
 
 [node name="BarrierBody" type="StaticBody3D" parent="Gates/Gate_S1_02"]
@@ -5565,6 +5573,7 @@ mesh = SubResource("Trim107")
 
 
 [node name="Gate_S1_03" type="Node3D" parent="Gates"]
+script = ExtResource("10_gate")
 metadata/encounter_id = "S1-03"
 
 [node name="BarrierBody" type="StaticBody3D" parent="Gates/Gate_S1_03"]
@@ -5628,6 +5637,7 @@ mesh = SubResource("Trim116")
 
 
 [node name="Gate_S1_04" type="Node3D" parent="Gates"]
+script = ExtResource("10_gate")
 metadata/encounter_id = "S1-04"
 
 [node name="BarrierBody" type="StaticBody3D" parent="Gates/Gate_S1_04"]
@@ -5691,6 +5701,7 @@ mesh = SubResource("Trim125")
 
 
 [node name="Gate_S1_05" type="Node3D" parent="Gates"]
+script = ExtResource("10_gate")
 metadata/encounter_id = "S1-05"
 
 [node name="BarrierBody" type="StaticBody3D" parent="Gates/Gate_S1_05"]
@@ -6040,10 +6051,12 @@ position = Vector3(0, 37, -555)
 
 
 [node name="CP1-A" type="Area3D" parent="Checkpoints"]
+script = ExtResource("11_checkpoint")
 position = Vector3(0, 28, -325)
 collision_layer = 0
 collision_mask = 2
 monitoring = false
+checkpoint_id = &"CP1-A"
 metadata/checkpoint_id = "CP1-A"
 metadata/resume_encounter_id = "S1-05"
 
@@ -6102,10 +6115,12 @@ mesh = SubResource("Trim156")
 
 
 [node name="CP1-B" type="Area3D" parent="Checkpoints"]
+script = ExtResource("11_checkpoint")
 position = Vector3(0, 38, -450)
 collision_layer = 0
 collision_mask = 2
 monitoring = false
+checkpoint_id = &"CP1-B"
 metadata/checkpoint_id = "CP1-B"
 metadata/resume_encounter_id = "S1-07"
 

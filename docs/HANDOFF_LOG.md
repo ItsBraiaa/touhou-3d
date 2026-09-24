@@ -15,6 +15,31 @@ Action required by <other agent>: <what they must do, or "none">
 
 ---
 
+## 2026-09-23 23:05 — Claude (trunk) — F10-02: Gate and Checkpoint adapters on Stage 1 [shared]
+State: CODE_READY
+Files:
+- New: `scripts/progression/gate.gd` (`Gate`), `scripts/progression/checkpoint.gd` (`Checkpoint`), `docs/validation/stage-01-progression.md` with `stage-01-progression-gate.png` and `stage-01-progression-checkpoint.png`.
+- Edited: `scripts/progression/stage_director.gd` (Gates, Checkpoints, PortalLinks, `_apply_progress`, `check_setup` additions).
+- `scenes/stages/stage_01.tscn` **[shared]**: only two `ext_resource` lines, plus:
+  - `gate.gd` on `Gates/Gate_S1_02..05`;
+  - `checkpoint.gd` on `Checkpoints/CP1-A` and `CP1-B`, with `checkpoint_id` `&"CP1-A"` and `&"CP1-B"`;
+  - on `Stage`, `guard_links`: `S1-04/Wave1_Sentry1..3` → `Environment/PortalLinks/GuardLink1..3`.
+
+  No node, mesh, material, arch or `monitoring` flag changed.
+- Docs: `docs/engineering/stage-director.md` ("Gate", "Checkpoint", "Progress application"), `docs/GUIDE.md` (Section 6 rows for `gate.gd`, `checkpoint.gd` and `stage_director.gd`, the Section 7 row "Checkpoint entered", the Section 10 rows "Stage 1 progression" and "Checkpoints/gates/seals"), the ROADMAP F10-02 row, and the ticket.
+
+Change:
+- **Stage 1 plays end to end with the dev enemies.** Each Gate clears hostile fire, then opens when its Encounter completes; closed, it stops the ship at every height and stops Projectiles.
+- **Checkpoints.** CP1-A and CP1-B activate only after the Encounter before them. The first activation clears fire, refills (100 %, the Shield, 2 Bombs), commits the Attempt and records the Snapshot; a revisit does nothing. Each Checkpoint arms the next Encounter.
+- **PortalLinks.** The S1-04 links hide as their guards die.
+- **Tests.** None added (sprint rule). A verifier agent drove the game, including the whole route flown from the main menu in a window; the reviewer's one finding is fixed.
+
+Why: F10-02; F10-03's Retry reuses `_apply_progress()` and the store.
+Action required by Astra:
+1. Keep `BarrierBody/Collision`, `ClosedVisual`, `Respawn` and `Environment/PortalLinks/GuardLink1..3`. `check_setup()` refuses the stage if one goes missing.
+2. For a Checkpoint glow, react to `StageDirector.checkpoint_activated(checkpoint_id)`, for example with an `AnimationPlayer` on the arch, and tell Claude the node to connect.
+3. The Gate and Checkpoint arch lintels are solid, and a ship can snag under one. Check that this is intended.
+
 ## 2026-09-23 22:40 — Claude (trunk) — F10-01: StageDirector attached to Stage 1 [shared]
 State: CODE_READY
 Files:

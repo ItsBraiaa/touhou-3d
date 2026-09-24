@@ -9,9 +9,12 @@ extends Node3D
 ##
 ## The Session calls [method check_setup] before the stage enters the tree and refuses the
 ## stage on any message, then [method setup] once after the ship is bound, then
-## [method start_attempt] at every Attempt. Gates, Checkpoints and PortalLinks arrive in
-## F10-02, Retry in F10-03. The Director sits under `WorldRoot`, which is PAUSABLE, so it
-## stops while paused.
+## [method start_attempt] at every Attempt. Since F10-02 it also opens each [Gate] when its
+## Encounter completes, activates each [Checkpoint] once through its own
+## [CheckpointStore] (clearing hostile fire first), hides a PortalLink when its guard dies,
+## and sets every Gate and link from the machine's state (`_apply_progress`). Retry
+## arrives in F10-03. The Director sits under `WorldRoot`, which is PAUSABLE, so it stops
+## while paused.
 
 
 ## The last Encounter of the stage completed. The Session connects it deferred.
@@ -21,9 +24,14 @@ signal threat_reported(side: int)
 ## A reward Pickup was accepted: re-emitted from [signal Pickup.accepted], for audio
 ## (F13-03). Its [param score_awarded] already reached the Run; never add it again.
 signal pickup_accepted(pickup_id: StringName, kind: Pickup.Kind, score_awarded: int)
+## The Checkpoint [param checkpoint_id] activated for the first time: resources refilled,
+## the Attempt committed and a Snapshot recorded. For presentation, such as an arch glow.
+signal checkpoint_activated(checkpoint_id: StringName)
 
 ## Holds one child per Encounter, named by its id (`docs/STAGE_01_HANDOFF.md`).
 const ENCOUNTERS_PATH := ^"Encounters"
+## Holds one [Gate] per Encounter `gate_id`, named by it.
+const GATES_PATH := ^"Gates"
 ## Where spawned enemies and Pickups go; never an authored node.
 const RUNTIME_ACTORS_PATH := ^"RuntimeActors"
 const ENTRY_VOLUME_NAME := ^"EntryVolume"
@@ -42,8 +50,16 @@ const EXIT_VOLUME_NAME := ^"ExitVolume"
 ## Radius, in world units, of the horizontal circle a reward of more than one Pickup is
 ## laid out on around its marker. Claude's proposal.
 @export var reward_spread: float = 1.5
+## The PortalLink each portal guard feeds, by the guard's enemy id
+## (`&"S1-04/Wave1_Sentry1"` → `^"Environment/PortalLinks/GuardLink1"`), relative to the
+## stage root. A link hides when its guard dies and shows again while its Encounter is
+## not complete.
+@export var guard_links: Dictionary[StringName, NodePath] = {}
 
 var _machine: EncounterMachine
+## One per Director, so a new stage load or a Restart starts at Stage Entry with no
+## Checkpoint.
+var _checkpoint_store: CheckpointStore
 var _run_state: RunState
 var _combat_state: CombatState
 var _projectile_system: ProjectileSystem
@@ -87,6 +103,7 @@ func check_setup() -> PackedStringArray:
 		return errors
 	for encounter: EncounterDefinition in stage_definition.encounters:
 		errors.append_array(_check_encounter(encounter))
+	errors.append_array(_check_gates_checkpoints_and_links())
 	# An enemy refuses a definition that does not validate, and a Wave that never spawns
 	# never completes: refuse the stage instead.
 	for kind: StringName in enemy_definitions:
@@ -116,12 +133,15 @@ func setup(run_state: RunState, combat_state: CombatState, projectile_system: Pr
 	_machine.rewards_requested.connect(_on_rewards_requested)
 	_machine.encounter_completed.connect(_on_encounter_completed)
 	_machine.stage_cleared.connect(stage_cleared.emit)
+	_machine.gate_opened.connect(_on_gate_opened)
 	for encounter: EncounterDefinition in stage_definition.encounters:
 		var root := _encounter_root(encounter.id)
 		# Deferred: entry spawns Area3D actors and Pickups, which must not happen inside
 		# the physics flush that reports the body.
 		_arm(root.get_node(ENTRY_VOLUME_NAME) as Area3D, _on_entry_body_entered.bind(encounter.id))
 		_arm(root.get_node(EXIT_VOLUME_NAME) as Area3D, _on_exit_body_entered.bind(encounter.id))
+	_setup_checkpoints()
+	_apply_progress()
 
 
 ## Starts an Attempt with a new random stream seeded by [param attempt_seed], and begins
@@ -234,6 +254,7 @@ func _on_enemy_defeated(enemy_id: StringName, encounter_id: StringName) -> void:
 		return
 	var score: int = _live_enemies[enemy_id]
 	_live_enemies.erase(enemy_id)
+	_hide_guard_link(enemy_id)
 	_run_state.add_score(score)
 	_machine.notify_enemy_defeated(enemy_id, encounter_id)
 
@@ -287,6 +308,100 @@ func _enter_if_inside(encounter_id: StringName) -> void:
 	var entry := _encounter_root(encounter_id).get_node(ENTRY_VOLUME_NAME) as Area3D
 	if entry.overlaps_body(_player):
 		_machine.notify_entered(encounter_id)
+
+
+## Every Gate the route names must be a [Gate] with its barrier collision and closed
+## visual, every Checkpoint a [Checkpoint] with the definition's id and a `Respawn`, and
+## every guard link a [Node3D].
+func _check_gates_checkpoints_and_links() -> PackedStringArray:
+	var errors: PackedStringArray = []
+	var stage_id := _stage_id()
+	for encounter: EncounterDefinition in stage_definition.encounters:
+		if encounter.gate_id.is_empty():
+			continue
+		var path := NodePath("%s/%s" % [GATES_PATH, encounter.gate_id])
+		var gate := get_node_or_null(path)
+		if not gate is Gate:
+			errors.append("stage '%s': no Gate (gate.gd) at '%s'" % [stage_id, path])
+		elif not gate.get_node_or_null(Gate.COLLISION_PATH) is CollisionShape3D or not gate.get_node_or_null(Gate.CLOSED_VISUAL_PATH) is Node3D:
+			errors.append("stage '%s': Gate '%s' needs '%s' and '%s'" % [stage_id, path, Gate.COLLISION_PATH, Gate.CLOSED_VISUAL_PATH])
+	for definition: CheckpointDefinition in stage_definition.checkpoints:
+		var checkpoint := get_node_or_null(definition.node_path) as Checkpoint
+		if checkpoint == null:
+			errors.append("stage '%s': no Checkpoint (checkpoint.gd) at '%s'" % [stage_id, definition.node_path])
+		elif checkpoint.checkpoint_id != definition.id:
+			errors.append("stage '%s': Checkpoint '%s' has checkpoint_id '%s', not '%s'" % [stage_id, definition.node_path, checkpoint.checkpoint_id, definition.id])
+		elif not checkpoint.get_node_or_null(Checkpoint.RESPAWN_PATH) is Node3D:
+			errors.append("stage '%s': Checkpoint '%s' has no Node3D at '%s'" % [stage_id, definition.node_path, Checkpoint.RESPAWN_PATH])
+	# A key that names no spawned enemy would leave its link lit for the whole Attempt.
+	var enemy_ids: Dictionary[StringName, bool] = {}
+	for encounter: EncounterDefinition in stage_definition.encounters:
+		for wave: WaveDefinition in encounter.waves:
+			for marker: NodePath in wave.spawn_markers:
+				enemy_ids[EncounterMachine.enemy_id(encounter.id, marker)] = true
+	for enemy_id: StringName in guard_links:
+		if not enemy_ids.has(enemy_id):
+			errors.append("stage '%s': guard link key '%s' names no Wave enemy" % [stage_id, enemy_id])
+		if not get_node_or_null(guard_links[enemy_id]) is Node3D:
+			errors.append("stage '%s': guard link of '%s' at '%s' is not a Node3D" % [stage_id, enemy_id, guard_links[enemy_id]])
+	return errors
+
+
+## Creates this Director's [CheckpointStore] and arms every Checkpoint.
+func _setup_checkpoints() -> void:
+	_checkpoint_store = CheckpointStore.new()
+	for definition: CheckpointDefinition in stage_definition.checkpoints:
+		var checkpoint := get_node(definition.node_path) as Checkpoint
+		checkpoint.set_armed(true)
+		# Deferred: activation clears fire, refills and may spawn the resume Encounter.
+		checkpoint.entered.connect(_on_checkpoint_entered, CONNECT_DEFERRED)
+
+
+## A first valid entry clears hostile fire, then activates the Checkpoint through the
+## store (refill, commit, Snapshot), and begins its resume Encounter at once when the
+## ship is already inside that EntryVolume, which the machine refused while the
+## Checkpoint was inactive. An entry before the preceding Encounter completed, or a
+## revisit, does nothing at all: no clear and no refill.
+func _on_checkpoint_entered(checkpoint_id: StringName) -> void:
+	var definition := stage_definition.find_checkpoint(checkpoint_id)
+	if definition == null or not _machine.is_completed(definition.after_encounter_id) \
+			or _machine.is_checkpoint_activated(checkpoint_id):
+		return
+	_projectile_system.clear_hostile_all()
+	if not _checkpoint_store.activate(checkpoint_id, _combat_state, _run_state, _machine):
+		return
+	checkpoint_activated.emit(checkpoint_id)
+	_enter_if_inside(definition.resume_encounter_id)
+
+
+## Clears hostile fire, awarding nothing, then opens the Gate (STAGE_DESIGN "Shared
+## encounter rules").
+func _on_gate_opened(gate_id: StringName) -> void:
+	_projectile_system.clear_hostile_all()
+	_gate(gate_id).set_open(true)
+
+
+## Sets every Gate and PortalLink from the machine's state: a Gate is open only when its
+## Encounter is complete, so a Gate a failed Attempt opened closes again, and a guard link
+## shows while its Encounter is not complete. Called at the end of [method setup], and
+## after a restore (F10-03).
+func _apply_progress() -> void:
+	var open_ids := _machine.get_open_gate_ids()
+	for encounter: EncounterDefinition in stage_definition.encounters:
+		if not encounter.gate_id.is_empty():
+			_gate(encounter.gate_id).set_open(encounter.gate_id in open_ids)
+	for enemy_id: StringName in guard_links:
+		var encounter_id := StringName(String(enemy_id).get_slice("/", 0))
+		(get_node(guard_links[enemy_id]) as Node3D).visible = not _machine.is_completed(encounter_id)
+
+
+func _hide_guard_link(enemy_id: StringName) -> void:
+	if guard_links.has(enemy_id):
+		(get_node(guard_links[enemy_id]) as Node3D).visible = false
+
+
+func _gate(gate_id: StringName) -> Gate:
+	return get_node(NodePath("%s/%s" % [GATES_PATH, gate_id])) as Gate
 
 
 func _encounter_root(encounter_id: StringName) -> Node:

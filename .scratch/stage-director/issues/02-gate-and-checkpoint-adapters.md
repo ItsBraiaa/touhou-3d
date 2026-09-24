@@ -1,6 +1,6 @@
 # F10-02 Gate and Checkpoint adapters
 
-Status: todo
+Status: done
 Type: adapter
 parallel-safe: no
 Depends on: F10-01, F8-03, F7-02
@@ -126,6 +126,19 @@ This ticket also builds the Director's `_apply_progress()`, which sets every Gat
 
 - `gate.gd` and `checkpoint.gd` are attached with their exports. Keep `BarrierBody/Collision`, `ClosedVisual`, `Respawn` and `Environment/PortalLinks/GuardLink1..3`: the Director resolves them.
 - For a Checkpoint glow, react to `StageDirector.checkpoint_activated(checkpoint_id)`, for example with an `AnimationPlayer` on the arch. Tell Claude the node, and Claude connects it once.
+
+## Outcome
+
+Done 2026-09-23 by trunk (Claude: implementer, plus a verifier agent that ran the game and a reviewer agent).
+
+`Gate`, `Checkpoint` and the Director additions follow the Deliverables. Each addition to `stage_director.gd` sits in its own private function with a one-line call site, for sol's F12-05 merge. `stage_01.tscn` [shared] gained two `ext_resource` lines, the scripts on the four Gates and two Checkpoints, their `checkpoint_id`s and the Director's `guard_links`; `monitoring` stays off in the file.
+
+- **No new tests** (the user's sprint rule): `tests/scene/test_gates_and_checkpoints.gd` was not written. A throwaway driver ran the ticket's thirteen cases in the real game headless, and the windowed `/run` flew Stage 1 from the main menu on keyboard actions with no teleport: the Gates opened in order, and CP1-A and CP1-B each refilled once. Results and two captures are in `docs/validation/stage-01-progression.md`. The suite stays at 225, `validate_combat.gd` still gives `COMBAT_OK`, and F10-01's pass still passes.
+- **Deviation:**
+  - There is no `_latest_checkpoint_id` member. `CheckpointStore.latest_checkpoint_id()` already records the latest successful activation, and a copy would be duplicate state. F10-03 reads it from `_checkpoint_store`, with `Checkpoint.get_respawn_transform()`.
+  - The reviewer agreed.
+- **Reviewer finding, fixed:** `check_setup()` also requires every `guard_links` key to be one of the route's Wave enemy ids. Before, a mistyped key would have left its link lit for the whole Attempt.
+- **Noted, unchanged:** the "ship already inside the resume EntryVolume" branch cannot happen on Stage 1, because the volumes are 10 units past the Checkpoints. It was exercised with a synthetic entry. A Checkpoint entry handled in the same tick as a defeating hit clears fire, and the store then refuses; Retry clears everything anyway.
 
 ## Kickoff prompt
 

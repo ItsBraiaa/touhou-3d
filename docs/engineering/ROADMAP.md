@@ -68,7 +68,7 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | | | | 03 seal-and-guard-rules | core+adapter | no | oc-a | todo (consumed by F12-05, Stage 2 S2-03) |
 | F10 | Stage Director in Stage 1 | `stage-director` | 00 plan | docs | no | — | done (one-pass planning) |
 | | | | 01 stage-director-adapter | adapter | no | trunk | done (2026-09-23: `StageDirector` on Stage 1; S1-01 to S1-03 Encounters, defeats scored once, rewards and stage clear verified in the running game, no new tests per the sprint rule; fixed `EncounterMachine`'s compile error) |
-| | | | 02 gate-and-checkpoint-adapters | adapter | no | trunk | todo |
+| | | | 02 gate-and-checkpoint-adapters | adapter | no | trunk | done (2026-09-23: `Gate` and `Checkpoint` on Stage 1; the whole route flown from the menu, Gates open as Encounters clear, CP1-A and CP1-B refill once; no new tests per the sprint rule) |
 | | | | 03 retry-restart-flow | integration | no | trunk | todo |
 | | | | 04 stage-01-contract-smoke-test | test | yes (one new test file) | — | cut (the user's no-tests rule, 2026-09-23) |
 | F11 | Run flow | `run-flow` | 00 plan | docs | no | — | done (one-pass planning) |
