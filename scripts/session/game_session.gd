@@ -22,7 +22,8 @@ extends Node
 ##
 ## Nothing here decides gameplay: movement, targeting, progression and the Run's
 ## accounting belong to their cores. A stage clear freezes the stage under Results, and
-## the last stage of the order ends the Run with its victory (F11-01).
+## the last stage of the order ends the Run with its victory (F11-01); Results' Continuar
+## enters the next Campaign stage and Jogar novamente replays a Direct Stage (F11-02).
 
 
 ## Marker every stage root has, where the player enters (GUIDE Section 5 "Stages").
@@ -153,6 +154,10 @@ func _on_action_requested(action: StringName, payload: Dictionary) -> void:
 			_restart_stage()
 		&"retry":
 			_retry()
+		&"continue_campaign":
+			_continue_campaign()
+		&"replay_stage":
+			_replay_stage()
 		&"return_to_menu":
 			_return_to_menu()
 		&"quit":
@@ -169,6 +174,50 @@ func _start_run(mode: RunState.RunMode, stage: StringName) -> void:
 	if not _load_stage(stage):
 		return
 	_run_state.start(mode, stage)
+	_begin_first_attempt()
+
+
+## Results' Continuar after Campaign Stage 1 (F11-02): enters the next stage of the order
+## with the Power Level and the score carried, and 100 % Health, one Shield and two Bombs
+## (PLANEJAMENTO Section 6). Power Progress starts at 0: [RunState] carries only the
+## level, so a Restart there returns to the same entry. Ignored, with a warning, unless
+## a Campaign stage that is not the last has just completed.
+func _continue_campaign() -> void:
+	# The phase first: stage_result() is only valid once a Run has started.
+	if _run_state.get_phase() != RunState.Phase.STAGE_COMPLETE \
+			or _run_state.stage_result()["mode"] != RunState.RunMode.CAMPAIGN \
+			or _run_state.stage_result()["is_final"]:
+		push_warning("%s: continue_campaign outside Campaign Results with a next stage; ignored" % get_path())
+		return
+	var power := _combat_state.get_power_level()
+	_set_paused(false)
+	_run_state.advance(power)
+	if not _load_stage(_run_state.stage_result()["stage"]):
+		_return_to_menu()
+		return
+	_begin_first_attempt()
+
+
+## Results' Jogar novamente after a Direct Stage (F11-02): the same stage as a new Direct
+## Stage Run, a new [method RunState.start] with Attempt 1 and score 0, not a Restart.
+## Ignored, with a warning, unless a Direct Stage Run has just ended on its clear.
+func _replay_stage() -> void:
+	# The phase first, as above; the ship is still loaded only under the Results of the clear.
+	if _run_state.get_phase() != RunState.Phase.RUN_ENDED or _player == null \
+			or _run_state.stage_result()["mode"] != RunState.RunMode.DIRECT_STAGE:
+		push_warning("%s: replay_stage outside Direct Stage Results; ignored" % get_path())
+		return
+	var stage: StringName = _run_state.stage_result()["stage"]
+	_set_paused(false)
+	_start_run(RunState.RunMode.DIRECT_STAGE, stage)
+	if not _is_in_stage():
+		_return_to_menu()  # The stage no longer loads; it reported why.
+
+
+## The shared tail of a stage entered from its start, after the [RunState] call that
+## entered it: the combat resources at the stage's entry Power Level, the first Attempt,
+## the Director's, and the HUD.
+func _begin_first_attempt() -> void:
 	_combat_state.start(_run_state.starting_power_level())
 	_run_state.begin_attempt()
 	if _director != null:

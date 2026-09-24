@@ -58,3 +58,41 @@ focused, with Menu principal and Créditos below it. The HUD sits dimmed under t
 ![Defeat](run-flow-defeat.png)
 
 `run-flow-defeat.png`: "Tente outra vez" with `Início da fase` and Tentar novamente focused.
+
+# Continuation, Replay and Direct Stage entry — 2026-09-24 (F11-02)
+
+## Automated
+
+`tools/test.ps1`: 225 passed, 0 failed, no `SCRIPT ERROR`. No test is added (the sprint's
+no-new-tests rule), and `tools/validate_run_flow.gd` is void with it.
+
+## Driven pass: `scenes/main.tscn`
+
+Another throwaway `SceneTree` script drove the real Session. Results' buttons were pressed
+through `pressed`, Pause through `push_input`, and clears came from
+`StageDirector.stage_cleared.emit()`. Stage 2 has had its Director since F12-05, so its clear
+takes the real path. Power came from `CombatState.collect_power_pickup()`, the Bomb from
+`update_bomb_input(true)`, and the hit from `take_hit`. The pass ran headless, then windowed
+for one screenshot. There was no `SCRIPT ERROR`. The only `WARNING:` lines were the six
+expected "ignored" warnings of the first row.
+
+| Check | Measured |
+| --- | --- |
+| Continuar and Jogar novamente outside their Results | Ignored with a warning at the main menu with no Run, during Campaign Stage 1 play, Continue on Direct Stage Results and Replay on Campaign Stage 1 Results. Nothing loads or changes |
+| Continuar carries Power and score | Stage 1 left at Power 3, score 550, Health 70, no Shield, 1 Bomb. After Continuar: `stage_02.tscn` under `WorldRoot`, the HUD on top, unpaused; the ship at Stage 2's `PlayerStart` (0, 10, 25); Power 3, Progress 0, score 550 |
+| Continuar restores resources | Health 70 → 100, Shield back, Bombs 1 → 2 (PLANEJAMENTO Section 6) |
+| Stage 2's own tally | Clear Time 0.03 s after 1 tick, Graze 0, bombs used 0, Attempt 1, no `run_ended` |
+| Restart in Campaign Stage 2 | After +250 and a hit, Pause → Reiniciar fase: Power 3, score 550 (the entry), Health 100, Shield, Attempt 2 |
+| Campaign Stage 2 clear: the final victory | Heading `Jornada concluída`, Continue and Replay hidden, focus on Menu principal; `run_ended` `[true]` once; Créditos opens and Back returns to it; Menu principal leaves with still one `run_ended` |
+| Jogar novamente, Direct Stage 1 and 2 | Replay focused on the Direct Results. Pressed: a new stage instance, the HUD, unpaused; `IN_STAGE`, `DIRECT_STAGE`, score 0, Attempt 1, Power 1 and 2 |
+| Direct Stage entry values | Stage 1: Power 1, 100 %, Shield, 2 Bombs, score 0, HUD `PowerValue` 1. Stage 2: Power 2, the same resources, HUD `PowerValue` 2 (PLANEJAMENTO Section 12 "direct Stage 2 starts at power level 2") |
+
+## Windowed pass
+
+The window was 1280 × 720. A Campaign reached Power 3 and score 500, and Stage 1 was
+cleared. Continuar, then 90 ticks flying forward in Stage 2.
+
+![After Continuar](run-flow-continue.png)
+
+`run-flow-continue.png`: the Stage 2 mountain route with its torii. The HUD shows 100 %, the
+Shield, two Bombs and Power 3, with three Familiars around the ship.

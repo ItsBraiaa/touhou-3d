@@ -52,6 +52,25 @@ Action required by <other agent>: <what they must do, or "none">
 
 ---
 
+## 2026-09-24 11:40 — Claude (trunk) — F11-02: Continuar into Campaign Stage 2, and Jogar novamente
+State: CODE_READY
+Files:
+- Edited: `scripts/session/game_session.gd` (`_continue_campaign`, `_replay_stage`, `_begin_first_attempt`, two `match` arms).
+- New: `docs/validation/run-flow-continue.png`.
+- Docs: `docs/engineering/run-flow.md` ("Continuation and Direct Stage (F11-02)", Open issues), `docs/validation/run-flow.md` (F11-02 section), `docs/engineering/README.md` (the run-flow line), `docs/GUIDE.md` (the Section 6 `game_session.gd` row, the Section 10 rows "Main composition and session" and "Menus/options"), the ROADMAP F11-02 row and the ticket.
+
+No scene file changed.
+
+Change:
+- **Continuar** after Campaign Stage 1 loads Stage 2. It carries the Power Level and the score, and restores 100 % Health, one Shield and two Bombs. Power Progress starts at 0.
+- **Jogar novamente** after a Direct Stage starts that stage again as a new Direct Stage Run: Attempt 1, score 0, the stage's entry Power Level.
+- Both buttons warn and do nothing anywhere else.
+- **The Campaign's Stage 2 clear** shows the final victory (`Jornada concluída`) and ends the Run once.
+- **Tests.** None added (sprint rule). A scratchpad driver of `main.tscn` checked every item, headless and windowed.
+
+Why: F11-02; the Campaign now runs Stage 1 → Results → Stage 2 → final victory.
+Action required by Astra: none for scenes. One design question for you or Braia: only the Power Level carries into Campaign Stage 2, not partial Power Progress (for example 3 of 5). Say if it should carry; the change is small but touches `RunState`.
+
 ## 2026-09-24 11:05 — Claude (trunk) — F11-01: Results, Defeat and Pause with real values
 State: CODE_READY
 Files:

@@ -1,6 +1,6 @@
 # Run flow
 
-Feature F11: how a stage ends. Started with ticket F11-01 on 2026-09-24 (CODE_READY): a stage clear freezes the stage under Results with the real statistics, a final stage ends the Run with its one victory, and every Defeat, Results and Pause button works except Results' Continuar and Jogar novamente, which F11-02 adds.
+Feature F11: how a stage ends. Started with ticket F11-01 on 2026-09-24 (CODE_READY): a stage clear freezes the stage under Results with the real statistics, a final stage ends the Run with its one victory, and every Defeat, Results and Pause button works. F11-02 (CODE_READY the same day) added Results' Continuar and Jogar novamente ("Continuation and Direct Stage").
 
 ## Purpose
 
@@ -15,7 +15,7 @@ It does not own:
 
 ## Files
 
-- `scripts/session/game_session.gd`: `_on_stage_completed(result)` and `_results_params(result)`. The `run_ended` handler is gone: it only returned to the menu.
+- `scripts/session/game_session.gd`: `_on_stage_completed(result)` and `_results_params(result)`. The `run_ended` handler is gone: it only returned to the menu. Since F11-02 also `_continue_campaign()`, `_replay_stage()` and `_begin_first_attempt()`, the shared tail of `_start_run` and `_continue_campaign`.
 - `scripts/ui/menu_controller.gd`: `RESULTS_VALUE_PATHS`, `_find_results_values`, `_write_results_values` and `_format_clear_time`.
 - `tests/scene/test_game_session_flow.gd`: `test_a_completed_stage_returns_to_the_menu_until_results_exist` became `test_a_completed_stage_shows_results` (minimal adjustment, sprint rule). No new test file: the ticket's test list is void under the sprint's no-new-tests rule, and so is `tools/validate_run_flow.gd`. A scratchpad driver checked it instead ([validation/run-flow.md](../validation/run-flow.md)).
 
@@ -57,13 +57,47 @@ It also copies the four statistics.
 | --- | --- | --- | --- |
 | Results | Menu principal | `return_to_menu` | Unpauses, unloads the stage and the ship, `end_run(false)` (ignored after a victory), main menu |
 | Results | Créditos | `open_credits` | Credits over Results; the tree stays paused; Back returns to Results with the same values |
-| Results | Continuar, Jogar novamente | `continue_campaign`, `replay_stage` | Warn "not implemented yet" until F11-02 |
+| Results | Continuar | `continue_campaign` | F11-02: the next Campaign stage (below) |
+| Results | Jogar novamente | `replay_stage` | F11-02: the same stage as a new Direct Stage Run (below) |
 | Results, Defeat | Back (`ui_cancel`) | — | Nothing: the router refuses it and the Session ignores `back_refused` |
 | Defeat | Tentar novamente | `retry` | F10-03's Retry, or Restart before any Checkpoint |
 | Defeat | Menu principal | `return_to_menu` | As from Results |
 | Pause | Continuar, Reiniciar fase, Opções, Menu principal | `resume`, `restart_stage`, `open_options`, `return_to_menu` | As in F2-04; Options keeps the game paused |
 
 Defeat shows `Início da fase` before any Checkpoint, else `Último checkpoint · <display_name>`, for example `Portal Selado`. Pause shows the Attempt's score and Graze: `Pontos  <score>     Graze  <graze>`.
+
+## Continuation and Direct Stage (F11-02)
+
+### `_continue_campaign()` (Continuar)
+
+It acts only when the Run is `STAGE_COMPLETE`, the mode is `CAMPAIGN` and the stage is not the last of the order. Anywhere else it warns and does nothing: no Run, a stage in play, Direct Stage Results, or the final victory.
+1. It reads the Power Level: `_combat_state.get_power_level()`.
+2. `_set_paused(false)`.
+3. `_run_state.advance(power)` enters the next stage with that Power Level and the score carried. Clear Time, Graze and bombs used start from zero, and the Attempt index from 0.
+4. `_load_stage(<the next stage>)` loads the stage and the ship at its `PlayerStart`. If the load fails, it calls `_return_to_menu()`.
+5. `_begin_first_attempt()` runs, which does four things: `_combat_state.start(starting_power_level())` (100 % Health, one Shield, two Bombs, Power Progress 0), `begin_attempt()`, the Director's `start_attempt`, and the HUD.
+
+Only the Power Level carries. A Stage 1 run ending at, for example, level 2 with 3 of 5 Progress loses those 3. This is Claude's reading: `RunState` carries only the level, so a Restart of Campaign Stage 2 returns to the same entry. Carrying Progress would need an entry-progress value in `RunState`, which is the user's call (Open issues).
+
+### `_replay_stage()` (Jogar novamente)
+
+It acts only when the Run is `RUN_ENDED` from a `DIRECT_STAGE` clear whose stage is still loaded under Results. Anywhere else it warns and does nothing.
+1. It unpauses.
+2. It calls `_start_run(DIRECT_STAGE, <that stage>)`: a new `RunState.start()`, Attempt 1, score 0, the stage's entry Power Level. It is not a Restart.
+3. If the stage no longer loads, it returns to the menu.
+
+### Entry values
+
+| Entry | Power Level | Health, Shield, Bombs | Score |
+| --- | --- | --- | --- |
+| Direct Stage 1, Campaign Stage 1 | 1 | 100 %, one, two | 0 |
+| Direct Stage 2 | 2 | 100 %, one, two | 0 |
+| Campaign Stage 2 (Continuar) | Stage 1's final Power Level | 100 %, one, two | Stage 1's final score |
+| Restart of any of these | the same entry | 100 %, one, two | the same entry score |
+
+### Final victory
+
+Campaign Stage 2's clear shows the `final_victory` layout: heading `Jornada concluída`, Continue and Replay hidden, focus on Menu principal, Créditos reachable. It also emits `run_ended(true)` once. Stage 2 has had its Director since F12-05, so this is its real clear path. Its bosses (F12-06, F12-07) are still dev stand-ins or unintegrated, so the driver cleared it through `stage_cleared`.
 
 ## Dependencies
 
@@ -90,6 +124,7 @@ No test is added (the sprint's no-new-tests rule). Every row was checked by the 
 
 ## Open issues
 
-- **The Campaign's real final victory needs Continuar (F11-02).** Here the `final_victory` layout was checked through the Session's own `_results_params` on a pushed Results.
+- **Power Progress is not carried into Campaign Stage 2** (F11-02, Claude's reading above). Tell Claude if it should be; it needs an entry-progress value in `RunState`.
+- **The Campaign's final victory through play** was reached by clearing Stage 2 through its Director's `stage_cleared` (F11-02). A clear flown through Stage 2's Encounters waits for F12-06 and F12-07.
 - **Results over Defeat.** A Defeat raised in the same physics step as the last kill is replaced by Results: the stage was cleared. The player's defeated `CombatState` stays frozen under Results. Continuar (F11-02) starts a new `CombatState` anyway.
 - **`menus-session.md` "Params"** still calls Defeat's `checkpoint` param an id; it is the Checkpoint's `display_name` (the doc comment in `menu_controller.gd` is fixed).

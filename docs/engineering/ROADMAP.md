@@ -75,7 +75,7 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | | | | 06 stage-validators-accept-the-director | tooling | yes | oc-a | done (2026-09-24: Stage 1 validator accepts no root script or the StageDirector script; all three validators passed headless, no new tests per sprint rule) |
 | F11 | Run flow | `run-flow` | 00 plan | docs | no | — | done (one-pass planning) |
 | | | | 01 defeat-results-retry-restart-screens | integration | no | trunk | done (2026-09-24: a stage clear freezes under Results with the real values and the Run Mode's layout, a final stage ends the Run with one victory, `STAGE_RESULT` line; every Defeat, Results and Pause button verified in the running game; no new tests per the sprint rule) |
-| | | | 02 campaign-continuation-and-direct-stage | integration | no | trunk | todo |
+| | | | 02 campaign-continuation-and-direct-stage | integration | no | trunk | done (2026-09-24: Continuar loads Campaign Stage 2 with Power and score carried and resources restored, Jogar novamente starts a fresh Direct Stage Run; the Campaign's Stage 2 clear shows the final victory once; verified in the running game, no new tests per the sprint rule) |
 | | | | 03 active-and-clear-time-verification | test | no | path | todo (manual protocol only; no tests) |
 | F12 | Bosses and Stage 2 | `bosses` | 00 plan | docs | no | — | done (one-pass planning; Stage 2 reinstated by the sprint plan) |
 | | | | 01 boss-machine-core | core | yes | path | done (no unit tests, by the sprint rule; transition cap 0.75 s from D-07 ruling 1) |
