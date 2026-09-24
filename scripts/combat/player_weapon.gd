@@ -6,8 +6,9 @@ extends Node
 ##
 ## Shots leave from `Muzzle` and the Familiar anchors, rotated by the camera yaw (the body
 ## never yaws, F1-02), fly where the view looks, and turn toward the locked target's
-## `HitVolume` when it is inside the shot's Aim Assist cone. A shot flies straight: there
-## is no homing, and the field kills it on scenery for its whole travel (ADR-0004). The
+## `HitVolume` when it is inside the shot's Aim Assist cone, measured from the camera
+## (F6-04). A shot flies straight: there is no homing, and the field kills it on scenery
+## for its whole travel (ADR-0004). The
 ## Bomb button is tracked from `bomb` events, never from `Input.is_action_just_pressed`,
 ## because gamepad B is also `ui_cancel` (F2-04); a Bomb shows up as
 ## [signal CombatState.bomb_activated]; the Session reacts to it with this weapon's
@@ -68,6 +69,11 @@ const PHYSICS_PRIORITY := 50
 @export var familiar_assist_degrees_level_2: float = 10.0
 ## Aim Assist cone of a Familiar shot at Power Level 3, in degrees.
 @export var familiar_assist_degrees_level_3: float = 20.0
+## Aim Assist cone of the main shot under a Target Lock, in degrees, measured from the
+## camera between the view direction and the locked target: wide enough to cover the lock
+## framing, which keeps the target off the view center (F6-04). Familiar cones widen by the
+## same margin over [member main_assist_degrees]. Claude's proposal; Astra tunes it.
+@export var lock_assist_degrees: float = 25.0
 
 @export_group("Bomb")
 ## Radius around the Core, in world units, of a Bomb's hostile clear and enemy damage.
@@ -186,10 +192,16 @@ func set_fire_enabled(enabled: bool) -> void:
 ##
 ## "Forward" is toward the point the view's center ray reaches at the locked target's
 ## depth along the view, or at the shot's range with no lock, rather than the camera's
-## own axis: the camera sits behind and above the Muzzle, and that parallax alone would
-## put a locked target outside a 10-degree cone. The Aim Assist cone then measures the
-## target's real offset from the view center. The point always stays at least
+## own axis: the camera sits behind and above the Muzzle. The point always stays at least
 ## [constant MIN_AIM_AHEAD] ahead of the shot's origin.
+##
+## Aim Assist under a Target Lock (F6-04) is measured from the camera, not from the shot:
+## the angle between the view direction and the locked target, against the shot's cone
+## widened by `lock_assist_degrees - main_assist_degrees`. `CameraRig` frames the ship and
+## the target together, so the target sits off the view center, and seen from the Muzzle a
+## close target was outside a 10-degree cone. Inside the widened cone the shot flies from
+## its origin straight at the target; outside it, along "forward". With no lock there is
+## no assist.
 func _fire(shots: Array[WeaponModel.Shot]) -> void:
 	var yaw := Basis(Vector3.UP, camera_rig.get_yaw())
 	var eye := camera_rig.camera.global_position
@@ -198,6 +210,8 @@ func _fire(shots: Array[WeaponModel.Shot]) -> void:
 	var aiming := is_instance_valid(_target_point) and _target_point.is_inside_tree()
 	var target := _target_point.global_position if aiming else Vector3.ZERO
 	var depth := (target - eye).dot(view) if aiming else shot_speed * shot_lifetime
+	var lock_degrees := rad_to_deg(view.angle_to(target - eye)) if aiming else INF
+	var lock_widening := lock_assist_degrees - main_assist_degrees
 	for shot: WeaponModel.Shot in shots:
 		var offset := muzzle.position
 		var damage := shot_damage
@@ -206,10 +220,10 @@ func _fire(shots: Array[WeaponModel.Shot]) -> void:
 			damage = familiar_shot_damage
 		var origin := _ship.global_position + yaw * offset
 		var shot_depth := maxf(depth, (origin - eye).dot(view) + MIN_AIM_AHEAD)
-		var forward := eye + view * shot_depth - origin
-		var direction := forward.normalized()
-		if aiming:
-			direction = WeaponModel.assist_direction(origin, forward, target, shot.assist_degrees)
+		var direction := (eye + view * shot_depth - origin).normalized()
+		var to_target := target - origin
+		if lock_degrees <= shot.assist_degrees + lock_widening and not to_target.is_zero_approx():
+			direction = to_target.normalized()
 		_request.position = origin
 		_request.velocity = direction * shot_speed
 		_request.lifetime = shot_lifetime

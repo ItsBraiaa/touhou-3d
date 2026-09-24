@@ -43,6 +43,103 @@ Action required by Astra:
 2. Never rerun `tools/build_stage_01.py` over the wiring.
 3. Keep the `Encounters/<ID>/{EntryVolume,ExitVolume,Spawns,RewardOrigin,ShieldPickup}` and `RuntimeActors` names. `check_setup()` refuses the stage if one goes missing.
 4. `scenes/enemies/visuals/spirit_lume.tscn` and `sentry_lantern.tscn` declare `CharacterArmature`, `Skeleton3D`, the mesh and `AnimationPlayer` again as new typed nodes under the instanced glTF `Model`. Each enemy then holds duplicate children, leaks them at exit (`… RID allocations … leaked at exit`), and probably draws its model twice. Re-save them so those children are overrides with no `type=`.
+## 2026-09-24 00:20 — Claude (path) — F3-02: Options bound to Settings, buses and window
+State: CODE_READY
+Files: New `scripts/ui/options_screen.gd`. Edited `scripts/ui/interface.gd` (`settings_path`, `get_settings()`, the Options binding, `restore_defaults` resolved). Docs: `docs/engineering/settings.md` ("Options binding"), `docs/engineering/menus-session.md` (the Interface contract and the Session actions row), `docs/GUIDE.md` (Section 6 `interface.gd`, Section 14 "State and verification"), and the ROADMAP F3-02 row.
+Change:
+- **`Interface`** owns the one `Settings`. It reads `settings_path` (default `user://settings.cfg`) once at boot; a bad file is a warning and the defaults are used. `get_settings()` exposes it.
+- **A code-built `OptionsScreen` under the Options root** does the binding:
+  - it fills the eight Section 14 widgets without signals, then connects them;
+  - it applies Master, Music and SFX (0 mutes only that bus) and the window (Janela at the chosen resolution, stepped down to fit the screen; Tela cheia keeps the resolution for Janela);
+  - it saves after each explicit change, and Defaults restores, refreshes and saves once.
+- **Defaults** (`restore_defaults`) no longer reaches the Session.
+- **Stored but not yet applied:** camera sensitivity, invert vertical and the input device.
+- **Checks.** Tests: none (sprint rule). A scripted headless check of every behavior the ticket lists is recorded in `settings.md`.
+Why: F3-02 (moved to path).
+Action required by Astra: the eight widget paths, the item order of Janela/Tela cheia, the three resolutions and Automático/Teclado/Controle, and the slider ranges are load-bearing. A mismatch is reported at boot and leaves that field unbound. Values authored in `options.tscn` are now overwritten at boot by the saved values or the defaults.
+Action required by Claude (trunk): F3-04 reads `interface.get_settings()` for `camera_sensitivity` and `invert_vertical`, listening to `Settings.changed` for live changes. `game_session.gd` needed no edit. The windowed display pass is owed to F3-04 part 1 (path).
+
+## 2026-09-23 23:40 — Claude (path) — F6-04: Aim Assist follows the Target Lock under lock framing
+State: CODE_READY
+Files: `scripts/combat/player_weapon.gd` (the fire path and one new export), `docs/validation/enemies.md` (re-measurement; the F9-02 finding marked resolved), `docs/engineering/weapon-rendering.md` ("Aim Assist under a lock"), `docs/GUIDE.md` (Section 6 `player_weapon.gd` row), the ROADMAP F6-04 row.
+Change:
+- **The rule.** Under a Target Lock, the Aim Assist angle is measured from the camera, between the view and the lock's `HitVolume`. Each shot compares it with its cone widened by `lock_assist_degrees − main_assist_degrees`: main 25°, Familiars 25° at Power Level 2 and 35° at Power Level 3. Inside the cone the shot flies straight at the target. Unlocked fire is unchanged (no assist without a lock).
+- **New export** `lock_assist_degrees` 25.0, a code default. `player_ship.tscn` is untouched.
+- **Measured:** a locked Spirit at 10, 16, 30 and 50 units now falls in 2.02, 2.12, 2.35 and 2.68 s. Before, it never fell at 10 or 16. `CameraRig` and `Targeting` are unchanged.
+- **Tests:** none (sprint rule).
+Why: F6-04, from path's F9-02 finding (PLANEJAMENTO Section 4: Aim Assist toward the lock).
+Action required by Astra: `lock_assist_degrees` (25°) is yours to tune (D-05 or D-07 Part C). Report the value to trunk for F14-01's swap step.
+Action required by Claude (trunk): none now. F13-03 adds `shots_fired` to the same `_fire`, which is still the single fire path. `WeaponModel.assist_direction` is no longer called by the weapon; it stays in the core.
+## 2026-09-24 02:00 — OpenCode (oc-a) — F9-03 part 1: SealRules core
+State: CODE_READY
+Files: `scripts/progression/seal_rules.gd`, `docs/engineering/enemies.md`
+Change: Added the Node-free SealRules lifecycle core. It activates linked Guards once, counts each linked defeat once, exposes the Seal only after all Guards are defeated, ignores early damage including Bomb damage, and emits exactly-once progression signals. Capture and restore preserve state without emitting signals.
+Why: F9-03 part 1 supplies the Stage 2 Seal progression contract for the adapter in part 2.
+Action required by other agent: none; continue with F9-03 part 2.
+
+## 2026-09-24 01:45 — Claude (plan) — land compiles every script; EncounterMachine fix landed early
+State: dev
+Files: `tools/check_resources.gd`, `tools/lane.ps1`, `docs/engineering/SPRINT.md`, `scripts/progression/encounter_machine.gd` (cherry-picked from trunk's `be64081`, byte-identical).
+Change:
+- **The fault.** F8-02's `encounter_machine.gd` never compiled: a parameter shadowed a function, which this project treats as an error. It passed `land` because no test or scene loaded it. Trunk found it in F10-01 and fixed it.
+- **The early landing.** That exact fix is landed now, so no lane is blocked while trunk is still in F10-01. The change is identical, so trunk's own branch merges cleanly.
+- **The gate.** `tools/check_resources.gd` now also compiles every `.gd` under `scripts/` and `tools/`: 53 scripts and 70 resources, clean.
+
+Why: a core that nothing loads yet would otherwise break the first lane that uses it.
+
+Action required by Astra: none.
+
+## 2026-09-23 23:05 — Claude (path) — F12-02: BossController and dev boss prefab
+State: CODE_READY
+Files:
+- New: `scripts/enemies/boss_controller.gd`, `scenes/dev/dev_boss.tscn`, `scenes/dev/dev_boss_definition.tres`, `docs/validation/bosses.md`, `docs/validation/bosses-dev-boss.png`.
+- Edited: `scenes/dev/arena_harness.gd` and `.tscn` (export `spawn_dev_boss`, marker `EnemySpawns/DevBoss`, HUD boss-panel wiring, readout lines; additions in their own functions).
+- Docs: `docs/engineering/bosses.md` (BossController contract, Setup for Astra), `docs/GUIDE.md` (Section 6 `boss_controller.gd`, Section 7 "Boss phase changed"), the ROADMAP F12-02 row.
+
+Change:
+- **`BossController`** on a boss's `Enemy` root. `spawn_setup(definition, enemy_id, encounter_id, rng, projectile_system, player, bounds) -> bool` works as for `EnemyActor`. Each physics tick at priority 0 it hovers the boss (placeholder bob), ticks the `BossMachine` from `Emitters/Main`, spawns its shots and registers its `HitVolume` sphere. It also:
+  - clears every hostile Projectile when a Phase is depleted;
+  - plays the optional clips `idle_clip`, `step_clip`, `phase_clip` (the sprint note) and `defeat_clip` only if `has_animation()` finds them, and otherwise warns once and skips them;
+  - emits `boss_started`, `phase_changed`, `phase_health_changed`, `threat_reported` and `defeated` once, shaped for the HUD boss panel;
+  - provides `get_score()`.
+- **Dev boss:** "Guardião (dev)", three Phases of 40, a primitive sphere, hit radius 2.5. In the harness, `spawn_dev_boss` spawns it and wires the HUD as GUIDE Section 7 says.
+- **Tests:** none added or changed (sprint rule). Scripted runs are in `docs/validation/bosses.md`.
+
+Why: F12-02; F12-03, F12-06 and F12-07 attach this controller to Astra's boss scenes.
+Action required by Claude (trunk): `content/bosses/lantern_guardian.tres` (F12-03 part 1) **does not load**. Line 14 references `SubResource("Attack_Ritual")` before it is declared, and Godot's parser refuses that. Reorder the sub-resources (steps, then attacks, then phases) before F12-03 part 2. To attach the controller to `lantern_guardian.tscn`, set `visual_root`, `hit_volume`, `emitter`, `animation_player` → `VisualRoot/Model/AnimationPlayer` and the clips `Flying_Idle`, `Punch`, `Yes`, `Death`. All four were checked at runtime.
+Action required by Astra: none. Your boss trees already fit, with `HitVolume` placed at the hit center.
+## 2026-09-24 01:30 — Claude (plan) — lantern_guardian.tres loads again; land now loads every resource [shared]
+State: dev
+Files: `content/bosses/lantern_guardian.tres` (sub-resources reordered, values unchanged), `tools/check_resources.gd` (new gate tool), `tools/lane.ps1`, `docs/engineering/SPRINT.md`.
+Change:
+- **The fault.** F12-03 part 1 landed `lantern_guardian.tres` with each Phase declared before the Attack and Steps it references. Godot's text parser rejects forward `SubResource` references ("Parse Error" at line 14), so the Boss Definition did not load. Path found it while checking F12-02.
+- **The fix.** The blocks are now ordered so each comes after everything it references, with no value changed; the file loads and validates.
+- **Why the gate missed it.** It never loaded `content/`: no content-validation test exists under the no-tests rule.
+- **The new gate step.** `land` now also runs `tools/check_resources.gd`: every `.tres` and `.tscn` under `content/` and `scenes/` must load, and each Definition's `validate()` must pass. It checks 70 files, clean.
+
+Why: trunk's F12-03 part 2 was blocked on this file, and a hand-written `.tres` can break the same way again.
+
+Action required by Astra: when you hand-write or tune a `.tres` with sub-resources, declare each one after the ones it references. `land` now refuses the file otherwise.
+## 2026-09-23 22:27 — OpenCode (oc-b) — F14-02 part 1 package script
+State: CODE_READY
+Files: `tools/package.ps1`, `docs/HANDOFF_LOG.md`
+Change: Added the PowerShell 5.1-compatible package script for the first split part. It refuses a missing export with exit 2 and a dirty tree with exit 3, stages tracked project files while excluding agent directories, copies both exported executables, writes the Portuguese LEIA-ME, creates the dated zip, and includes extracted-copy import, test and executable boot verification plus `-SkipVerify`.
+Why: F14-02 part 1 prepares the delivery tooling before trunk's F14-01 export is available; the final acceptance record and package run remain part 2.
+Action required by trunk: none. For the next oc-b session (F14-02 part 2): sync after F14-01, run the script without `-SkipVerify`, record the package evidence and acceptance matrix, then close the ticket.
+
+## 2026-09-23 22:20 — OpenCode (oc-b) — F3-01 Settings core and ConfigFile persistence
+State: CODE_READY
+Files: `scripts/settings/settings.gd`, `docs/engineering/settings.md`, `docs/engineering/README.md`, `docs/engineering/ROADMAP.md`, `.scratch/settings/issues/01-settings-core-and-configfile.md`, `docs/HANDOFF_LOG.md`
+Change: Added the Node-free `Settings` Rules Core with GUIDE Section 14 defaults, typed getters, per-field sanitising and validation, idempotent `changed` signal emission, deep `capture`/`restore`, explicit ConfigFile load/save, corrupt-file fallback and static volume helpers. The new settings module contract documents the audio/display/controls file layout and invariants. No tests were written per the sprint rule.
+Why: F3-01 supplies F3-02 with the validated settings state and persistence boundary without coupling the core to buses, windows, devices or camera behavior.
+Action required by Astra: none. For path F3-02: construct `Settings`, call `load_file()` once at startup, apply the typed getters to widgets and call `save_file()` only after explicit user changes.
+
+## 2026-09-24 01:00 — Claude (plan) — F6-04: Aim Assist under lock framing, queued in path
+State: PLANNED
+Files: `.scratch/weapon-rendering/issues/04-aim-assist-under-lock-framing.md` (new), `docs/engineering/SPRINT.md` (path row 7a), `docs/engineering/ROADMAP.md`.
+Change: Path's F9-02 finding (locked shots miss enemies 10 to 16 units away once the lock framing blends in) becomes F6-04, in path after F12-02. It changes `PlayerWeapon`'s fire path so a Target Lock is aimed at against the lock itself, not the off-center framed view. The camera framing is untouched.
+Why: Aim Assist toward the Target Lock is a PLANEJAMENTO Section 4 rule, and trunk is on the critical path.
+Action required by Astra: tune `lock_assist_degrees` if F6-04 adds it, through D-05 or D-07 Part C.
 
 ## 2026-09-23 22:15 — Claude (path) — F9-02: EnemyActor and dev Spirit and Sentry prefabs [shared]
 State: CODE_READY

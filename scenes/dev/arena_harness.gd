@@ -15,7 +15,8 @@ extends Node3D
 ## on `_ready`, and the dev key H breaks the Shield so the Shield Pickup can be taken
 ## (F7-03). A dev Spirit and Sentry spawn at the `EnemySpawns` markers under the arena's
 ## `RuntimeActors`, as the Director will spawn them, and the dev key R respawns the
-## defeated ones (F9-02). Dev only: it is never loaded by `scenes/main.tscn` and holds no
+## defeated ones (F9-02). With `spawn_dev_boss` on, the dev boss spawns too and drives the
+## HUD boss panel (F12-02). Dev only: it is never loaded by `scenes/main.tscn` and holds no
 ## gameplay rule.
 
 
@@ -38,6 +39,10 @@ const SENTRY_DEFINITION: EnemyDefinition = preload("res://content/enemies/sentry
 const ENEMY_SEED := 902
 const ENEMY_ENCOUNTER_ID := &"arena"
 const THREAT_SECONDS := 1.0
+## F12-02: the dev boss and its Definition, and how long its Attack name shows on the HUD.
+const DEV_BOSS_SCENE := preload("res://scenes/dev/dev_boss.tscn")
+const DEV_BOSS_DEFINITION: BossDefinition = preload("res://scenes/dev/dev_boss_definition.tres")
+const ATTACK_CUE_SECONDS := 2.0
 
 ## The instanced `combat_arena.tscn`, holding `PlayerShip`, `FlightBounds` and `Targets`.
 @export var arena: Node3D
@@ -55,8 +60,12 @@ const THREAT_SECONDS := 1.0
 @export var power_pickup_scene: PackedScene
 ## A [Pickup] scene of kind SHIELD (`scenes/dev/shield_pickup.tscn`).
 @export var shield_pickup_scene: PackedScene
-## Holds the `Spirit` and `Sentry` [Marker3D]s the dev enemies spawn at (F9-02).
+## Holds the `Spirit` and `Sentry` [Marker3D]s the dev enemies spawn at (F9-02), and the
+## `DevBoss` one (F12-02).
 @export var enemy_spawns: Node3D
+## F12-02: also spawn the dev boss at `EnemySpawns/DevBoss`, wired to the HUD boss panel
+## the way the Session will wire a real boss (F12-03).
+@export var spawn_dev_boss: bool = false
 
 var _player: PlayerController
 var _rig: CameraRig
@@ -75,6 +84,12 @@ var _enemy_bounds: AABB
 var _enemy_spawn_count: int = 0
 var _enemy_defeats: int = 0
 var _last_threat: String = "none"
+## F12-02: what the dev boss last reported, for the readout.
+var _boss_state: String = "off (spawn_dev_boss)"
+var _boss_phase: int = 0
+var _boss_phase_count: int = 0
+var _boss_ratio: float = 1.0
+var _boss_attack: String = ""
 
 
 func _ready() -> void:
@@ -99,6 +114,8 @@ func _ready() -> void:
 		dummy.setup(projectile_system)
 	_spawn_pickups()
 	_start_enemies(bounds)
+	if spawn_dev_boss:
+		_spawn_dev_boss(bounds)
 
 
 ## Dev keys 1, 2 and 3 restart the combat state at that Power Level; H hits the ship once,
@@ -123,7 +140,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _process(_delta: float) -> void:
 	readout.text = "\n".join(PackedStringArray([
-		_flight_line(), _camera_line(), _lock_line(), _projectile_line(), _weapon_line(), _pickup_line(), _enemy_line(),
+		_flight_line(), _camera_line(), _lock_line(), _projectile_line(), _weapon_line(), _pickup_line(), _enemy_line(), _boss_line(),
 	]))
 
 
@@ -346,3 +363,63 @@ func _on_enemy_defeated(_enemy_id: StringName, _encounter_id: StringName, marker
 func _on_enemy_threat_reported(side: int, marker_name: StringName) -> void:
 	_last_threat = "%s %s" % [marker_name, "left" if side < 0 else "right"]
 	hud.show_threat(side, THREAT_SECONDS)
+
+
+## F12-02: what the Director and the Session will do for a boss (F12-03): instance it
+## under `RuntimeActors` at its marker, wire it to the HUD boss panel, then
+## [method BossController.spawn_setup], which emits `boss_started` and Phase 0 at once.
+func _spawn_dev_boss(bounds: AABB) -> void:
+	var marker := enemy_spawns.get_node_or_null(^"DevBoss") as Marker3D
+	var actors_root := arena.get_node_or_null(^"RuntimeActors")
+	if marker == null or actors_root == null or not bounds.has_volume():
+		push_error("%s: the dev boss needs %s/DevBoss, %s/RuntimeActors and a Flight Volume" % [
+			get_path(), enemy_spawns.get_path(), arena.get_path(),
+		])
+		return
+	var boss := DEV_BOSS_SCENE.instantiate() as BossController
+	boss.name = &"DevBoss"
+	actors_root.add_child(boss)
+	boss.global_transform = marker.global_transform
+	boss.boss_started.connect(_on_boss_started)
+	boss.phase_changed.connect(_on_boss_phase_changed)
+	boss.phase_health_changed.connect(_on_boss_phase_health_changed)
+	boss.threat_reported.connect(_on_boss_threat_reported)
+	boss.defeated.connect(_on_boss_defeated)
+	if not boss.spawn_setup(DEV_BOSS_DEFINITION, &"dev_boss_1", ENEMY_ENCOUNTER_ID, _enemy_rng, projectile_system, _player, bounds):
+		boss.queue_free()
+
+
+## The dev boss's Phase, that Phase's health and its current Attack name.
+func _boss_line() -> String:
+	if _boss_phase_count == 0 or _boss_state != "":
+		return "boss %s" % _boss_state
+	return "boss phase %d of %d at %.2f\nattack %s" % [_boss_phase + 1, _boss_phase_count, _boss_ratio, _boss_attack]
+
+
+func _on_boss_started(display_name: String, phase_count: int) -> void:
+	_boss_state = ""
+	_boss_phase_count = phase_count
+	hud.show_boss(display_name, phase_count)
+
+
+func _on_boss_phase_changed(phase_index: int, attack_name: String) -> void:
+	_boss_phase = phase_index
+	_boss_ratio = 1.0
+	_boss_attack = attack_name
+	hud.show_attack_cue(attack_name, ATTACK_CUE_SECONDS)
+
+
+func _on_boss_phase_health_changed(phase_index: int, ratio: float) -> void:
+	if phase_index == _boss_phase:
+		_boss_ratio = ratio
+	hud.set_phase_health(phase_index, ratio)
+
+
+func _on_boss_threat_reported(side: int) -> void:
+	_last_threat = "DevBoss %s" % ("left" if side < 0 else "right")
+	hud.show_threat(side, THREAT_SECONDS)
+
+
+func _on_boss_defeated(_enemy_id: StringName, _encounter_id: StringName) -> void:
+	_boss_state = "defeated"
+	hud.hide_boss()

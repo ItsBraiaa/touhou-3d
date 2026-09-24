@@ -8,18 +8,6 @@
 [ext_resource type="Resource" path="res://content/patterns/lantern_aimed_burst.tres" id="6_burst"]
 [ext_resource type="Resource" path="res://content/patterns/lantern_paired_fan.tres" id="7_fan"]
 
-[sub_resource type="Resource" id="Phase_Ritual"]
-script = ExtResource("2_phase")
-health = 1500
-attack = SubResource("Attack_Ritual")
-transition_seconds = 0.0
-
-[sub_resource type="Resource" id="Attack_Ritual"]
-script = ExtResource("3_attack")
-display_name = "Ritual das Lanternas"
-steps = Array[ExtResource("4_step")]([SubResource("Step_Ring_High"), SubResource("Step_Aimed_Sparse"), SubResource("Step_Ring_Low"), SubResource("Step_Aimed_Sparse_2")])
-reposition_seconds = 1.0
-
 [sub_resource type="Resource" id="Step_Ring_High"]
 script = ExtResource("4_step")
 pattern = ExtResource("5_ring")
@@ -48,17 +36,17 @@ anticipation_seconds = 0.8
 height_offset = -2.0
 pause_after = 0.5
 
-[sub_resource type="Resource" id="Phase_Threads"]
+[sub_resource type="Resource" id="Attack_Ritual"]
+script = ExtResource("3_attack")
+display_name = "Ritual das Lanternas"
+steps = Array[ExtResource("4_step")]([SubResource("Step_Ring_High"), SubResource("Step_Aimed_Sparse"), SubResource("Step_Ring_Low"), SubResource("Step_Aimed_Sparse_2")])
+reposition_seconds = 1.0
+
+[sub_resource type="Resource" id="Phase_Ritual"]
 script = ExtResource("2_phase")
 health = 1500
-attack = SubResource("Attack_Threads")
-transition_seconds = 0.75
-
-[sub_resource type="Resource" id="Attack_Threads"]
-script = ExtResource("3_attack")
-display_name = "Fios de Luz"
-steps = Array[ExtResource("4_step")]([SubResource("Step_Charged_Aim"), SubResource("Step_Paired_Fan"), SubResource("Step_Charged_Aim_2"), SubResource("Step_Paired_Fan_2")])
-reposition_seconds = 1.0
+attack = SubResource("Attack_Ritual")
+transition_seconds = 0.0
 
 [sub_resource type="Resource" id="Step_Charged_Aim"]
 script = ExtResource("4_step")
@@ -88,17 +76,17 @@ anticipation_seconds = 0.9
 height_offset = 6.0
 pause_after = 0.5
 
-[sub_resource type="Resource" id="Phase_Dance"]
-script = ExtResource("2_phase")
-health = 2100
-attack = SubResource("Attack_Dance")
-transition_seconds = 0.75
-
-[sub_resource type="Resource" id="Attack_Dance"]
+[sub_resource type="Resource" id="Attack_Threads"]
 script = ExtResource("3_attack")
-display_name = "Dança do Crepúsculo"
-steps = Array[ExtResource("4_step")]([SubResource("Step_Dance_Ring"), SubResource("Step_Dance_Aim"), SubResource("Step_Dance_Ring_2"), SubResource("Step_Dance_Aim_2")])
-reposition_seconds = 2.0
+display_name = "Fios de Luz"
+steps = Array[ExtResource("4_step")]([SubResource("Step_Charged_Aim"), SubResource("Step_Paired_Fan"), SubResource("Step_Charged_Aim_2"), SubResource("Step_Paired_Fan_2")])
+reposition_seconds = 1.0
+
+[sub_resource type="Resource" id="Phase_Threads"]
+script = ExtResource("2_phase")
+health = 1500
+attack = SubResource("Attack_Threads")
+transition_seconds = 0.75
 
 [sub_resource type="Resource" id="Step_Dance_Ring"]
 script = ExtResource("4_step")
@@ -127,6 +115,18 @@ pattern = ExtResource("6_burst")
 anticipation_seconds = 1.0
 follow_player_height = true
 pause_after = 0.35
+
+[sub_resource type="Resource" id="Attack_Dance"]
+script = ExtResource("3_attack")
+display_name = "Dança do Crepúsculo"
+steps = Array[ExtResource("4_step")]([SubResource("Step_Dance_Ring"), SubResource("Step_Dance_Aim"), SubResource("Step_Dance_Ring_2"), SubResource("Step_Dance_Aim_2")])
+reposition_seconds = 2.0
+
+[sub_resource type="Resource" id="Phase_Dance"]
+script = ExtResource("2_phase")
+health = 2100
+attack = SubResource("Attack_Dance")
+transition_seconds = 0.75
 
 [resource]
 script = ExtResource("1_boss")

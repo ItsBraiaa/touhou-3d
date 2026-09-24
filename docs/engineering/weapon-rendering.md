@@ -92,6 +92,7 @@ Before the first `setup` the field has a unit placeholder Flight Volume at the o
 | `shot_speed`, `shot_lifetime`, `shot_radius` | `float` | 60, 1.2, 0.15 | yes | Every shot: 72 units of range, beyond the 60-unit lock range. |
 | `shot_damage`, `familiar_shot_damage` | `int` | 1, 1 | yes | Damage a main or a Familiar shot carries to `on_damage`. |
 | The six `Tuning` values | `float` | as `WeaponModel.Tuning` | yes | Copied into the model in `_ready`. |
+| `lock_assist_degrees` | `float` | 25.0 | yes | The main shot's Aim Assist cone under a Target Lock, measured from the camera (F6-04, "Aim Assist under a lock"). Not set in `player_ship.tscn`, so the code default applies. |
 | `bomb_radius`, `bomb_damage`, `bomb_visual_scene` | `float`, `int`, `PackedScene` | 10.0, 20, `scenes/dev/bomb_blast.tscn` | the scene is optional | The "Bomb" group (F7-02): read by the Session's Bomb handler, not by the weapon ([damage-pickups.md](damage-pickups.md) "Bomb"). |
 
 A missing reference, a missing `Left` or `Right` marker, or a Familiar scene with a collision object is reported with `push_error` and disables the weapon.
@@ -114,9 +115,26 @@ The weapon's `process_physics_priority` is `PHYSICS_PRIORITY` (50, since F7-02):
 2. `_fire(shots)`, the single fire path (F13-03 adds `shots_fired` here). For each shot:
    - **Origin:** the ship's position plus `Basis(UP, camera_rig.get_yaw())` × the local offset (`Muzzle`, or the `Left` or `Right` anchor under `FamiliarAnchors`). The body never yaws (F1-02), so the offsets are rotated in code and no authored node moves.
    - **Forward:** toward the point the camera's center ray reaches at the locked target's depth along the view, or at the shot's range (`shot_speed × shot_lifetime`) with no lock, and always at least `MIN_AIM_AHEAD` (8 units) ahead of the shot's origin along the view, so a close target never turns it up or back. This is Claude's reading of "where the view looks". The camera sits 8.5 behind and 3.2 above the Muzzle, and measured from the camera's own axis that parallax alone put a locked target 12.4° off, outside the 10° main cone. Measured from the view point, the cone sees the target's real offset from the screen center.
-   - **Aim Assist:** with a lock, `WeaponModel.assist_direction(origin, forward, hit_volume_point, shot.assist_degrees)`.
+   - **Aim Assist:** with a lock whose angle from the view, seen from the camera, is inside the shot's cone widened by `lock_assist_degrees − main_assist_degrees`, the shot flies from its origin straight at the lock's `HitVolume` (since F6-04; see "Aim Assist under a lock"). Otherwise it flies along forward.
    - `projectile_system.spawn(...)` of a PLAYER `ProjectileSpawn` at `shot_speed`, `shot_lifetime`, `shot_radius` and the source's damage.
 3. `combat_state.update_bomb_input(_bomb_held)`, once. A Bomb shows up as `CombatState.bomb_activated()` (F7-02 connects it); there is no `bomb_requested` signal.
+
+### Aim Assist under a lock
+
+F6-04, from path's F9-02 finding. The fix uses the ticket's design 1.
+
+- **The problem.** `CameraRig` frames a lock by aiming at the midpoint between the ship and the target, so the target sits off the view center. From 10 to 16 units, with the framing blended in, the target was about 6° off the view seen from the camera but about 10.3° off seen from the Muzzle. The 10° main cone was measured from the shot's origin, so it gave up and the shots passed about 3.5 units from a Spirit.
+- **The rule.**
+  - Under a lock, the angle is measured once per tick from the camera: between the view direction and the direction to the lock's `HitVolume`.
+  - Each shot compares that angle with its own cone widened by `lock_assist_degrees − main_assist_degrees` (15° by default).
+  - Inside the cone, the shot flies from its origin straight at the target; outside it, along forward.
+- **The cones this gives:**
+  - main shot 25°;
+  - Familiars 25° at Power Level 2 and 35° at Power Level 3, so they keep their stronger tracking (PLANEJAMENTO Section 4);
+  - no assist without a lock, as before.
+- **Why the cone stays.** Assist stays a cone, not auto-aim, because PLANEJAMENTO asks for "visible targets near the screen center", and `CameraRig` lets the player orbit the view away from a lock. The framing itself is untouched.
+- **What does not change.** Shots still fly straight, and the Projectile Field still stops them on scenery and closed Gates. `WeaponModel.assist_direction` is no longer called by the weapon; it stays in the core (F6-04 edits `weapon_model.gd` only for a signature change).
+- **Measured** in [validation/enemies.md](../validation/enemies.md): a locked Spirit at 10, 16, 30 and 50 units falls in 2.02, 2.12, 2.35 and 2.68 s at Power Level 1, where 10 and 16 units never fell before.
 
 ### Bomb button
 
@@ -168,6 +186,7 @@ The sprint's no-new-tests rule (2026-09-23) replaced the ticket's listed scene t
 | Holding fire shoots at the main cadence; Power Level 2 and 3 add Familiars and shots (ENGINEERING_BRIEF 4.E) | Harness run: 5, 9 and 13 shots in 30 ticks at levels 1, 2 and 3 |
 | Familiars add no collision volume (ENGINEERING_BRIEF 4.E) | Harness run: 0 `CollisionObject3D`; `PlayerWeapon._ready` refuses a Familiar scene with one |
 | Aim Assist bends shots onto a locked dummy | Harness run: 10 hits in 60 ticks |
+| A locked target in view is hit at every lock range, under the lock framing (F6-04) | Harness run, windowed: a locked Spirit falls in 2.02 to 2.68 s from 10 to 50 units |
 | Shots follow the camera yaw | Harness run: after a 90° orbit, shots travel along the view |
 | One Bomb press spends one Bomb, through the real input path | Harness run: three held presses spend the 2 Bombs |
 
@@ -177,7 +196,7 @@ The sprint's no-new-tests rule (2026-09-23) replaced the ticket's listed scene t
 - `DamageCore` and `GrazeVolume` stay `monitoring = false`. Their sphere radii (0.18 and 0.55) are the hit and Graze sizes, so resizing a sphere changes gameplay exactly.
 - For final Projectile art (D-02), deliver a mesh of radius 1 with one material per faction; Claude swaps the two exports on `Main/ProjectileRoot` and on the harness.
 - Closed Gate barriers and any solid scenery must be `StaticBody3D` on layer 1 for Projectiles to die on them; foliage stays off layer 1 (F1-05).
-- `PlayerShip/Weapon` carries the shot values, cadences and Aim Assist cones as Inspector exports (Claude's proposals). A final Familiar scene (D-02) must have a `Node3D` root and no `CollisionObject3D`; the weapon refuses one that does. Keep each target's `HitVolume` centered on its visible body: Aim Assist aims at it.
+- `PlayerShip/Weapon` carries the shot values, cadences and Aim Assist cones as Inspector exports (Claude's proposals). `lock_assist_degrees` (25°, F6-04) is yours to tune in D-05 or D-07 Part C: report the value to trunk, who sets it in `player_ship.tscn` in F14-01's swap step. A final Familiar scene (D-02) must have a `Node3D` root and no `CollisionObject3D`; the weapon refuses one that does. Keep each target's `HitVolume` centered on its visible body: Aim Assist aims at it.
 - The body and `VisualRoot` never yaw; shots and Familiars follow the camera yaw in code, so an F1 pass that turns `VisualRoot` toward the view changes nothing here.
 
 ## Open issues

@@ -1,6 +1,6 @@
 # F12-02 BossController adapter and dev boss prefab
 
-Status: todo
+Status: done
 Type: adapter
 parallel-safe: no
 Depends on: F12-01, F9-02, F4-03
@@ -70,3 +70,14 @@ Your `scenes/enemies/lantern_guardian.tscn` needs the same tree: an `Enemy` root
 ```
 Read CLAUDE.md, docs/engineering/ROADMAP.md and .scratch/bosses/issues/02-boss-controller-adapter.md, then implement that ticket. Use /run to verify the dev boss's three Phases, Projectile clears, Attack names and single defeat in the arena harness. Finish with its Definition of Done and commit.
 ```
+
+## Outcome (2026-09-23)
+
+Delivered solo in lane path: `scripts/enemies/boss_controller.gd`, `scenes/dev/dev_boss.tscn`, `scenes/dev/dev_boss_definition.tres` (patterns inline, `metadata/dev = true`), the harness's `spawn_dev_boss` export with a `DevBoss` marker and HUD wiring, `docs/validation/bosses.md` with `bosses-dev-boss.png`, and the contract in `docs/engineering/bosses.md`. **No tests:** the sprint's no-new-tests rule voids the "Tests required" list and the named-tests line of the Definition of Done. Throwaway scripts drove the harness headless and windowed instead (every listed behavior, recorded in the validation page), and the land gate runs the existing suite and the boot smoke.
+
+- **Sprint note applied:** the optional `phase_clip` export, played on `phase_changed` above index 0.
+- **Same shape as `EnemyActor`:** `spawn_setup(...) -> bool` (true when started; the caller frees a refused boss), a single "add_child first" error outside the tree, and `take_damage` ignoring a paused tree, an actor outside the tree and non-positive damage (`BossMachine.take_damage` asserts on it).
+- **Off-screen test uses the `HitVolume` center,** not the root: Astra's boss roots sit at the feet (the Lantern Guardian's hit center is 4.3 above).
+- **The harness wires the HUD boss panel** exactly as the GUIDE Section 7 row says, so F12-03 can copy it. It keeps the dev Spirit and Sentry; with `spawn_dev_boss` on, all three spawn.
+- **Defect found in another ticket's file:** `content/bosses/lantern_guardian.tres` (F12-03 part 1) fails to load, a forward `SubResource("Attack_Ritual")` at line 14. Reported to the orchestrator for trunk; `content/` is outside this ticket. Astra's `lantern_guardian.tscn` itself runs with the controller attached at runtime, and its four clips exist.
+- **`BossMachine` needed no fix.**

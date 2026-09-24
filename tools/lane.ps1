@@ -18,9 +18,11 @@ setup <lane>            Creates the worktree <primary>-<lane> on branch lane/<la
 sync                    Merges the integration branch into the current lane branch.
 land                    From a lane worktree with everything committed: merges the
                         integration branch in, runs tools/test.ps1 (the existing suite), then a
-                        300-frame headless boot of the main scene. A red suite, a SCRIPT ERROR,
-                        parse error or failed script load in either, or any ERROR line in the
-                        boot, stops the landing. Then it fast-forwards the primary tree to the lane
+                        300-frame headless boot of the main scene, then tools/check_resources.gd
+                        (every .gd under scripts/ and tools/ must compile, and every .tres and
+                        .tscn under content/ and scenes/ must load and pass its validate()). A red suite, a SCRIPT ERROR, parse error or failed script
+                        load, any ERROR line in the boot, or a resource that fails to load or
+                        validate stops the landing. Then it fast-forwards the primary tree to the lane
                         branch, retrying while another lane lands first. During the sprint
                         this gate is the only automated check: nobody writes new tests.
 
@@ -236,6 +238,19 @@ function Invoke-BootSmoke {
     Write-Host 'lane: boot smoke clean (main scene, 300 frames, headless).'
 }
 
+function Invoke-ResourceCheck {
+    $root = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..')).Path
+    $output = & (Join-Path $PSScriptRoot 'godot.ps1') --headless --path $root --script res://tools/check_resources.gd -- --strict-validate *>&1 | ForEach-Object { "$_" }
+    $code = $LASTEXITCODE
+    $summary = @($output | Where-Object { $_ -match '^RESOURCES_CHECKED' })
+    if ($code -ne 0 -or $summary.Count -eq 0) {
+        $output | Where-Object { $_ -match 'RESOURCE_|Parse Error|SCRIPT ERROR|Failed' } | ForEach-Object { Write-Host $_ }
+        Write-Host "lane: a resource under content/ or scenes/ does not load or does not validate (exit $code). Fix it before landing."
+        exit 1
+    }
+    Write-Host "lane: resource check clean ($($summary[0]))."
+}
+
 function Invoke-Land([string]$Primary, [string]$Base) {
     $branch = Assert-LaneBranch
     Remove-ShadowedSidecars $Base
@@ -251,6 +266,7 @@ function Invoke-Land([string]$Primary, [string]$Base) {
         if (-not $SkipTests) {
             Invoke-Tests
             Invoke-BootSmoke
+            Invoke-ResourceCheck
         }
         Add-GeneratedSidecars
         if ((Get-BaseBranch $Primary) -ne $Base) {

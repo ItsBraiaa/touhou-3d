@@ -9,6 +9,7 @@ Model: part 1 GPT 5.6 Luna (fallback DeepSeek V4.1 Flash); part 2 DeepSeek V4.1 
 
 > **Split (SPRINT.md):**
 > - **Part 1, lane oc-b** (no dependency): write and test `tools/package.ps1`. Commit with `(F14-02 part 1)`.
+> - **Part 1b, lane oc-b** (no dependency, DeepSeek V4.1 Flash): draft `docs/validation/acceptance.md` as a table. Each acceptance check in PLANEJAMENTO Section 12 and STAGE_DESIGN "Acceptance checks for stage progression" gets one row: the check, its source line, the ticket that delivers it, and "not yet verified". No code. Part 2 then only fills in results.
 > - **Part 2, lane oc-b** (after F14-01): sync, re-export with the command F14-01 recorded, package, and write the acceptance record. It closes the ticket.
 
 > **Sprint note:** F3, F13 and Stage 2 are reinstated (docs/engineering/SPRINT.md). Nothing is "not verified (cut)" unless the user cuts it at a checkpoint.

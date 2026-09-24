@@ -1,6 +1,6 @@
 # F3-01 Settings core and ConfigFile
 
-Status: todo
+Status: done
 Type: core
 parallel-safe: yes
 Depends on: F0-02
@@ -135,6 +135,18 @@ The tests:
 - `docs/engineering/settings.md` is written from `TEMPLATE.md` (purpose, the `Settings` contract, the sanitising table, the file layout, invariants and tests) and has its line in `README.md`.
 - Handoff log entry. `Status: done` with an Outcome. ROADMAP row.
 - One commit: `settings: add Settings core and ConfigFile persistence`. Then run the lane glm-b land step from `docs/engineering/SPRINT.md`.
+
+## Outcome
+
+Implemented `scripts/settings/settings.gd` as a Node-free, strictly typed
+`Settings` Rules Core. It owns GUIDE Section 14's eight defaults, validates and
+sanitises every write, emits one `changed` signal only for actual stored changes,
+deep-copies through `capture`/`restore`, and persists explicit saves through a
+fresh ConfigFile split into audio, display and controls sections. Missing files
+silently use defaults; corrupt files report the path and error, leave the file
+untouched and fall back to defaults; invalid fields fall back independently.
+The module contract is documented in `docs/engineering/settings.md` and no tests
+were written per the sprint no-new-tests rule.
 
 ## Handoff notes for Astra
 

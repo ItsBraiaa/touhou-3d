@@ -1,6 +1,6 @@
 # F3-02 Options screen binding
 
-Status: todo
+Status: done
 Type: adapter
 parallel-safe: no
 Depends on: F3-01, F4-02
@@ -151,3 +151,13 @@ The tests:
 ```
 In your lane worktree, read AGENTS.md, docs/engineering/SPRINT.md (your lane section), docs/engineering/ROADMAP.md and .scratch/settings/issues/02-options-screen-binding.md. Check its dependencies with tools/lane.ps1 status F3-01 F4-02, implement it test-first, run tools/test.ps1 until green with no SCRIPT ERROR, finish its Definition of Done, commit, then run tools/lane.ps1 land.
 ```
+
+## Outcome (2026-09-23)
+
+Delivered solo in lane path: `scripts/ui/options_screen.gd` (`OptionsScreen`) and the `scripts/ui/interface.gd` edits the ticket lists (`settings_path`, `_settings`, `_options_screen`, `get_settings()`, `restore_defaults` resolved in `_on_action_requested`), with the contract in `docs/engineering/settings.md` "Options binding". **No tests:** the sprint's no-new-tests rule voids the "Tests required" list and the named-tests line of the Definition of Done. A throwaway script checked every listed behavior headless on a per-process temp path (recorded in `settings.md`), and the land gate runs the existing suite and the boot smoke.
+
+- **As specified.** `OptionsScreen` is a code-built child of the Options root, so `Interface` keeps nine children. `setup` writes every widget without signals before connecting, then applies the buses and the display once. `Settings.changed` is the one application point, and each explicit change or Defaults saves.
+- **One reading:** a widget whose `OptionButton` item count or slider range mismatches `Settings` is reported and left unbound, like a missing one, rather than bound with a warning.
+- **Windowed display pass owed** to F3-04 part 1's `/run` (recorded in `settings.md` Open issues). A windowed boot of `main.tscn` printed no error and wrote no settings file.
+- **No gap in `Settings`** (F3-01) was found.
+- The ticket's final line names the old `glm-b` lane; landed with `tools/lane.ps1 land` from lane path.

@@ -35,8 +35,8 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | | | | 03 run-state-core | core | yes | — | done |
 | | | | 04 game-session-start-pause-quit | integration | no | — | done (menu-to-flight flow scripted on keyboard and gamepad; physical-device pass owed; Stage 2 wired too) |
 | F3 | Settings | `settings` | 00 plan | docs | no | — | done (cut, then reinstated by the sprint plan, 2026-09-23) |
-| | | | 01 settings-core-and-configfile | core | yes | oc-b | todo |
-| | | | 02 options-screen-binding | adapter | no | path | todo |
+| | | | 01 settings-core-and-configfile | core | yes | oc-b | done (2026-09-23: `Settings` core and explicit ConfigFile persistence landed; no tests per sprint rule) |
+| | | | 02 options-screen-binding | adapter | no | path | done (2026-09-23: `Interface` owns the one `Settings`; `OptionsScreen` binds the eight widgets, applies buses and window, saves on change and Defaults; no new tests, by the sprint rule; windowed display pass owed to F3-04 part 1) |
 | | | | 03 input-device-mode-and-controller-disconnect | adapter | no | path | todo |
 | | | | 04 settings-to-camera-wiring | integration | no | trunk (part 1: path) | todo |
 | F4 | Combat state and HUD | `combat-hud` | 00 plan | docs | no | — | done (one-pass planning, 2026-09-23; 01 was written and delivered separately) |
@@ -52,6 +52,7 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | | | | 01 rendering-spike | spike | no | — | cut (folded into 02 by the sprint plan: MultiMesh by default, benchmark inside 02) |
 | | | | 02 projectile-system-adapter | adapter | no | trunk | done (2026-09-23: MultiMesh ProjectileSystem on ProjectileRoot, capacity 2048; 3000 Projectiles at 1118 FPS with other lanes running; swap pending D-02) |
 | | | | 03 weapon-model-and-player-weapon | core+adapter | no | trunk (part 1: oc-a) | done (2026-09-23: WeaponModel by oc-a, PlayerWeapon, dev Familiars and target dummies by trunk; swap pending D-02) |
+| | | | 04 aim-assist-under-lock-framing | adapter | no | path | done (2026-09-23: under a lock the Aim Assist cone is measured from the camera, `lock_assist_degrees` 25; a locked Spirit falls in 2.0 to 2.7 s from 10 to 50 units; no new tests, by the sprint rule) |
 | F7 | Damage, bomb, pickups | `damage-pickups` | 00 plan | docs | no | — | done (one-pass planning) |
 | | | | 01 hit-to-combat-state-and-defeat | integration | no | trunk | done (2026-09-23: hits, Graze, Invulnerability blink and Defeat wired in GameSession; `tools/validate_combat.gd` COMBAT_OK; Retry restarts the stage until F10-03) |
 | | | | 02 bomb-clear-and-invulnerability | integration | no | trunk | done (2026-09-23: Bomb clear, radius damage, bombs used and dev blast; `validate_combat.gd` checks 14-21 COMBAT_OK; swap pending D-02) |
@@ -76,7 +77,7 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | | | | 03 active-and-clear-time-verification | test | no | path | todo (manual protocol only; no tests) |
 | F12 | Bosses and Stage 2 | `bosses` | 00 plan | docs | no | — | done (one-pass planning; Stage 2 reinstated by the sprint plan) |
 | | | | 01 boss-machine-core | core | yes | path | done (no unit tests, by the sprint rule; transition cap 0.75 s from D-07 ruling 1) |
-| | | | 02 boss-controller-adapter | adapter | no | path | todo |
+| | | | 02 boss-controller-adapter | adapter | no | path | done (2026-09-23: `BossController` and the dev boss run three Phases, clears and the HUD panel in the arena harness; no new tests, by the sprint rule; `lantern_guardian.tres` load failure reported for F12-03) |
 | | | | 03 lantern-guardian-in-s1-07 | integration | no | trunk (part 1: oc-a) | todo |
 | | | | 04 stage-02-content-draft | content | yes | oc-b | done (2026-09-23: dev draft of `content/stages/stage_02/` landed, validates and matches the scene; Astra tunes values in D-06) |
 | | | | 05 stage-02-director-integration | adapter | no | sol | todo |
