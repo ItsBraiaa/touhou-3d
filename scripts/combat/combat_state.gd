@@ -8,7 +8,8 @@ extends RefCounted
 ## the Bomb button through [method update_bomb_input] once per physics tick, and reports
 ## hits and collected Pickups; the Session calls [method start] at stage entry,
 ## [method refill] on a Checkpoint's first activation, [method capture] and
-## [method restore] for Retry and [method grant_invulnerability] after one (F15-12), and
+## [method restore] for Retry and [method grant_invulnerability] after one (F15-12) and for
+## each dash (F16-05), and
 ## forwards [signal bomb_activated] and [signal score_awarded] to [RunState]. The HUD
 ## observes the signals and never mutates the core. Graze, score totals and the clearing
 ## of Projectiles are not held here.
@@ -77,6 +78,12 @@ const MAX_POWER_LEVEL := 3
 const PICKUPS_PER_LEVEL := 5
 ## Points a Power Pickup is worth at [constant MAX_POWER_LEVEL] (PLANEJAMENTO Section 4).
 const EXCESS_PICKUP_SCORE := 50
+## Seconds of Invulnerability at or below which [method tick] ends the window. A window of
+## whole physics ticks leaves a rounding residue after its last tick (0.15 s at 60 Hz
+## leaves 2e-17 s), which would hold it one tick longer than it lasts: a dash's protection
+## has to end on the tick its [DashModel] burst ends (F16-05). Far below one tick at any
+## physics rate.
+const TIME_EPSILON := 1e-6
 
 
 var _health: int = MAX_HEALTH
@@ -142,12 +149,13 @@ func take_hit(damage: int = HIT_DAMAGE) -> HitOutcome:
 
 
 ## Counts Invulnerability down by one physics step of [param delta] seconds, and emits
-## [signal invulnerability_changed] when it runs out. Nothing counts while paused or
-## defeated.
+## [signal invulnerability_changed] when it runs out, which is when
+## [constant TIME_EPSILON] or less is left. Nothing counts while paused or defeated.
 func tick(delta: float) -> void:
 	if not _is_live() or not is_invulnerable():
 		return
-	_set_invulnerability(maxf(0.0, _invulnerability - delta))
+	var left := _invulnerability - delta
+	_set_invulnerability(left if left > TIME_EPSILON else 0.0)
 
 
 ## Records the Bomb button state for this physics tick and returns true when this call
@@ -172,7 +180,10 @@ func update_bomb_input(held: bool) -> bool:
 
 ## Grants [param seconds] of Invulnerability with no hit and no Bomb, keeping a longer
 ## window that is already running. The Session calls it for the ship a Checkpoint Retry
-## respawns (F15-12). Ignored unless live, so never while paused or defeated.
+## respawns (F15-12), and on the ship's `dash_started` for the dash's duration (F16-05).
+## Ignored unless live, so never while paused or defeated. Like every change here, it
+## emits [signal invulnerability_changed] only when the window starts: a grant inside a
+## longer window emits nothing, and the end of a dash never touches the core.
 func grant_invulnerability(seconds: float) -> void:
 	assert(seconds > 0.0, "CombatState: granted Invulnerability must be positive, got %f" % seconds)
 	if not _is_live():

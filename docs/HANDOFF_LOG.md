@@ -46,6 +46,54 @@ Action required by Astra:
 - **Review the copy.** Check the two text changes and the runtime copy: category headings, ActionHelp, the dialog messages and "AJUSTES DA CÂMERA".
 - **Label the sliders.** The three Câmera sliders have no visible label; ActionHelp names the focused one and the tooltip names it for the mouse. Add labels if you want them.
 - **Check glyphs in F16-07.** Confirm that the theme font draws `✕ ○ □ △` in the PlayStation footers, and that 32 px glyphs read well in the rows.
+## 2026-09-24 — Claude (rescue) — F16-05: review fixes
+State: CODE_READY
+Files: `scripts/player/player_controller.gd`; `scripts/player/dash_model.gd`; `scripts/ui/hud.gd`; `docs/engineering/player-flight.md` (only "F16 lateral dash (F16-05)"); `docs/engineering/combat-hud.md` (only the F16-05 section); `docs/validation/controls-expansion.md` (only the F16-05 section); `.scratch/controls-expansion/issues/05-invulnerable-lateral-dash.md` (Outcome). No scene changed.
+Change:
+- **No slide along a Flight Volume face.** Before, the clamp worked axis by axis. When a dash crossed a face at an angle to the camera, the clamp kept the part of that tick's step along the face, up to 1/3 unit. Now `_move_dash` records where its step started, and the new `_stop_dash_at_flight_volume` puts the ship at the fraction of the step where it first met a face, then ends the travel. The ordinary clamp still runs after it, as a safeguard.
+- **One epsilon.** `DashModel.TIME_EPSILON` is now `CombatState.TIME_EPSILON` itself, not a second literal. The burst and its protection end on the same tick only while the two match.
+- **A ship without a dash never reads ready.** With `dash_duration` 0 every request was refused, yet the HUD showed `PRONTO`. The new `DashModel.is_enabled()` and `PlayerController.has_dash()` report it, `try_start` uses the first, and `Hud` counts a ship without a dash as unavailable. Shipped values are unaffected.
+Why: three minor findings from the review of `601b722`, verdict ship.
+Verification: no tests or drivers (sprint rule). The fixes were checked by reading, and the existing gate was run again.
+Action required by trunk (F16-06): add `DashModel.is_enabled()` and `PlayerController.has_dash()` to the spec's API list, next to the getters listed in the entry below, when trunk next edits `.scratch/controls-expansion/spec.md`.
+Action required by Astra (F16-07): when checking the Flight Volume stops, also dash into a face at an angle with the camera turned. The ship should stop where it meets the face, with no slide along it.
+
+## 2026-09-24 — Claude (rescue) — F16-05: invulnerable lateral dash, cooldown HUD and dash visual [shared]
+State: CODE_READY
+Files: `scripts/player/dash_model.gd` (new) and its `.uid`; `scripts/player/player_controller.gd`; `scripts/combat/combat_state.gd`; `scripts/session/game_session.gd` (dash wiring and doc comments only); `scripts/ui/hud.gd`; `scenes/player/player_ship.tscn` [shared] (three dash exports, the `dash_visual` reference, Astra's `dash_visual.tscn` instanced as `VisualRoot/DashVisual`); `scenes/ui/hud.tscn` [shared] (Astra's `dash_cooldown.tscn` instanced as `DashCooldown`, bottom-left at (32, -191)–(280, -144), 12 px above `PlayerStatus`); `docs/engineering/player-flight.md` (only "F16 lateral dash (F16-05)"); `docs/engineering/combat-hud.md` (the `invulnerability_changed`, `tick` and `grant_invulnerability` rows, and a new "F16 dash protection and the Impulso indicator (F16-05)" section); `docs/validation/controls-expansion.md` (only the F16-05 section); `.scratch/controls-expansion/issues/05-invulnerable-lateral-dash.md` (Status, Work, Outcome); `docs/engineering/ROADMAP.md` (the F16-05 row). `projectile_system.gd` and `camera_rig.gd` are unchanged.
+Change:
+- **`DashModel`** (Rules Core): `configure`, `try_start`, `tick`, `cancel`, `is_active`, `get_active_time_left`, `get_cooldown_left`, `get_direction` and the static `resolve_direction`.
+  - One press makes one dash.
+  - Both directions down together give 0, which costs no cooldown.
+  - The 0.8 s cooldown runs from activation, and a press during it is dropped, never buffered.
+- **`PlayerController`.**
+  - The dash is read with the movement, in physics. Its direction is the rig's basis X, flattened, captured at activation.
+  - The burst replaces the velocity at `dash_distance / dash_duration` (3.0 / 0.15 = 20 units/s), with no Focus scaling and no vertical part. The last step is clamped to the active time left.
+  - The motion is `move_and_collide`, never `move_and_slide`. A contact facing the travel, or the Flight Volume clamp, ends the travel with no slide. A surface square to the travel (a skimmed floor) does not.
+  - The window, and its protection, still end at activation + 0.15 s.
+  - Signals: `dash_started(direction, duration)`, `dash_ended`, `dash_cooldown_changed(remaining, total)`. Also `controls_enabled_changed(enabled)`, a seam refinement the HUD needs for its disabled state, and the getters `are_controls_enabled()` and `get_dash_cooldown_left()`.
+  - Pause freezes the dash, because `set_controls_enabled(false)` keeps it when `can_process()` is false. A beat (defeat, stage clear) and `reset_to` cancel it and clear the cooldown. Every new Attempt spawns a new ship that starts ready. Nothing is in a Snapshot.
+  - `DashVisual` shows only while the burst is active and the ship is Invulnerable. `TrailLeft` shows for a left dash and `TrailRight` for a right one, while the burst travels. `ProtectionAccent` shows throughout. Under `VisualRoot` it blinks with the existing flicker, and the Core draws over it.
+- **Protection.** `GameSession._spawn_player` connects `dash_started` once per ship, without deferral, to `CombatState.grant_invulnerability(duration)`, which keeps `max(remaining, duration)`.
+  - The order was proven by reading: `Main` ticks the core, then the ship grants inside its step, then `ProjectileRoot` at priority 100 sweeps with the flag set. The activation tick is protected.
+  - The last tick was not right. The residue of `0.15 - 9 × (1/60)`, 2e-17 s, kept a tenth tick protected. **Fix:** `CombatState.TIME_EPSILON` (1e-6 s) ends a window at that residue, so a dash protects exactly nine ticks at 60 Hz. As a side effect, Bomb and Retry windows are now exactly 120 ticks instead of 121.
+  - The field already refused hits and Graze while invulnerable, spending each contact's one Graze, and it is unchanged. The dash's end never touches the core, so there is no early `false`.
+- **HUD.** The `Impulso` indicator has three states:
+  - `IMPULSO  ·  PRONTO`, with the bar full and `ReadyAccent` shown, only while the controls are on and no cooldown is left.
+  - `IMPULSO  ·  0,6 s` while cooling down, the bar filling.
+  - A bare, dimmed `IMPULSO` while the controls are off or nothing is bound.
+
+  The new required paths are `DashCooldown/{Label,Progress,ReadyAccent}`. Every existing path is unchanged.
+Why: F16-05, both parts. F16-01 had landed Astra's two components.
+Verification: no tests or drivers (sprint rule). `tools/test.ps1` passed 225 of 225 with no script, parse or compile error. The 300-frame boot printed no ERROR or WARNING, and `check_resources --strict-validate` passed 85 resources and 85 scripts. The ordering proof, with file:line references, and the manual checks owed are in `docs/validation/controls-expansion.md` (F16-05). Not verified: physical feel, stops against real scenery, and whether Jolt ever reports a skimmed floor as facing the travel. The owed check covers it.
+Action required by trunk (F16-06):
+- **Ownership.** `game_session.gd`, `player_controller.gd`, `combat_state.gd`, `projectile_system.gd`, `hud.*` and `player_ship.tscn` return to trunk.
+- **Walkthrough.** The integrated walkthrough is F16-06's: Retry, Restart, Campaign Stage 2, Jogar novamente, Pause and Options over Pause. The dash needs no Session call beyond the one connection, and nothing to reapply at spawn.
+- **Resume can dash.** If a remap lets `dash_left` or `dash_right` share an input with `ui_cancel` or `pause`, the press that resumes from Pause could dash on the first unpaused tick. That is the known `bomb` problem (menus-session.md Open issues). Decide whether the capture rules or the resume must guard it.
+- **Spec API list.** Add `PlayerController.controls_enabled_changed(enabled: bool)`, `are_controls_enabled()`, `get_dash_cooldown_left()`, `DashModel.is_active/get_direction/resolve_direction` and `CombatState.TIME_EPSILON` to the spec's list when trunk next edits `.scratch/controls-expansion/spec.md`. This lane stayed inside its Files list.
+Action required by Astra (F16-07):
+- Judge the trail side: a left dash shows `TrailLeft`, the one at the left engine. Also judge the accent, the blink with the flicker, the Core's readability, and the `DashCooldown` spot and its dimmed state at the three resolutions.
+- The dash values (3.0, 0.15, 0.8) are exports on `PlayerShip`, group Dash. Send value changes to trunk.
 
 ## 2026-09-24 — Claude (trunk) — F16-02: review fixes
 State: CODE_READY
