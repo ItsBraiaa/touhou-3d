@@ -1,5 +1,14 @@
 # Handoff Log
 
+## 2026-09-24 — Claude (path) — F10-05 Retry restores the checkpoint's pickups
+State: CODE_READY
+Files: `scripts/progression/stage_director.gd`; `docs/engineering/stage-director.md`; `docs/validation/stage-director.md`; `docs/validation/stage-director-retry-pickups.png` (new); `docs/validation/stage-01-progression.md`; `docs/GUIDE.md`; `docs/engineering/ROADMAP.md`; F10-05 ticket.
+
+Change: Astra's decision is implemented as written. The Director records every Pickup it spawns (`_live_pickups`: prefab and spawn point) and drops it on `accepted`. It copies the record when a Checkpoint activates (`_record_checkpoint_pickups`, after `CheckpointStore.activate` returned true), and on Retry spawns the copy again at the spawn points, bound to the new ship (`_restore_checkpoint_pickups`). So Pickups collected before the Checkpoint stay collected, those live at it come back even when the failed Attempt took them, and those spawned after it are removed and return with their replayed Encounters. `_spawn_pickup` refuses an id that is already live. The Session's `_retry` order is unchanged. Stage 2's entry fallback and Seal rewards already go through the two functions touched, so CP2-A records its Seal Pickups.
+Verification: driven headless on `main.tscn`, 70 checks passed. The five S1-02 Pickups came back on their 1.5 ring, twice. One taken before CP1-A stayed taken. One taken after came back, with Power reset to the Snapshot's and +1 Progress when taken again. S1-05's five were removed on Retry and dropped once more on replay. All ten Power Pickups came back from CP1-B. The guard never fired and there was no `SCRIPT ERROR`. Windowed capture `stage-director-retry-pickups.png`. No new tests (sprint rule). `stage-director.md`'s open-issue line "No Checkpoint glow or sound yet" became "No Checkpoint glow yet" (F13-03 added the sound).
+Action required by Astra: none. Restored Pickups reappear at their spawn point (the ring around `RewardOrigin`, or the `ShieldPickup` marker), not where they had drifted; say so if you want otherwise.
+Action required by sol: `stage_director.gd` gained two members after `_live_enemies`, three private functions after `_spawn_pickup`, a guard and two lines in `_spawn_pickup`, and one call line each in `_on_checkpoint_entered` and `retry_from_checkpoint`. Keep them when you merge F12-06/F12-07 part 2.
+
 ## 2026-09-24 — Claude (path) — F13-03 audio event wiring
 State: CODE_READY
 Files: `scenes/main.tscn`; `scripts/session/game_session.gd`; `scripts/progression/stage_director.gd`; `scripts/combat/player_weapon.gd`; `scripts/combat/projectile_system.gd`; `docs/engineering/audio.md`; `docs/validation/audio.md` (new); `docs/GUIDE.md`; `docs/engineering/ROADMAP.md`; F13-03 ticket.

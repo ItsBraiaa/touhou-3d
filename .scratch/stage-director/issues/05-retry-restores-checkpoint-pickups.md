@@ -1,6 +1,6 @@
 # F10-05 Retry restores the checkpoint's pickups
 
-Status: todo
+Status: done
 Type: adapter
 parallel-safe: no
 Depends on: F10-03, F12-03
@@ -134,3 +134,13 @@ var _checkpoint_pickups: Dictionary[StringName, Dictionary] = {}
 ```
 Read CLAUDE.md, docs/engineering/SPRINT.md and .scratch/stage-director/issues/05-retry-restores-checkpoint-pickups.md, then implement that ticket solo in lane path with no tests. Run tools/lane.ps1 sync right before you start, since stage_director.gd is shared. Verify it with the driven Retry pass on main.tscn, headless first, then the windowed capture. Finish with its Definition of Done, commit, and run tools/lane.ps1 land.
 ```
+
+## Outcome
+
+Done 2026-09-24 by lane path (solo, self-reviewed against the Definition of Done).
+
+- `stage_director.gd` changed only where the ticket allows. It gained the two members, the guard and two lines in `_spawn_pickup`, and `_on_pickup_accepted`, `_record_checkpoint_pickups()` and `_restore_checkpoint_pickups()`. It also gained one call line each in `_on_checkpoint_entered` (after `activate` returned true) and `retry_from_checkpoint` (after the new `_rng`, before `_apply_progress()`), plus the two doc clauses.
+- F12-05 had already landed. Its entry fallback `_enter_with_checkpoint` activates through `_on_checkpoint_entered`, and its Seal rewards spawn through `_spawn_pickup`, so both are covered with no extra line.
+- Driven headless on `main.tscn`: the four cases and the CP1-B extra passed 70 checks. The duplicate-id guard never fired, and nothing leaked at exit. Windowed capture: `docs/validation/stage-director-retry-pickups.png`. Details are in `docs/validation/stage-director.md`.
+- The module doc's open-issues line "No Checkpoint glow or sound yet" now reads "No Checkpoint glow yet", because F13-03 added the sound. This one-line correction is outside the ticket's list.
+- Tests: none, by the sprint rule.

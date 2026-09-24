@@ -14,7 +14,8 @@ extends Node3D
 ## Encounter completes, activates each [Checkpoint] once through its own
 ## [CheckpointStore] (clearing hostile fire first), hides a PortalLink when its guard dies,
 ## and sets every Gate and link from the machine's state (`_apply_progress`). Since F10-03
-## Defeat's Retry restores in place ([method retry_from_checkpoint]). Since F12-03 a Wave
+## Defeat's Retry restores in place ([method retry_from_checkpoint]), with the Pickups that
+## were uncollected when its Checkpoint activated (F10-05). Since F12-03 a Wave
 ## kind found in [member boss_definitions] spawns a [BossController] instead, whose fight
 ## is re-emitted as the `boss_*` signals for the HUD; its one defeat emits
 ## [signal boss_defeated], plays the optional defeat presentation, then scores and reaches
@@ -119,6 +120,12 @@ var _runtime_actors: Node3D
 ## first report scores and erases it, so a repeat scores nothing. A boss's is its
 ## [method BossController.get_score], read once it started.
 var _live_enemies: Dictionary[StringName, int] = {}
+## Every Pickup spawned and not yet accepted, by pickup id:
+## {"scene": PackedScene, "position": Vector3}, its prefab and its spawn point.
+var _live_pickups: Dictionary[StringName, Dictionary] = {}
+## A copy of [member _live_pickups] taken when the latest Checkpoint activated: what Retry
+## spawns again. Empty before any Checkpoint.
+var _checkpoint_pickups: Dictionary[StringName, Dictionary] = {}
 
 
 func _physics_process(delta: float) -> void:
@@ -232,8 +239,9 @@ func get_machine() -> EncounterMachine:
 ## Pickup of the failed Attempt, restores the latest Snapshot into the cores (resources,
 ## committed statistics, completed and rewarded Encounters, flags; queued Waves are
 ## cancelled), takes [param player], the new ship, and a new random stream seeded by
-## [param attempt_seed], and sets every Gate and link from the restored state. The
-## Session has already cleared the field and spawned the ship at
+## [param attempt_seed], spawns again at their spawn points the Pickups that were
+## uncollected when that Checkpoint activated (F10-05), and sets every Gate and link from
+## the restored state. The Session has already cleared the field and spawned the ship at
 ## [method get_respawn_transform]; it begins the Attempt afterwards.
 func retry_from_checkpoint(player: PlayerController, attempt_seed: int) -> bool:
 	if _checkpoint_store.latest() == null:
@@ -247,6 +255,7 @@ func retry_from_checkpoint(player: PlayerController, attempt_seed: int) -> bool:
 	_player = player
 	_rng = RandomNumberGenerator.new()
 	_rng.seed = attempt_seed
+	_restore_checkpoint_pickups()
 	_apply_progress()
 	return true
 
@@ -387,6 +396,9 @@ func _on_rewards_requested(encounter_id: StringName) -> void:
 
 
 func _spawn_pickup(scene: PackedScene, pickup_id: StringName, at: Vector3) -> void:
+	if _live_pickups.has(pickup_id):
+		push_error("%s: Pickup %s is already live; it is not spawned twice" % [get_path(), pickup_id])
+		return
 	var node := scene.instantiate()
 	var pickup := node as Pickup
 	if pickup == null:
@@ -397,6 +409,32 @@ func _spawn_pickup(scene: PackedScene, pickup_id: StringName, at: Vector3) -> vo
 	pickup.global_position = at
 	pickup.setup(pickup_id, _combat_state, _player)
 	pickup.accepted.connect(pickup_accepted.emit)
+	pickup.accepted.connect(_on_pickup_accepted)
+	_live_pickups[pickup_id] = {"scene": scene, "position": at}
+
+
+## A Pickup accepted leaves the live record, so a Checkpoint activated afterwards does not
+## bring it back.
+func _on_pickup_accepted(pickup_id: StringName, _kind: Pickup.Kind, _score_awarded: int) -> void:
+	_live_pickups.erase(pickup_id)
+
+
+## Records the Pickups live at this Checkpoint's activation: what its Retry spawns again.
+## The inner Dictionaries are copied; each `PackedScene` stays a reference.
+func _record_checkpoint_pickups() -> void:
+	_checkpoint_pickups = _live_pickups.duplicate(true)
+
+
+## Spawns every Pickup recorded at the latest Checkpoint again, with its recorded id, at its
+## spawn point, bound to the new ship. The removal loop already freed every live Pickup,
+## so the live record starts empty.
+func _restore_checkpoint_pickups() -> void:
+	_live_pickups.clear()
+	for pickup_id: StringName in _checkpoint_pickups:
+		var record: Dictionary = _checkpoint_pickups[pickup_id]
+		var scene: PackedScene = record["scene"]
+		var at: Vector3 = record["position"]
+		_spawn_pickup(scene, pickup_id, at)
 
 
 ## Spawns the boss of Wave kind [param kind] at [param marker_path] under `RuntimeActors`
@@ -543,6 +581,7 @@ func _on_checkpoint_entered(checkpoint_id: StringName) -> void:
 	_projectile_system.clear_hostile_all()
 	if not _checkpoint_store.activate(checkpoint_id, _combat_state, _run_state, _machine):
 		return
+	_record_checkpoint_pickups()
 	checkpoint_activated.emit(checkpoint_id)
 	_enter_if_inside(definition.resume_encounter_id)
 

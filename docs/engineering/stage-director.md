@@ -97,11 +97,21 @@ F10-03, after STAGE_DESIGN's retry matrix. Defeat's Retry resumes in place from 
 
 | Method | Effect |
 | --- | --- |
-| `retry_from_checkpoint(player: PlayerController, attempt_seed: int) -> bool` | False, changing nothing, while `_checkpoint_store.latest()` is null. Otherwise, in order: removes every child of `RuntimeActors` (`remove_child`, then `queue_free`: enemies, reward Pickups, the S1-03 Shield Pickup) and clears `_live_enemies`; `_checkpoint_store.retry_into(combat_state, run_state, machine)`, which restores the resources, Power Progress, committed statistics, completed and rewarded Encounters, Objectives and Checkpoint flags, and cancels queued Waves; takes `player` and a new `RandomNumberGenerator` seeded by `attempt_seed`; `_apply_progress()`, so completed Encounters' Gates are open and every other Gate closed, including one the failed Attempt opened, and guard links follow; returns true. |
+| `retry_from_checkpoint(player: PlayerController, attempt_seed: int) -> bool` | False, changing nothing, while `_checkpoint_store.latest()` is null. Otherwise, in order: removes every child of `RuntimeActors` (`remove_child`, then `queue_free`: enemies, reward Pickups, the S1-03 Shield Pickup) and clears `_live_enemies`; `_checkpoint_store.retry_into(combat_state, run_state, machine)`, which restores the resources, Power Progress, committed statistics, completed and rewarded Encounters, Objectives and Checkpoint flags, and cancels queued Waves; takes `player` and a new `RandomNumberGenerator` seeded by `attempt_seed`; since F10-05 `_restore_checkpoint_pickups()` spawns again, bound to the new ship, every Pickup recorded at the latest Checkpoint's activation (see "Checkpoint Pickups"); `_apply_progress()`, so completed Encounters' Gates are open and every other Gate closed, including one the failed Attempt opened, and guard links follow; returns true. |
 | `get_respawn_transform() -> Transform3D` | The latest activated Checkpoint's `Respawn` (CP1-A (0, 27, -329), CP1-B (0, 37, -454), facing -Z), or `PlayerStart` before any. |
-| `retry_location_name() -> String` | The latest activated Checkpoint's `display_name` (`"CP1-A"` until Astra names the places), or `""` before any. |
+| `retry_location_name() -> String` | The latest activated Checkpoint's `display_name` (since D-05 `Portal Selado` for CP1-A and `Entrada do Santuário` for CP1-B), or `""` before any. |
 
 There is no `restart_from_entry()`, and `CheckpointStore.restart_into` is not used.
+
+### Checkpoint Pickups
+
+F10-05, after Astra's decision of 2026-09-24: a Retry restores the set of Pickups that existed when its Checkpoint activated. Pickups collected before the Checkpoint stay collected; those available at the Checkpoint reappear, even if the failed Attempt collected them; those spawned after it are removed and come back through the replayed Encounters' rewards.
+
+- **The record lives in the Director,** beside `_checkpoint_store`, not in the Snapshot, which holds only the three core captures as primitives. `_live_pickups: Dictionary[StringName, Dictionary]` holds every Pickup spawned and not yet accepted, as `{"scene": PackedScene, "position": Vector3}`: its prefab (which fixes its kind) and its spawn point. `_checkpoint_pickups` is a copy of it.
+- **`_spawn_pickup`** refuses, with a `push_error`, an id that is already live. Otherwise it connects `accepted` to `_on_pickup_accepted`, which erases the id, and records the Pickup. Every Pickup goes through it: Encounter rewards, Stage 2's Seal rewards and restored Pickups.
+- **Activation.** `_on_checkpoint_entered` calls `_record_checkpoint_pickups()` right after `CheckpointStore.activate` returns true, before `checkpoint_activated`. That covers Stage 2's entry fallback too. So the record changes exactly when `latest()` does, and a Restart's new Director starts with both empty.
+- **Retry.** The removal loop frees every Pickup. `_restore_checkpoint_pickups()` clears `_live_pickups` and spawns each recorded Pickup again, with its recorded id, at its spawn point, bound to the new ship. A Pickup that had drifted toward the ship reappears where it was laid out.
+- **Nothing is credited twice.** A Pickup taken before the Checkpoint is not in the record. One taken during the failed Attempt did credit `CombatState`, but `retry_into` puts back the Snapshot's Power, Power Progress, Shield and committed score, so taking it again counts once. Replayed Encounters get the same ids as before, and none of them is in the record: the resume Encounter cannot begin before its Checkpoint activates, and every Encounter before it comes back rewarded. A second Retry from the same Checkpoint spawns the same set.
 
 ### Session
 
@@ -219,7 +229,8 @@ The sprint's no-new-tests rule (2026-09-23) replaced the ticket's fifteen scene 
 ## Open issues
 
 - **Respawn Invulnerability** is not specified and none is added: a Retry puts the ship at the Respawn with nothing incoming.
-- **No Checkpoint glow or sound yet:** Astra connects presentation to `checkpoint_activated` through Claude.
+- **No Checkpoint glow yet:** Astra connects presentation to `checkpoint_activated` through Claude (F13-03 plays its sound).
+- **An Encounter still active when its Checkpoint activates** (between `after_encounter_id` and `resume_encounter_id`, such as S1-06 at CP1-B) is restored completed and rewarded. Rewards it dropped after the activation would not return on Retry. Neither stage has such an Encounter today: S1-06 and S2-06 are traversals without rewards (F10-05).
 - **No scene tests** (sprint rule).
 - **The defeat presentation is one stage-wide player** (F12-03): every boss defeat plays the same `defeat_animation`, not keyed by `boss_id`, and Retry never resets it. Fine for Stage 1, whose only boss ends the stage; a mid-stage boss (Stage 2's Tempest Sentinel, F12-06) that is defeated before a Retry to an earlier Checkpoint would keep its "resolved" presentation. F12-06 or F12-07 keys or resets it if Stage 2 uses it.
 - **`tools/validate_stage_01.gd` (Astra's) now fails** its "static stage has no runtime script" check, by design: Stage 1 has its Director. Its owner updates the check; `tools/build_stage_01.py` must never be rerun over the wiring.

@@ -121,11 +121,12 @@ route to S1-05, no bullets or enemies, the HUD full (100 %, the Shield, 2 Bombs,
 
 ## Not verified, and open
 
-- **Uncollected earlier rewards are lost on Retry.** Retry removes every runtime Pickup, as
+- **Resolved by F10-05 (2026-09-24): uncollected earlier rewards were lost on Retry.** Retry removed every runtime Pickup, as
   the ticket says, including ones left behind before the Checkpoint (S1-02's Power Pickups,
   S1-03's Shield Pickup). Their Encounters stay rewarded, so they never drop again.
   STAGE_DESIGN says to remove pickups "from the failed segment" and that completed rewards
   "remain resolved"; whether the earlier ones should come back is a design call, raised in
-  the handoff log.
+  the handoff log. Astra decided that Retry restores the Pickups live at the Checkpoint's
+  activation; see [stage-director.md](stage-director.md) "Retry restores the Checkpoint's Pickups".
 - A Bomb blast still playing at the moment of Retry was not observed.
 - A physical keyboard or pad.
