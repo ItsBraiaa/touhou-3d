@@ -6,12 +6,13 @@
 [resource]
 script = ExtResource("1_enemy")
 kind = &"spirit"
-health = 20
+health = 30
 score = 100
 anticipation_seconds = 1.0
 pattern = ExtResource("2_pattern")
-attack_interval = 1.5
+attack_interval = 1.4
 movement = 0
 move_speed = 2.0
 move_range = 3.0
 metadata/dev = true
+metadata/reviewed = true

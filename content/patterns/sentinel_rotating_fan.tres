@@ -4,15 +4,15 @@
 
 [resource]
 script = ExtResource("1_pattern")
-id = &"spirit_aimed_burst"
-shape = 4
-projectiles_per_volley = 3
-volley_count = 3
-volley_interval = 0.15
-speed = 10.0
-lifetime = 6.0
-projectile_radius = 0.3
+id = &"sentinel_rotating_fan"
+shape = 1
+projectiles_per_volley = 5
+volley_count = 4
+volley_interval = 0.22
+speed = 9.0
+lifetime = 7.0
+projectile_radius = 0.24
 damage = 10
-spread_degrees = 14.0
+spread_degrees = 60.0
+rotation_step_degrees = 28.0
 metadata/dev = true
-metadata/reviewed = true

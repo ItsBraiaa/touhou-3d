@@ -31,3 +31,4 @@ rewards = Array[ExtResource("1_s5i30")]([SubResource("Resource_m41tf")])
 gate_id = &"Gate_S1_05"
 checkpoint_id = &"CP1-A"
 metadata/dev = true
+metadata/reviewed = true

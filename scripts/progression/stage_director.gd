@@ -9,12 +9,13 @@ extends Node3D
 ##
 ## The Session calls [method check_setup] before the stage enters the tree and refuses the
 ## stage on any message, then [method setup] once after the ship is bound, then
-## [method start_attempt] at every Attempt. Since F10-02 it also opens each [Gate] when its
+## [method start_attempt] at every Attempt the stage starts or restarts from its entry,
+## and [method retry_from_checkpoint] for a Retry from a Checkpoint. Since F10-02 it also opens each [Gate] when its
 ## Encounter completes, activates each [Checkpoint] once through its own
 ## [CheckpointStore] (clearing hostile fire first), hides a PortalLink when its guard dies,
-## and sets every Gate and link from the machine's state (`_apply_progress`). Retry
-## arrives in F10-03. The Director sits under `WorldRoot`, which is PAUSABLE, so it stops
-## while paused.
+## and sets every Gate and link from the machine's state (`_apply_progress`). Since F10-03
+## Defeat's Retry restores in place ([method retry_from_checkpoint]). The Director sits
+## under `WorldRoot`, which is PAUSABLE, so it stops while paused.
 
 
 ## The last Encounter of the stage completed. The Session connects it deferred.
@@ -32,6 +33,9 @@ signal checkpoint_activated(checkpoint_id: StringName)
 const ENCOUNTERS_PATH := ^"Encounters"
 ## Holds one [Gate] per Encounter `gate_id`, named by it.
 const GATES_PATH := ^"Gates"
+## Where the ship enters the stage (GUIDE Section 5), and where Retry puts it before any
+## Checkpoint.
+const PLAYER_START_PATH := ^"PlayerStart"
 ## Where spawned enemies and Pickups go; never an authored node.
 const RUNTIME_ACTORS_PATH := ^"RuntimeActors"
 const ENTRY_VOLUME_NAME := ^"EntryVolume"
@@ -173,6 +177,48 @@ func get_active_encounter_bounds() -> AABB:
 ## The progression core, for tests and dev tools to read. Null before [method setup].
 func get_machine() -> EncounterMachine:
 	return _machine
+
+
+## Defeat's Retry, in place: returns false and changes nothing before any Checkpoint
+## activated (the Session Restarts instead). Otherwise removes every runtime actor and
+## Pickup of the failed Attempt, restores the latest Snapshot into the cores (resources,
+## committed statistics, completed and rewarded Encounters, flags; queued Waves are
+## cancelled), takes [param player], the new ship, and a new random stream seeded by
+## [param attempt_seed], and sets every Gate and link from the restored state. The
+## Session has already cleared the field and spawned the ship at
+## [method get_respawn_transform]; it begins the Attempt afterwards.
+func retry_from_checkpoint(player: PlayerController, attempt_seed: int) -> bool:
+	if _checkpoint_store.latest() == null:
+		return false
+	for child: Node in _runtime_actors.get_children():
+		_runtime_actors.remove_child(child)
+		child.queue_free()
+	_live_enemies.clear()
+	_checkpoint_store.retry_into(_combat_state, _run_state, _machine)
+	_player = player
+	_rng = RandomNumberGenerator.new()
+	_rng.seed = attempt_seed
+	_apply_progress()
+	return true
+
+
+## Where Retry puts the ship: the latest activated Checkpoint's `Respawn`, or
+## `PlayerStart` before any.
+func get_respawn_transform() -> Transform3D:
+	var checkpoint_id := _checkpoint_store.latest_checkpoint_id()
+	if checkpoint_id.is_empty():
+		return (get_node(PLAYER_START_PATH) as Node3D).global_transform
+	var definition := stage_definition.find_checkpoint(checkpoint_id)
+	return (get_node(definition.node_path) as Checkpoint).get_respawn_transform()
+
+
+## The latest activated Checkpoint's `display_name`, for the Defeat screen, or `""`
+## before any (the screen then reads "Início da fase").
+func retry_location_name() -> String:
+	var checkpoint_id := _checkpoint_store.latest_checkpoint_id()
+	if checkpoint_id.is_empty():
+		return ""
+	return stage_definition.find_checkpoint(checkpoint_id).display_name
 
 
 func _check_encounter(encounter: EncounterDefinition) -> PackedStringArray:
@@ -384,7 +430,7 @@ func _on_gate_opened(gate_id: StringName) -> void:
 ## Sets every Gate and PortalLink from the machine's state: a Gate is open only when its
 ## Encounter is complete, so a Gate a failed Attempt opened closes again, and a guard link
 ## shows while its Encounter is not complete. Called at the end of [method setup], and
-## after a restore (F10-03).
+## by [method retry_from_checkpoint] after a restore.
 func _apply_progress() -> void:
 	var open_ids := _machine.get_open_gate_ids()
 	for encounter: EncounterDefinition in stage_definition.encounters:

@@ -19,3 +19,4 @@ id = &"stage_01"
 encounters = Array[ExtResource("4_crl6q")]([ExtResource("5_k3uxu"), ExtResource("6_k00f0"), ExtResource("7_461kd"), ExtResource("8_xkejx"), ExtResource("9_aa6m5"), ExtResource("10_1gjjy"), ExtResource("11_m670x")])
 checkpoints = Array[ExtResource("1_tvcgt")]([ExtResource("2_p3s7q"), ExtResource("3_tddw2")])
 metadata/dev = true
+metadata/reviewed = true

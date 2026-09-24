@@ -1,12 +1,12 @@
 # Stage Director
 
-Feature F10: the Adapter that plays a stage's authored route. Started with ticket F10-01 on 2026-09-23 (CODE_READY); Gates, Checkpoints and PortalLinks are CODE_READY since F10-02 (sections "Gate", "Checkpoint" and "Progress application"). Retry follows in F10-03, the boss branch in F12-03 and Stage 2 in F12-05; each appends its own section.
+Feature F10: the Adapter that plays a stage's authored route. Started with ticket F10-01 on 2026-09-23 (CODE_READY); Gates, Checkpoints and PortalLinks are CODE_READY since F10-02 (sections "Gate", "Checkpoint" and "Progress application"). Retry and Restart are CODE_READY since F10-03 ("Retry and Restart"). The boss branch follows in F12-03 and Stage 2 in F12-05; each appends its own section.
 
 ## Purpose
 
 `StageDirector` sits on a stage's `Stage` root and plays its `StageDefinition` through an `EncounterMachine` (F8-02). It arms each Encounter's EntryVolume and ExitVolume and reports the ship's traversal, spawns every requested Wave and every reward Pickup under `RuntimeActors`, scores each enemy defeat once and reports it to the machine, relays off-screen threats to the HUD and stage clear to the Session, and exposes the active Encounter's bounds. Enemies report outcomes; the machine decides progression (ENGINEERING_BRIEF 4.G).
 
-It does not own any progression rule (the machine's), enemy behavior (F9's `EnemyActor`), Pickup acceptance (F7-03's `Pickup`), the score or the Run (`RunState`), the refill, commit and Snapshot (`CheckpointStore`, F8-03), Retry (F10-03), the boss (F12-03), or any authored node: it adds only to `RuntimeActors`, and changes only the volumes' and Checkpoints' `monitoring`, the Gates' barrier collision and `ClosedVisual`, and the PortalLinks' visibility.
+It does not own any progression rule (the machine's), enemy behavior (F9's `EnemyActor`), Pickup acceptance (F7-03's `Pickup`), the score or the Run (`RunState`), the refill, commit and Snapshot (`CheckpointStore`, F8-03), the ship and the field on Retry (the Session's), the boss (F12-03), or any authored node: it adds only to `RuntimeActors`, and changes only the volumes' and Checkpoints' `monitoring`, the Gates' barrier collision and `ClosedVisual`, and the PortalLinks' visibility.
 
 ## Files
 
@@ -88,6 +88,35 @@ A guard's first defeat report also hides its link at once (`_hide_guard_link`).
 
 `check_setup()` also requires, since F10-02: a `Gate` with both children for every non-empty `gate_id`, a `Checkpoint` whose `checkpoint_id` equals the definition's and which has a `Respawn` for every `CheckpointDefinition.node_path`, and, for every `guard_links` entry, a key that is one of the route's Wave enemy ids and a path that resolves to a `Node3D` (reviewer finding: a mistyped key would leave its link lit).
 
+## Retry and Restart
+
+F10-03, after STAGE_DESIGN's retry matrix. Defeat's Retry resumes in place from the latest activated Checkpoint's Snapshot; before any Checkpoint it is Restart (PLANEJAMENTO Section 6). Restart keeps F2-04's full reload: a new stage, Director and `CheckpointStore` are the Stage Entry Snapshot by construction, so every Checkpoint is discarded. The split is GUIDE Section 8's: the Director restores its own actors, flags, Gates and links and survives the Retry; the Session re-instances the ship and clears the field.
+
+### Director
+
+| Method | Effect |
+| --- | --- |
+| `retry_from_checkpoint(player: PlayerController, attempt_seed: int) -> bool` | False, changing nothing, while `_checkpoint_store.latest()` is null. Otherwise, in order: removes every child of `RuntimeActors` (`remove_child`, then `queue_free`: enemies, reward Pickups, the S1-03 Shield Pickup) and clears `_live_enemies`; `_checkpoint_store.retry_into(combat_state, run_state, machine)`, which restores the resources, Power Progress, committed statistics, completed and rewarded Encounters, Objectives and Checkpoint flags, and cancels queued Waves; takes `player` and a new `RandomNumberGenerator` seeded by `attempt_seed`; `_apply_progress()`, so completed Encounters' Gates are open and every other Gate closed, including one the failed Attempt opened, and guard links follow; returns true. |
+| `get_respawn_transform() -> Transform3D` | The latest activated Checkpoint's `Respawn` (CP1-A (0, 27, -329), CP1-B (0, 37, -454), facing -Z), or `PlayerStart` before any. |
+| `retry_location_name() -> String` | The latest activated Checkpoint's `display_name` (`"CP1-A"` until Astra names the places), or `""` before any. |
+
+There is no `restart_from_entry()`, and `CheckpointStore.restart_into` is not used.
+
+### Session
+
+- **`_spawn_player(ship: PlayerController, at: Transform3D)`**, the one place a ship enters play. It unbinds the HUD and frees the current ship, if any; places `ship` at `at` before adding it under `WorldRoot` (so the `CameraRig` starts behind it); calls `setup(_flight_volume)`; then makes every per-ship binding: the HUD, `projectile_system.setup(_flight_volume, ship)` and `weapon.setup(...)`. `_load_stage` calls it with the instance it already checked is a `PlayerController`, at `PlayerStart`. The ticket's `_spawn_player(at)` became `(ship, at)` so that check still refuses a bad `player_scene` before anything unloads.
+- **`_retry()`**, the `retry` action:
+  1. With no Director, or `retry_location_name()` empty, it calls `_restart_stage()` and returns.
+  2. `_set_paused(false)`: the tree, `RunState` and `CombatState` run again.
+  3. `projectile_system.clear_all()`: nothing incoming.
+  4. `_spawn_player(new ship, get_respawn_transform())`: no velocity, no Target Lock, no blink.
+  5. `retry_from_checkpoint(ship, _attempt_seed(attempt_index + 1))`.
+  6. `_run_state.begin_attempt()`, after the restore, as F8-03 says.
+  7. `interface.show_home(HUD)`, which also removes Defeat.
+- **Defeat.** `_on_player_defeated` pushes `{"checkpoint": _director.retry_location_name()}` (or `""` without a Director); the Defeat screen reads `Último checkpoint · <name>` or `Início da fase`.
+- **Restart** (`_restart_stage`) is unchanged: a full reload with `run_state.restart_stage()` and `combat_state.start(starting_power_level())`.
+- The loaded stage's Flight Volume is kept in `_flight_volume` for every ship spawned into it.
+
 ## Session wiring
 
 - `_load_stage`: when the stage root is a `StageDirector`, `check_setup()`'s messages join the existing pre-check (after the `PlayerStart`, Flight Volume and ship checks), so a bad stage is refused before anything is unloaded and the menu stays. After the ship's HUD, field and weapon bindings: `setup(_run_state, _combat_state, projectile_system, _player)`, `stage_cleared` → `_on_stage_cleared` (`CONNECT_DEFERRED`), `threat_reported` → `_on_threat_reported`. Every load builds a new Director, so a Restart cannot double a connection.
@@ -137,7 +166,7 @@ The sprint's no-new-tests rule (2026-09-23) replaced the ticket's fifteen scene 
 
 ## Open issues
 
-- **Retry** restores through `_checkpoint_store` and `_apply_progress()` in F10-03; until then Defeat's Retry restarts the stage.
+- **Respawn Invulnerability** is not specified and none is added: a Retry puts the ship at the Respawn with nothing incoming.
 - **No Checkpoint glow or sound yet:** Astra connects presentation to `checkpoint_activated` through Claude.
 - **No scene tests** (sprint rule).
 - **`tools/validate_stage_01.gd` (Astra's) now fails** its "static stage has no runtime script" check, by design: Stage 1 has its Director. Its owner updates the check; `tools/build_stage_01.py` must never be rerun over the wiring.

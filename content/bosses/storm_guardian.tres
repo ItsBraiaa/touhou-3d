@@ -1,0 +1,103 @@
+[gd_resource type="Resource" script_class="BossDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/definitions/boss_definition.gd" id="1_boss"]
+[ext_resource type="Script" path="res://scripts/definitions/boss_phase_definition.gd" id="2_phase"]
+[ext_resource type="Script" path="res://scripts/definitions/attack_definition.gd" id="3_attack"]
+[ext_resource type="Script" path="res://scripts/definitions/attack_step_definition.gd" id="4_step"]
+[ext_resource type="Resource" path="res://content/patterns/storm_spiral.tres" id="5_spiral"]
+[ext_resource type="Resource" path="res://content/patterns/storm_thunder_rings.tres" id="6_rings"]
+[ext_resource type="Resource" path="res://content/patterns/storm_aimed_burst.tres" id="7_aim"]
+
+[sub_resource type="Resource" id="Step_Spiral"]
+script = ExtResource("4_step")
+pattern = ExtResource("5_spiral")
+anticipation_seconds = 1.0
+follow_player_height = true
+pause_after = 0.4
+
+[sub_resource type="Resource" id="Attack_Spiral"]
+script = ExtResource("3_attack")
+display_name = "Espiral da Tempestade"
+steps = Array[ExtResource("4_step")]([SubResource("Step_Spiral")])
+reposition_seconds = 0.8
+
+[sub_resource type="Resource" id="Phase_Spiral"]
+script = ExtResource("2_phase")
+health = 1040
+attack = SubResource("Attack_Spiral")
+transition_seconds = 0.0
+
+[sub_resource type="Resource" id="Step_Ring_High"]
+script = ExtResource("4_step")
+pattern = ExtResource("6_rings")
+anticipation_seconds = 1.0
+height_offset = 8.0
+pause_after = 0.4
+
+[sub_resource type="Resource" id="Step_Ring_Low"]
+script = ExtResource("4_step")
+pattern = ExtResource("6_rings")
+anticipation_seconds = 1.0
+height_offset = -8.0
+pause_after = 0.4
+
+[sub_resource type="Resource" id="Attack_Thunder_Rings"]
+script = ExtResource("3_attack")
+display_name = "Círculos do Trovão"
+steps = Array[ExtResource("4_step")]([SubResource("Step_Ring_High"), SubResource("Step_Ring_Low")])
+reposition_seconds = 0.8
+
+[sub_resource type="Resource" id="Phase_Thunder_Rings"]
+script = ExtResource("2_phase")
+health = 1040
+attack = SubResource("Attack_Thunder_Rings")
+transition_seconds = 0.75
+
+[sub_resource type="Resource" id="Step_Eye_Aim_1"]
+script = ExtResource("4_step")
+pattern = ExtResource("7_aim")
+anticipation_seconds = 1.0
+follow_player_height = true
+pause_after = 0.35
+
+[sub_resource type="Resource" id="Step_Eye_Spiral_1"]
+script = ExtResource("4_step")
+pattern = ExtResource("5_spiral")
+anticipation_seconds = 0.9
+height_offset = 5.0
+pause_after = 0.35
+
+[sub_resource type="Resource" id="Step_Eye_Aim_2"]
+script = ExtResource("4_step")
+pattern = ExtResource("7_aim")
+anticipation_seconds = 1.0
+follow_player_height = true
+pause_after = 0.35
+
+[sub_resource type="Resource" id="Step_Eye_Spiral_2"]
+script = ExtResource("4_step")
+pattern = ExtResource("5_spiral")
+anticipation_seconds = 0.9
+height_offset = -5.0
+pause_after = 0.35
+
+[sub_resource type="Resource" id="Attack_Storm_Eye"]
+script = ExtResource("3_attack")
+display_name = "Olho da Tormenta"
+steps = Array[ExtResource("4_step")]([SubResource("Step_Eye_Aim_1"), SubResource("Step_Eye_Spiral_1"), SubResource("Step_Eye_Aim_2"), SubResource("Step_Eye_Spiral_2")])
+reposition_seconds = 1.2
+
+[sub_resource type="Resource" id="Phase_Storm_Eye"]
+script = ExtResource("2_phase")
+health = 1300
+attack = SubResource("Attack_Storm_Eye")
+transition_seconds = 0.75
+
+[resource]
+script = ExtResource("1_boss")
+kind = &"storm_guardian"
+display_name = "Guardião da Tempestade"
+score = 1000
+entry_seconds = 1.0
+phases = Array[ExtResource("2_phase")]([SubResource("Phase_Spiral"), SubResource("Phase_Thunder_Rings"), SubResource("Phase_Storm_Eye")])
+metadata/dev = true

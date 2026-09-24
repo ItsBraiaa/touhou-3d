@@ -16,3 +16,4 @@ completion = 1
 waves = Array[ExtResource("3_ysmrv")]([SubResource("Resource_s240s")])
 checkpoint_id = &"CP1-B"
 metadata/dev = true
+metadata/reviewed = true

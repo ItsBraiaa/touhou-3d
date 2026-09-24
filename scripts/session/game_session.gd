@@ -14,7 +14,9 @@ extends Node
 ##
 ## A stage whose root is a [StageDirector] is checked before it loads, set up with the
 ## Run, the [CombatState], the field and the ship, started at every Attempt, and its clear
-## completes the stage; its off-screen threats reach the HUD (F10-01).
+## completes the stage; its off-screen threats reach the HUD (F10-01). Defeat's Retry
+## resumes in place from the latest Checkpoint with a new ship at its `Respawn`, or
+## restarts the stage before any (F10-03).
 ##
 ## Nothing here decides gameplay: movement, targeting, progression and the Run's
 ## accounting belong to their cores. Results arrive with F11.
@@ -67,6 +69,8 @@ var _player: PlayerController
 ## The loaded stage's root when it is a [StageDirector], else null: a stage without one
 ## loads and flies as a static stage (F10-01).
 var _director: StageDirector
+## The loaded stage's Flight Volume, kept for every ship spawned into it (F10-03).
+var _flight_volume := AABB()
 
 
 func _ready() -> void:
@@ -141,9 +145,7 @@ func _on_action_requested(action: StringName, payload: Dictionary) -> void:
 		&"restart_stage":
 			_restart_stage()
 		&"retry":
-			# TODO(F10-03): retry from the latest Checkpoint; until then Retry restarts the
-			# stage (PLANEJAMENTO Section 6, "before any intermediate checkpoint").
-			_restart_stage()
+			_retry()
 		&"return_to_menu":
 			_return_to_menu()
 		&"quit":
@@ -167,8 +169,9 @@ func _start_run(mode: RunState.RunMode, stage: StringName) -> void:
 	interface.show_home(ScreenRouter.HUD)
 
 
-## Pause's Restart, and Defeat's Retry until F10-03: the stage from its entry values, with
-## a new stage and a new ship.
+## Pause's Restart, and Defeat's Retry before any Checkpoint: the stage from its entry
+## values, with a new stage, ship, Director and [CheckpointStore], so every Checkpoint is
+## discarded (STAGE_DESIGN "Restart Stage explicitly discards checkpoint progress").
 func _restart_stage() -> void:
 	if not _is_in_stage():
 		return
@@ -251,15 +254,8 @@ func _load_stage(stage_id: StringName) -> bool:
 		return false
 	_unload_stage()
 	world_root.add_child(stage)
-	_player = player as PlayerController
-	# Placed before it enters the tree, so its camera rig starts behind it at the marker
-	# instead of easing in from the origin.
-	_player.transform = start.global_transform
-	world_root.add_child(_player)
-	_player.setup(bounds)
-	interface.get_hud().bind(_combat_state, _player.targeting, _player.camera_rig.camera)
-	projectile_system.setup(bounds, _player)
-	_player.weapon.setup(_combat_state, projectile_system, _player.targeting)
+	_flight_volume = bounds
+	_spawn_player(player as PlayerController, start.global_transform)
 	_director = director
 	if _director != null:
 		_director.setup(_run_state, _combat_state, projectile_system, _player)
@@ -268,6 +264,46 @@ func _load_stage(stage_id: StringName) -> bool:
 		_director.stage_cleared.connect(_on_stage_cleared, CONNECT_DEFERRED)
 		_director.threat_reported.connect(_on_threat_reported)
 	return true
+
+
+## The one place a ship enters play: replaces the current one, if any, with [param ship]
+## at [param at], kept inside the stage's Flight Volume, and makes every per-ship binding
+## (the HUD, the [ProjectileSystem] and the weapon). A new ship carries no velocity, no
+## Target Lock and no blink. [param ship] is a fresh instance of [member player_scene].
+func _spawn_player(ship: PlayerController, at: Transform3D) -> void:
+	if _player != null:
+		interface.get_hud().unbind()
+		world_root.remove_child(_player)
+		_player.queue_free()
+	_player = ship
+	# Placed before it enters the tree, so its camera rig starts behind it at the marker
+	# instead of easing in from the origin.
+	_player.transform = at
+	world_root.add_child(_player)
+	_player.setup(_flight_volume)
+	interface.get_hud().bind(_combat_state, _player.targeting, _player.camera_rig.camera)
+	projectile_system.setup(_flight_volume, _player)
+	_player.weapon.setup(_combat_state, projectile_system, _player.targeting)
+
+
+## Defeat's Retry: resumes from the latest activated Checkpoint's Snapshot in place, with
+## a new ship at its `Respawn` and nothing incoming; the Director removes the failed
+## Attempt's actors and Pickups, restores the cores and rebuilds its Gates and links.
+## Before any Checkpoint, or on a stage without a Director, Retry is Restart (PLANEJAMENTO
+## Section 6).
+func _retry() -> void:
+	if not _is_in_stage():
+		return
+	if _director == null or _director.retry_location_name().is_empty():
+		_restart_stage()
+		return
+	_set_paused(false)
+	projectile_system.clear_all()
+	_spawn_player(player_scene.instantiate() as PlayerController, _director.get_respawn_transform())
+	_director.retry_from_checkpoint(_player, _attempt_seed(_run_state.get_attempt_index() + 1))
+	# After the restore, which puts back the committed statistics (F8-03).
+	_run_state.begin_attempt()
+	interface.show_home(ScreenRouter.HUD)
 
 
 ## Takes the stage and the ship out of the tree at once, so a stage loaded in the same
@@ -374,8 +410,9 @@ func _on_score_awarded(points: int) -> void:
 ## Return to Menu leave from the overlay.
 func _on_player_defeated() -> void:
 	_set_paused(true)
-	# TODO(F10-03): name the latest Checkpoint once there is one.
-	interface.push_overlay(ScreenRouter.DEFEAT, {"checkpoint": ""})
+	# The Defeat screen shows "Último checkpoint · <name>", or "Início da fase" for "".
+	var location := _director.retry_location_name() if _director != null else ""
+	interface.push_overlay(ScreenRouter.DEFEAT, {"checkpoint": location})
 
 
 func _on_stage_completed(_result: Dictionary) -> void:

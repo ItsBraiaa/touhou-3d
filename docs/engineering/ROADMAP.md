@@ -69,7 +69,7 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | F10 | Stage Director in Stage 1 | `stage-director` | 00 plan | docs | no | — | done (one-pass planning) |
 | | | | 01 stage-director-adapter | adapter | no | trunk | done (2026-09-23: `StageDirector` on Stage 1; S1-01 to S1-03 Encounters, defeats scored once, rewards and stage clear verified in the running game, no new tests per the sprint rule; fixed `EncounterMachine`'s compile error) |
 | | | | 02 gate-and-checkpoint-adapters | adapter | no | trunk | done (2026-09-23: `Gate` and `Checkpoint` on Stage 1; the whole route flown from the menu, Gates open as Encounters clear, CP1-A and CP1-B refill once; no new tests per the sprint rule) |
-| | | | 03 retry-restart-flow | integration | no | trunk | todo |
+| | | | 03 retry-restart-flow | integration | no | trunk | done (2026-09-23: Retry resumes in place from the latest Checkpoint, Restart reloads, Defeat names the Checkpoint; verified in the running game, no new tests per the sprint rule) |
 | | | | 04 stage-01-contract-smoke-test | test | yes (one new test file) | — | cut (the user's no-tests rule, 2026-09-23) |
 | F11 | Run flow | `run-flow` | 00 plan | docs | no | — | done (one-pass planning) |
 | | | | 01 defeat-results-retry-restart-screens | integration | no | trunk | todo |
@@ -94,7 +94,7 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | | | | 02 combat-visuals | design | — | sol | done (2026-09-23: six visuals and focused-slider fix verified) |
 | | | | 03 lantern-guardian-scene | design | — | sol | done (2026-09-23: Ghost prefab, clips and dusk render verified) |
 | | | | 04 stage-2-boss-scenes | design | — | sol | done (2026-09-23: Tempest Sentinel and Storm Guardian prefabs, clips and Stage 2 renders verified) |
-| | | | 05 stage-1-tuning-and-pacing | design | — | sol | todo |
+| | | | 05 stage-1-tuning-and-pacing | design | — | sol | done (2026-09-23: content values, names, clip candidates and provisional 221 s estimate) |
 | | | | 06 stage-2-content-review | design | — | sol | todo (pass 1 values/reward review and provisional pacing estimate landed; passes 2–3 pending) |
 | | | | 07 shrine-lighting-and-boss-rulings | design | — | sol | doing (Part B rulings delivered; Parts A and C await F12-03) |
 
@@ -140,6 +140,8 @@ Dependencies Claude has on scene and content work. These are needs by Feature, n
 | F14 | Nothing new; credits and licenses must already cover every integrated asset. F14-02 lists any gaps it finds. |
 
 ## Received from Astra
+
+2026-09-23: D-05 reviewed Stage 1 content and shared Spirit/Sentry values, named both checkpoints and selected candidate Anticipation clips. [stage-01-pacing.md](../validation/stage-01-pacing.md) estimates an efficient clear at about 221 s against the 240 s design target; it is not a measured result. Trunk owns clip playback and any PlayerShip value follow-up; D-06 must recompute its Stage 2 estimate from the revised shared enemy health.
 
 2026-09-23: D-06 pass 1 reviewed F12-04's Stage 2 content and named CP2-A/CP2-B; [stage-02-pacing.md](../validation/stage-02-pacing.md) records the exact reward audit and conditional ~319 s efficient / ~392 s normal estimates. The ≥300 s requirement still needs a measured clear; Seal and boss tuning remain for passes 2 and 3.
 

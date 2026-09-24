@@ -8,5 +8,6 @@ id = &"CP1-B"
 after_encounter_id = &"S1-05"
 resume_encounter_id = &"S1-07"
 node_path = NodePath("Checkpoints/CP1-B")
-display_name = "CP1-B"
+display_name = "Entrada do Santuário"
 metadata/dev = true
+metadata/reviewed = true
