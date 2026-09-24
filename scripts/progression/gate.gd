@@ -16,14 +16,19 @@ var _open: bool = false
 var _collision: CollisionShape3D
 var _closed_visual: Node3D
 var _open_visual: Node3D
+var _closed_geometry: GeometryInstance3D
+var _fade_tween: Tween
 
 
 func _ready() -> void:
 	_collision = get_node_or_null(COLLISION_PATH) as CollisionShape3D
 	_closed_visual = get_node_or_null(CLOSED_VISUAL_PATH) as Node3D
 	_open_visual = get_node_or_null(^"OpenVisual") as Node3D
+	_closed_geometry = _closed_visual as GeometryInstance3D
 	if _open_visual != null:
 		_open_visual.visible = _open
+	if _closed_geometry != null:
+		_closed_geometry.transparency = 0.0
 	if _collision == null or _closed_visual == null:
 		push_error("%s: a Gate needs a CollisionShape3D at '%s' and a Node3D at '%s'" % [get_path(), COLLISION_PATH, CLOSED_VISUAL_PATH])
 
@@ -36,9 +41,44 @@ func set_open(open: bool) -> void:
 		return
 	_open = open
 	_collision.set_deferred(&"disabled", open)
-	_closed_visual.visible = not open
+	_fade_closed_visual(open)
 	if _open_visual != null:
 		_open_visual.visible = open
+
+
+## Restores a Gate from progression instantly; safe to call repeatedly.
+func restore_open(open: bool) -> void:
+	_open = open
+	if _fade_tween != null:
+		_fade_tween.kill()
+		_fade_tween = null
+	if _collision != null:
+		_collision.disabled = open
+	if _closed_visual != null:
+		_closed_visual.visible = not open
+	if _closed_geometry != null:
+		_closed_geometry.transparency = 1.0 if open else 0.0
+	if _open_visual != null:
+		_open_visual.visible = open
+
+
+func _fade_closed_visual(open: bool) -> void:
+	if _closed_visual == null:
+		return
+	if _fade_tween != null:
+		_fade_tween.kill()
+		_fade_tween = null
+	if _closed_geometry == null:
+		_closed_visual.visible = not open
+		return
+	_closed_visual.visible = true
+	_closed_geometry.transparency = 0.0
+	if open:
+		_fade_tween = create_tween()
+		_fade_tween.tween_property(_closed_geometry, ^"transparency", 1.0, 0.35)
+		_fade_tween.tween_callback(_closed_visual.hide)
+	else:
+		_closed_geometry.transparency = 0.0
 
 
 ## Whether the Gate is open.
