@@ -1,5 +1,12 @@
 # Handoff Log
 
+## 2026-09-24 — OpenCode (oc-a) — F15-09 HUD edge cues
+State: DELIVERED
+Files: `scripts/ui/hud.gd`, `docs/engineering/ROADMAP.md`.
+Change: The locked target marker now remains visible when its projection is off-screen or behind the camera, clamped inside the screen edge and rotated toward the target. Hud builds a subtle full-screen boundary vignette in code and connects the bound ship's `edge_proximity_changed` through `Targeting`'s parent, with a short fade tween. No `hud.tscn` or Session edit.
+Verification: `tools/lane.ps1 land` and the short headless boot are the gate; no tests added (sprint rule).
+Action required by trunk: the pre-existing behind-camera marker expectation is superseded by F15-09 behavior if an acceptance test still asserts hiding it.
+
 ## 2026-09-24 — OpenCode (oc-a) — F15-06 checkpoint glow and Gate fade
 State: DELIVERED
 Files: `scripts/progression/checkpoint.gd`, `scripts/progression/gate.gd`, `scripts/progression/stage_director.gd`, `docs/engineering/ROADMAP.md`.
