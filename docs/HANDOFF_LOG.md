@@ -43,6 +43,23 @@ Action required by Astra:
 2. Never rerun `tools/build_stage_01.py` over the wiring.
 3. Keep the `Encounters/<ID>/{EntryVolume,ExitVolume,Spawns,RewardOrigin,ShieldPickup}` and `RuntimeActors` names. `check_setup()` refuses the stage if one goes missing.
 4. `scenes/enemies/visuals/spirit_lume.tscn` and `sentry_lantern.tscn` declare `CharacterArmature`, `Skeleton3D`, the mesh and `AnimationPlayer` again as new typed nodes under the instanced glTF `Model`. Each enemy then holds duplicate children, leaks them at exit (`… RID allocations … leaked at exit`), and probably draws its model twice. Re-save them so those children are overrides with no `type=`.
+## 2026-09-24 — OpenCode (oc-b) — F14-02 part 1b: acceptance draft
+
+State: docs
+Files: New `docs/validation/acceptance.md`.
+Change:
+- **Part 1b of F14-02** (SPRINT.md "Split tickets"). Drafts `docs/validation/acceptance.md`
+  as two tables: all 18 acceptance checks of PLANEJAMENTO Section 12 (lines 300-317) and
+  all 14 checks of STAGE_DESIGN "Acceptance checks for stage progression" (lines 147-160),
+  32 rows in total.
+- Every row gives the check text, its source file and line, the ticket(s) from
+  `docs/engineering/ROADMAP.md` that deliver it, and the status `not yet verified`, as part 1b
+  specifies. The header and summary sections are stubs for F14-02 part 2.
+- No code and no tests; F14-02 stays `todo`.
+Why: F14-02 part 1b (SPRINT.md oc-b queue row 9b); part 2 fills in the results after F14-01.
+Action required by other agent: none. F14-02 part 2 (lane oc-b, after F14-01) fills in the
+header, each row's status and evidence, the credits coverage and the summary.
+
 ## 2026-09-24 00:20 — Claude (path) — F3-02: Options bound to Settings, buses and window
 State: CODE_READY
 Files: New `scripts/ui/options_screen.gd`. Edited `scripts/ui/interface.gd` (`settings_path`, `get_settings()`, the Options binding, `restore_defaults` resolved). Docs: `docs/engineering/settings.md` ("Options binding"), `docs/engineering/menus-session.md` (the Interface contract and the Session actions row), `docs/GUIDE.md` (Section 6 `interface.gd`, Section 14 "State and verification"), and the ROADMAP F3-02 row.
