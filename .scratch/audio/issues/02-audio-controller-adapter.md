@@ -1,6 +1,6 @@
 # F13-02 AudioController adapter
 
-Status: todo
+Status: done
 Type: adapter
 parallel-safe: no
 Depends on: F13-01
@@ -102,6 +102,10 @@ Attaching to `Main/Audio`, choosing streams, and connecting gameplay producers (
 
 - `Main/Audio` stays in Claude's `main.tscn`. Hand over the event-to-file table and any volume proposals (D-01), and Claude sets `event_streams` and `event_volume_db`.
 - Every sound effect must be non-looping. The limiter counts a voice for the stream's length.
+
+## Outcome
+
+Implemented `AudioController` per the spec's cross-feature contract: limiter-gated SFX pool with priority steals, the 17-event catalogue as `EVENTS`/`EVENT_RULES` (Vector3 of interval, voices, priority), coalesced UI sounds (accept outranks focus, one per frame, played in `_process` after any `stop_all()` the same action caused), crossfading music pair on a `create_tween()` Tween, loud `_ready` validation with disable-on-fatal and ignore-on-entry, and the `missing_events()` query for F13-03. No test file by the sprint rule; the DoD's headless check ran as a throwaway `tools/zz_audio_check.gd` (deleted after, no `.uid` generated): three mapped events granted with `event_played` logs, an in-interval repeat refused, `missing_events()` exact. Headless audio runs on the Dummy driver, recorded in `audio.md`. No defect found in `audio_limiter.gd`. GUIDE Section 6 row updated; attached in F13-03.
 
 ## Kickoff prompt
 

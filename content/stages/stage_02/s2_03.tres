@@ -1,0 +1,43 @@
+[gd_resource type="Resource" script_class="EncounterDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/definitions/reward_definition.gd" id="1_e2sgi"]
+[ext_resource type="Script" path="res://scripts/definitions/encounter_definition.gd" id="2_7yqku"]
+[ext_resource type="Script" path="res://scripts/definitions/wave_definition.gd" id="3_ni5s1"]
+
+[sub_resource type="Resource" id="Resource_bm7vg"]
+script = ExtResource("1_e2sgi")
+origin_marker = NodePath("Seals/Seal1/RewardOrigin")
+
+[sub_resource type="Resource" id="Resource_4sk24"]
+script = ExtResource("1_e2sgi")
+origin_marker = NodePath("Seals/Seal2/RewardOrigin")
+
+[sub_resource type="Resource" id="Resource_6n6jp"]
+script = ExtResource("1_e2sgi")
+origin_marker = NodePath("Seals/Seal3/RewardOrigin")
+
+[sub_resource type="Resource" id="Resource_agcg7"]
+script = ExtResource("3_ni5s1")
+spawn_markers = Array[NodePath]([NodePath("Spawns/Seal1_Sentry1"), NodePath("Spawns/Seal1_Sentry2")])
+enemy_kinds = Array[StringName]([&"sentry", &"sentry"])
+
+[sub_resource type="Resource" id="Resource_d2v5t"]
+script = ExtResource("3_ni5s1")
+spawn_markers = Array[NodePath]([NodePath("Spawns/Seal2_Sentry1"), NodePath("Spawns/Seal2_Sentry2")])
+enemy_kinds = Array[StringName]([&"sentry", &"sentry"])
+
+[sub_resource type="Resource" id="Resource_6kl0o"]
+script = ExtResource("3_ni5s1")
+spawn_markers = Array[NodePath]([NodePath("Spawns/Seal3_Sentry1"), NodePath("Spawns/Seal3_Sentry2")])
+enemy_kinds = Array[StringName]([&"sentry", &"sentry"])
+
+[resource]
+script = ExtResource("2_7yqku")
+id = &"S2-03"
+next_id = &"S2-04"
+completion = 2
+waves = Array[ExtResource("3_ni5s1")]([SubResource("Resource_agcg7"), SubResource("Resource_d2v5t"), SubResource("Resource_6kl0o")])
+rewards = Array[ExtResource("1_e2sgi")]([SubResource("Resource_bm7vg"), SubResource("Resource_4sk24"), SubResource("Resource_6n6jp")])
+gate_id = &"Gate_S2_03"
+required_objective_ids = Array[StringName]([&"S2-03-Seal1", &"S2-03-Seal2", &"S2-03-Seal3"])
+metadata/dev = true

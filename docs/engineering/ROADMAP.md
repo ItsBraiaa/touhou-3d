@@ -78,13 +78,13 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | | | | 01 boss-machine-core | core | yes | path | done (no unit tests, by the sprint rule; transition cap 0.75 s from D-07 ruling 1) |
 | | | | 02 boss-controller-adapter | adapter | no | path | todo |
 | | | | 03 lantern-guardian-in-s1-07 | integration | no | trunk (part 1: oc-a) | todo |
-| | | | 04 stage-02-content-draft | content | yes | oc-b | todo |
+| | | | 04 stage-02-content-draft | content | yes | oc-b | done (2026-09-23: dev draft of `content/stages/stage_02/` landed, validates and matches the scene; Astra tunes values in D-06) |
 | | | | 05 stage-02-director-integration | adapter | no | sol | todo |
 | | | | 06 tempest-sentinel-miniboss | integration | no | sol | todo |
 | | | | 07 storm-guardian | integration | no | sol | todo |
 | F13 | Audio | `audio` | 00 plan | docs | no | — | done (cut, then reinstated by the sprint plan, 2026-09-23) |
 | | | | 01 audio-limiter-core | core | yes | oc-a | done |
-| | | | 02 audio-controller-adapter | adapter | no | oc-a | todo |
+| | | | 02 audio-controller-adapter | adapter | no | oc-a | done (no new tests, by the sprint rule; headless Dummy-driver check recorded in audio.md) |
 | | | | 03 audio-event-wiring | integration | no | trunk | todo |
 | F14 | Delivery | `delivery` | 00 plan | docs | no | — | done (one-pass planning) |
 | | | | 01 export-and-run-outside-editor | integration | no | trunk | todo (blocks itself until the user installs the Godot 4.7.2 export templates) |

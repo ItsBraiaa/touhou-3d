@@ -1,6 +1,6 @@
 # F12-04 Stage 2 content draft (dev)
 
-Status: todo
+Status: done
 Type: content
 parallel-safe: yes
 Depends on: F8-01, F9-01
@@ -101,3 +101,7 @@ The `content/stages/stage_02/*.tres` values are yours to tune in D-06. The appro
 ```
 In your lane worktree, read AGENTS.md, docs/engineering/SPRINT.md (your lane section), docs/engineering/ROADMAP.md and .scratch/bosses/issues/04-stage-02-content-draft.md. Check its dependencies with tools/lane.ps1 status F8-01 F9-01, implement it test-first, run tools/test.ps1 until green with no SCRIPT ERROR, finish its Definition of Done, commit, then run tools/lane.ps1 land.
 ```
+
+## Outcome
+
+Wrote all ten `.tres` files under `content/stages/stage_02/` with a one-off headless scratch script (kept outside the project, not committed, deleted after the run), every one flagged `metadata/dev = true`. The script reloaded `stage_02.tres` from disk with the cache ignored and verified it: `validate()` empty, seven Encounters in route order with the `next_id` chain, S2-01 `requires_exit`, S2-03 `OBJECTIVES` over the three `seal_id`s with three ON_ENTRY guard waves, gates `Gate_S2_01`…`Gate_S2_05`, CP2-A after S2-03 resuming S2-04 and guarding it, CP2-B after S2-05 resuming S2-07 and guarding it, and totals of 22 markers (20 common plus two bosses), 7 POWER and 2 SHIELD. The same run instantiated `scenes/stages/stage_02.tscn` and checked every content Encounter root, Entry/Exit volume (Area3D, layer 0, mask includes 2), spawn marker (`Marker3D`), reward origin (including `Seals/SealN/RewardOrigin`), gate (`BarrierBody` on layer 1, `ClosedVisual`, `Arch`) and Checkpoint (`Area3D` mask 2 with `Respawn`); it also matched every objective id to a Seal `seal_id` and every `guard_spawn` to an S2-03 wave marker, and confirmed all 22 spawn markers are referenced. No test files were written under the sprint's no-new-tests rule, so `tests/unit/definitions/test_stage_02_content.gd` and `tests/scene/test_stage_02_content_contract.gd` do not exist; verification is `tools/lane.ps1 land` plus the scratch cross-check above. The three schema readings are recorded in `docs/engineering/progression-core.md` "Stage 2 content": per-Seal rewards as separate S2-03 `RewardDefinition`s spawned on Seal destruction, all six guards as ON_ENTRY waves kept passive by the Director, and the two new boss kinds mapped by F12-05/06/07.

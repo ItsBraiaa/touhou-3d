@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="CheckpointDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/definitions/checkpoint_definition.gd" id="1_2qifx"]
+
+[resource]
+script = ExtResource("1_2qifx")
+id = &"CP2-A"
+after_encounter_id = &"S2-03"
+resume_encounter_id = &"S2-04"
+node_path = NodePath("Checkpoints/CP2-A")
+display_name = "CP2-A"
+metadata/dev = true
