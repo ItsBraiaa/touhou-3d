@@ -8,6 +8,13 @@ Change: `Main/Audio` carries `AudioController` with D-01's 17 non-looping effect
 Verification: `tools/test.ps1` 225 passed, no `SCRIPT ERROR`, no test changed or added (sprint rule). A throwaway driver of `main.tscn` from the main menu, headless then windowed, passed 54 checks: one connection per producer after the first load, Retry and two Restarts; menu focus and accept once each; shield, health and defeating hits each with their own sound only; the full Stage 1 route to the Lantern Guardian (3 `boss_phase_changed`, 1 `boss_defeated`, 1 `stage_cleared`); zero voices right after Retry, Restart and Return to Menu, and no gameplay sound afterwards. Details in `docs/validation/audio.md`.
 Action required by Astra: the listening pass (human, F14-02). To retune an event's interval, voices, priority or volume, or swap a file, send a new catalogue row. `StageDirector.checkpoint_activated` now also plays a sound; the arch glow is still yours.
 Action required by sol: `stage_director.gd` gained one signal declaration (after `boss_defeated`) and one emit line in `_on_enemy_defeated`; keep both when you merge F12-06/F12-07 part 2.
+## 2026-09-24 — Astra (sol) — D-01 selected sound folder and music path casing
+State: done
+Files: `sound_effects/` (17 original Ogg clips, four pack licenses, selection.json, README.md, .gdignore); `.gitignore`; folder references in design, audio, foundation, delivery and project documentation.
+Change: User requested the measured 17-event shortlist in `sound_effects/`, and lowercase `music` folder references. The folder is a curated source selection, excluded from Godot discovery via .gdignore; runtime copies and audio event wiring remain as delivered. Gains and repetition settings in the manifest remain proposals pending listening. Documentation and ignore rules now use `music/`. The Godot bus named `Music` is unchanged. Earlier handoff entries are historical and retain their original wording; their `Music/` source-folder references mean `music/` today.
+Verification: all 17 copied clips match the reviewed selection byte for byte; four source licenses included. No new tests. The lane landing gate records automated validation.
+Action required by audio owner: use this selection for the next approved runtime mapping/mix pass; do not interpret the folder move as a completed listening pass.
+
 ## 2026-09-24 — Astra (sol) — Stage 2 content review (D-06 pass 3) [shared]
 State: SCENE_READY
 Files: `content/bosses/tempest_sentinel.tres`; `content/bosses/storm_guardian.tres`; five `content/patterns/{sentinel,storm}_*.tres`; `docs/validation/stage-02-pacing.md`; ROADMAP; D-06 ticket.

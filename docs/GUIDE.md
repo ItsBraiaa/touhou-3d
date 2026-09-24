@@ -44,7 +44,7 @@ The old Superpowers implementation draft is non-authoritative. Prefer the curren
 
 Every change to a file owned by the other agent is announced in `docs/HANDOFF_LOG.md`.
 
-Preserve original downloads in `All models/`, `all-sounds/`, and `Music/`. Runtime assets should use selected copies with their texture/buffer dependencies. Never edit the same shared file concurrently.
+Preserve original downloads in `All models/`, `all-sounds/`, and `music/`. Runtime assets should use selected copies with their texture/buffer dependencies. Never edit the same shared file concurrently.
 
 ## 4. Placeholder policy
 

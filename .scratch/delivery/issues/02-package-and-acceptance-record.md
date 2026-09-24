@@ -19,7 +19,7 @@ Model: part 1 GPT 5.6 Luna (fallback DeepSeek V4.1 Flash); part 2 DeepSeek V4.1 
 
 ## Goal
 
-`tools/package.ps1` builds the academic submission as one zip. The zip holds the Godot project, excluding the `.godot/` cache, the raw asset packs (`All models/`, `all-sounds/`, `Music/`), `build/` and agent tooling, plus the exported executable and a short Portuguese read-me. The script then extracts the zip and checks the copy independently: the project imports and its tests pass, and the executable boots (ENGINEERING_BRIEF Section 8 "Packaging": "Reopen an extracted copy and run the exported executable independently before claiming delivery readiness").
+`tools/package.ps1` builds the academic submission as one zip. The zip holds the Godot project, excluding the `.godot/` cache, the raw asset packs (`All models/`, `all-sounds/`, `music/`), `build/` and agent tooling, plus the exported executable and a short Portuguese read-me. The script then extracts the zip and checks the copy independently: the project imports and its tests pass, and the executable boots (ENGINEERING_BRIEF Section 8 "Packaging": "Reopen an extracted copy and run the exported executable independently before claiming delivery readiness").
 
 The session also checks that credits and licenses cover every integrated asset. It walks every acceptance check of PLANEJAMENTO Section 12 and STAGE_DESIGN and records each in `docs/validation/acceptance.md` as pass, fail, not verified, or not verified (cut), with evidence. Uploading to Classroom is the user's action.
 

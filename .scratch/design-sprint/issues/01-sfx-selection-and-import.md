@@ -25,7 +25,7 @@ Choose one sound for each of the 17 events in the F13 catalogue from the four lo
   - Section 3: off-screen threats need audio warnings. Section 7: Graze gets "subtle light and sound feedback".
 - `docs/STAGE_DESIGN.md` "Checkpoint contract": arches with "a brief glow and sound"
 - `docs/ASSET_CREDITS.md` (the entry format) and `assets/licenses/` (the naming, `kenney-space-kit.txt`)
-- `docs/GUIDE.md` Section 3 (preserve `all-sounds/` and `Music/`; runtime assets are selected copies), Section 5 (buses `Master`, `Music`, `SFX`) and Section 14 (extend credits only for integrated assets; never rerun `build_menu_handoff.py` over integrated menus)
+- `docs/GUIDE.md` Section 3 (preserve `all-sounds/` and `music/`; runtime assets are selected copies), Section 5 (buses `Master`, `Music`, `SFX`) and Section 14 (extend credits only for integrated assets; never rerun `build_menu_handoff.py` over integrated menus)
 
 ## Files
 
@@ -34,7 +34,7 @@ Choose one sound for each of the 17 events in the F13 catalogue from the four lo
   - `assets/licenses/kenney-interface-sounds.txt`, `kenney-digital-audio.txt`, `kenney-sci-fi-sounds.txt`, `kenney-impact-sounds.txt`: each pack's supplied license, copied only for packs with a selected file.
   - `tools/validate_audio_selection.gd` and `docs/validation/audio-selection.md`.
 - **Edits:** `docs/ASSET_CREDITS.md` (new "Sound effects" and "Music" sections), `scenes/ui/credits.tscn` (one "EFEITOS SONOROS" entry in the existing style: `Kenney · <packs used> · CC0`), `docs/HANDOFF_LOG.md`.
-- **Must not touch:** `all-sounds/**` and `Music/**` (originals), `scenes/main.tscn` (Claude sets the mapping in F13-03), `scripts/**`, `tests/**`, `project.godot`, `default_bus_layout.tres`, every other menu scene, and `tools/build_menu_handoff.py` (do not rerun it).
+- **Must not touch:** `all-sounds/**` and `music/**` (originals), `scenes/main.tscn` (Claude sets the mapping in F13-03), `scripts/**`, `tests/**`, `project.godot`, `default_bus_layout.tres`, every other menu scene, and `tools/build_menu_handoff.py` (do not rerun it).
 
 ## Deliverable contract
 
@@ -54,7 +54,7 @@ Consumed by F13-03 (`.scratch/audio/issues/03-audio-event-wiring.md`) and read b
   - `docs/ASSET_CREDITS.md` "Sound effects": creator Kenney, each pack used with its source link from PLANEJAMENTO Section 9, CC0, the license copy's path, the runtime folder, and the changes (none, or per file).
   - `credits.tscn` names only the packs actually used.
 - **Music decision**, recorded in `docs/ASSET_CREDITS.md` "Music" and in the handoff entry:
-  - The five files in `Music/` carry *Touhou 10* composition titles. PLANEJAMENTO calls those compositions references, "not verified audio files ready to redistribute".
+  - The five files in `music/` carry *Touhou 10* composition titles. PLANEJAMENTO calls those compositions references, "not verified audio files ready to redistribute".
   - Unless a file's source and permission are documented, do not copy it. The expected outcome is "No music ships in this delivery", with the reason.
   - Do not download anything in this ticket: a new track is the user's call.
   - If a permitted track is identified, copy it to `assets/audio/music/` with loop on and credit it with the attribution its license requires. Then give Claude a table over the ids `menu`, `stage_01_route`, `stage_01_boss`, `stage_02_route` and `stage_02_boss`; one track may serve several ids.
