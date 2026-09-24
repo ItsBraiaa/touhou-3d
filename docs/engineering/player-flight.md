@@ -187,6 +187,10 @@ A group member that is not a `Node3D` or has no `HitVolume` child is skipped, wi
 
 `Targeting` runs after `PlayerController` and before `CameraRig` in the same tick, by tree order, so it measures the ship where it ended up this tick and the camera where the rig left it last frame.
 
+- **The resume press.** The adapter starts disarmed, and the public `require_release()` disarms it again; `PlayerController.set_controls_enabled(true)` calls it, so it runs at spawn and on every Resume (F16-09). While disarmed, a tick reads no press and only waits for both actions to be released; a held lock is still validated and released. So the press that resumed play, even when it is also `ui_cancel`, cannot lock or switch.
+
+- **Handoff on defeat (F16-11).** `Targeting` connects only the locked target's `defeated(enemy_id, encounter_id)` signal (EnemyActor, BossController), reconnecting on every lock change, so an unrelated death is never heard and a manual release or switch stops listening at once. The handler records the id; the next physics tick that finds the lock invalid hands it to `TargetSelector.select_successor()`: visible and in range, nearest the screen center, nearer distance on a tie, no screen radius, never the dying node (it left `targetable` before reporting). That is one `target_changed` with the successor, so the camera, HUD and weapon follow. With no successor the lock is released (one `target_changed(null)`) and `lock_lost_to_defeat` follows, which `PlayerController` answers with `CameraRig.request_recenter(false)`: only while the ship has its controls (never in a beat, like a pressed recenter), and without the 0.1 s grace, so the player's own camera input interrupts it at once. "Visible" is Target Lock's existing meaning: in front of the camera and not occluded, which includes a target off screen to the side, as for `next_target`. The exception is a `BossController` still in the tree, which means its `Death` clip is playing: then there is no recenter, so the camera keeps the boss's defeat in view (the user's call). A manual press on the same tick is applied as before (release, then the press). Range loss, a Retry or unload free, a Seal and anything else keep the old release, with no reacquire and no recenter.
+
 ## Dependencies
 
 The core imports nothing, holds no Node, and is constructed with `FlightModel.new()` by the adapter, which injects the authored values through `configure()` and the Flight Volume through `set_bounds()`.
@@ -252,6 +256,184 @@ Manual and measured results, with screenshots, are in [docs/validation/player-fl
 - `PlayerShip/CameraRig` now carries the `CameraRig` script's values: `camera` points at `Camera3D`, and `follow_distance` 8.5 and `follow_height` 3.2 are your authored camera offset moved onto the rig. The `Camera3D` node keeps its authored transform as the documented rest pose, but the rig writes that transform every frame at runtime, so moving the camera node in the editor no longer changes where the camera sits — change `follow_distance`, `follow_height` and `default_pitch_degrees` instead. Its FOV, near and far are still yours and are not touched.
 - The rig sets `top_level` on itself at run time, which is why the camera does not roll with the banking ship. Do not clear it.
 - `tools/build_scene_handoff.py` is retired (2026-09-22). Its unchanged contents are reference text at `docs/archive/build_scene_handoff.py.txt`. Edit the integrated scenes in Godot; do not run the archive. Retirement resolves the generator divergence without rewriting any scene or wiring.
+
+## F16 mouse camera and recenter (F16-04)
+
+Implemented in `scripts/player/camera_rig.gd` (lane path, 2026-09-24). The rig only stores values and applies them; nothing calls the new methods until F16-06 wires them. The "Camera contract" above still holds. This section adds to it.
+
+### Methods (F16-04)
+
+| Method | Called by | Effect |
+| --- | --- | --- |
+| `apply_control_settings(p_mode: StringName, p_mouse_sensitivity: float, p_mouse_invert: bool, p_deadzone: float) -> void` | F16-06, from `Settings`, at every spawn and on every change | Stores four values. `p_mode` is `CameraRig.MODE_KEYS` (`&"keys"`) or `MODE_MOUSE` (`&"mouse"`); any other value reads as keys. `p_mouse_sensitivity` is in degrees per screen pixel. `p_mouse_invert` inverts the mouse's vertical axis only. `p_deadzone` is the radial deadzone of the `camera_*` actions. The call also drops pending mouse motion. |
+| `apply_settings(p_sensitivity: float, p_invert_vertical: bool) -> void` | `GameSession._apply_camera_settings`, unchanged | Now documented as applying to the `camera_*` actions (keys and right stick) only. |
+| `set_mouse_capture_active(active: bool) -> void` | F16-06, whenever it captures or releases the pointer | Opens or closes the mouse-look gate. Every call drops pending motion. The rig never touches `Input.mouse_mode`. |
+| `clear_pending_look() -> void` | F16-06, on focus changes, on Resume, and after a capture warp | Drops the mouse motion collected since the last physics tick. |
+| `request_recenter(with_grace: bool = true) -> void` | F16-06, on `camera_recenter` just pressed during gameplay; F16-11, `PlayerController` with `with_grace` false after a defeat ends the lock with no target left | Starts a recenter, or restarts one already running (see below). The rig does not read the action itself. |
+
+### Exports (F16-04)
+
+None of these is authored in `player_ship.tscn`, so the defaults apply. The spec supplies the two 0.25 s values, the 0.12 sensitivity and the 0.2 deadzone. The jitter speed and the recenter grace are Claude's proposals for Astra's playtest.
+
+| Export | Group | Default | Meaning |
+| --- | --- | --- | --- |
+| `stick_deadzone` | Orbit | 0.2 | Radial deadzone passed to `Input.get_vector` for the `camera_*` actions. 0.2 equals the actions' own deadzone, which was the old implicit value, so orbit is unchanged. |
+| `camera_input_mode` | Mouse look | `&"keys"` | `MODE_KEYS` or `MODE_MOUSE`. |
+| `mouse_sensitivity` | Mouse look | 0.12 | Degrees per screen pixel. |
+| `mouse_invert_vertical` | Mouse look | false | When true, mouse up looks down. |
+| `mouse_jitter_speed` | Mouse look | 60.0 | Fastest mouse motion, in screen pixels per second of real time, that still counts as jitter. 60 is one pixel per tick at 60 Hz. |
+| `mouse_look_hold_seconds` | Mouse look | 0.25 | How long the lock framing stays off after the last deliberate mouse motion. |
+| `recenter_seconds` | Recenter | 0.25 | Length of a recenter. 0 snaps on the next tick. |
+| `recenter_grace_seconds` | Recenter | 0.1 | Start of a recenter during which camera input is dropped instead of interrupting it. |
+
+### Rules and timing
+
+- **Collection.** Mouse motion is collected in `_input`, but only while the mode is mouse and capture is active. The rig uses `_input`, not `_unhandled_input`, so no Control under the hidden cursor can take the motion first; the capture gate decides. The rig never marks the event handled, so `Interface`'s device tracking still sees it. A paused tree does not deliver `_input` to the rig.
+- **`screen_relative`, not `relative`.** The project stretches with `canvas_items`, and `relative` is divided by that stretch factor. In a 1920×1080 window the same hand movement would read 1.5× smaller than at 1280×720. `screen_relative` is in unscaled screen pixels at every window size.
+- **Application.** Pending motion is spent once, in the first physics tick after it arrives, as `degrees = pixels × mouse_sensitivity`. It is never multiplied by delta. The total turn therefore does not depend on the render rate or the tick rate. At 30 fps the first of two ticks in a frame takes it all; at 144 fps one tick takes about 2.4 frames of motion.
+- **Keys and stick.** They keep turning at a rate: `orbit_speed_degrees × sensitivity × delta`, after the radial deadzone.
+- **Directions.** Mouse right turns the view right, which lowers the yaw. Mouse up raises the view unless `mouse_invert_vertical` is on. Each source has its own inversion.
+- **Both modes.** The `camera_*` actions orbit in either mode, keys included. Keys and the right stick share those actions, and F16-02/03 give the bindings to the player, so the rig does not split an action by device. Mouse mode adds the mouse on top of them.
+- **Locked look.**
+  - Motion counts as deliberate when its speed is above `mouse_jitter_speed`. The speed is the tick's motion divided by the real time since the previous tick (`Time.get_ticks_usec`, clamped to 1–100 ms). That interval is what the motion was collected over at any frame rate; the tick's delta is not, because at 30 fps the first of two ticks spends a whole frame's motion. So the split between jitter and look does not move with the frame rate.
+  - Deliberate motion turns the lock pull fully off at once and sets a 0.25 s hold.
+  - When the hold runs out, the override fades back to 0 at `lock_blend_speed`, which takes 0.25 s at 4.0. The usual `rotation_damping` pull then returns the view to the ship-and-target framing.
+  - The lock is never released by any of this.
+  - The `camera_*` actions do not trigger the override; they push against the pull, as before F16.
+  - The override also runs while no lock is held, so a lock taken mid-look does not yank the view.
+- **Recenter goal.**
+  - Free: the ship body's own -Z, flattened onto the horizontal plane (yaw 0 for an unrotated ship, the Respawn marker's heading otherwise), at `default_pitch_degrees`, with the normal follow offset. The goal is not the last movement direction.
+  - Locked: `_framing_yaw` and `_framing_pitch`, the same ship-and-target framing the lock pull aims at. The lock is kept.
+  - The goal is recomputed every tick, so a moving target, a lock gained or a lock lost mid-recenter all switch the goal cleanly.
+- **Recenter motion.**
+  - The move lasts `recenter_seconds`, eased with smoothstep.
+  - Each tick moves the pose by the share of the remaining angle that the curve assigns to that tick. The goal is met exactly when the time ends, even if it moved.
+  - Yaw moves with `lerp_angle`, which takes the shorter way round.
+  - A new request resets the elapsed time: the curve starts again from the current pose, and nothing queues.
+  - A request also ends any mouse-look hold, so the lock pull resumes the tick the recenter ends, from the framing it has just reached.
+- **Interruption.** Two things interrupt a recenter: a non-zero `camera_*` vector after the deadzone, or deliberate mouse motion. Motion below the jitter speed is dropped while a recenter runs.
+- **Grace.** For the first `recenter_grace_seconds` (0.1 s) of a recenter, all camera input is dropped instead of interrupting it. Without it the press that asked for the recenter could cancel it: a Mouse 3 click nudges the mouse, and an R3 click can tilt the stick past a low deadzone. A repeated request restarts the grace along with the curve. Dropped motion does not arm the mouse-look hold. A camera key held through the request takes over when the grace ends.
+- **One writer.** While a recenter runs, it replaces the lock pull for that tick. The yaw is written only through `_place_rig`, with the value `_advance_aim` returns, and the pitch only inside `_advance_aim` and `_advance_recenter`. The camera transform is written only by `_apply_camera_transform`. There are no tweens.
+- **Pitch limits and obstruction.** Both still win. Every pitch write is clamped or interpolates between two clamped values. The obstruction ray still runs every tick against the desired position computed from the new angles.
+- **Rotation rate.** The aim, mouse included, changes at the physics rate: 60 Hz by default. On a faster display the view turns in 60 Hz steps, as the stick orbit always has. F16-07 judges whether that is visible.
+
+### What F16-06 owns
+
+- **Settings.** Reading `Settings.get_camera_input_mode`, `get_mouse_sensitivity`, `get_mouse_invert_vertical` and `get_camera_deadzone` (F16-02). Calling `apply_control_settings` next to `_apply_camera_settings` at every spawn and on every change, Options over Pause included.
+- **New ships.** Retry and Restart spawn a new ship whose rig starts in keys mode with capture off, so F16-06 must set both again.
+- **Pointer capture.** `Input.mouse_mode`: capture only during active gameplay; release it for menus, Pause, focus loss, controller disconnect and leaving a Run. Every change must be matched by `set_mouse_capture_active`, and `clear_pending_look` must be called on focus changes and on Resume.
+- **Capture warp.** Some backends deliver the warp that capturing causes as a motion in the next frame. If a jump shows after capture, clear once more on the frame after the mode change.
+- **`camera_recenter`.** Reading it only during gameplay, never under the capture dialog, and calling `request_recenter`.
+
+## F16 lateral dash (F16-05)
+
+Implemented by lane rescue on 2026-09-24. The spec's "Lateral dash" section gives the product rules. The protection contract is in [combat-hud.md "F16 dash protection and the Impulso indicator"](combat-hud.md#f16-dash-protection-and-the-impulso-indicator-f16-05). The tick-ordering proof is in the [F16-05 validation record](../validation/controls-expansion.md#lateral-dash-f16-05-rescue).
+
+### Files (F16-05)
+
+- `scripts/player/dash_model.gd` (Rules Core, `class_name DashModel extends RefCounted`, new).
+- `scripts/player/player_controller.gd`: the burst, the collision stop, the signals and the visual.
+- `scenes/player/player_ship.tscn`: the three dash exports, and Astra's `scenes/player/visuals/dash_visual.tscn` instanced as `VisualRoot/DashVisual`.
+
+### DashModel
+
+| Method | Effect |
+| --- | --- |
+| `configure(duration: float, cooldown: float) -> void` | Stores the active duration and the cooldown, in seconds. A negative value counts as 0. A duration of 0 refuses every request. |
+| `try_start(direction: int) -> bool` | Accepts -1 (left) or +1 (right) only when no burst is active and the cooldown is over. On acceptance the burst is active for the duration and the cooldown starts at once, from activation. Anything else returns false and changes nothing: a 0, a press during the cooldown (dropped, never buffered) or a call before `configure`. |
+| `tick(delta: float) -> void` | Counts both timers down by one physics step. A timer left at `TIME_EPSILON` (1e-6 s) or less becomes 0. The constant is `CombatState.TIME_EPSILON` itself, not a copy, so the burst and its protection cannot drift a tick apart. |
+| `cancel() -> void` | Ends the burst and clears the cooldown, so the next request is accepted. |
+| `is_enabled()`, `is_active()`, `get_active_time_left()`, `get_cooldown_left()`, `get_direction()` | Read-only state. `is_enabled()` is false before `configure` and with a duration of 0. The direction is that of the current or last burst, 0 before any. |
+| `static resolve_direction(left_pressed, right_pressed, left_held, right_held) -> int` | -1 for a `dash_left` press, +1 for a `dash_right` press. 0 for no press, or when both directions are down together: pressed in the same tick, or one pressed while the other is held. |
+
+### Exports (F16-05)
+
+Authored on `PlayerShip`, group **Dash**; the values are the spec's baseline.
+
+| Export | Default | Meaning |
+| --- | --- | --- |
+| `dash_distance` | 3.0 | Unobstructed travel, world units. |
+| `dash_duration` | 0.15 | Active and protected seconds. The burst speed is `dash_distance / dash_duration` (20 units/s), which Focus does not scale. 0 disables the dash, and the HUD then shows it as unavailable. |
+| `dash_cooldown` | 0.8 | Seconds from activation until the next dash in either direction. |
+| `dash_visual` | `VisualRoot/DashVisual` | Required, in **Scene references**. A missing export disables the adapter like the other references. A `DashVisual` without `TrailLeft`, `TrailRight` or `ProtectionAccent` is reported, and the dash then runs without visuals. |
+
+### Signals and methods (F16-05)
+
+| Member | Meaning |
+| --- | --- |
+| `dash_started(direction: int, duration: float)` | Emitted inside the physics tick of the activation, before the ship moves. The Session connects it without deferral to `CombatState.grant_invulnerability(duration)`. |
+| `dash_ended` | The active window ran out, or a cancel ended it. A burst stopped by scenery emits it only when its window ends. |
+| `dash_cooldown_changed(remaining: float, total: float)` | Emitted at activation (`0.8, 0.8`), on every physics tick of the cooldown down to `0, 0.8`, and on a cancel that clears it. |
+| `controls_enabled_changed(enabled: bool)` | A refinement of the spec's seams: `set_controls_enabled` changed the state. The HUD shows the dash as unavailable while it is false. |
+| `are_controls_enabled() -> bool`, `get_dash_cooldown_left() -> float`, `has_dash() -> bool` | Read at `Hud.bind`, so a new binding renders the current state. `has_dash()` is false when `dash_duration` is 0, and the HUD then never shows the dash as ready. |
+| `set_controls_enabled(false)` | With the tree paused it only freezes the dash (see below). With the tree running (a beat, a defeat, a stage clear) it cancels the dash. |
+| `reset_to(transform)` | Also cancels the dash: no carried burst, trail or cooldown. |
+
+### Rules and timing
+
+- **Input.** `dash_left` and `dash_right` are read in `_physics_process`, where movement is read. A press counts once, with `is_action_just_pressed`, so holding a key never repeats a dash.
+- **Tick order.** Each tick runs in this order:
+  1. The dash timers tick, so a window that ran out ends first.
+  2. Movement and Focus are read. Focus and the F15-07 Core cues are unchanged by a dash.
+  3. The press is resolved.
+  4. The ship flies either the burst or the ordinary velocity.
+  5. The position is clamped to the Flight Volume, and the edge feedback is updated.
+- **Direction.** At activation it is `camera_rig.global_basis.x` with y set to 0 and normalized, times the sign. The rig's basis is a pure yaw (F16-04 "Framing geometry"), so this is the camera's horizontal right. The flattening is a guard: a dash never climbs or dives. Turning the camera mid-burst does not bend it. Like movement, it reads the rig as it was left last tick.
+- **Burst.** The burst replaces the ordinary velocity: `velocity = direction * dash_distance / dash_duration`, so there is no diagonal stacking and no vertical part. Each tick moves `velocity * min(delta, active time left)`. At 60 Hz that is nine full steps of 1/3 unit, and at 144 Hz twenty-one full steps plus a clamped last one. The burst covers `dash_distance` exactly at any tick rate. Fire and Target Lock run on their own nodes and are untouched. The bank reads the burst velocity, so the model rolls into it. The camera does not roll, shake or flash.
+- **Collision.** The burst moves with `move_and_collide`, a swept motion test on the body's shape, never `move_and_slide`. So it cannot tunnel through thin scenery or a closed Gate, and it never teleports.
+  - A contact whose normal has a component of more than `DASH_GLANCE_TOLERANCE` (0.02, about 1°) against the travel stops the burst where the body touched. The rest of the travel is cancelled for good, with no tangent slide.
+  - A contact square to the travel (a floor the ship skims, a ceiling, a wall alongside) does not stop it. The remainder goes on in the same direction, never deflected, for up to `MAX_DASH_CASTS` (4) casts per step.
+  - A Flight Volume face stops the burst too. When this tick's step crossed a face, the ship goes back along its own step to the first face it met, and the travel ends there. The per-axis clamp alone would keep the part of the step along the face, a one-tick slide when the camera is at an angle to it. The ordinary clamp still runs after the move, as a safeguard.
+  - A stopped burst keeps its window: the cooldown is not refunded, the protection still ends at activation + 0.15 s, and ordinary flight resumes on the next tick.
+- **Pause.** The Session pauses the tree and then calls `set_controls_enabled(false)`. The adapter sees `can_process()` false and keeps the dash. With the tree paused the ship does not tick, so the burst's progress, its cooldown and, in `CombatState`, its protection all stand still and resume together.
+- **Lifecycle.** A beat (defeat, stage clear) disables the controls with the tree running, which cancels the dash and clears the cooldown. Every new Attempt spawns a new ship with a new `DashModel`, which starts ready: Retry, Restart, Campaign Stage 2 and Jogar novamente all do. The old ship leaves the tree the same frame. `CombatState.start` and `restore` end any leftover protection. Dash state is transient: it is not in any Snapshot.
+
+### Visual (part 2)
+
+- **Placement.** `VisualRoot/DashVisual` sits at the ship's origin under `VisualRoot`. Astra's two trails sit at the engines and bank with the model. The `DamageCore` Core stays outside `VisualRoot`. Its material draws after the translucent trail and accent (no depth test, render priority 10), so the trail never hides it.
+- **When it shows.** `DashVisual` is visible only while the burst is active **and** the ship is Invulnerable, as mirrored through `set_invulnerable_visual`. So no part of it can outlive the protection.
+  - `TrailLeft` shows for a left dash and `TrailRight` for a right one, only while the burst still travels.
+  - `ProtectionAccent` shows for the whole protected window.
+  - The dev harness grants no dash protection, so it shows no dash visual.
+- **Flicker.** Being under `VisualRoot`, the visual blinks with the existing Invulnerability flicker (12 Hz) and never out of step with it. The protection's end and the burst's end fall on the same physics tick, before any frame is drawn.
+
+### What F16-06 owns
+
+- `player_ship.tscn` goes back to trunk with this ticket. F16-06 changes only the references or values it needs.
+- A rebinding that puts a dash on a key or button that also resumes from Pause (B / `ui_cancel`, Start / `pause`) could dash on the first unpaused tick. This is the same class of problem as the known `bomb` one (menus-session.md Open issues). F16-06 decides whether capture or resume must guard it.
+- The integrated walkthrough (Retry, Restart, Campaign Stage 2, Pause and Options over Pause) belongs to F16-06. Device feel belongs to F16-07.
+
+## F16 Session integration (F16-06)
+
+Delivered by trunk on 2026-09-24. `GameSession` now drives the rig's F16-04 API and guards the dash's input; the settings side and the pointer rules are in [settings.md "F16 Session integration"](settings.md#f16-session-integration-f16-06). Each "What F16-06 owns" item above is settled here. No export value and no scene changed: `player_ship.tscn`, `main.tscn` and `project.godot` are as F16-05 and F16-02 left them.
+
+### The rig, from the Session
+
+| Rig call | When the Session makes it |
+| --- | --- |
+| `apply_settings(camera_sensitivity, invert_vertical)` and `apply_control_settings(camera_input_mode, mouse_sensitivity, mouse_invert_vertical, camera_deadzone)` | In `_spawn_player`, right after `setup`, for every new ship (Start, Direct Stage, Restart, Retry, Continuar, Jogar novamente), and on every `Settings.changed` of one of the six values, over Pause too. So a Retry's new rig, which starts in keys mode with capture off, gets the saved mode before its first tick. |
+| `set_mouse_capture_active(active)` | With every pointer decision (`GameSession._set_pointer_captured`): true only while the player flies in Mouse mode, with the HUD on top, the tree running and the window focused; false on Pause, every menu and overlay, a focus loss, an unload and a switch to Teclas. The rig collects mouse look exactly while the pointer is captured. |
+| `clear_pending_look()` | Through each gate call above, on focus changes and on Resume. Once more at the start of the first physics tick after the next input flush that follows a capture, to drop a capture warp that a backend reports as one large motion (`_drop_capture_warp`: `process_frame`, then `physics_frame`, before the rig's own tick). |
+| `request_recenter()` | On a `camera_recenter` press event (R, Mouse 3, RS / R3) in `GameSession._unhandled_input`, only while the player flies and never in a beat. A press consumed by a menu or by the Controls capture never gets there. The rig's grace, interruption and restart rules apply unchanged. |
+
+- **Lock and manual orbit** stay the rig's (F16-04): mouse look holds the lock framing off, keys and stick push against it, and a recenter keeps the lock. The Session adds no second camera writer.
+- **Several devices at once.** The mouse adds to the `camera_*` actions (keys and right stick) in Mouse mode, and every recenter input goes through the one action.
+- **In a beat** (defeat, victory) the pointer stays captured and the mouse still orbits, as the keys do; recenter and Pause are refused, as before.
+
+### The dash through the Session lifecycle
+
+- **Nothing to reapply at spawn.** Every Attempt spawns a new ship, and its `DashModel` starts ready (F16-05). The Session's only dash wiring is still the one `dash_started` connection in `_spawn_player`, freed with the ship.
+- **The order that freezes a dash is kept.** `_set_paused` sets `get_tree().paused` before `set_controls_enabled(false)`.
+- **The resume guard (new).** `PlayerController._dash_input_armed` is false from the moment the ship gets its controls, which is its spawn or a `set_controls_enabled(true)` after a pause, until a tick with both `dash_left` and `dash_right` released. That tick reads no press. So the press that resumed from Pause never dashes, even when a remap shares it with a menu action: a dash on B resumes as `ui_cancel` on the press, and `Input.is_action_just_pressed` still reports it on the first unpaused tick. Buttons (Continuar, Iniciar, Tentar novamente) act on the release, so they leave no fresh press; the guard covers every route anyway. A dash tapped within one tick of a Resume is dropped. Beats and a defeat do not re-enable the controls, so they are unaffected.
+- **Also affected, not fixed here.** `Targeting` polls `lock_target` and `next_target` the same way (`targeting.gd`, outside this ticket's files). With the defaults nothing shares them with `ui_cancel`; a remap that puts one on B would lock or switch on the first tick after Back resumes from Pause. The fix is the same guard in `Targeting`.
+
+### Open for F16-07
+
+The walkthrough in [validation/controls-expansion.md](../validation/controls-expansion.md) "Integrated walkthrough (F16-06, trunk)". It covers the capture lifecycle on a real mouse (no jump after capture, none after Continuar, a free cursor on every menu), Alt+Tab in flight and during the confirmation, recenter near scenery with and without a lock, and the dash across every Attempt route.
+
+## F16-07 acceptance status
+
+The integrated `40969f0` presentation pass remains blocked on interactive evidence. No physical keyboard, mouse or pad check was reported; dash travel, protection, trail, cooldown and camera feel are not verified. Astra made no numeric change: `dash_distance = 3.0`, `dash_duration = 0.15` and `dash_cooldown = 0.8` remain the baseline in `player_ship.tscn`. See the [F16-07 matrix](../validation/controls-expansion.md#visual-and-device-acceptance-f16-07-sol) before changing these exports.
 
 ## Open issues
 

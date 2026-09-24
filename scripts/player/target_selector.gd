@@ -1,12 +1,16 @@
 class_name TargetSelector
 extends RefCounted
 ## Rules Core for Target Lock: which target a lock acquires, where `next_target` steps to,
-## when a held lock is invalidated, and when the lock changes.
+## when a held lock is invalidated, which target a lock hands off to when its target is
+## defeated, and when the lock changes.
 ##
 ## Node-free (ADR-0001). The adapter describes every target it can see as a [Candidate]
-## each tick and asks the questions below; ids are opaque to the core. The rules come
-## from PLANEJAMENTO Section 3: prefer visible targets near the screen center, and keep a
-## lock "until explicitly switched, released, or invalidated by target death/range".
+## each tick and asks the questions below; ids are opaque to the core, and so is defeat:
+## the adapter decides that a lock was lost to a defeat and then asks
+## [method select_successor]. The rules come from PLANEJAMENTO Section 3: prefer visible
+## targets near the screen center, keep a lock until it is switched or released or its
+## target leaves range or is lost, and hand it to a surviving target when its target is
+## defeated (F16-11).
 
 
 ## Emitted by [method set_current] when the locked id actually changes. [param id] is the
@@ -91,6 +95,25 @@ func select_next(candidates: Array[Candidate], current_id: int) -> int:
 		if ring[index].id == current_id:
 			return ring[(index + 1) % ring.size()].id
 	return select_best(candidates)
+
+
+## The id a lock hands off to when its target is defeated: among the candidates that are
+## visible and within range, the one nearest the screen center, with the nearer in
+## distance winning a tie. [constant NO_TARGET] when none qualifies. It excludes no id of
+## its own: the adapter lists only the targets still in the group, and a defeated one left
+## it before reporting its defeat.
+##
+## The screen radius does not apply, as for [method select_next]: a handoff continues a
+## lock rather than starting one, and the camera framing the defeated target together with
+## the ship can have pushed its neighbours past the radius.
+func select_successor(candidates: Array[Candidate]) -> int:
+	var best: Candidate = null
+	for candidate: Candidate in candidates:
+		if not _is_reachable(candidate):
+			continue
+		if best == null or _is_closer_to_center(candidate, best):
+			best = candidate
+	return NO_TARGET if best == null else best.id
 
 
 ## Whether a held lock on [param current_id] survives this tick: false when the target is

@@ -43,6 +43,7 @@ func before_each() -> void:
 	if packed == null:
 		return
 	_main = packed.instantiate()
+	IsolatedSettings.isolate(_main)
 	tree.root.add_child(_main)
 	await tree.process_frame
 
@@ -54,6 +55,7 @@ func after_each() -> void:
 	tree.root.remove_child(_main)
 	_main.free()
 	_main = null
+	IsolatedSettings.clean()
 
 
 func test_root_is_main_with_game_session_attached() -> void:

@@ -456,7 +456,7 @@ size = Vector3(2.2, 16, 2.2)
 size = Vector3(90, 75, 1)
 
 [sub_resource type="BoxMesh" id="GateMesh2"]
-size = Vector3(90, 75, 0.1)
+size = Vector3(90, 75, 4)
 material = SubResource("Barrier")
 
 [sub_resource type="BoxShape3D" id="Shape101"]
@@ -488,7 +488,7 @@ material = SubResource("Corrupted")
 size = Vector3(90, 75, 1)
 
 [sub_resource type="BoxMesh" id="GateMesh3"]
-size = Vector3(90, 75, 0.1)
+size = Vector3(90, 75, 4)
 material = SubResource("Barrier")
 
 [sub_resource type="BoxShape3D" id="Shape110"]
@@ -520,7 +520,7 @@ material = SubResource("Corrupted")
 size = Vector3(90, 75, 1)
 
 [sub_resource type="BoxMesh" id="GateMesh4"]
-size = Vector3(90, 75, 0.1)
+size = Vector3(90, 75, 4)
 material = SubResource("Barrier")
 
 [sub_resource type="BoxShape3D" id="Shape119"]
@@ -552,7 +552,7 @@ material = SubResource("Corrupted")
 size = Vector3(90, 75, 1)
 
 [sub_resource type="BoxMesh" id="GateMesh5"]
-size = Vector3(90, 75, 0.1)
+size = Vector3(90, 75, 4)
 material = SubResource("Barrier")
 
 [sub_resource type="BoxShape3D" id="Shape128"]
@@ -5730,6 +5730,7 @@ shape = SubResource("Shape99")
 [node name="ClosedVisual" type="MeshInstance3D" parent="Gates/Gate_S1_02"]
 position = Vector3(0, 37.5, -140)
 mesh = SubResource("GateMesh2")
+instance_shader_parameters/arch_center_y = 10.0
 
 
 [node name="Arch" type="Node3D" parent="Gates/Gate_S1_02"]
@@ -5794,6 +5795,7 @@ shape = SubResource("Shape108")
 [node name="ClosedVisual" type="MeshInstance3D" parent="Gates/Gate_S1_03"]
 position = Vector3(0, 37.5, -225)
 mesh = SubResource("GateMesh3")
+instance_shader_parameters/arch_center_y = 22.0
 
 
 [node name="Arch" type="Node3D" parent="Gates/Gate_S1_03"]
@@ -5858,6 +5860,7 @@ shape = SubResource("Shape117")
 [node name="ClosedVisual" type="MeshInstance3D" parent="Gates/Gate_S1_04"]
 position = Vector3(0, 37.5, -315)
 mesh = SubResource("GateMesh4")
+instance_shader_parameters/arch_center_y = 28.0
 
 
 [node name="Arch" type="Node3D" parent="Gates/Gate_S1_04"]
@@ -5922,6 +5925,7 @@ shape = SubResource("Shape126")
 [node name="ClosedVisual" type="MeshInstance3D" parent="Gates/Gate_S1_05"]
 position = Vector3(0, 37.5, -425)
 mesh = SubResource("GateMesh5")
+instance_shader_parameters/arch_center_y = 33.0
 
 
 [node name="Arch" type="Node3D" parent="Gates/Gate_S1_05"]

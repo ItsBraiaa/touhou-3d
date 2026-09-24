@@ -4,7 +4,8 @@ extends Control
 ## player panel from a [CombatState] and keeps the target marker on the locked target
 ## that [Targeting] reports. It also shows what bosses and encounters tell it: the
 ## segmented boss bar with a short name, a brief attack-name cue, and the left and right
-## threat indicators.
+## threat indicators. Since F16-05 it shows the ship's dash cooldown on Astra's `Impulso`
+## indicator, `DashCooldown`, which never looks ready while the dash cannot start.
 ##
 ## It observes and never decides: the panel is redrawn from the core's change signals
 ## and read-only getters, and no [CombatState] method other than a getter is ever called
@@ -32,16 +33,28 @@ const PHASE_BAR_PATHS: Array[NodePath] = [^"BossStatus/Phase1", ^"BossStatus/Pha
 const ATTACK_NAME_PATH := ^"AttackName"
 const THREAT_LEFT_PATH := ^"ThreatLeft"
 const THREAT_RIGHT_PATH := ^"ThreatRight"
+## The Impulso indicator, an instance of `scenes/ui/components/dash_cooldown.tscn`
+## (F16-05).
+const DASH_COOLDOWN_PATH := ^"DashCooldown"
+const DASH_LABEL_PATH := ^"DashCooldown/Label"
+const DASH_PROGRESS_PATH := ^"DashCooldown/Progress"
+const DASH_READY_ACCENT_PATH := ^"DashCooldown/ReadyAccent"
 ## Phases a boss bar shows: two for the Tempest Sentinel, three for a final boss
 ## (STAGE_DESIGN).
 const MIN_PHASES := 2
 const MAX_PHASES := 3
+## The Impulso label while the dash is ready, while it cools down (with the seconds left,
+## a decimal comma, rounded up), and while the ship's controls are off. Astra's F16-01
+## copy for the first two.
+const DASH_READY_TEXT := "IMPULSO  ·  PRONTO"
+const DASH_COOLDOWN_TEXT := "IMPULSO  ·  %s s"
+const DASH_DISABLED_TEXT := "IMPULSO"
 
 @export_group("Presentation")
 ## Modulate of the Shield, a Bomb icon or a boss Phase bar while it is available.
 @export var lit_modulate: Color = Color(1, 1, 1, 1)
-## Modulate of the Shield and a Bomb icon while it is spent. Claude's proposal; Astra
-## tunes it.
+## Modulate of the Shield and a Bomb icon while it is spent, and of the whole Impulso
+## indicator while the ship's controls are off. Claude's proposal; Astra tunes it.
 @export var dim_modulate: Color = Color(1, 1, 1, 0.25)
 ## Modulate of a boss Phase bar once that Phase is at 0. Claude's proposal; Astra tunes it.
 @export var completed_phase_modulate: Color = Color(1, 1, 1, 0.3)
@@ -78,6 +91,16 @@ var _authored_phase_offsets: Array[Vector2] = []
 var _attack_name: Label
 ## Left, then right, as the `side` of [method show_threat] picks them.
 var _threats: Array[CanvasItem] = []
+var _dash_cooldown: CanvasItem
+var _dash_label: Label
+var _dash_progress: ProgressBar
+var _dash_ready_accent: CanvasItem
+## What the Impulso indicator shows: the ship's cooldown left and total, in seconds, and
+## whether it can dash, that is its controls are on and it has a dash
+## ([method PlayerController.has_dash]). Unbound, it cannot.
+var _dash_cooldown_left: float = 0.0
+var _dash_cooldown_total: float = 0.0
+var _dash_enabled: bool = false
 ## False when a Section 15 path is missing: every method then does nothing.
 var _configured: bool = false
 
@@ -102,15 +125,22 @@ func _ready() -> void:
 	_attack_name = _require(ATTACK_NAME_PATH) as Label
 	_threats.append(_require(THREAT_LEFT_PATH) as CanvasItem)
 	_threats.append(_require(THREAT_RIGHT_PATH) as CanvasItem)
+	_dash_cooldown = _require(DASH_COOLDOWN_PATH) as CanvasItem
+	_dash_label = _require(DASH_LABEL_PATH) as Label
+	_dash_progress = _require(DASH_PROGRESS_PATH) as ProgressBar
+	_dash_ready_accent = _require(DASH_READY_ACCENT_PATH) as CanvasItem
 	var nodes: Array[Object] = [
 		_health_bar, _health_value, _shield, _bomb_1, _bomb_2, _power_value, _power_progress,
 		_target_marker, _boss_status, _boss_name, _attack_name,
+		_dash_cooldown, _dash_label, _dash_progress, _dash_ready_accent,
 	]
 	nodes.append_array(_phase_bars)
 	nodes.append_array(_threats)
 	_configured = not nodes.has(null)
 	if not _configured:
 		process_mode = Node.PROCESS_MODE_DISABLED
+		return
+	_render_dash()
 
 
 func _process(delta: float) -> void:
@@ -131,7 +161,9 @@ func _process(delta: float) -> void:
 ## Shows [param combat_state] on the player panel and follows the lock of
 ## [param targeting], projecting through [param camera]. Replaces any earlier binding,
 ## so binding again never connects twice, and clears the boss panel and the threats.
-## Renders the current values at once.
+## Renders the current values at once. When [param targeting]'s parent is the
+## [PlayerController], its edge proximity and its dash cooldown and controls are shown
+## too; without one the Impulso indicator stays unavailable.
 func bind(combat_state: CombatState, targeting: Targeting, camera: Camera3D) -> void:
 	unbind()
 	if not _configured:
@@ -147,6 +179,12 @@ func bind(combat_state: CombatState, targeting: Targeting, camera: Camera3D) -> 
 	_player = _targeting.get_parent() as PlayerController
 	if _player != null:
 		_player.edge_proximity_changed.connect(_on_edge_proximity_changed)
+		_player.dash_cooldown_changed.connect(_on_dash_cooldown_changed)
+		_player.controls_enabled_changed.connect(_on_controls_enabled_changed)
+		_dash_cooldown_left = _player.get_dash_cooldown_left()
+		_dash_cooldown_total = _player.dash_cooldown
+		_dash_enabled = _player.are_controls_enabled() and _player.has_dash()
+	_render_dash()
 	_on_health_changed(_combat_state.get_health())
 	_on_shield_changed(_combat_state.has_shield())
 	_on_bombs_changed(_combat_state.get_bombs())
@@ -168,11 +206,15 @@ func unbind() -> void:
 		_targeting.target_changed.disconnect(_on_target_changed)
 	if is_instance_valid(_player):
 		_player.edge_proximity_changed.disconnect(_on_edge_proximity_changed)
+		_player.dash_cooldown_changed.disconnect(_on_dash_cooldown_changed)
+		_player.controls_enabled_changed.disconnect(_on_controls_enabled_changed)
 	_combat_state = null
 	_targeting = null
 	_camera = null
 	_player = null
 	_marker_point = null
+	_dash_cooldown_left = 0.0
+	_dash_enabled = false
 	if not _configured:
 		return
 	_target_marker.hide()
@@ -180,6 +222,7 @@ func unbind() -> void:
 	for index: int in _threats.size():
 		_hide_threat(index)
 	_set_vignette_strength(0.0)
+	_render_dash()
 
 
 ## Shows the boss bar named [param display_name] (already in Portuguese, from the boss
@@ -312,6 +355,47 @@ func _create_boundary_vignette() -> void:
 
 func _on_edge_proximity_changed(value: float) -> void:
 	_set_vignette_strength(clampf(value, 0.0, 1.0))
+
+
+func _on_dash_cooldown_changed(remaining: float, total: float) -> void:
+	_dash_cooldown_left = remaining
+	_dash_cooldown_total = total
+	_render_dash()
+
+
+func _on_controls_enabled_changed(enabled: bool) -> void:
+	_dash_enabled = enabled and _player.has_dash()
+	_render_dash()
+
+
+## Draws the Impulso indicator in one of three states. Ready (controls on, a dash, no
+## cooldown left): `PRONTO`, `Progress` full, `ReadyAccent` shown, lit. Cooling down: the
+## seconds left, `Progress` filling from empty at activation to full, no accent.
+## Unavailable (controls off, a ship without a dash, or no ship bound): the bare label, no
+## accent, the whole indicator at [member dim_modulate], `Progress` held where the cooldown
+## froze. Only the first can read as ready.
+func _render_dash() -> void:
+	var dash_ready := _dash_enabled and _dash_cooldown_left <= 0.0
+	var filled := 1.0
+	if _dash_cooldown_total > 0.0:
+		filled = 1.0 - clampf(_dash_cooldown_left / _dash_cooldown_total, 0.0, 1.0)
+	_dash_progress.value = filled * _dash_progress.max_value
+	_dash_ready_accent.visible = dash_ready
+	_dash_cooldown.modulate = lit_modulate if _dash_enabled else dim_modulate
+	if not _dash_enabled:
+		_dash_label.text = DASH_DISABLED_TEXT
+	elif dash_ready:
+		_dash_label.text = DASH_READY_TEXT
+	else:
+		_dash_label.text = DASH_COOLDOWN_TEXT % _format_tenths(_dash_cooldown_left)
+
+
+## [param seconds] rounded up to a tenth with a decimal comma, "0,8" for 0.8, so a
+## cooldown still running never reads "0,0". The small offset keeps a float residue from
+## rounding a whole tenth up (0.30000000000000004 reads "0,3").
+static func _format_tenths(seconds: float) -> String:
+	var tenths := maxi(ceili(seconds * 10.0 - 0.001), 1)
+	return ("%.1f" % (tenths / 10.0)).replace(".", ",")
 
 
 func _set_vignette_strength(value: float) -> void:

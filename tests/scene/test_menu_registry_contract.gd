@@ -274,7 +274,7 @@ func test_the_five_full_screens_carry_the_keyboard_footer() -> void:
 
 
 ## Which prompts to show is decided by Interface's InputDeviceState since F3-03; the menu
-## only shows or hides its footer when told.
+## switches its footer text when told.
 func test_set_keyboard_prompts_shows_and_hides_the_footer() -> void:
 	if not _open("res://scenes/ui/main_menu.tscn"):
 		return
@@ -282,7 +282,8 @@ func test_set_keyboard_prompts_shows_and_hides_the_footer() -> void:
 	_menu.enter({}, NodePath())
 	assert_true(footer.visible, "keyboard hint shown by default")
 	_menu.set_keyboard_prompts(false)
-	assert_false(footer.visible, "hidden for gamepad prompts")
+	assert_true(footer.visible, "gamepad hint remains visible")
+	assert_eq((footer as Label).text, "Analógico  Navegar     A  Confirmar     B  Voltar")
 	_menu.set_keyboard_prompts(true)
 	assert_true(footer.visible, "shown again for keyboard prompts")
 	assert_eq(_focused_path(), "Layout/StartButton", "none of this moved focus")

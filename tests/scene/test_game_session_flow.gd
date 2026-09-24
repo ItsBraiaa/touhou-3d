@@ -47,6 +47,7 @@ func before_each() -> void:
 	if packed == null:
 		return
 	_main = packed.instantiate() as GameSession
+	IsolatedSettings.isolate(_main)
 	tree.root.add_child(_main)
 	_interface = _main.interface
 	_world_root = _main.world_root
@@ -63,6 +64,7 @@ func after_each() -> void:
 	tree.root.remove_child(_main)
 	_main.free()
 	_main = null
+	IsolatedSettings.clean()
 	# Unloaded stages are queued for deletion; let them go before the next test.
 	await tree.process_frame
 

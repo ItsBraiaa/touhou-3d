@@ -7,6 +7,7 @@
 [ext_resource type="Script" path="res://scripts/combat/player_weapon.gd" id="5_weapon"]
 [ext_resource type="PackedScene" path="res://scenes/combat/visuals/familiar.tscn" id="6_familiar"]
 [ext_resource type="PackedScene" path="res://scenes/dev/bomb_blast.tscn" id="7_bomb_blast"]
+[ext_resource type="PackedScene" path="res://scenes/player/visuals/dash_visual.tscn" id="8_dash_visual"]
 
 [sub_resource type="StandardMaterial3D" id="Teal"]
 albedo_color = Color(0.08, 0.95, 0.84, 1)
@@ -44,7 +45,7 @@ radial_segments = 12
 rings = 6
 material = SubResource("Teal")
 
-[node name="PlayerShip" type="CharacterBody3D" node_paths=PackedStringArray("visual_root", "camera_rig", "damage_core", "graze_volume", "targeting", "weapon")]
+[node name="PlayerShip" type="CharacterBody3D" node_paths=PackedStringArray("visual_root", "camera_rig", "damage_core", "graze_volume", "targeting", "weapon", "dash_visual")]
 collision_layer = 2
 collision_mask = 1
 motion_mode = 1
@@ -54,12 +55,16 @@ focus_multiplier = 0.45
 edge_margin = 4.0
 max_bank_angle_degrees = 25.0
 bank_smoothing = 8.0
+dash_distance = 3.0
+dash_duration = 0.15
+dash_cooldown = 0.8
 visual_root = NodePath("VisualRoot")
 camera_rig = NodePath("CameraRig")
 damage_core = NodePath("DamageCore")
 graze_volume = NodePath("GrazeVolume")
 targeting = NodePath("Targeting")
 weapon = NodePath("Weapon")
+dash_visual = NodePath("VisualRoot/DashVisual")
 
 [node name="BodyCollision" type="CollisionShape3D" parent="."]
 shape = SubResource("BodyShape")
@@ -79,6 +84,8 @@ cast_shadow = 0
 position = Vector3(0.52000, -0.08000, 0.83000)
 mesh = SubResource("EngineMesh")
 cast_shadow = 0
+
+[node name="DashVisual" parent="VisualRoot" instance=ExtResource("8_dash_visual")]
 
 [node name="DamageCore" type="Area3D" parent="."]
 collision_layer = 4

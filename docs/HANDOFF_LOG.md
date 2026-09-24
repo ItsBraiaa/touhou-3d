@@ -1,5 +1,330 @@
 # Handoff Log
 
+## 2026-09-24 — Claude (path) — F16-11: Target Lock hands off when the locked target dies
+State: INTEGRATED_VERIFIED (headless in-game driver; physical play owed)
+Files: `scripts/player/target_selector.gd` (`select_successor`), `scripts/player/targeting.gd` (defeat watch, handoff, `lock_lost_to_defeat`), `scripts/player/player_controller.gd` (one connection to `CameraRig.request_recenter`); `docs/engineering/player-flight.md` (Targeting contract); `docs/validation/controls-expansion.md` (new F16-11 section); the ticket `.scratch/controls-expansion/issues/11-target-lock-handoff-on-defeat.md`; `docs/engineering/ROADMAP.md`.
+Change:
+- When the locked enemy or boss is defeated, the lock moves on the next tick to the visible, in-range target nearest the screen center. The camera, HUD and weapon follow through the normal `target_changed`.
+- With none left, the lock is released and the camera recenters to the authored follow view, except after a boss: the camera then keeps the boss's Death clip in view (the user's call).
+- An unrelated death, a manual unlock, range loss, Retry and Seals behave as before.
+
+Why: the user's request.
+
+Action required by Astra: PLANEJAMENTO Section 3 still says a lock lasts until "invalidated by target death/range". A death now hands the lock off. Please update that sentence in your words.
+## 2026-09-24 — Claude (readme) — repository README
+State: DELIVERED
+Files: `README.md` (new).
+Change: The repository had no README. It now has a short description of the game and its two stages, how to play the Windows build, run from source and export, the gameplay rules, the default controls (read from `project.godot` and `InputBindings`), and the credits, taken from `docs/ASSET_CREDITS.md`.
+Verification: docs only. Every control and credit line was checked against `project.godot`, `scripts/settings/input_bindings.gd`, the menu scenes and `docs/ASSET_CREDITS.md`. `tools/lane.ps1 land` is the gate.
+Action required by Astra: none. Add group member names to the Credits if the delivery needs them.
+
+## 2026-09-24 — Astra (gate-fog) — closed gate clarity in both stages
+State: DELIVERED
+Files: `assets/environment/stage_01/gate_veil.gdshader`, `assets/environment/stage_02/gate_veil.gdshader`, visual mesh sizes and per-arch shader parameters in `scenes/stages/stage_01.tscn` and `scenes/stages/stage_02.tscn`, `.scratch/gate-clarity/issues/01-closed-gate-veils.md`, `docs/engineering/ROADMAP.md`.
+Change: Stage 1's closed arch has dense animated blue mist. Stage 2's closed arch has animated violet storm folds and subtle glints. Both veils are masked to their arch so they do not make a rectangle in the sky. No script attachment, collision, export, or prefab wiring changed.
+Verification: windowed Stage 1 and Stage 2 preview scripts completed with zero failures; rendered entrance and near-gate views were inspected. No new tests. `tools/lane.ps1 land` is the sprint integration gate.
+Action required by Claude: implement the separate target-death camera request from the user. On the current locked enemy's defeat, choose a surviving eligible target using existing targeting rules and retarget the camera; if none exists, clear the lock and recenter the camera to its authored follow yaw and pitch. Do not let unrelated enemy deaths steal an existing lock or treat movement Focus as Target Lock.
+
+## 2026-09-24 — Claude lane oc-b (DeepSeek V4.1 Flash) — F16-10: the spec's API list now matches the shipped code [shared]
+State: CODE_READY
+Files: `.scratch/controls-expansion/spec.md` [shared] (only the API block, its heading line and the paragraph after it); `.scratch/controls-expansion/issues/10-spec-api-list-matches-shipped-code.md` (Status, Outcome); `docs/engineering/ROADMAP.md` (the F16-10 row).
+Change:
+- The block "Proposed APIs for the implementation tickets" is now "Shipped APIs (F16-02 to F16-08, checked against the code 2026-09-24)". Every F16 public method, signal and constant of the classes it names is listed; corrected signatures carry a short `# was: ...` note, and the members the proposal was missing carry `# was: not listed`.
+- **Added, from the code.** `InputBindings.default_profiles`, `profile_for`, `check_profile_data`, `normalize_profile`, the four `*_binding` constructors and the constants; `InputBindingAdapter.apply_defaults` and `find_default_drift`; the five `ControlsScreen` members; the whole `BindingLabels` and the F16-08 `InputDeviceState` additions; `CameraRig.set_mouse_capture_active`/`clear_pending_look`; and the F16-05 `DashModel` (`is_enabled`, `is_active`, `get_direction`, `resolve_direction`, `TIME_EPSILON`) and `PlayerController` (`controls_enabled_changed`, `are_controls_enabled`, `get_dash_cooldown_left`, `has_dash`) members.
+- **Corrections.** `InputBindings.assign`'s default is `RESOLUTION_NONE`; `CameraRig.apply_control_settings`'s parameters are `p_mode/p_mouse_sensitivity/p_mouse_invert/p_deadzone`; `get_default_bindings`/`get_fixed_bindings` are fully typed.
+- **The paragraph after the block.** Only its last sentence changed, to "This list was reconciled with the code by F16-10."
+Why: that block is where the next reader looks, and the F16-05 additions were missing from it (a follow-up F16-05 and F16-06 both recorded).
+Verification: docs only; no code, scene or test changed, and no test or driver script was written. Each changed line was read back against the named file and function (the ticket Outcome lists them with line numbers) and cross-checked with the F16 sections of settings.md, player-flight.md and combat-hud.md. `tools/lane.ps1 land` is the gate.
+Action required by Astra: none. F16-10 edits only the spec's API block, its heading and the paragraph after it; your product rules and the layout contract are as written.
+
+## 2026-09-24 — OpenCode (oc-a) — F16-09: targeting ignores the press that resumed play
+State: CODE_READY
+Files: `scripts/player/targeting.gd`; `scripts/player/player_controller.gd` (the resume-guard call and its doc comment only); `docs/engineering/player-flight.md` (one bullet in "Targeting contract"); `docs/engineering/menus-session.md` (one Open issues line); `.scratch/controls-expansion/issues/09-targeting-ignores-the-resume-press.md` (Status, Outcome); `docs/engineering/ROADMAP.md` (the F16-09 row).
+Change:
+- `Targeting` now uses the dash's release latch: `var _input_armed`, cleared by the new public `require_release()`. At the top of `_physics_process`, while disarmed, a tick sets `_input_armed` once both `lock_target` and `next_target` are released and treats this tick's `lock_pressed` and `next_pressed` as false; the held lock's `validate` and the press branches are otherwise unchanged.
+- `PlayerController.set_controls_enabled(true)` calls `targeting.require_release()` beside `_dash_input_armed = false`, guarded by `if targeting != null`. The resume press can now reach neither the dash nor targeting.
+- Docs: one bullet in player-flight.md's "Targeting contract" and one Open issues line in menus-session.md. No `game_session.gd`, `camera_rig.gd`, scene or test change.
+Why: F16-06 recorded that with Lock or Next remapped onto B, the press that resumes from Pause -- or A starting a stage with Lock on A -- locks or switches at once, since a poll still sees that press on the first unpaused tick.
+Verification: no tests or drivers (F16 rule). Verified by reading; `tools/lane.ps1 land` is the gate and runs the existing suite (its targeting contract tests included), the boot smoke and the resource check.
+Action required by Astra (F16-07): remap Lock to B, pause, resume with B, and confirm nothing gets locked in the integrated device walk.
+
+## 2026-09-24 — Astra (sol) — F16-07 integrated presentation and device acceptance
+State: BLOCKED_ON_INTERACTIVE_EVIDENCE. Integrated source `40969f0` plus `40dd592` (test harness only); no packaged build was used.
+Files: `scenes/ui/controls.tscn` (presentation only); `docs/validation/controls-expansion.md` (F16-07 section); `docs/engineering/player-flight.md` (F16-07 status); `.scratch/controls-expansion/issues/07-controls-visual-and-device-acceptance.md` (Status, Outcome); `docs/engineering/ROADMAP.md` (F16-07 row); this newest-first entry.
+Change: Added visible `15 px` Portuguese labels to MouseSensitivity, OrbitSensitivity and Deadzone within their existing Câmera slider rows. The sliders had only tooltips and focus help, so a sighted player could not identify all three while browsing the page. Every original node path, connection and gameplay value is preserved. The rendered result needs the interactive visual pass.
+Evidence: Windows 11, Godot 4.7.2 OpenGL Compatibility on AMD Radeon RX 9070 XT. The integrated game window opened after a local class-cache import. The sandbox desktop returned an invalid handle on screen capture, so no interactive frame or gameplay input was inspected. The user explicitly reported **no physical checks yet**: actual keyboard/mouse, Xbox, DualShock and DualSense devices exercised for F16-07 are **none**. Each requested device and gameplay branch is marked **not verified**, with no hardware passed by inference, in the F16-07 validation matrix. The earlier static F16-01 images are not treated as integrated acceptance.
+Numeric handoff to Claude: **no change requested** to `player_ship.tscn` or code exports. Keep `dash_distance = 3.0` world units, `dash_duration = 0.15 s`, `dash_cooldown = 0.8 s`, and current camera values pending a real play pass. Reason: no motion, cooldown or protection feel could be observed, so a new number would be arbitrary. Astra changed no Claude-owned file.
+Engineering follow-up: F16-06's `targeting.gd` concern remains open by code reading, not a witnessed failure. During this land, Claude assigned it to OpenCode (oc-a) as F16-09. Reproduction to exercise: bind `lock_target` or `next_target` to the controller Back input, Pause, press Back to resume, and inspect whether Targeting locks or switches on the first unpaused tick. If reproduced, apply the same release-before-arming rule used for dash. This is outside F16-07's Files boundary; no Astra script edit was made.
+Action required: a real interactive keyboard/mouse walk of F16-03 steps 1–17, F16-05's owed checks and F16-06 steps 1–16, with the exact backend and hardware model for every available pad. Check PlayStation footer `✕ ○ □ △`, focused scrolling, modals, the three resolutions, Impulso and trail in motion. Unavailable hardware remains not verified. F16-07 cannot be marked done until gameplay failures, if any, are resolved and the visual/device pass is recorded.
+
+## 2026-09-24 — Claude (plan) — F16-09 and F16-10: two small OpenCode follow-ups from the F16 reviews
+State: PLANNED
+Files: `.scratch/controls-expansion/issues/09-targeting-ignores-the-resume-press.md` (new), `.scratch/controls-expansion/issues/10-spec-api-list-matches-shipped-code.md` (new), `docs/engineering/ROADMAP.md` (two F16 rows).
+Change:
+- **F16-09 (oc-a).** Targeting polls `lock_target` and `next_target` with `is_action_just_pressed`, so with either remapped onto B, the B press that resumes from Pause locks or switches the target (the risk F16-06 recorded). Targeting gets the same release latch as the dash, `require_release()`, which `PlayerController.set_controls_enabled(true)` calls.
+- **F16-10 (oc-b).** The spec's "Proposed APIs" block is reconciled with the shipped code, since the F16-05 additions were missing. Docs only.
+
+Why: the user asked for both review gaps to go to OpenCode. Both run beside Astra's F16-07, whose files they do not touch.
+
+Action required by Astra: F16-10 edits only the spec's API block, its heading and the paragraph after it; your product rules and layout contract stay as written.
+
+## 2026-09-24 — Claude (plan) — F16 follow-up: the scene tests no longer read the real settings file
+State: INTEGRATED_VERIFIED
+Files: `tests/framework/isolated_settings.gd` (new) and its `.uid`; `tests/scene/test_game_session_flow.gd`, `test_interface_contract.gd` and `test_main_contract.gd` (one line each in `before_each` and `after_each`); `docs/engineering/testing.md` (Files).
+Change: The three scene tests that instance `main.tscn` point its `Interface` at a per-process `user://test_settings_<pid>.cfg` before it enters the tree, and delete that file afterwards. Before this, the suite and every lane's gate loaded the player's real `user://settings.cfg`, which F16-03 lets the player remap. A remap could have changed what key-driven tests saw and failed the gate for everyone (the risk F16-02, F16-03 and F16-06 all recorded). No assertion changed and no test was added: the user asked for this harness fix.
+
+Why: the gate must not depend on the player's saved controls.
+
+Action required by trunk: a new test that instances `main.tscn` uses `IsolatedSettings.isolate()` and `clean()` the same way. The 300-frame boot smoke still reads the real file, which is harmless: loading never writes it (F16-02), and a remap only changes bindings.
+
+## 2026-09-24 — Claude (trunk) — F16-06: review fixes [shared]
+State: CODE_READY
+Files: `scripts/session/game_session.gd`; `docs/PLANEJAMENTO.md` [shared] (the Section 3 camera-input paragraph); `docs/GUIDE.md` [shared] (the `game_session.gd` row); `docs/engineering/settings.md` and `docs/engineering/player-flight.md` (only their "F16 Session integration (F16-06)" sections); `docs/validation/controls-expansion.md` (only the F16-06 section); `.scratch/controls-expansion/issues/06-session-camera-and-controls-integration.md` (Outcome).
+Change:
+- **No capture for an unfocused window.** A gamepad still drives a window without the focus, so Continuar, Tentar novamente or a Results button pressed on the pad after an Alt+Tab resumed play and captured the pointer, and Windows clipped the cursor to the background window. `_update_pointer` now also requires `_window_focused`, which the four focus notifications set. The Run itself still goes on. On the focus-in, `_on_focus_gained` runs `_update_pointer()` outside a beat, so a player already flying gets the capture back, and a paused Run, a screen on top and a beat keep the pointer free. Regaining focus still resumes nothing.
+- **PLANEJAMENTO no longer overstates the disconnect rule.** An unplug shows the pointer only when it pauses, in every input mode but Teclado. A defeat or victory beat refuses that pause and keeps the capture until Defeat or Results. settings.md's "Controller disconnect" says the same.
+- **Walkthrough.** Step 5 adds a gamepad Continuar made from another window. Step 8 adds Alt+Tab and an unplug during the defeat beat.
+Why: review findings on F16-06.
+Verification: no tests or drivers (F16 rule). Verified by reading; the gate runs at land.
+Action required by Astra (F16-07): walk the new lines of steps 5 and 8 with the rest of the walkthrough.
+Action required by trunk: none.
+
+## 2026-09-24 — Claude (trunk) — F16-06: controls, mouse camera, recenter and dash through the Session lifecycle [shared]
+State: CODE_READY
+Files: `scripts/session/game_session.gd`; `scripts/player/player_controller.gd` (the resume guard only); `scripts/player/camera_rig.gd`, `scripts/ui/interface.gd` and `scripts/ui/controls_screen.gd` (doc comments only); `docs/GUIDE.md` [shared] (Sections 5, 6, 7 and 14, including a new "Controls screen (F16)" subsection); `docs/PLANEJAMENTO.md` [shared] (Section 3 camera input and recenter, a new Section 4 "Lateral dash (Impulso)", and Sections 7 and 8); `docs/engineering/settings.md` (Purpose, Public contract, File layout, a new "F16 Session integration (F16-06)" section and Open issues); `docs/engineering/player-flight.md` (a new "F16 Session integration (F16-06)" section); `docs/validation/controls-expansion.md` (only the F16-06 section); `.scratch/controls-expansion/issues/06-session-camera-and-controls-integration.md` (Status, Work, Outcome); `docs/engineering/ROADMAP.md` (the F16-06 row). `main.tscn`, `player_ship.tscn`, `project.godot`, `settings.gd`, `menu_controller.gd`, `input_device_state.gd` and `options_screen.gd` needed no change.
+Change:
+- **Camera values reach every ship.** `GameSession._apply_camera_settings` gives the rig all six camera values: `apply_settings` as in F3-04, plus `apply_control_settings(camera_input_mode, mouse_sensitivity, mouse_invert_vertical, camera_deadzone)`. It runs at every spawn (Start, Direct Stage, Restart, Retry, Continuar, Jogar novamente) and on `Settings.changed` of any of them, over Pause too.
+- **The pointer.** The Session is the only writer of `Input.mouse_mode`.
+  - It captures only while the player flies in Câmera: Mouse: a ship, the HUD on top, the tree running. A defeat or victory beat counts, because its camera still orbits.
+  - It shows the pointer on every menu (Controls and its capture dialog included), Pause, Defeat, Results, unload and the main menu.
+  - Each decision opens or closes the rig's mouse-look gate and drops the pending look. A capture drops it once more at the first physics tick after the next input flush, against a backend's capture warp.
+- **Focus loss** pauses a stage in play, like `pause`. In a beat or under a screen it only shows the pointer. Regaining focus resumes nothing and captures nothing; Continuar does.
+- **Controller disconnect** pauses through F3-03's injected `pause`, which shows the pointer. In Teclado mode an unplug does not pause, and a keyboard-and-mouse player keeps the capture.
+- **Recenter.** A `camera_recenter` press event (R, Mouse 3, RS/R3) calls `CameraRig.request_recenter()` only while flying, never in a beat. The Controls capture and the menus consume their events first.
+- **Resume guard (F16-05's question).** It is decided on the resume side, not in the capture rules. The ship ignores both dash actions from its spawn and from each `set_controls_enabled(true)` until a tick with both released. So a dash remapped to B no longer fires on the Back that resumes from Pause, although `is_action_just_pressed` still reports that press on the first unpaused tick. Every binding stays allowed.
+- **Checked, unchanged.** Options → Controls → caller from the main menu and from Pause, global Defaults, the confirmation rollback on Alt+Tab and on an unplug, the device prompt policy, and the connection counts after repeated Retry and Restart. No per-ship connection was added.
+- **Docs.** GUIDE and PLANEJAMENTO no longer contradict F16: the fixed footers, the static Controls screen, "full remapping is an expansion" and the sixteen actions are gone. settings.md's "eight values" wording and its stale "No gamepad glyphs" open issue are corrected.
+Why: F16-06 is the serialized convergence of F16-03, F16-04 and F16-05 through the real main menu, Pause and settings lifecycle.
+Verification: no tests or drivers (F16 rule).
+- `tools/test.ps1` passed 225, 0 failed, with no script, parse or compile error.
+- The 300-frame headless boot printed no ERROR or WARNING line.
+- `check_resources --strict-validate` failed nothing (85 resources, 86 scripts).
+- The headless display server has no mouse mode and sends no focus events, so the pointer, focus and recenter paths were checked by reading only. Two engine behaviors the design relies on are recalled from the engine source, not exercised: Windows re-applies a captured mode when the window is activated, and focus loss releases held input. Walkthrough steps 5 and 6 check both.
+- `tools/lane.ps1 land` was not run in this stage.
+Action required by Astra (F16-07):
+- **Integrated revision.** Walk the `dev-01` commit that lands this one. After the land, `git log dev-01 --grep "(F16-06)" -1 --format=%H` names it. Never walk the old packaged executable.
+- **The walkthrough.** Run the 16 steps in `docs/validation/controls-expansion.md` "Integrated walkthrough (F16-06, trunk)", with F16-03's 17 steps and F16-05's owed checks. Record the device and backend for each step; an unavailable device stays not verified.
+- **Rulings on four choices.** Is it right that the pointer stays captured, and the mouse still orbits, through the 1 s defeat beat and the 2.5 s victory beat? That the arrow keys still orbit in Câmera: Mouse? That the HUD shows no key hint beside Impulso? That a dash tapped within one tick of a Resume is dropped?
+- **Value changes.** Send camera or dash value changes to trunk with the numbers.
+Action required by trunk (follow-ups, outside this ticket's Files list):
+- **`Targeting`** polls `lock_target` and `next_target` with `is_action_just_pressed`. A remap that puts one on B locks or switches on the first tick after Back resumes from Pause. The same arm-on-release guard in `targeting.gd` fixes it.
+- **`spec.md`.** The API list still lacks F16-05's additions: `PlayerController.controls_enabled_changed`, `are_controls_enabled`, `get_dash_cooldown_left`, `has_dash`, `DashModel.is_active`, `is_enabled`, `get_direction` and `resolve_direction`, and `CombatState.TIME_EPSILON`. Add them the next time it is edited.
+
+## 2026-09-24 — Claude (trunk) — F16-03: review fixes
+State: CODE_READY
+Files: `scripts/ui/controls_screen.gd`; `docs/engineering/settings.md` (only the section "F16 capture workflow and prompts (F16-03)"); `docs/validation/controls-expansion.md` (only the F16-03 section).
+Change:
+- **A refused axis no longer stalls the review.** On the keyboard tab, a pad stick pushed past 0.6 was refused with a hint but stayed the candidate axis. A key pressed next then waited in the review for that stick to centre, so a stick held or drifting at 0.2 or more ran the capture out to "O tempo acabou; nada mudou." `_listen` now clears the candidate axis when it refuses the other device's input.
+- **Substituir's refusal names its real reason.** The conflict dialog always said Substituir would leave a required action unbound. It now says so only when the trial reports that. A candidate fixed on a conflicting action (Numpad Enter on `ui_accept`, met by Pausa, for example) reads "Substituir não é possível: este comando é fixo em Confirmar.", and any other refusal reads "Substituir não é possível para este comando."
+Why: review findings on F16-03.
+Verification: no tests or drivers (F16 rule). Both fixes were verified by reading; the gate runs at land.
+Action required by trunk: none.
+Action required by Astra: review the two new Portuguese dialog lines with the rest of F16-03's copy.
+
+## 2026-09-24 — Claude (trunk) — F16-03: rebinding workflow, conflicts, confirmation and live prompts [shared]
+State: CODE_READY
+Files: `scripts/ui/controls_screen.gd` (new) and its `.uid`; `scripts/ui/interface.gd`; `scripts/ui/menu_controller.gd`; `scripts/ui/input_device_state.gd`; `scripts/ui/options_screen.gd` (doc comments only); `scenes/ui/controls.tscn` [shared] (wiring only, below); `docs/engineering/settings.md` (only the section "F16 capture workflow and prompts (F16-03)"); `docs/validation/controls-expansion.md` (only the F16-03 section); `.scratch/controls-expansion/issues/03-rebind-workflow-and-prompts.md` (Status, Work, Outcome); `docs/engineering/ROADMAP.md` (the F16-03 row). `scenes/ui/options.tscn` is unchanged.
+Change:
+- **`ControlsScreen`** (Adapter, `Node`) is created by `Interface` as `Controls/ControlsScreen`, like `OptionsScreen`, and binds Astra's exact paths. The menu scene registry is unchanged.
+  - **Rows.** The six `Preview*` rows are gone. `BindingScroll/Rows` gets a heading per category and one `binding_row.tscn` row per catalog action (27). Slots show F16-08's glyph when the file exists, else its text. Changed rows are marked `• `, and Aplicar is disabled while the draft equals the live profiles.
+  - **Focus.** Tabs → Ícones → rows (Principal → Alternativo → Redefinir) → Restaurar esta aba → Aplicar → Voltar, wrapping. Up and down keep the column, the tabs remember each tab's last row, and a focused row scrolls into view with `ensure_control_visible`. ActionHelp explains the focused control. Only the shown tab is linked, and the scroll bar never takes focus. Entry focus stays on Voltar, because the existing menu contract test pins it.
+  - **Capture.** Wait until every key and button is released, listen, review after the candidate's release, then Usar or Cancelar. Echo, `InputEventAction`, mouse motion and drift are ignored. An axis must read below 0.2 during the capture before a pull past 0.6 counts, with its sign. A trigger backend that rests at −1 is rescaled. A modifier makes a chord or binds alone. Escape and the live accept and cancel can be captured. The other device's `ui_cancel`, a click on Cancelar and the 10 s timeout cancel with no change. `Interface._input` hands every event to the open dialog first, focus is trapped in the dialog, and `Overlays` blocks the mouse behind it. Losing the window cancels a capture.
+  - **Conflicts.** Trocar, Substituir and Cancelar go through `InputBindings.assign`. Trocar and Substituir are each enabled only when a trial on a copy succeeds, so Substituir is disabled when a required action would lose its last binding. F16-02's layout limit is resolved: `pause` and the menu-only actions are also compared in the layout's space for character keys, and such a conflict can only be replaced.
+  - **Draft and Aplicar.** Changes stay a draft until Aplicar, which goes through `Settings.apply_input_bindings`. A failed save shows "Não foi possível salvar os controles." and keeps both the draft and the live map. A change to `pause` or a `ui_*` action runs the 10 s ConfirmBindingsDialog on the new bindings, with focus on Reverter. Reverter, `ui_cancel`, the timeout, a controller disconnect, focus loss or the screen hiding all revert. Redefinir, Restaurar esta aba and the Dirty dialog (Aplicar, Descartar, Continuar editando) work on the draft.
+  - **Câmera tab and Ícones do controle** store and save at once, with the `Settings` ranges, which override the authored 0.1–3.0 slider ranges.
+- **Prompts.** `MenuController.set_prompts(family, bindings)` writes every footer from the live bindings, as keyboard, Xbox or PlayStation text: Navegar, Confirmar and, except on the main menu, Voltar. `Interface._push_prompts` pushes it at boot and on every family or binding change, replacing F15-07's fixed gamepad text. `set_keyboard_prompts` stays, for a menu on its own, which the contract test pins. `InputDeviceState` gains `get_controller_family()` and `controller_family_changed`. `Interface` now applies `controller_glyph_family` as the glyph override at boot and on every change, global Defaults included. The device and disconnect policy is unchanged.
+- **Headless.** `BindingLabels`' physical-key lookup prints `ERROR: Not supported by this display server` on the headless display server, which made the boot smoke fail. All prompts go through the new `MenuController.describe_binding`, which names a physical key by its code there. Hidden rows are not written.
+- **`controls.tscn` [shared].** The preview rows and their `binding_row.tscn` ext_resource are removed. Two buttons are added: `CaptureDialog/Buttons/UseButton` ("Usar", hidden until a review) and `ConflictDialog/Buttons/ReplaceButton` ("Substituir"). Two texts follow the spec: `ConflictDialog/Buttons/CancelButton` "Escolher outro" → "Cancelar", and `ConfirmBindingsDialog/Buttons/ConfirmButton` "Manter" → "Manter controles". No geometry or style changed.
+Why: F16-03 turns F16-01's static screen into a safe, persistent editor on F16-02's contracts, with truthful prompts everywhere.
+Verification: no tests or drivers (F16 rule).
+- The existing suite passed (225, 0 failed; no script, parse or compile error).
+- The 300-frame headless boot printed no ERROR or WARNING line.
+- `check_resources --strict-validate` passed (85 resources, 85 scripts).
+- `setup` runs at every boot, and the suite enters and leaves Controls through `main.tscn`.
+- Capture, conflicts, the dialogs, the confirmation and the camera widgets were checked by reading only. The table and a 17-step human walkthrough are in `docs/validation/controls-expansion.md`.
+Action required by trunk (F16-06):
+- **Camera values to the rig.** The Câmera tab writes `camera_input_mode`, `mouse_sensitivity`, `mouse_invert_vertical` and `camera_deadzone` at once, also from Pause. Apply them with `CameraRig.apply_control_settings` at every spawn and on `Settings.changed` for those four keys, next to the existing `apply_settings` for `camera_sensitivity` and `invert_vertical`.
+- **Mouse capture.** `ControlsScreen` never touches `Input.mouse_mode`, so the pointer must be released on every menu, Controls included, before a capture can take mouse buttons.
+- **`camera_recenter` and dashes.** Read them in gameplay only (HUD on top). A capture cannot leak into them: every event is consumed in `Interface._input`, and the tree is paused or no stage runs under Controls.
+- **HUD hints.** The HUD shows no control hints, so `hud.*` is unchanged. A hint added later, for example beside F16-05's Impulso, should use `MenuController.prompt_for(action, family, bindings)` pushed from `Interface._push_prompts`. It is rescue's file until F16-05 hands it back.
+- **New prompts on headless.** Name bindings with `MenuController.describe_binding`, not `BindingLabels.describe`, or move the headless guard into `BindingLabels` (F16-08's file, outside this ticket).
+- **Stale docs.** settings.md "Open issues" still says "No gamepad glyphs or gamepad hint text", and GUIDE Section 14 still describes the fixed footers and the static Controls screen. They were outside F16-03's sections; F16-06 owns those updates.
+- **Pinned tests.** `test_menu_registry_contract` pins Controls' entry focus on Voltar and F15-07's gamepad footer text for a standalone menu, so both behaviours stay. If the user allows test edits later, entry focus on the first tab and a footer from the defaults would match the spec better. `tools/validate_menus.gd` still expects a hidden gamepad footer (stale since F15-07); it is not in the gate.
+- **Not done.** No UI clears a slot to blank: only Redefinir and Restaurar esta aba reach a blank Alternativo. Add a clear action if F16-07 asks for one.
+Action required by Astra:
+- **Preserve the new paths.** Keep `CaptureDialog/Buttons/UseButton` and `ConflictDialog/Buttons/ReplaceButton`; `ControlsScreen` needs every spec path, and a missing one leaves the screen inert with an error naming it.
+- **Review the copy.** Check the two text changes and the runtime copy: category headings, ActionHelp, the dialog messages and "AJUSTES DA CÂMERA".
+- **Label the sliders.** The three Câmera sliders have no visible label; ActionHelp names the focused one and the tooltip names it for the mouse. Add labels if you want them.
+- **Check glyphs in F16-07.** Confirm that the theme font draws `✕ ○ □ △` in the PlayStation footers, and that 32 px glyphs read well in the rows.
+## 2026-09-24 — Claude (rescue) — F16-05: review fixes
+State: CODE_READY
+Files: `scripts/player/player_controller.gd`; `scripts/player/dash_model.gd`; `scripts/ui/hud.gd`; `docs/engineering/player-flight.md` (only "F16 lateral dash (F16-05)"); `docs/engineering/combat-hud.md` (only the F16-05 section); `docs/validation/controls-expansion.md` (only the F16-05 section); `.scratch/controls-expansion/issues/05-invulnerable-lateral-dash.md` (Outcome). No scene changed.
+Change:
+- **No slide along a Flight Volume face.** Before, the clamp worked axis by axis. When a dash crossed a face at an angle to the camera, the clamp kept the part of that tick's step along the face, up to 1/3 unit. Now `_move_dash` records where its step started, and the new `_stop_dash_at_flight_volume` puts the ship at the fraction of the step where it first met a face, then ends the travel. The ordinary clamp still runs after it, as a safeguard.
+- **One epsilon.** `DashModel.TIME_EPSILON` is now `CombatState.TIME_EPSILON` itself, not a second literal. The burst and its protection end on the same tick only while the two match.
+- **A ship without a dash never reads ready.** With `dash_duration` 0 every request was refused, yet the HUD showed `PRONTO`. The new `DashModel.is_enabled()` and `PlayerController.has_dash()` report it, `try_start` uses the first, and `Hud` counts a ship without a dash as unavailable. Shipped values are unaffected.
+Why: three minor findings from the review of `601b722`, verdict ship.
+Verification: no tests or drivers (sprint rule). The fixes were checked by reading, and the existing gate was run again.
+Action required by trunk (F16-06): add `DashModel.is_enabled()` and `PlayerController.has_dash()` to the spec's API list, next to the getters listed in the entry below, when trunk next edits `.scratch/controls-expansion/spec.md`.
+Action required by Astra (F16-07): when checking the Flight Volume stops, also dash into a face at an angle with the camera turned. The ship should stop where it meets the face, with no slide along it.
+
+## 2026-09-24 — Claude (rescue) — F16-05: invulnerable lateral dash, cooldown HUD and dash visual [shared]
+State: CODE_READY
+Files: `scripts/player/dash_model.gd` (new) and its `.uid`; `scripts/player/player_controller.gd`; `scripts/combat/combat_state.gd`; `scripts/session/game_session.gd` (dash wiring and doc comments only); `scripts/ui/hud.gd`; `scenes/player/player_ship.tscn` [shared] (three dash exports, the `dash_visual` reference, Astra's `dash_visual.tscn` instanced as `VisualRoot/DashVisual`); `scenes/ui/hud.tscn` [shared] (Astra's `dash_cooldown.tscn` instanced as `DashCooldown`, bottom-left at (32, -191)–(280, -144), 12 px above `PlayerStatus`); `docs/engineering/player-flight.md` (only "F16 lateral dash (F16-05)"); `docs/engineering/combat-hud.md` (the `invulnerability_changed`, `tick` and `grant_invulnerability` rows, and a new "F16 dash protection and the Impulso indicator (F16-05)" section); `docs/validation/controls-expansion.md` (only the F16-05 section); `.scratch/controls-expansion/issues/05-invulnerable-lateral-dash.md` (Status, Work, Outcome); `docs/engineering/ROADMAP.md` (the F16-05 row). `projectile_system.gd` and `camera_rig.gd` are unchanged.
+Change:
+- **`DashModel`** (Rules Core): `configure`, `try_start`, `tick`, `cancel`, `is_active`, `get_active_time_left`, `get_cooldown_left`, `get_direction` and the static `resolve_direction`.
+  - One press makes one dash.
+  - Both directions down together give 0, which costs no cooldown.
+  - The 0.8 s cooldown runs from activation, and a press during it is dropped, never buffered.
+- **`PlayerController`.**
+  - The dash is read with the movement, in physics. Its direction is the rig's basis X, flattened, captured at activation.
+  - The burst replaces the velocity at `dash_distance / dash_duration` (3.0 / 0.15 = 20 units/s), with no Focus scaling and no vertical part. The last step is clamped to the active time left.
+  - The motion is `move_and_collide`, never `move_and_slide`. A contact facing the travel, or the Flight Volume clamp, ends the travel with no slide. A surface square to the travel (a skimmed floor) does not.
+  - The window, and its protection, still end at activation + 0.15 s.
+  - Signals: `dash_started(direction, duration)`, `dash_ended`, `dash_cooldown_changed(remaining, total)`. Also `controls_enabled_changed(enabled)`, a seam refinement the HUD needs for its disabled state, and the getters `are_controls_enabled()` and `get_dash_cooldown_left()`.
+  - Pause freezes the dash, because `set_controls_enabled(false)` keeps it when `can_process()` is false. A beat (defeat, stage clear) and `reset_to` cancel it and clear the cooldown. Every new Attempt spawns a new ship that starts ready. Nothing is in a Snapshot.
+  - `DashVisual` shows only while the burst is active and the ship is Invulnerable. `TrailLeft` shows for a left dash and `TrailRight` for a right one, while the burst travels. `ProtectionAccent` shows throughout. Under `VisualRoot` it blinks with the existing flicker, and the Core draws over it.
+- **Protection.** `GameSession._spawn_player` connects `dash_started` once per ship, without deferral, to `CombatState.grant_invulnerability(duration)`, which keeps `max(remaining, duration)`.
+  - The order was proven by reading: `Main` ticks the core, then the ship grants inside its step, then `ProjectileRoot` at priority 100 sweeps with the flag set. The activation tick is protected.
+  - The last tick was not right. The residue of `0.15 - 9 × (1/60)`, 2e-17 s, kept a tenth tick protected. **Fix:** `CombatState.TIME_EPSILON` (1e-6 s) ends a window at that residue, so a dash protects exactly nine ticks at 60 Hz. As a side effect, Bomb and Retry windows are now exactly 120 ticks instead of 121.
+  - The field already refused hits and Graze while invulnerable, spending each contact's one Graze, and it is unchanged. The dash's end never touches the core, so there is no early `false`.
+- **HUD.** The `Impulso` indicator has three states:
+  - `IMPULSO  ·  PRONTO`, with the bar full and `ReadyAccent` shown, only while the controls are on and no cooldown is left.
+  - `IMPULSO  ·  0,6 s` while cooling down, the bar filling.
+  - A bare, dimmed `IMPULSO` while the controls are off or nothing is bound.
+
+  The new required paths are `DashCooldown/{Label,Progress,ReadyAccent}`. Every existing path is unchanged.
+Why: F16-05, both parts. F16-01 had landed Astra's two components.
+Verification: no tests or drivers (sprint rule). `tools/test.ps1` passed 225 of 225 with no script, parse or compile error. The 300-frame boot printed no ERROR or WARNING, and `check_resources --strict-validate` passed 85 resources and 85 scripts. The ordering proof, with file:line references, and the manual checks owed are in `docs/validation/controls-expansion.md` (F16-05). Not verified: physical feel, stops against real scenery, and whether Jolt ever reports a skimmed floor as facing the travel. The owed check covers it.
+Action required by trunk (F16-06):
+- **Ownership.** `game_session.gd`, `player_controller.gd`, `combat_state.gd`, `projectile_system.gd`, `hud.*` and `player_ship.tscn` return to trunk.
+- **Walkthrough.** The integrated walkthrough is F16-06's: Retry, Restart, Campaign Stage 2, Jogar novamente, Pause and Options over Pause. The dash needs no Session call beyond the one connection, and nothing to reapply at spawn.
+- **Resume can dash.** If a remap lets `dash_left` or `dash_right` share an input with `ui_cancel` or `pause`, the press that resumes from Pause could dash on the first unpaused tick. That is the known `bomb` problem (menus-session.md Open issues). Decide whether the capture rules or the resume must guard it.
+- **Spec API list.** Add `PlayerController.controls_enabled_changed(enabled: bool)`, `are_controls_enabled()`, `get_dash_cooldown_left()`, `DashModel.is_active/get_direction/resolve_direction` and `CombatState.TIME_EPSILON` to the spec's list when trunk next edits `.scratch/controls-expansion/spec.md`. This lane stayed inside its Files list.
+Action required by Astra (F16-07):
+- Judge the trail side: a left dash shows `TrailLeft`, the one at the left engine. Also judge the accent, the blink with the flicker, the Core's readability, and the `DashCooldown` spot and its dimmed state at the three resolutions.
+- The dash values (3.0, 0.15, 0.8) are exports on `PlayerShip`, group Dash. Send value changes to trunk.
+
+## 2026-09-24 — Claude (trunk) — F16-02: review fixes
+State: CODE_READY
+Files: `scripts/settings/input_bindings.gd`; `docs/engineering/settings.md` (only the section "F16 binding profiles and persistence (F16-02)"); `docs/validation/controls-expansion.md` (only the F16-02 section); `.scratch/controls-expansion/issues/02-binding-profiles-and-persistence.md` (Outcome).
+Change:
+- **The per-action fallback no longer resets a profile.** Before, a missing or malformed action took its default without looking at the file's remaps, so a default held by a remap made the whole profile fall back and lose every remap. Now each default input that an action kept from the file holds, and cannot share, is left out. A required action that would be left unbound that way takes the input back from its holder instead. For example, after a K/J swap of `fire` and `lock_target`, a malformed `fire` gets J back and `lock_target` is left blank. The whole profile falls back only when the file's own bindings conflict, or when a take-back leaves a required holder unbound. Each input left out or taken back gets one diagnostic.
+- **Key codes must be codes a key reports.** Before, any integer from 1 to `KEY_CODE_MASK` passed, so a corrupt file could satisfy a required action with an unpressable key such as code 5. Now a code must be a printable character (from Space to U+10FFFF, with no control characters or surrogates) or one of the special keys Godot 4.7 names. The ranges were taken from the engine's own `Key` enum dump. `KEY_UNKNOWN` and the unassigned special codes are refused, and such an action falls back per action.
+- **Known limit, documented, not fixed:** `pause` takes physical keys and the menu-only actions take layout keys, and the Node-free core compares them by code. That is exact for the special keys on any layout, and for every key on US QWERTY. On another layout it is not exact for character keys. The core cannot know the layout, so the fix belongs to F16-03's capture.
+Why: review findings on F16-02 part 2. The ticket's acceptance line says malformed binding data falls back per action, and required actions must stay pressable.
+Verification: no tests or drivers (F16 rule). The existing suite and `check_resources --strict-validate` were clean. The fallback and the code check were verified by reading only.
+Action required by trunk:
+- **F16-03:** when a capture puts a character key on `pause`, or on a menu-only action while `pause` holds a character key, compare the two in the layout's space (`DisplayServer.keyboard_get_keycode_from_physical`) before calling `assign`. The details are in settings.md, under "The binding descriptor".
+Action required by Astra: none.
+
+## 2026-09-24 — Claude (trunk) — F16-02: binding profiles, persistence and InputMap adapter [shared]
+State: CODE_READY
+Files: `scripts/settings/input_bindings.gd` (new) and its `.uid`; `scripts/settings/settings.gd`; `scripts/ui/input_binding_adapter.gd` (new) and its `.uid`; `scripts/ui/interface.gd`; `docs/engineering/settings.md` (only the section "F16 binding profiles and persistence (F16-02)"); `docs/validation/controls-expansion.md` (only the F16-02 section); `.scratch/controls-expansion/spec.md` [shared] (the descriptor line and the API list, per the spec's own refinement rule); `.scratch/controls-expansion/issues/02-binding-profiles-and-persistence.md` (Status, Outcome); `docs/engineering/ROADMAP.md` (the F16-02 row). `project.godot` is unchanged: part 1's defaults were already right.
+Change:
+- **`InputBindings`** (Rules Core) is the catalog.
+  - It has 27 actions: every gameplay action, `camera_recenter`, the dashes, and the eight `ui_*` actions the menus use. Each one has a Portuguese label, a category (Movimento, Combate, Câmera, Menus), a context mask and a required flag.
+  - There are two profiles, `keyboard_mouse` and `gamepad`, with two slots each. The defaults equal `project.godot`, and Godot's built-in events for the `ui_*` directions and the Tab pair. Numpad Enter is a fixed third `ui_accept` key, so no default is lost.
+  - A binding is a validated primitive descriptor.
+  - Conflicts count within a profile when contexts overlap. Gameplay and menu actions never overlap, `pause` is in both, and `pause`/`ui_cancel` on Escape is the one permitted overlap.
+  - `assign` is one transaction, with swap, replace and cancel. A replacement that leaves a required action unbound is refused.
+- **`Settings`** adds the new `[controls]` values and the profiles.
+  - Values: `controls_version=1`, `binding_profiles`, `camera_input_mode` (keys or mouse), `mouse_sensitivity` (0.12, 0.02 to 0.50), `mouse_invert_vertical`, `camera_deadzone` (0.2, 0.05 to 0.5) and `controller_glyph_family` (auto, xbox or playstation).
+  - Old files migrate silently, and a load never writes, so the real `settings.cfg` is untouched until the next explicit save.
+  - The save is atomic: tmp, read back, `.bak`, rename.
+  - `apply_input_bindings(draft, needs_confirmation)` saves before anything goes live. With a confirmation it also saves the confirmed profiles and a marker, and a boot with the marker restores them. `confirm_input_bindings` and `revert_input_bindings` finish the confirmation.
+  - Global Defaults now covers the new values and the profiles.
+- **`InputBindingAdapter`** is the only `InputMap` writer for catalog actions.
+  - Both profiles are live, with device −1, and the deadzones are untouched, so analog input stays analog. Actions outside the catalog are kept.
+  - `describe_event` handles physical and layout keys, Shift+Tab, Left Shift and Left Ctrl, and axis plus sign.
+  - `find_default_drift` checks the catalog against `project.godot` at every editor-build boot.
+- **`Interface`** installs the saved profiles before the menus are instanced. It reinstalls them on `Settings.changed(BINDING_PROFILES)` and restores the defaults on `_exit_tree`. It adds `get_input_binding_adapter()`.
+Why: F16-03 (Controls screen), F16-04 and F16-06 (camera settings) and F16-08 (glyph family) need one validated data contract and one safe persistence path before they wire any UI.
+Verification: no tests or drivers (F16 rule).
+- The existing suite passed (225).
+- The 300-frame headless boot and `check_resources --strict-validate` were clean.
+- The drift check was proven by one temporary broken default, then reverted.
+- The real `settings.cfg` was not rewritten.
+- Transactions, fallback, save and recovery were checked by reading only; the human pass list is in `docs/validation/controls-expansion.md`.
+Action required by trunk:
+- **F16-03** edits a draft (`InputBindings.new()` + `restore(live.capture())`) and calls `Settings.apply_input_bindings`, never the live instance. It passes the action to `describe_event(event, action)`. It uses `InputBindings.CATALOG` and `CATEGORIES` for the rows, and it wires `get_controller_glyph_family()` to F16-08's `set_glyph_override`.
+- **The suite loads the real `user://settings.cfg`.** After the user remaps a key that a scene test drives by key event, that test runs on the remap and can fail. `_exit_tree` stops the leak between tests, but not inside one. The fix is a temporary `settings_path` for the suite's `main.tscn`, which is a test-harness change the no-tests rule forbids today. Until the user allows it, remap only in a build you are not gating.
+Action required by Astra: none. The Portuguese action labels and required flags are Claude's proposal; send changes to trunk.
+## 2026-09-24 — Claude (path) — F16-04: mouse camera and recenter
+State: DELIVERED
+Files: `scripts/player/camera_rig.gd`; `docs/engineering/player-flight.md` (section "F16 mouse camera and recenter (F16-04)" only); `docs/validation/controls-expansion.md` (F16-04 section only); `.scratch/controls-expansion/issues/04-mouse-camera-and-recenter.md` (Outcome); `docs/engineering/ROADMAP.md` (F16-04 row).
+Change:
+- **New API.** `apply_control_settings(p_mode, p_mouse_sensitivity, p_mouse_invert, p_deadzone)`, `set_mouse_capture_active(active)`, `clear_pending_look()`, `request_recenter()`, and the constants `MODE_KEYS` and `MODE_MOUSE`. `apply_settings` is unchanged; it now covers the `camera_*` actions only.
+- **Mouse look.** Active only in mouse mode with capture on. Motion comes from `screen_relative` in `_input` and is never marked handled. It is spent once per physics tick as pixels × 0.12 degrees, never times delta. Keys and stick keep their rate and a radial deadzone, `stick_deadzone` 0.2, which is today's value. Each source has its own vertical inversion.
+- **Locked look.** Deliberate mouse motion holds the lock pull off: faster than `mouse_jitter_speed`, 60 px/s, measured over the real time since the previous tick so the split does not move with the frame rate. After 0.25 s idle the pull fades back in at `lock_blend_speed`. The lock is never released.
+- **Recenter.** Free: the ship's own -Z at -9°. Locked: the ship-and-target framing, lock kept. The move lasts 0.25 s, eased with smoothstep, and takes the shortest way round with `lerp_angle`. For its first 0.1 s (`recenter_grace_seconds`) camera input is dropped, so the Mouse 3 or R3 press that asked for it cannot cancel it; after that, actions or deliberate mouse motion interrupt it. A new request restarts it from the current pose; nothing queues. While it runs it is the tick's only aim writer. Pitch limits and the obstruction ray still apply.
+- **Defaults and scene.** Default Teclas behaves exactly as before. The new exports keep their script defaults, and `player_ship.tscn` is untouched.
+Verification: `tools/test.ps1` passed 225 tests, 0 failed, including the eleven camera rig contract cases. `check_resources.gd --strict-validate` failed nothing. Yaw wrap, pitch limits, lock preservation and obstruction were checked by reading, and the reasoning is in the validation record. The Session lifecycle is pending F16-06, not passed. Physical device feel is not verified, nor whether 0.1 s of grace covers a real wheel click (F16-07). No tests (sprint rule). The jitter speed and the grace came from review; `tools/lane.ps1 land` gates the review-fix commit.
+Why: F16-04 needs mouse orbit and recenter confined to CameraRig, so F16-06 can wire Settings and pointer capture without a second camera writer.
+Action required by trunk (F16-06):
+- Call `apply_control_settings` with the F16-02 Settings getters wherever `_apply_camera_settings` runs: at every spawn and on every change. A Retry's new rig starts in keys mode with capture off.
+- Own `Input.mouse_mode`. Call `set_mouse_capture_active` on every capture or release, and `clear_pending_look` on focus changes and on Resume.
+- Read `camera_recenter` during gameplay only and call `request_recenter`.
+- In mouse mode the arrow-key `camera_*` bindings still orbit, because keys and the stick share those actions. If that should change, it is a binding decision for F16-02/03, not a rig change.
+
+Action required by Astra: none. The new values are exports on `PlayerShip/CameraRig`, in the groups Orbit, Mouse look and Recenter, if you want to tune them in F16-07.
+## 2026-09-24 — Astra (sol) — F16-01 controls layout, glyphs and dash visuals [shared]
+State: INTEGRATED_VERIFIED. The landing gate passed the existing suite (225 passed), 300-frame boot and resource check; `lane/sol` landed on `dev-01`.
+Files: `scenes/ui/controls.tscn`, `scenes/ui/components/binding_row.tscn`, `scenes/ui/components/dash_cooldown.tscn`, `scenes/player/visuals/dash_visual.tscn`, `assets/ui/controls/glyphs/*.png` and import sidecars, `docs/ASSET_CREDITS.md`, F16-01 section of `docs/validation/controls-expansion.md`, ticket Outcome and ROADMAP row. No scripts, InputMap, camera or dash rules changed.
+Node inventory: `Layout/ControlsPanel/Tabs/{KeyboardMouse,Gamepad,Camera}`; `Layout/ControlsPanel/{DeviceFamily,BindingScroll/Rows,ActionHelp,CameraSettings/{Mode,MouseSensitivity,OrbitSensitivity,MouseInvert,OrbitInvert,Deadzone}}`; `Layout/{RestoreTabButton,ApplyButton,BackButton,NavigationHint}`; `Overlays/{CaptureDialog,ConflictDialog,DirtyDialog,ConfirmBindingsDialog}` (each has `Title`, `Message`, `Buttons`). Components: `BindingRow/{ActionLabel,PrimaryButton,SecondaryButton,ResetButton}`; `DashCooldown/{Label,Progress,ReadyAccent}`; `DashVisual/{TrailLeft,TrailRight,ProtectionAccent}`.
+Screenshots: `docs/validation/controls-expansion/controls-1280x720.png`, `controls-1600x900.png`, `controls-1920x1080.png`. Godot 4.7.2 OpenGL Compatibility rendered each viewport. Text, columns, scroll area and fixed footer were visually inspected; physical controller input and runtime remapping remain for F16-03/F16-07.
+Gate follow-up: the existing MenuController expects Controls to focus BackButton on entry. BackButton remains first in scene tree order to preserve both menu contract assertions; F16-03 takes over the tabs-first focus loop.
+Action required by Claude: F16-03 replaces the six `Preview*` rows in `BindingScroll/Rows` when populating the catalog and preserves the node paths above. F16-05 part 2 instances the two reusable dash components and drives their visibility/value. `DashVisual` is cosmetic, script-free and has no collision. All 36 glyph IDs from F16-08 have PNG files, with text labels for fallback.
+
+## 2026-09-24 — Astra (water-flow) — Stage 2 downhill water
+State: DELIVERED
+Files: `assets/environment/stage_02/water.gdshader`; `.scratch/stage-02-area/issues/03-water-flow-direction.md`; `docs/engineering/ROADMAP.md`.
+Change: Reversed the two time-driven UV terms in Stage 2's shared water shader. All six streams and four waterfalls now animate in the opposite direction, toward the lower route, while the geometry and wave motion are unchanged.
+Verification: `tools/lane.ps1 land` is the sprint gate; no new tests.
+Action required by Claude: none.
+## 2026-09-24 — OpenCode (oc-a) — F16-08: binding labels and prompt family
+State: DELIVERED
+Files: `scripts/ui/binding_labels.gd` (new, with its `.uid`); `scripts/ui/input_device_state.gd` (additions only); `.scratch/controls-expansion/issues/08-binding-labels-and-prompt-family.md`; `docs/engineering/settings.md` (its F16-08 section); `docs/validation/controls-expansion.md` (its F16-08 section); `docs/engineering/ROADMAP.md` (the F16-08 row).
+Change:
+- **`BindingLabels`** (`scripts/ui/binding_labels.gd`, static, Node-free): reads the F16 descriptor `{kind, code, axis_sign, physical, modifiers}`. `describe(binding, family)` gives the row text (physical keys via `DisplayServer.keyboard_get_label_from_physical` then `OS.get_keycode_string`, modifier prefixes with standalone modifiers kept, a short Portuguese Space/Escape/arrow table, mouse 1–9, per-family Xbox/PlayStation joypad buttons and axes, `Botão %d` for an unknown index); `glyph_id(binding, family)` gives Astra's `xbox_*`/`ps_*`/`dpad_*`/`stick_*` id or `&""`; `glyph_path(id)` is `res://assets/ui/controls/glyphs/<id>.png`. Malformed data describes as `—` and is never an error.
+- **`InputDeviceState`** gained `prompt_family_changed`, `set_glyph_override`, `get_prompt_family`, a memory-only last-pad device id, and the `MOUSE_MOTION_THRESHOLD` (8 px) accumulator: a mouse button counts as keyboard/mouse use at once, mouse motion only once its accumulated relative length since the last gamepad event passes 8 px. Every existing function, signal and behavior is unchanged.
+Verification: no tests or driver scripts (the ticket's rule). The read-through against the spec and the ticket is recorded in `docs/validation/controls-expansion.md` (F16-08). `tools/lane.ps1 land` is the gate; the resource check (82 scripts), the 300-frame boot smoke and the existing suite pass. Physical Xbox/PlayStation behaviour and the glyph art belong to F16-07.
+Action required by trunk: when F16-03 lands, use `BindingLabels.describe()` / `glyph_id()` / `glyph_path()` for the prompts, connect `InputDeviceState.prompt_family_changed`, and drive `set_glyph_override` from Options' "Ícones do controle".
+Action required by Astra: in F16-01, name the glyph files `res://assets/ui/controls/glyphs/<id>.png` with the ids in the ticket (for example `xbox_a`, `ps_cross`, `dpad_left`, `stick_right_up`); a missing file falls back to the `describe()` text.
+
+## 2026-09-24 — Claude (plan) — F16 routing: five lanes at once; F16-02 part 1 action defaults; F16-08 carved out [shared]
+State: PLANNED
+Files: `project.godot` (`camera_recenter`, `dash_left` and `dash_right` defaults only); `.scratch/controls-expansion/issues/02-*`, `03-*`, `04-*`, `05-*`, `06-*` (routing notes and dependencies) and `08-binding-labels-and-prompt-family.md` (new); `docs/engineering/controls-expansion-plan.md` [shared] (ownership table and routing paragraph); `docs/engineering/SPRINT.md` ("After delivery: F16"); `docs/engineering/ROADMAP.md` (F16 rows); `docs/validation/controls-expansion.md` (new, one pending section per ticket); `docs/engineering/settings.md` and `docs/engineering/player-flight.md` (pending F16 sections).
+Change:
+- **F16-02 part 1.** These defaults are live in `project.godot`:
+  - `camera_recenter`: R, Mouse 3 and RS/R3;
+  - `dash_left`: Q and D-pad left;
+  - `dash_right`: E and D-pad right.
+
+  None was bound before.
+- **Routing.** F16-04 no longer waits for F16-02. F16-05 moves to lane rescue, in two parts: part 1 now, part 2 after F16-01. The new OpenCode ticket F16-08 takes the binding labels, the glyph ids and the controller-family detection out of F16-03.
+- **Glyph files.** Name them `res://assets/ui/controls/glyphs/<glyph_id>.png`, using the id list in F16-08 (for example `xbox_a`, `ps_cross`, `dpad_left`, `stick_right_up`). A missing file falls back to text.
+
+Why: trunk's 02 → 03 → 05 → 06 chain was the whole critical path, although the dash, the camera and the labels share no files with it.
+
+Action required by Astra: in F16-01, name the controller glyphs by the F16-08 ids above, and fill only the F16-01 section of `docs/validation/controls-expansion.md`. The plan table in `controls-expansion-plan.md` now shows the new lanes.
+
+## 2026-09-24 — OpenCode (oc-b) — F15-07: ship and menu cues
+State: DELIVERED
+Files: `scripts/player/player_controller.gd`; `scripts/ui/menu_controller.gd`; `docs/engineering/ROADMAP.md`.
+Change: The ship's Core now duplicates its authored material at runtime, pulses gently while idle, and raises its emission while Focus is active via `focus_changed`. Existing menu device updates now keep footers visible and switch them between keyboard and explicit gamepad text (`Analógico`, `A`, `B`), without glyph art. No tests added (sprint rule).
+Verification: A short headless run completed without script or error output. The existing menu contract assertion was minimally updated because F15-07 intentionally changes gamepad prompts from hidden to visible text; no new test was added. `tools/lane.ps1 land` is the remaining gate.
+Action required by trunk: none.
 ## 2026-09-24 — Claude (path) — F15-03: boss feedback [shared]
 State: INTEGRATED_VERIFIED
 Files: `scripts/enemies/boss_controller.gd`; `scenes/enemies/storm_guardian.tscn` [shared] (one line on the `Enemy` root: `ring_cue = true`); `docs/engineering/bosses.md` (new "Presentation (F15-03)", export and wiring rows, Setup for Astra); `docs/engineering/enemies.md` (F15-02's Retry sentence corrected for F15-10's defeat beat); `docs/GUIDE.md` (the `boss_controller.gd` row); `docs/engineering/ROADMAP.md` (the F15-03 row).
