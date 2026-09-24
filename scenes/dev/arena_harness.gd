@@ -11,15 +11,24 @@ extends Node3D
 ## [ProjectileSystem] of its own carries the rings a [DevSpray] fires, and the readout
 ## counts them, with the hits and Grazes on the ship (F6-02). The ship's [PlayerWeapon]
 ## fires at three [TargetDummy]s, and the dev keys 1, 2 and 3 restart the [CombatState] at
-## that Power Level (F6-03). A dev Spirit and Sentry spawn at the `EnemySpawns` markers
-## under the arena's `RuntimeActors`, as the Director will spawn them, and the dev key R
-## respawns the defeated ones (F9-02). Dev only: it is never loaded by `scenes/main.tscn`
-## and holds no gameplay rule.
+## that Power Level (F6-03). A row of eleven Power Pickups and one Shield Pickup is spawned
+## on `_ready`, and the dev key H breaks the Shield so the Shield Pickup can be taken
+## (F7-03). A dev Spirit and Sentry spawn at the `EnemySpawns` markers under the arena's
+## `RuntimeActors`, as the Director will spawn them, and the dev key R respawns the
+## defeated ones (F9-02). Dev only: it is never loaded by `scenes/main.tscn` and holds no
+## gameplay rule.
 
 
 ## Metadata keys Astra authors on `FlightBounds` (GUIDE Section 13).
 const MIN_CORNER_META := &"min_corner"
 const MAX_CORNER_META := &"max_corner"
+## F7-03: eleven Power Pickups, one every three units along -Z beside the ship's start: ten
+## raise Power Level 1 to 3 and the eleventh awards the excess score. The Shield Pickup
+## sits across the arena, out of the row's attraction range.
+const POWER_PICKUP_COUNT := 11
+const POWER_ROW_START := Vector3(-14.0, 6.0, 12.0)
+const POWER_ROW_STEP := Vector3(0.0, 0.0, -3.0)
+const SHIELD_PICKUP_POSITION := Vector3(14.0, 6.0, 6.0)
 ## F9-02: the dev enemies, the harness's own Attempt seed and encounter id, and how long an
 ## off-screen warning shows on the HUD.
 const SPIRIT_SCENE := preload("res://scenes/dev/spirit.tscn")
@@ -40,6 +49,14 @@ const THREAT_SECONDS := 1.0
 @export var projectile_system: ProjectileSystem
 ## Holds the [TargetDummy] instances, set up with [member projectile_system].
 @export var dummy_root: Node3D
+## Where the spawned [Pickup]s are added.
+@export var pickup_root: Node3D
+## A [Pickup] scene of kind POWER (`scenes/dev/power_pickup.tscn`).
+@export var power_pickup_scene: PackedScene
+## A [Pickup] scene of kind SHIELD (`scenes/dev/shield_pickup.tscn`).
+@export var shield_pickup_scene: PackedScene
+## Holds the `Spirit` and `Sentry` [Marker3D]s the dev enemies spawn at (F9-02).
+@export var enemy_spawns: Node3D
 
 var _player: PlayerController
 var _rig: CameraRig
@@ -48,15 +65,16 @@ var _edge_proximity: float = 0.0
 var _combat_state := CombatState.new()
 var _hits: int = 0
 var _grazes: int = 0
-## F9-02: the live dev enemy of each `EnemySpawns` marker, by marker name.
+var _pickups_taken: int = 0
+## Score the [CombatState] awarded for excess Power Pickups.
+var _pickup_score: int = 0
+## F9-02: the live dev enemy of each [member enemy_spawns] marker, by marker name.
 var _enemies: Dictionary[StringName, EnemyActor] = {}
 var _enemy_rng := RandomNumberGenerator.new()
 var _enemy_bounds: AABB
 var _enemy_spawn_count: int = 0
 var _enemy_defeats: int = 0
 var _last_threat: String = "none"
-
-@onready var _enemy_spawns: Node3D = $EnemySpawns
 
 
 func _ready() -> void:
@@ -74,15 +92,18 @@ func _ready() -> void:
 	projectile_system.player_hit.connect(_on_player_hit)
 	projectile_system.grazed.connect(_on_grazed)
 	_combat_state.start(CombatState.MIN_POWER_LEVEL)
+	_combat_state.score_awarded.connect(_on_score_awarded)
 	hud.bind(_combat_state, _player.targeting, _rig.camera)
 	_player.weapon.setup(_combat_state, projectile_system, _player.targeting)
 	for dummy: TargetDummy in _dummies():
 		dummy.setup(projectile_system)
+	_spawn_pickups()
 	_start_enemies(bounds)
 
 
-## Dev keys 1, 2 and 3 restart the combat state at that Power Level, standing in for the
-## Pickups of F7-03. R respawns the defeated dev enemies (F9-02).
+## Dev keys 1, 2 and 3 restart the combat state at that Power Level; H hits the ship once,
+## which breaks the Shield (the harness never ticks the core, so the Invulnerability that
+## follows lasts until the next restart). R respawns the defeated dev enemies (F9-02).
 func _unhandled_input(event: InputEvent) -> void:
 	var key := event as InputEventKey
 	if key == null or not key.pressed or key.echo:
@@ -95,10 +116,15 @@ func _unhandled_input(event: InputEvent) -> void:
 	if level >= CombatState.MIN_POWER_LEVEL and level <= CombatState.MAX_POWER_LEVEL:
 		_combat_state.start(level)
 		get_viewport().set_input_as_handled()
+	elif key.keycode == KEY_H:
+		_combat_state.take_hit()
+		get_viewport().set_input_as_handled()
 
 
 func _process(_delta: float) -> void:
-	readout.text = "\n".join(PackedStringArray([_flight_line(), _camera_line(), _lock_line(), _projectile_line(), _weapon_line(), _enemy_line()]))
+	readout.text = "\n".join(PackedStringArray([
+		_flight_line(), _camera_line(), _lock_line(), _projectile_line(), _weapon_line(), _pickup_line(), _enemy_line(),
+	]))
 
 
 ## Finds the nodes this harness drives, reporting what is missing instead of failing on a
@@ -115,6 +141,14 @@ func _resolve_scene() -> bool:
 		missing.append("projectile_system")
 	if dummy_root == null:
 		missing.append("dummy_root")
+	if pickup_root == null:
+		missing.append("pickup_root")
+	if power_pickup_scene == null:
+		missing.append("power_pickup_scene")
+	if shield_pickup_scene == null:
+		missing.append("shield_pickup_scene")
+	if enemy_spawns == null:
+		missing.append("enemy_spawns")
 	for field: String in missing:
 		push_error("%s: required export '%s' is not set" % [get_path(), field])
 	if not missing.is_empty():
@@ -196,6 +230,35 @@ func _weapon_line() -> String:
 	]
 
 
+## Power Progress, the Shield, the Pickups taken and the excess score they awarded.
+func _pickup_line() -> String:
+	return "progress %d of %d shield %s (H breaks it)\npickups %d excess score +%d" % [
+		_combat_state.get_power_progress(), CombatState.PICKUPS_PER_LEVEL,
+		"on" if _combat_state.has_shield() else "off",
+		_pickups_taken, _pickup_score,
+	]
+
+
+func _spawn_pickups() -> void:
+	for index: int in POWER_PICKUP_COUNT:
+		var pickup_id := StringName("arena/power_%d" % (index + 1))
+		_spawn_pickup(power_pickup_scene, pickup_id, POWER_ROW_START + POWER_ROW_STEP * index)
+	_spawn_pickup(shield_pickup_scene, &"arena/shield_1", SHIELD_PICKUP_POSITION)
+
+
+func _spawn_pickup(scene: PackedScene, pickup_id: StringName, at: Vector3) -> void:
+	var node := scene.instantiate()
+	var pickup := node as Pickup
+	if pickup == null:
+		push_error("%s: %s has no Pickup root" % [get_path(), scene.resource_path])
+		node.free()
+		return
+	pickup_root.add_child(pickup)
+	pickup.global_position = at
+	pickup.setup(pickup_id, _combat_state, _player)
+	pickup.accepted.connect(_on_pickup_accepted)
+
+
 func _dummies() -> Array[TargetDummy]:
 	var found: Array[TargetDummy] = []
 	for child: Node in dummy_root.get_children():
@@ -214,6 +277,14 @@ func _on_player_hit(_projectile_id: int, _damage: int) -> void:
 
 func _on_grazed(_projectile_id: int) -> void:
 	_grazes += 1
+
+
+func _on_pickup_accepted(_pickup_id: StringName, _kind: Pickup.Kind, _score_awarded: int) -> void:
+	_pickups_taken += 1
+
+
+func _on_score_awarded(points: int) -> void:
+	_pickup_score += points
 
 
 ## F9-02: seeds the harness's Attempt RNG and spawns both dev enemies, which need the
@@ -238,10 +309,10 @@ func _spawn_missing_enemies() -> void:
 func _spawn_enemy_if_missing(marker_name: StringName, scene: PackedScene, definition: EnemyDefinition) -> void:
 	if _enemies.has(marker_name):
 		return
-	var marker := _enemy_spawns.get_node_or_null(NodePath(marker_name)) as Marker3D
+	var marker := enemy_spawns.get_node_or_null(NodePath(marker_name)) as Marker3D
 	var actors_root := arena.get_node_or_null(^"RuntimeActors")
 	if marker == null or actors_root == null:
-		push_error("%s: needs EnemySpawns/%s and %s/RuntimeActors" % [get_path(), marker_name, arena.get_path()])
+		push_error("%s: needs %s/%s and %s/RuntimeActors" % [get_path(), enemy_spawns.get_path(), marker_name, arena.get_path()])
 		return
 	var actor := scene.instantiate() as EnemyActor
 	actor.name = marker_name

@@ -4,8 +4,10 @@ Status: todo
 Type: adapter
 parallel-safe: no
 Depends on: F3-01, F4-02
-Lane: oc-b
-Model: GLM-5.3 (fallback GPT 5.6 Luna), after GLM-5.3's first window resets
+Lane: path
+Model: Claude Opus 5.5, solo
+
+> **Moved to lane path (shared OpenCode budget).** It was planned for oc-b on GLM-5.3, but on the shared meter one GLM-5.3 ticket takes most of a 5-hour window. Path (Opus) runs it in its gap, right before its F3-04 part 1 windowed pass.
 
 ## Goal
 

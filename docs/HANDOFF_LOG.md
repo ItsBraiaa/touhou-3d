@@ -28,10 +28,45 @@ Change:
 - **Dev prefabs** instance your `spirit_lume` and `sentry_lantern` as `VisualRoot`. The `HitVolume` sits at the root origin, where your visuals are centered (radius 1.0 and 0.9).
 - **Arena harness:** a Spirit and a Sentry spawn in front of the ship with a seeded RNG; R respawns them; the readout shows their health, the defeats and the last off-screen side.
 - **Tests:** none added or changed (sprint rule). Scripted runs in `docs/validation/enemies.md`.
+- **Merge with trunk's F7-03:** conflicts in `scenes/dev/arena_harness.gd`, `scenes/dev/arena_harness.tscn` and `docs/GUIDE.md` (Section 6 rows) resolved on `lane/path`, keeping both sides: the harness spawns the Pickups and then the enemies, the readout shows both lines (its box grown to 440 px), and `EnemySpawns` is now a validated export like `pickup_root`.
 
 Why: F9-02; the Director (F10-01) spawns through this API, and D-05 tunes these files.
 Action required by Astra: D-05 may now tune `content/enemies/*.tres`, `content/patterns/*.tres` and the `HitVolume` radii (move the `HitVolume` node itself to re-center: its position is the aim point). Your final `scenes/enemies/spirit.tscn` and `sentry.tscn` can copy the dev tree one to one (enemies.md "Setup for Astra").
 Action required by Claude (trunk): locked shots miss enemies 10 to 16 units away once the camera's lock framing blends in, by about 3.5 units, just outside the 10° main Aim Assist cone; from 30 units they hit. `PlayerWeapon` forward/cone against `CameraRig` lock framing (F6-03); see `docs/validation/enemies.md` "Finding for another lane". F10-01 can call `spawn_setup` as documented; score comes from `definition.score` on `defeated`.
+## 2026-09-24 00:30 — Claude (plan) — OpenCode runs on one shared meter: power models out, F3-02 and F3-03 to path
+State: docs
+Files: `docs/engineering/SPRINT.md` ("Model budgets" rewritten, oc-a, oc-b and path queues, Escalation, Overflow, Human steps, Shared files), `.scratch/settings/issues/02-*.md` and `03-*.md` (lane path), `.scratch/enemies/issues/03-seal-and-guard-rules.md` (part 2 on Luna), `docs/engineering/ROADMAP.md`.
+Change:
+- **The user's correction.** OpenCode has one usage meter shared by every model. A power-model request costs 10 to 20 times a Luna request and about 200 times a DeepSeek V4.1 Flash one.
+- **Routing.** The remaining OpenCode tickets run on GPT 5.6 Luna, with V4.1 Flash as fallback. F9-03 part 2 moves from Qwen3.8 Max to Luna. F3-02 and F3-03 (planned on GLM-5.3) move to lane path, which has an Opus gap before its F3-04 part 1.
+- **Escalation.** A stuck ticket now goes straight to rescue (Opus), not to Kimi K3.
+- **Cost.** The rest of the OpenCode plan is about 22 % of one 5-hour window.
+
+Why: on a shared meter, a single GLM-5.3 ticket would have spent most of a window.
+
+Action required by Astra: none.
+
+## 2026-09-23 21:54 — Claude (trunk) — F7-03: Pickup adapter and dev pickup prefabs
+State: CODE_READY
+Files:
+- New: `scripts/combat/pickup.gd` (`Pickup`), `scenes/dev/power_pickup.tscn`, `scenes/dev/shield_pickup.tscn`, `docs/validation/pickups-arena.png`.
+- Edited: `scenes/dev/arena_harness.gd` and `.tscn` (a `Pickups` node, the row spawn, the readout lines, dev key H).
+- Docs: `docs/engineering/damage-pickups.md` ("Pickup contract"), `docs/validation/combat.md` ("Pickups"), `docs/GUIDE.md` (Section 6 `pickup.gd` row, Section 7 "Pickup accepted" row), the ROADMAP F7-03 row and "Requests to Astra" F7 row, and the ticket.
+
+Change:
+- **`Pickup`** is the Adapter on a Pickup root `Area3D`: accepted once on contact with the player body through `CombatState.collect_power_pickup()` or `collect_shield_pickup()`, then `accepted(pickup_id, kind, score_awarded)` and `queue_free()`. A Shield Pickup stays, unattracted, while the ship is shielded and is taken on the first tick after the Shield breaks. It drifts toward the player within `attraction_range` (6.0) at `attraction_speed` (14.0).
+- **Dev prefabs** instance Astra's D-02 `power_pickup_visual.tscn` and `shield_pickup_visual.tscn` as `Visual` (no file of Astra's edited; no swap pending). Root: layer 0, mask 2, monitoring on, monitorable off, a 0.9 sphere.
+- **Arena harness:** eleven Power Pickups in a row and one Shield Pickup; readout shows progress, Shield, Pickups taken and excess score; H breaks the Shield.
+- **Tests.** None added (sprint rule). A throwaway script drove the harness: `PICKUPS_OK` headless and windowed.
+
+Why: F7-03, which feeds F10-01's reward spawning.
+Action required by Astra: none now. For final Pickup scenes keep the root contract in damage-pickups.md "Pickup contract", tune `attraction_range` and `attraction_speed` there, and send Claude the paths.
+## 2026-09-23 22:00 — OpenCode (oc-a) — F12-03 part 1 Lantern Guardian content [shared]
+State: dev
+Files: `content/bosses/lantern_guardian.tres`, `content/patterns/lantern_ring.tres`, `content/patterns/lantern_aimed_burst.tres`, `content/patterns/lantern_paired_fan.tres`, and F12-03's ticket.
+Change: Added the dev-flagged Lantern Guardian BossDefinition with three named Portuguese attack phases, health proposals of 1500/1500/2100, and authored ring, aimed-burst, and paired-fan patterns. Phase 1 alternates high/low rings and sparse aimed bursts; Phase 2 follows player height for charged aimed bursts and paired fans; Phase 3 combines rings, aimed bursts, and a reposition window.
+Why: F12-03 part 1, content deliverables for the later Stage 1 Director integration.
+Action required by Claude: Part 2 should reference these resources, preserve `kind = &"lantern_guardian"`, score 1000, the three attack names, and the dev placeholders until Astra tunes the values. No tests were added under the sprint rule.
 
 ## 2026-09-23 21:35 — Astra (sol) — Stage 2 content review (D-06 pass 1) [shared]
 State: SCENE_READY

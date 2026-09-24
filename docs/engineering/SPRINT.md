@@ -18,7 +18,8 @@ Planned 2026-09-23 by Claude acting as product owner, engineer and game-design a
   Two of the cuts broke assignment requirements (PLANEJAMENTO Section 2): sound effects, and a stage of at least five minutes, which is Stage 2.
 - **F6-01 is folded into F6-02.** MultiMesh is the default renderer, and F6-02 carries the benchmark.
 - **Astra's design work runs in lane `sol`,** as D-01 to D-07 in `.scratch/design-sprint/`.
-- **Routing by difficulty.** Opus takes the serialized Session path and the hardest Godot integration. OpenCode takes cores, content and standalone adapters, with the model chosen per ticket (a `Model:` line in its header; the user switches it by hand). Power models take the hardest OpenCode tickets. Flash models take the mechanical ones.
+- **Routing by difficulty and cost.** Opus takes the serialized Session path and the hardest Godot integration. OpenCode takes cores, content and standalone adapters, with the model chosen per ticket (a `Model:` line in its header; the user switches it by hand).
+- **OpenCode has one shared usage meter** (the user's correction). Every model draws on the same 5-hour, weekly and monthly budget, and a model's "requests per 5 h" says how far that budget stretches on it. A power-model request costs 10 to 20 times a Luna request and about 200 times a DeepSeek V4.1 Flash request. So the remaining OpenCode work runs on GPT 5.6 Luna and DeepSeek V4.1 Flash only, hard tickets go to the Opus lanes, and power models are out of the plan.
 - **Scope changes are still the user's call.** The fallback order in "Checkpoints" is a proposal the user confirms at the checkpoint.
 - **This page supersedes older "cut" wording.** Tickets written before the sprint may still say F3, F13 or F12-04 is "cut". Treat every such line as "reinstated, done by the ticket named here". An acceptance item is never "not verified (cut)" unless the user cuts it; a ticket that has not landed by delivery is "not verified (not landed)".
 - **Header lines win over body text.** Lane names in ticket bodies and specs are historical: `glm-a`, `glm-b`, or a lane the ticket later left. A ticket's `Lane:` and `Model:` header lines and this page's queues are authoritative.
@@ -67,8 +68,8 @@ No two agents ever share a working tree or a branch.
 | `scripts/progression/stage_director.gd` | trunk F10-01, F10-02, F10-03, F12-03 part 2, F13-03; sol F12-05, F12-06, F12-07 | Unordered pairs: F12-03 with F12-05, and F13-03 with F12-06 and F12-07. Sync right before starting, put every addition in its own private function with a one-line call site, and the second lander merges both. If sol hits a conflict inside one function, it stops and `rescue` resolves it on `lane/sol`. |
 | `tests/scene/test_stage_director.gd` | trunk F12-03; sol F12-05 | Each edits only its named functions; the second lander keeps both. |
 | `tests/scene/test_game_session_flow.gd`, `test_game_session_combat.gd`, F10 and F11 scene tests | trunk | Sol F12-05 may change only a case that breaks because Stage 2 now has a Director, and names it in its handoff. Trunk syncs before F11-01 and keeps the change. |
-| `scripts/ui/menu_controller.gd`, `tests/scene/test_menu_registry_contract.gd` | oc-b F3-03; trunk F11-01 | Whichever starts second syncs first and keeps the other's hunks. They overlap only at the tail of `_ready`. |
-| `scripts/ui/interface.gd` | trunk F4-02, then oc-b F3-02, then F3-03 | Ordered by dependencies. |
+| `scripts/ui/menu_controller.gd`, `tests/scene/test_menu_registry_contract.gd` | path F3-03; trunk F11-01 | Whichever starts second syncs first and keeps the other's hunks. They overlap only at the tail of `_ready`. |
+| `scripts/ui/interface.gd` | trunk F4-02, then path F3-02, then F3-03 | Ordered by dependencies. |
 | `scenes/dev/arena_harness.gd` and `.tscn` | trunk F6-02, F6-03, F7-03; path F9-02, F12-02 | F6-03 part 2 has landed. Trunk's F7-03 and path's F9-02 now run side by side and both only add nodes and harness code: sync right before starting, keep additions in their own functions and nodes, and the second lander merges both. No other ticket edits the harness. |
 | `docs/engineering/stage-director.md` | trunk F10-01, F12-03; sol F12-05 | F12-03 and F12-05 each write only their own section. |
 | `docs/engineering/damage-pickups.md`, `docs/validation/combat.md` | trunk F7-02; path F7-03 | Each appends its own headed section; the second lander keeps both. |
@@ -128,6 +129,8 @@ Slip rule: if F11-02 has not landed by T0 + 19.5 h, run F14-01 straight after F1
 | 5 | F9-02 dev-prefabs-and-enemy-actor | 2 agents | F9-01, F6-02, and trunk's F6-03 part 2 (arena harness). It reads the ProjectileSystem priority that F6-02 actually landed. |
 | 6 | ~~F7-03~~: moved to trunk (6b), so it runs beside F9-02 | — | — |
 | 7 | F12-02 boss-controller-adapter | solo | F12-01, F9-02, F4-03 |
+| 7b | F3-02 options-screen-binding (moved from oc-b) | solo | F3-01 (oc-b), F4-02 |
+| 7c | F3-03 input-device-mode-and-controller-disconnect (moved from oc-b) | solo | F3-02 |
 | 8 | F3-04 part 1: the windowed F3 pass for F3-02 and F3-03, `docs/validation/settings.md` and screenshots | solo | F3-02, F3-03 |
 | 9 | F14-01 pre-flight: export `dev-01` in this worktree, run it, and record export-only errors in a handoff entry (no other file edits) | solo | F10-02 |
 | 10 | F11-03 active-and-clear-time-verification, as the manual protocol and `docs/validation/clear-time.md` only (no tests). It never edits `game_session.gd`; a Session defect goes to trunk as a blocker. | solo | F11-02 |
@@ -146,7 +149,7 @@ Expected gaps (stop the session): about T0 + 4.0 to 5.9 h, T0 + 10.7 to 12.4 h, 
 | 6 | ~~F10-04 stage-01-contract-smoke-test~~: cut by the no-tests rule; skip it | — | — |
 | 7 | F12-03 part 1: `lantern_guardian.tres`, three lantern patterns, the content unit test | GPT 5.6 Luna (DeepSeek V4.1 Flash) | F12-01, F5-04, F6-03 part 1 |
 | 8 | F9-03 part 1: the SealRules core | GPT 5.6 Luna (DeepSeek V4.1 Flash) | F9-02 |
-| 9 | F9-03 part 2: the Seal adapter; closes the ticket. Starts after Qwen3.8 Max's window has reset (about T0 + 8.4 h) | **Qwen3.8 Max** (Kimi K3) | F9-03 part 1 |
+| 9 | F9-03 part 2: the Seal adapter; closes the ticket | GPT 5.6 Luna (MiMo-V2.6-Pro) | F9-03 part 1 |
 
 ### oc-b (OpenCode; model per ticket)
 
@@ -158,9 +161,9 @@ Expected gaps (stop the session): about T0 + 4.0 to 5.9 h, T0 + 10.7 to 12.4 h, 
 | 4 | F12-04 stage-02-content-draft. If F9-01 has not landed yet, do F8-03 first | DeepSeek V4.1 Flash (GPT 5.6 Luna) | F8-01, F9-01 |
 | 5 | F8-03 snapshot-capture-restore | GPT 5.6 Luna (DeepSeek V4.1 Flash) | F8-02, F4-01 |
 | 6 | F3-01 settings-core-and-configfile | GPT 5.6 Luna (DeepSeek V4.1 Flash) | done |
-| 7 | F3-02 options-screen-binding. Starts after GLM-5.3's first window resets (about T0 + 5.9 h) | **GLM-5.3** (GPT 5.6 Luna) | F3-01, F4-02 |
+| 7 | ~~F3-02~~: moved to path (shared OpenCode budget) | — | — |
 | 8 | F14-02 part 1: `tools/package.ps1` only | GPT 5.6 Luna (DeepSeek V4.1 Flash) | none |
-| 9 | F3-03 input-device-mode-and-controller-disconnect. Starts after GLM-5.3's second reset (about T0 + 10.9 h) | **GLM-5.3** (GPT 5.6 Luna) | F3-02 |
+| 9 | ~~F3-03~~: moved to path (shared OpenCode budget) | — | — |
 | 10 | F14-02 part 2: re-export after sync, package, acceptance record; closes the ticket | DeepSeek V4.1 Flash (GLM-5.3-Flash) | F14-01 |
 
 ### sol (Codex, GPT Sol as Astra)
@@ -185,41 +188,39 @@ Sol idles from about T0 + 8.7 h to T0 + 15.2 h, waiting for F10-03. It reads ahe
 
 Ticket files: `.scratch/<feature>/issues/NN-slug.md`, found by ID with `tools/lane.ps1 status <ID>`. Folders: F3 `settings`, F4 `combat-hud`, F5 `projectile-field`, F6 `weapon-rendering`, F7 `damage-pickups`, F8 `progression-core`, F9 `enemies`, F10 `stage-director`, F11 `run-flow`, F12 `bosses`, F13 `audio`, F14 `delivery`, D `design-sprint`.
 
-## Model budgets (OpenCode, requests per 5 h per model)
+## Model budgets (OpenCode: one shared meter)
 
-The 5-hour windows roll from each model's first use. The weekly cap is about 2.5 full windows per model. Before a power-model ticket, check the meter; if the remaining quota is below the estimate plus 15 %, use the ticket's fallback.
+All OpenCode models draw on one shared usage budget, with 5-hour, weekly and monthly limits. A model's "requests per 5 h" is how far one 5-hour budget stretches on that model alone, so a request costs 1 / (requests per 5 h) of the window.
 
-| Model | Quota / 5 h | Planned use | Note |
+| Model | Requests per 5 h | Cost per request (share of a 5 h window) | Use |
 | --- | --- | --- | --- |
-| GLM-5.3 | 220 | W1 F8-02 (~120); W2 F3-02 (~160); W3 F3-03 (~150) | Each window keeps 60 to 100 spare for one short escalation. Weekly 430 of about 550. |
-| Qwen3.8 Max | 160 | W1 F13-02 (~130); W2 F9-03 part 2 (~70) | 30 spare in W1 does not cover a retry: a red F13-02 escalates to Kimi K3. |
-| Kimi K3 | 110 | Escalation reserve only | At most 100 per window, one session at a time. |
-| Grok 4.7 | 169 | Unused unless the user opts in | Second escalation reserve (xAI keeps data 30 days). |
-| Qwen3.7 Max | 170 | Unused | Mixed tool-calling reports on OpenCode Go. |
-| GPT 5.6 Luna | 2050 | W1 about 670 across both sessions; W2 about 180 | The shared workhorse. Two sessions at once stay well inside the quota. |
-| DeepSeek V4.1 Flash | 26000 (4× promo until Sep 27) | About 240 in total, plus fix-up retries | Sometimes ends a turn empty after a tool call: reply "continue" (not a failure). |
-| GLM-5.3-Flash | 6320 | Fallback only | Not prompt-cached on Go; count it at a fraction of its quota. |
+| DeepSeek V4.1 Flash | 26000 (4× promo until Sep 27) | 0.004 % | Content, packaging, fix-up retries, and the fallback for every Luna ticket. It sometimes ends a turn empty after a tool call: reply "continue". |
+| MiMo-V2.6-Pro | 3250 | 0.03 % | Fallback for F9-03 part 2 |
+| GPT 5.6 Luna | 2050 | 0.05 % | Default for the remaining OpenCode tickets |
+| GLM-5.3, Qwen3.8 Max, Qwen3.7 Max, Grok 4.7, Kimi K3 | 110 to 220 | 0.45 to 0.9 % | **Not planned.** One 150-request ticket would take 70 % or more of a window. Only the user may opt one in, capped at 30 requests, for one debugging step. |
 
-Excluded by default: Muse Spark 1.2 and 1.3 Contributor (train on prompts) and Space Bunny Free (unknown provider). They are opt-in only.
+**Remaining OpenCode work:**
+- oc-a: F12-03 part 1 plus F9-03 parts 1 and 2 (about 190 Luna requests, about 9 %).
+- oc-b: F8-03, F3-01 and F14-02 part 1 (about 250 Luna requests, about 12 %), then F14-02 part 2 on V4.1 Flash (about 0.2 %).
 
-**Model switches are manual.** Before each ticket, the OpenCode session reads the ticket's `Model:` line. If it names a different model from the one selected, the session stops and asks the user to switch. There are about ten switch points between T0 and T0 + 11 h.
-- **Overnight fallback:** if the user is away, run the remaining oc-a and oc-b tickets on GPT 5.6 Luna with no switches, and hold only F3-02 and F3-03 for GLM-5.3. F3 has slack until about T0 + 21.5 h.
+That is roughly 22 % of one 5-hour window. Allow up to 60 % if the real counts run two to three times the estimates.
+
+**Already spent.** F8-02 ran on GLM-5.3 and F13-02 on Qwen3.8 Max, so check the shared meter before restarting the OpenCode lanes. If it is above 60 %, run everything left on DeepSeek V4.1 Flash.
+
+Excluded: Muse Spark 1.2 and 1.3 Contributor (train on prompts) and Space Bunny Free (unknown provider), unless the user opts in.
+
+**Model switches are manual.** Before each ticket, the OpenCode session reads the ticket's `Model:` line. If it names a different model from the one selected, the session stops and asks the user to switch.
 
 ## Escalation
 
 1. **When an OpenCode ticket is stuck.** A workhorse or flash model hits the same error twice after a fix (the land gate or the game run), or twice hits a tool-call error that poisons the session. The lane then stops and writes the error, where it shows, and its hypothesis into the ticket's Outcome.
-2. **Kimi K3 comes next.** The user switches that session to Kimi K3 for at most 100 requests, to debug and fix only (no rewrite), one session per window.
-3. **The ticket goes to `rescue` instead when:**
-   - Kimi K3 is spent or busy with the other lane;
-   - Kimi K3 also fails twice;
-   - the ticket already runs on a power model and has failed twice;
-   - its needed-by time is under 2 h: F8-02 by T0 + 9.1 h, F8-03 by T0 + 11.4 h, F9-03 by T0 + 15.2 h, and F14-02 part 2 at the end.
+2. **The ticket goes to `rescue` (Opus).** Power models are not used: on the shared meter, one debugging pass on Kimi K3 costs more than a whole Luna ticket. The user may opt a power model in for one step of at most 30 requests.
 4. **Handover to rescue.**
    1. The user stops the OpenCode session.
    2. The user opens Claude Code Opus 5.5 in that lane's worktree with the rescue prompt below.
    3. When rescue lands the ticket, the lane resumes.
 5. **Other rules.**
-   - A power-model ticket's fix-up after a written diagnosis may drop to DeepSeek V4.1 Flash to save quota; the same error a second time escalates.
+   - A fix-up after a written diagnosis may drop to DeepSeek V4.1 Flash to save budget; the same error a second time escalates.
    - Opus lanes never escalate to cheaper models. A stuck trunk or path ticket adds a diagnosing reviewer within its 3-agent cap.
    - A Session defect found by path's F11-03 becomes trunk's next ticket.
    - Sol keeps its tickets; rescue only resolves its `stage_director.gd` merge.
@@ -233,8 +234,8 @@ Both overflows are optional, and neither is expected under this plan (Luna's quo
 - Terra never takes a D ticket, anything sol owns, or any file outside those tickets.
 
 **OpenRouter (GLM-5.2 or DeepSeek, pay per token; set a spend cap on the key).** Plug the key into OpenCode and select it as that ticket's model when either:
-- the planned model and its fallback both show more than 90 % of the 5-hour window spent, and the next reset is more than an hour away; or
-- a model's weekly meter passes 80 %.
+- the shared OpenCode meter shows more than 90 % of the 5-hour window spent, and the next reset is more than an hour away; or
+- the weekly meter passes 80 %.
 
 Run easy tickets in batches of two or three in one session. Switch back as soon as the OpenCode window resets. The candidates:
 - F8-04, F12-04 and F12-03 part 1 (content);
@@ -325,7 +326,7 @@ You are lane terra of docs/engineering/SPRINT.md. Take only the ticket(s) the us
 ## Human steps
 
 - **Export templates.** Installed on 2026-09-23 (`%APPDATA%\Godot\export_templates\4.7.2.stable`).
-- **OpenCode model switches.** Switch models when a lane asks (about ten times before T0 + 11 h), or use the overnight fallback.
+- **OpenCode model switches.** Only Luna and DeepSeek V4.1 Flash remain: switch when a lane asks. Watch the shared meter; above 60 % of a window, switch the remaining Luna tickets to V4.1 Flash.
 - **Checkpoints.** Run `tools/lane.ps1 status <IDs>` from any lane folder, with the IDs of the checkpoint row.
 - **The human pass, reserved for about T0 + 21 to 24 h.**
   - D-01's listening pass.
