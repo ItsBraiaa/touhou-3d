@@ -22,6 +22,36 @@ Change: Transcribed STAGE_DESIGN's Stage 2 table into typed `.tres` Definitions 
 Why: F12-05 loads `stage_02.tres`; Astra tunes the values in D-06 while the approved structure stays.
 Action required by Astra: these files are yours. Free to change: the AFTER_PREVIOUS_WAVE delay (draft proposal 1.0 s) and the checkpoint `display_name`s (currently `"CP2-A"`/`"CP2-B"`). Must stay: the route order and completion conditions, the markers, 7 Power and 2 Shield Pickups, the five Gates and the resume points. Delete `metadata/dev` from a file once you have reviewed it.
 
+## 2026-09-23 21:07 — Claude (trunk) — F6-03 part 2: PlayerWeapon, Familiars, target dummies; closes F6-03 [shared]
+State: CODE_READY
+Files:
+- `scripts/combat/player_weapon.gd` (Astra's placeholder replaced by `PlayerWeapon`), `scripts/player/player_controller.gd`, `scripts/session/game_session.gd`.
+- `scenes/player/player_ship.tscn` **[shared]**: only the `PlayerShip` `weapon` reference and the `Weapon` exports `muzzle`, `familiar_anchors`, `camera_rig`, `familiar_scene`; no transform, mesh, shape, layer or monitoring change.
+- New: `scenes/dev/familiar.tscn`, `scenes/dev/target_dummy.gd` and `.tscn`, `docs/validation/weapon-rendering-familiars.png`.
+- Edited: `scenes/dev/arena_harness.gd` and `.tscn`.
+- Docs: `docs/engineering/weapon-rendering.md` ("WeaponModel", "PlayerWeapon contract", "TargetDummy"), `docs/validation/weapon-rendering.md`, `docs/GUIDE.md` (Section 5 Weapon line; Section 6 `player_weapon.gd` and `player_controller.gd` rows; Section 13 "Familiar anchors"), and the ROADMAP F6-03 row.
+
+Change:
+- **The ship shoots.** Holding `fire` spawns player Projectiles at the `WeaponModel` cadence (oc-a's part 1) from `Muzzle`, and from Power Level 2 also from both Familiar anchors, rotated by the camera yaw.
+- **Aim Assist.** Shots aim at the view's center point at the lock's depth and are bent onto the locked `HitVolume` inside each shot's cone.
+- **Familiars.** Two dev Familiars orbit the anchors from Power Level 2.
+- **Bomb button.** It is tracked from events and fed to `CombatState.update_bomb_input()`: one press spends one Bomb.
+- **Controls.** `PlayerController` gains the required `weapon` export, and `set_controls_enabled()` also turns fire off and on, so pause and Defeat stop firing.
+- **Dev harness.** Three `TargetDummy`s count hits and flash; keys 1 to 3 set the Power Level.
+- **Tests.** None were changed or added (sprint rule). A harness run gave `WEAPONCHECK_OK` headless and windowed.
+
+Why: F6-03 part 2, which closes the ticket.
+
+Action required by Astra:
+- **Tuning.** Shot values, cadences and Aim Assist cones are Inspector exports on `PlayerShip/Weapon`, Claude's proposals.
+- **Swap pending: D-02.** A final Familiar scene must have a `Node3D` root and no `CollisionObject3D` anywhere (the weapon refuses one that does).
+- **HitVolume placement.** Keep each target's `HitVolume` centered on its visible body, because Aim Assist aims at it.
+## 2026-09-23 21:05 — Astra (sol) — Combat visuals (D-02) [shared]
+State: SCENE_READY
+Files: `scenes/combat/visuals/*`, `assets/combat/*`, `assets/ui/menu_theme.tres`, `tools/validate_combat_visuals.gd`, `docs/validation/combat-visuals.md`, `docs/validation/combat-visuals.log`, `docs/validation/combat-visuals.png`, `docs/validation/menus-options-entry.png`, D-02's ticket, and the D-02 ROADMAP row.
+Change: Player Projectile is a cyan unit octahedron (6 vertices); hostile Projectile is a coral unit sphere (54 vertices); the dev sphere uses 104 vertices. `familiar.tscn` is a cyan/gold star of radius 0.58 with looping `hover`; `power_pickup_visual.tscn` is a gold crystal of radius 0.78; `shield_pickup_visual.tscn` is a blue orb of radius 0.76; each Pickup loops `float`. `bomb_blast_visual.tscn` uses see-through cyan rings with a unit outer edge and a non-looping/autoplay `blast` clip of 0.4 s that hides them. All scenes have no script or collision. Offline QA passed headless and windowed; the gallery was inspected. The Options slider focus fill is gold, distinct from unfocused teal, and its focused screenshot was recaptured.
+Why: Friendly shots, hostile patterns, Familiars and Pickups have distinct silhouettes while the Bomb shows its clear radius without hiding the next pattern.
+Action required by Claude: Trunk F6-02 sets `Main/ProjectileRoot`'s `player_projectile_mesh` and `hostile_projectile_mesh` exports to the two resources; trunk F6-03 sets `PlayerShip/Weapon.familiar_scene` to `familiar.tscn`; trunk F7-02 instances `bomb_blast_visual.tscn` inside its Bomb wrapper, scales it by `bomb_radius`, and frees it after `blast`; path F7-03 instances the Power and Shield scenes as `Visual` under its existing `Pickup` roots. Full paths are in `docs/validation/combat-visuals.md`.
 ## 2026-09-23 20:56 — OpenCode (oc-b) — F8-04 Stage 1 content draft (dev) [shared]
 State: dev
 Files: `content/stages/stage_01/stage_01.tres`, `s1_01.tres` … `s1_07.tres`, `cp1_a.tres`, `cp1_b.tres`, `docs/engineering/progression-core.md`, `docs/engineering/ROADMAP.md`, `.scratch/progression-core/issues/04-stage-01-content-draft.md`, `docs/HANDOFF_LOG.md`

@@ -1,0 +1,85 @@
+[gd_scene format=3]
+
+[ext_resource type="Material" path="res://assets/combat/bomb_ring.tres" id="1_k6xk8"]
+
+[sub_resource type="TorusMesh" id="TorusMesh_k6xk8"]
+material = ExtResource("1_k6xk8")
+inner_radius = 0.93
+rings = 24
+ring_segments = 6
+
+[sub_resource type="TorusMesh" id="TorusMesh_1cr8t"]
+material = ExtResource("1_k6xk8")
+inner_radius = 0.65
+outer_radius = 0.7
+rings = 24
+ring_segments = 6
+
+[sub_resource type="Animation" id="Animation_tltwx"]
+length = 0.4
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("OuterRing:transparency")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.4),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [0.15, 1.0]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("OuterRing:visible")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.4),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [true, false]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("InnerRing:transparency")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.4),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [0.15, 1.0]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("InnerRing:visible")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0, 0.4),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [true, false]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_7o72m"]
+_data = {
+&"blast": SubResource("Animation_tltwx")
+}
+
+[node name="BombBlastVisual" type="Node3D" unique_id=1810479566]
+
+[node name="OuterRing" type="MeshInstance3D" parent="." unique_id=1299504996]
+mesh = SubResource("TorusMesh_k6xk8")
+
+[node name="InnerRing" type="MeshInstance3D" parent="." unique_id=906700173]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0)
+mesh = SubResource("TorusMesh_1cr8t")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=1455719895]
+libraries/ = SubResource("AnimationLibrary_7o72m")
+autoplay = &"blast"

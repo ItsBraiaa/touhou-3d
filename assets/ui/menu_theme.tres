@@ -38,6 +38,11 @@ content_margin_top = 3.0
 content_margin_bottom = 3.0
 bg_color = Color(0.42, 0.72, 0.68, 1)
 
+[sub_resource type="StyleBoxFlat" id="SliderFillFocus"]
+content_margin_top = 3.0
+content_margin_bottom = 3.0
+bg_color = Color(0.93, 0.72, 0.32, 1)
+
 [sub_resource type="StyleBoxFlat" id="Slider"]
 content_margin_top = 3.0
 content_margin_bottom = 3.0
@@ -68,7 +73,7 @@ Button/styles/pressed = SubResource("ButtonPressed")
 CheckButton/styles/focus = SubResource("Focus")
 HSlider/styles/focus = SubResource("Focus")
 HSlider/styles/grabber_area = SubResource("SliderFill")
-HSlider/styles/grabber_area_highlight = SubResource("SliderFill")
+HSlider/styles/grabber_area_highlight = SubResource("SliderFillFocus")
 HSlider/styles/slider = SubResource("Slider")
 Label/colors/font_color = Color(0.87, 0.91, 0.9, 1)
 OptionButton/styles/focus = SubResource("Focus")
