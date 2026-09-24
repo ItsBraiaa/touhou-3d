@@ -15,6 +15,22 @@ Action required by <other agent>: <what they must do, or "none">
 
 ---
 
+## 2026-09-24 00:20 — Claude (path) — F3-02: Options bound to Settings, buses and window
+State: CODE_READY
+Files: New `scripts/ui/options_screen.gd`. Edited `scripts/ui/interface.gd` (`settings_path`, `get_settings()`, the Options binding, `restore_defaults` resolved). Docs: `docs/engineering/settings.md` ("Options binding"), `docs/engineering/menus-session.md` (the Interface contract and the Session actions row), `docs/GUIDE.md` (Section 6 `interface.gd`, Section 14 "State and verification"), and the ROADMAP F3-02 row.
+Change:
+- **`Interface`** owns the one `Settings`. It reads `settings_path` (default `user://settings.cfg`) once at boot; a bad file is a warning and the defaults are used. `get_settings()` exposes it.
+- **A code-built `OptionsScreen` under the Options root** does the binding:
+  - it fills the eight Section 14 widgets without signals, then connects them;
+  - it applies Master, Music and SFX (0 mutes only that bus) and the window (Janela at the chosen resolution, stepped down to fit the screen; Tela cheia keeps the resolution for Janela);
+  - it saves after each explicit change, and Defaults restores, refreshes and saves once.
+- **Defaults** (`restore_defaults`) no longer reaches the Session.
+- **Stored but not yet applied:** camera sensitivity, invert vertical and the input device.
+- **Checks.** Tests: none (sprint rule). A scripted headless check of every behavior the ticket lists is recorded in `settings.md`.
+Why: F3-02 (moved to path).
+Action required by Astra: the eight widget paths, the item order of Janela/Tela cheia, the three resolutions and Automático/Teclado/Controle, and the slider ranges are load-bearing. A mismatch is reported at boot and leaves that field unbound. Values authored in `options.tscn` are now overwritten at boot by the saved values or the defaults.
+Action required by Claude (trunk): F3-04 reads `interface.get_settings()` for `camera_sensitivity` and `invert_vertical`, listening to `Settings.changed` for live changes. `game_session.gd` needed no edit. The windowed display pass is owed to F3-04 part 1 (path).
+
 ## 2026-09-23 23:40 — Claude (path) — F6-04: Aim Assist follows the Target Lock under lock framing
 State: CODE_READY
 Files: `scripts/combat/player_weapon.gd` (the fire path and one new export), `docs/validation/enemies.md` (re-measurement; the F9-02 finding marked resolved), `docs/engineering/weapon-rendering.md` ("Aim Assist under a lock"), `docs/GUIDE.md` (Section 6 `player_weapon.gd` row), the ROADMAP F6-04 row.

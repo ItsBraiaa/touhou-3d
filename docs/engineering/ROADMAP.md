@@ -36,7 +36,7 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | | | | 04 game-session-start-pause-quit | integration | no | — | done (menu-to-flight flow scripted on keyboard and gamepad; physical-device pass owed; Stage 2 wired too) |
 | F3 | Settings | `settings` | 00 plan | docs | no | — | done (cut, then reinstated by the sprint plan, 2026-09-23) |
 | | | | 01 settings-core-and-configfile | core | yes | oc-b | done (2026-09-23: `Settings` core and explicit ConfigFile persistence landed; no tests per sprint rule) |
-| | | | 02 options-screen-binding | adapter | no | path | todo |
+| | | | 02 options-screen-binding | adapter | no | path | done (2026-09-23: `Interface` owns the one `Settings`; `OptionsScreen` binds the eight widgets, applies buses and window, saves on change and Defaults; no new tests, by the sprint rule; windowed display pass owed to F3-04 part 1) |
 | | | | 03 input-device-mode-and-controller-disconnect | adapter | no | path | todo |
 | | | | 04 settings-to-camera-wiring | integration | no | trunk (part 1: path) | todo |
 | F4 | Combat state and HUD | `combat-hud` | 00 plan | docs | no | — | done (one-pass planning, 2026-09-23; 01 was written and delivered separately) |
