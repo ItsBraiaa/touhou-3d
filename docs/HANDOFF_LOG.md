@@ -1,5 +1,16 @@
 # Handoff Log
 
+## 2026-09-24 — OpenCode (oc-a) — F16-09: targeting ignores the press that resumed play
+State: CODE_READY
+Files: `scripts/player/targeting.gd`; `scripts/player/player_controller.gd` (the resume-guard call and its doc comment only); `docs/engineering/player-flight.md` (one bullet in "Targeting contract"); `docs/engineering/menus-session.md` (one Open issues line); `.scratch/controls-expansion/issues/09-targeting-ignores-the-resume-press.md` (Status, Outcome); `docs/engineering/ROADMAP.md` (the F16-09 row).
+Change:
+- `Targeting` now uses the dash's release latch: `var _input_armed`, cleared by the new public `require_release()`. At the top of `_physics_process`, while disarmed, a tick sets `_input_armed` once both `lock_target` and `next_target` are released and treats this tick's `lock_pressed` and `next_pressed` as false; the held lock's `validate` and the press branches are otherwise unchanged.
+- `PlayerController.set_controls_enabled(true)` calls `targeting.require_release()` beside `_dash_input_armed = false`, guarded by `if targeting != null`. The resume press can now reach neither the dash nor targeting.
+- Docs: one bullet in player-flight.md's "Targeting contract" and one Open issues line in menus-session.md. No `game_session.gd`, `camera_rig.gd`, scene or test change.
+Why: F16-06 recorded that with Lock or Next remapped onto B, the press that resumes from Pause -- or A starting a stage with Lock on A -- locks or switches at once, since a poll still sees that press on the first unpaused tick.
+Verification: no tests or drivers (F16 rule). Verified by reading; `tools/lane.ps1 land` is the gate and runs the existing suite (its targeting contract tests included), the boot smoke and the resource check.
+Action required by Astra (F16-07): remap Lock to B, pause, resume with B, and confirm nothing gets locked in the integrated device walk.
+
 ## 2026-09-24 — Claude (plan) — F16-09 and F16-10: two small OpenCode follow-ups from the F16 reviews
 State: PLANNED
 Files: `.scratch/controls-expansion/issues/09-targeting-ignores-the-resume-press.md` (new), `.scratch/controls-expansion/issues/10-spec-api-list-matches-shipped-code.md` (new), `docs/engineering/ROADMAP.md` (two F16 rows).

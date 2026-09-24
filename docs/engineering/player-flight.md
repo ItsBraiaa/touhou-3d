@@ -187,6 +187,8 @@ A group member that is not a `Node3D` or has no `HitVolume` child is skipped, wi
 
 `Targeting` runs after `PlayerController` and before `CameraRig` in the same tick, by tree order, so it measures the ship where it ended up this tick and the camera where the rig left it last frame.
 
+- **The resume press.** The adapter starts disarmed, and the public `require_release()` disarms it again; `PlayerController.set_controls_enabled(true)` calls it, so it runs at spawn and on every Resume (F16-09). While disarmed, a tick reads no press and only waits for both actions to be released; a held lock is still validated and released. So the press that resumed play, even when it is also `ui_cancel`, cannot lock or switch.
+
 ## Dependencies
 
 The core imports nothing, holds no Node, and is constructed with `FlightModel.new()` by the adapter, which injects the authored values through `configure()` and the Flight Volume through `set_bounds()`.
