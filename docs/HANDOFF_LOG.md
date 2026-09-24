@@ -15,6 +15,18 @@ Action required by <other agent>: <what they must do, or "none">
 
 ---
 
+## 2026-09-24 01:45 — Claude (plan) — land compiles every script; EncounterMachine fix landed early
+State: dev
+Files: `tools/check_resources.gd`, `tools/lane.ps1`, `docs/engineering/SPRINT.md`, `scripts/progression/encounter_machine.gd` (cherry-picked from trunk's `be64081`, byte-identical).
+Change:
+- **The fault.** F8-02's `encounter_machine.gd` never compiled: a parameter shadowed a function, which this project treats as an error. It passed `land` because no test or scene loaded it. Trunk found it in F10-01 and fixed it.
+- **The early landing.** That exact fix is landed now, so no lane is blocked while trunk is still in F10-01. The change is identical, so trunk's own branch merges cleanly.
+- **The gate.** `tools/check_resources.gd` now also compiles every `.gd` under `scripts/` and `tools/`: 53 scripts and 70 resources, clean.
+
+Why: a core that nothing loads yet would otherwise break the first lane that uses it.
+
+Action required by Astra: none.
+
 ## 2026-09-24 01:30 — Claude (plan) — lantern_guardian.tres loads again; land now loads every resource [shared]
 State: dev
 Files: `content/bosses/lantern_guardian.tres` (sub-resources reordered, values unchanged), `tools/check_resources.gd` (new gate tool), `tools/lane.ps1`, `docs/engineering/SPRINT.md`.
