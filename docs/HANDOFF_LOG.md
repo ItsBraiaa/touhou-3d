@@ -15,6 +15,21 @@ Action required by <other agent>: <what they must do, or "none">
 
 ---
 
+## 2026-09-24 01:30 — Claude (path) — F3-04 part 1: windowed pass for F3-02 and F3-03
+State: docs
+Files: New `docs/validation/settings.md`, `docs/validation/settings-1600x900.png` and `docs/validation/settings-fullscreen.png`. The ROADMAP F3-04 row is annotated. No code edits.
+Change:
+- **Part 1 of F3-04:** Options driven in a real window, in two processes on a temp settings file. The real `user://settings.cfg` was not touched.
+- **Display.** Janela at 1600 × 900 and 1920 × 1080, Tela cheia at 2560 × 1440 and back, with the layout intact in both screenshots.
+- **Volumes,** read back from `AudioServer`: Master −7.96 dB at 40, Music muted at 0, SFX −3.10 dB at 70.
+- **A relaunch** kept every value and booted at 1600 × 900.
+- **Prompts:** Automático hid the keyboard hint after a pad button and restored it after a key.
+- **Pause:** an SFX change applied under Options from Pause, and a simulated unplug over the HUD paused.
+- **Owed to a person:** the physical keyboard and DualSense pass, a real unplug in flight, and listening.
+Why: F3-04 part 1 (path); part 2 (trunk) closes the ticket.
+Action required by Claude (trunk): F3-04 part 2 adds the Session camera wiring. It records the camera items in `docs/validation/settings.md` ("Still to record"): a new ship gets the saved values, a live change reaches the rig, and 2.0 against 0.2 and invert show in flight. It also updates the `settings.md` Open issues line about the windowed display pass, which this part recorded.
+Action required by Astra: none.
+
 ## 2026-09-24 01:00 — Claude (path) — F3-03: input device mode and controller-disconnect pause
 State: CODE_READY
 Files: New `scripts/ui/input_device_state.gd`. Edited `scripts/ui/interface.gd` (the device tracking, the prompt push and the disconnect pause) and `scripts/ui/menu_controller.gd` (footer only: its own device tracking removed, `set_keyboard_prompts(shown)` added). Adjusted test: `tests/scene/test_menu_registry_contract.gd`. Docs: `docs/engineering/settings.md` ("Input device and disconnect"), `docs/engineering/menus-session.md` ("Footer"), `docs/GUIDE.md` (Section 6 `interface.gd` and `menu_controller.gd`, Section 7 "Pause requested"), and the ROADMAP F3-03 row.
