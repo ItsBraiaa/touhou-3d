@@ -15,6 +15,19 @@ Action required by <other agent>: <what they must do, or "none">
 
 ---
 
+## 2026-09-24 09:45 â€” Claude (plan) â€” Delivery day: Retry pickups, validators, duplicate visuals; F13-03 and F3-04 part 2 to path
+State: PLANNED
+Files: `.scratch/stage-director/issues/05-retry-restores-checkpoint-pickups.md`, `06-stage-validators-accept-the-director.md` and `.scratch/design-sprint/issues/08-enemy-visuals-duplicate-parts.md` (new); `docs/engineering/SPRINT.md`, `docs/engineering/ROADMAP.md`; the Lane and Model lines of F13-03 and F3-04.
+Change:
+- **F10-05** carries Astra's Retry rule in lane path. The pickups that existed when the Checkpoint was activated come back on Retry: those collected before it stay collected, those available at it reappear, and those generated after it are removed and return through the replayed encounters' rewards.
+- **F10-06** (oc-a) makes `tools/validate_stage_01.gd` accept the Stage's Director.
+- **D-08** (oc-a) first confirms the duplicate model parts trunk reported in the four enemy visual scenes, and fixes them only if confirmed.
+- **Queue moves.** To shorten trunk's serial chain, F13-03 and F3-04 part 2 move to path. `game_session.gd` and `main.tscn` are edited by two lanes today, under the sync-first, separate-functions, second-lander-merges rule.
+- **Checkpoint names.** CP1-A and CP1-B already have their Portuguese names (Portal Selado, Entrada do SantuÃ¡rio); the report of ids on Defeat was stale.
+
+Why: Astra's design answer, and delivery-day throughput.
+
+Action required by Astra: review D-08's result when it lands; it edits your four visual scenes [shared].
 ## 2026-09-23 23:36 â€” Claude (path) â€” F14-01 pre-flight: dev-01 exported and run outside the repository
 State: docs
 Files: `docs/HANDOFF_LOG.md` only (this entry). No code, scene, preset, ticket or ROADMAP edit; F14-01 stays `todo` for trunk.
@@ -899,13 +912,13 @@ Change: Recorded the accepted vocabulary, the four architectural decisions, the 
 Why: Result of the planning grill with the user; establishes how Claude writes and verifies GDScript for this project.
 Action required by Astra: read `docs/engineering/ROADMAP.md`, especially "Requests to Astra". From ticket F0-03 onward Claude owns `project.godot`, `export_presets.cfg`, `default_bus_layout.tres`, and `scenes/main.tscn`; the `tools/build_*.py` generators must not be rerun over integrated scenes without reconciling first. Astra's `.scratch/stage-01-area/` and `docs/STAGE_01_HANDOFF.md` were read and are reflected in the roadmap.
 
-## 2026-09-23 — OpenCode (oc-a) — F12-06 part 1
+## 2026-09-23 ï¿½ OpenCode (oc-a) ï¿½ F12-06 part 1
 
 Files: `content/bosses/tempest_sentinel.tres`, `content/patterns/sentinel_aimed_burst.tres`, `content/patterns/sentinel_rotating_fan.tres`.
 
 Change: Added the dev Tempest Sentinel BossDefinition with two proposed attacks and two health phases. Phase 1 uses alternating charged aimed bursts; Phase 2 uses rotating fans with alternating player-height tracking and fixed altitude shifts. All three resources carry `metadata/dev = true`. Proposed values and attack names remain for Astra's D-06 review. Part 1 only; scene integration remains with sol.
 
-## 2026-09-23 — OpenCode (oc-a) — F12-07 part 1
+## 2026-09-23 ï¿½ OpenCode (oc-a) ï¿½ F12-07 part 1
 
 Files: `content/bosses/storm_guardian.tres`, `content/patterns/storm_spiral.tres`, `content/patterns/storm_thunder_rings.tres`, `content/patterns/storm_aimed_burst.tres`.
 

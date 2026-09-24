@@ -4,8 +4,8 @@ Status: todo
 Type: integration
 parallel-safe: no
 Depends on: F10-03, F3-02
-Lane: trunk (part 1: path)
-Model: part 1 Claude Opus 5.5, solo (lane path); part 2 Claude Opus 5.5, solo
+Lane: path
+Model: Claude Opus 5.5, solo
 
 > **Split (SPRINT.md):**
 > - **Part 1, lane path** (after F3-02 and F3-03): the windowed F3 pass, `docs/validation/settings.md` and its screenshots. No code edits. Commit with `(F3-04 part 1)`.

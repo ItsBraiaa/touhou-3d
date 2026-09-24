@@ -38,7 +38,7 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | | | | 01 settings-core-and-configfile | core | yes | oc-b | done (2026-09-23: `Settings` core and explicit ConfigFile persistence landed; no tests per sprint rule) |
 | | | | 02 options-screen-binding | adapter | no | path | done (2026-09-23: `Interface` owns the one `Settings`; `OptionsScreen` binds the eight widgets, applies buses and window, saves on change and Defaults; no new tests, by the sprint rule; windowed display pass owed to F3-04 part 1) |
 | | | | 03 input-device-mode-and-controller-disconnect | adapter | no | path | done (2026-09-23: one `InputDeviceState` in `Interface` drives every menu footer; a controller unplugged over the HUD pauses through `pause`; no new tests, by the sprint rule; physical unplug owed to the human pass) |
-| | | | 04 settings-to-camera-wiring | integration | no | trunk (part 1: path) | todo (part 1 landed 2026-09-24: the windowed F3 pass in `docs/validation/settings.md`; part 2, the Session camera wiring, closes it) |
+| | | | 04 settings-to-camera-wiring | integration | no | path | todo (part 1 landed 2026-09-24: the windowed F3 pass in `docs/validation/settings.md`; part 2, the Session camera wiring, closes it) |
 | F4 | Combat state and HUD | `combat-hud` | 00 plan | docs | no | — | done (one-pass planning, 2026-09-23; 01 was written and delivered separately) |
 | | | | 01 combat-state-core | core | yes | — | done |
 | | | | 02 hud-binding-and-target-marker | adapter | no | trunk | done (2026-09-23: `Hud` bound to the Session's `CombatState` and each ship's `Targeting`; marker verified in the harness) |
@@ -71,6 +71,8 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | | | | 02 gate-and-checkpoint-adapters | adapter | no | trunk | done (2026-09-23: `Gate` and `Checkpoint` on Stage 1; the whole route flown from the menu, Gates open as Encounters clear, CP1-A and CP1-B refill once; no new tests per the sprint rule) |
 | | | | 03 retry-restart-flow | integration | no | trunk | done (2026-09-23: Retry resumes in place from the latest Checkpoint, Restart reloads, Defeat names the Checkpoint; verified in the running game, no new tests per the sprint rule) |
 | | | | 04 stage-01-contract-smoke-test | test | yes (one new test file) | — | cut (the user's no-tests rule, 2026-09-23) |
+| | | | 05 retry-restores-checkpoint-pickups | adapter | no | path | todo |
+| | | | 06 stage-validators-accept-the-director | tooling | yes | oc-a | todo |
 | F11 | Run flow | `run-flow` | 00 plan | docs | no | — | done (one-pass planning) |
 | | | | 01 defeat-results-retry-restart-screens | integration | no | trunk | todo |
 | | | | 02 campaign-continuation-and-direct-stage | integration | no | trunk | todo |
@@ -86,7 +88,7 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | F13 | Audio | `audio` | 00 plan | docs | no | — | done (cut, then reinstated by the sprint plan, 2026-09-23) |
 | | | | 01 audio-limiter-core | core | yes | oc-a | done |
 | | | | 02 audio-controller-adapter | adapter | no | oc-a | done (no new tests, by the sprint rule; headless Dummy-driver check recorded in audio.md) |
-| | | | 03 audio-event-wiring | integration | no | trunk | todo |
+| | | | 03 audio-event-wiring | integration | no | path | todo |
 | F14 | Delivery | `delivery` | 00 plan | docs | no | — | done (one-pass planning) |
 | | | | 01 export-and-run-outside-editor | integration | no | trunk | todo (blocks itself until the user installs the Godot 4.7.2 export templates) |
 | | | | 02 package-and-acceptance-record | tooling | no | oc-b | todo |
@@ -97,6 +99,7 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | | | | 05 stage-1-tuning-and-pacing | design | — | sol | done (2026-09-23: content values, names, clip candidates and provisional 221 s estimate) |
 | | | | 06 stage-2-content-review | design | — | sol | todo (pass 1 values/reward review and provisional pacing estimate landed; passes 2–3 pending) |
 | | | | 07 shrine-lighting-and-boss-rulings | design | — | sol | doing (Part B rulings delivered; Parts A and C await F12-03) |
+| | | | 08 enemy-visuals-duplicate-parts | design | — | oc-a | todo |
 
 Order rationale: Player before Menus (highest UX risk and GUIDE Section 13's assignment). Audio buses are created in F0-03 so F3 can bind Options to them. Enemies (F9) come before the Stage Director (F10) so the Director is integrated against real Waves. The sprint's lane queues, checkpoints and kickoff prompts are in [SPRINT.md](SPRINT.md).
 
