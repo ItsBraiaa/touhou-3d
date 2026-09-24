@@ -22,6 +22,17 @@ Change: Stage 1 has a navy night palette, moon, warm sparse lanterns, textured f
 Merge note: scenes/stages/stage_01.tscn overlapped with trunk F10-01 Stage Director attachment; the merge keeps both resource declarations and the Director script exports.
 Why: User review requested a stronger Stage 1 night presentation, removal of the pink sky column, and readable out-of-bounds edges on both stages.
 Action required by Claude: preserve Environment/BoundaryRails and the authored lighting/veil when attaching Stage Director and stage actors. The existing FlightBounds walls continue to provide physical containment; include them in the integrated flight pass. No wiring change is required for the rails.
+## 2026-09-24 01:00 — Claude (path) — F3-03: input device mode and controller-disconnect pause
+State: CODE_READY
+Files: New `scripts/ui/input_device_state.gd`. Edited `scripts/ui/interface.gd` (the device tracking, the prompt push and the disconnect pause) and `scripts/ui/menu_controller.gd` (footer only: its own device tracking removed, `set_keyboard_prompts(shown)` added). Adjusted test: `tests/scene/test_menu_registry_contract.gd`. Docs: `docs/engineering/settings.md` ("Input device and disconnect"), `docs/engineering/menus-session.md` ("Footer"), `docs/GUIDE.md` (Section 6 `interface.gd` and `menu_controller.gd`, Section 7 "Pause requested"), and the ROADMAP F3-03 row.
+Change:
+- **One `InputDeviceState` in `Interface`** decides every menu's keyboard hint from Options' input device. Automático follows the last device used, Teclado always shows the hint, and Controle hides it while a pad is connected. The menus no longer track devices, so they cannot disagree.
+- **A controller unplugged while the HUD is on top** injects the ordinary `pause` action, so the Session pauses and the keyboard drives Pause. Teclado mode skips this. Over Pause, Options, Defeat, Results or the menus nothing happens.
+- **Adjusted test (SPRINT: an existing test broken by an intentional change):** `test_menu_registry_contract.gd::test_the_footer_hides_on_gamepad_input_and_returns_on_keyboard_input` is now `test_set_keyboard_prompts_shows_and_hides_the_footer`.
+- **Checks.** No new tests. The scripted headless checks are recorded in `settings.md`, and `validate_menus.gd` still gives `MENUS_OK`.
+Why: F3-03 (moved to path; PLANEJAMENTO Section 7).
+Action required by Astra: `Layout/NavigationHint` stays load-bearing on the five full screens. No gamepad hint text or glyphs are planned.
+Action required by Claude (trunk): F11-01 edits `menu_controller.gd` `_ready` and the registry test. Keep this ticket's `_ready` tail: the `_footer` lookup only, with no joypad connection. `game_session.gd` needed no edit. A physical DualSense unplug is owed to the human pass.
 
 ## 2026-09-23 22:40 — Claude (trunk) — F10-01: StageDirector attached to Stage 1 [shared]
 State: CODE_READY

@@ -180,7 +180,7 @@ The Results value labels (time, score, Graze, bombs) are F11's.
 
 ### Footer
 
-`Layout/NavigationHint`, the keyboard hint on the five full screens, is hidden after a gamepad button or a stick pushed past 0.5 and shown again after a key press or when the last gamepad is disconnected. Every menu tracks this in `_input` even while hidden, so the next screen opens with the right state. Pause, Defeat and Results are authored without a footer; the path is pinned by a test instead of a runtime log.
+`Layout/NavigationHint` is the keyboard hint on the five full screens. Since F3-03 no menu tracks devices: `Interface` owns the one `InputDeviceState` and calls `MenuController.set_keyboard_prompts(shown)` on every menu when the prompts change, so the next screen opens with the right state and the menus cannot disagree. Which prompts show depends on Options' input device (Automático follows the last device used, Teclado always shows the hint, Controle hides it while a pad is connected): see [settings.md](settings.md) "Input device and disconnect". Pause, Defeat and Results are authored without a footer; the path is pinned by a test instead of a runtime log.
 
 ### Menu input bindings
 
