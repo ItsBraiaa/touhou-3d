@@ -116,7 +116,7 @@ Run top to bottom. When the next ticket's dependencies are not done, take the fi
 | 13 | ~~F13-03~~: moved to path on delivery day | — | — |
 | 14 | ~~F3-04 part 2~~: moved to path on delivery day | — | — |
 | 14b | F11-03 active-and-clear-time-verification, as the manual protocol and `docs/validation/clear-time.md` only (no tests; moved from path) | solo | F11-02 |
-| 15 | F14-01 export-and-run-outside-editor, starting with the swap step. **Start rule:** begin once F12-07, F13-03, F10-05 and D-07 have landed, so the build ships them, or at the user's cutoff time, whichever comes first. What has not landed by then ships as it is on `dev-01`. | solo | F11-03, F12-03 |
+| 15 | F14-01 export-and-run-outside-editor. **Delivery is 18:00.** Run its swap step now. Export once F13-04 has landed, and at 15:30 at the latest with whatever is on `dev-01`. Record the densest-boss FPS on the Storm Guardian. | solo | F11-03, F12-03 |
 
 Slip rule: if F11-02 has not landed by T0 + 19.5 h, run F14-01 straight after F11-03 (before F13-03 and F3-04), and F14-02 re-exports at the end.
 
@@ -139,6 +139,7 @@ Slip rule: if F11-02 has not landed by T0 + 19.5 h, run F14-01 straight after F1
 | 9a | F3-04 part 2: the Session additions (moved from trunk); closes the ticket | solo | F10-03, F3-02, F3-04 part 1 |
 | 9b | F13-03 audio-event-wiring (moved from trunk) | 2 agents | F13-02, F12-03, F7-03, D-01 |
 | 9c | F10-05 retry-restores-checkpoint-pickups (Astra's Retry rule) | solo | F10-03, F12-03 |
+| 9d | F13-04 apply-astras-revised-sfx-selection (the user chose Astra's revised list; land by about 13:30, before F14-01's export) | solo | F13-03 |
 | 10 | ~~F11-03~~: moved to trunk on delivery day (trunk is idle before F14-01) | — | — |
 
 Expected gaps (stop the session): about T0 + 4.0 to 5.9 h, T0 + 10.7 to 12.4 h, and T0 + 13.2 to 19.5 h.
@@ -176,6 +177,7 @@ Expected gaps (stop the session): about T0 + 4.0 to 5.9 h, T0 + 10.7 to 12.4 h, 
 | 9 | ~~F3-03~~: moved to path (shared OpenCode budget) | — | — |
 | 9b | F14-02 part 1b: draft `docs/validation/acceptance.md`, one row per acceptance check in PLANEJAMENTO Section 12 and STAGE_DESIGN "Acceptance checks for stage progression", with its source line, the ticket that delivers it, and "not yet verified". No code. Commit with `(F14-02 part 1b)` | DeepSeek V4.1 Flash (GPT 5.6 Luna) | none |
 | 10 | F14-02 part 2: re-export after sync, package, acceptance record; closes the ticket. Fills in the part 1b table | DeepSeek V4.1 Flash (GLM-5.3-Flash) | F14-01 |
+|  | **Timing:** start part 2 as soon as F14-01 lands, and have it landed by 16:30 so the user's human pass (16:30 to 17:30) runs on the packaged build. | | |
 
 ### sol (Codex, GPT Sol as Astra)
 

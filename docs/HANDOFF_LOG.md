@@ -139,6 +139,17 @@ Action required by <other agent>: <what they must do, or "none">
 
 ---
 
+## 2026-09-24 12:00 — Claude (plan) — Delivery at 18:00: F13-04 applies Astra's revised SFX list; export timeline
+State: PLANNED
+Files: `.scratch/audio/issues/04-apply-astras-revised-sfx-selection.md` (new), `docs/engineering/SPRINT.md`, `docs/engineering/ROADMAP.md`.
+Change:
+- **Sound.** The user chose Astra's revised selection (`sound_effects/`, 5 files swapped, new gains, intervals and voices, a global cap of 8). F13-04 in lane path applies it by about 13:30.
+- **Export.** Trunk's F14-01 runs its swap step now, and exports once F13-04 has landed, at 15:30 at the latest.
+- **Package.** oc-b's F14-02 part 2 lands by 16:30, and the human pass runs from 16:30 to 17:30.
+
+Why: the delivery time is 18:00.
+
+Action required by Astra: none; your revised list becomes the shipped mix.
 ## 2026-09-24 10:55 — Claude (plan) — Endgame routing: F11-03 to trunk, F14-01 start rule
 State: PLANNED
 Files: `docs/engineering/SPRINT.md` (trunk and path queues), `.scratch/run-flow/issues/03-active-and-clear-time-verification.md` (Lane), `docs/engineering/ROADMAP.md`.

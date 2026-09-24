@@ -89,6 +89,7 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | | | | 01 audio-limiter-core | core | yes | oc-a | done |
 | | | | 02 audio-controller-adapter | adapter | no | oc-a | done (no new tests, by the sprint rule; headless Dummy-driver check recorded in audio.md) |
 | | | | 03 audio-event-wiring | integration | no | path | done (2026-09-24: `AudioController` on `Main/Audio` with D-01's 17 effects and volumes, no music; every producer connected once where the Session owns it, `stop_all()` on unload and Retry; driven from the menu through Retry, two Restarts, the Lantern Guardian and Return to Menu, headless and windowed; no new tests per the sprint rule; listening pass owed) |
+| | | | 04 apply-astras-revised-sfx-selection | integration | no | path | todo |
 | F14 | Delivery | `delivery` | 00 plan | docs | no | — | done (one-pass planning) |
 | | | | 01 export-and-run-outside-editor | integration | no | trunk | todo (blocks itself until the user installs the Godot 4.7.2 export templates) |
 | | | | 02 package-and-acceptance-record | tooling | no | oc-b | todo |
