@@ -1,5 +1,38 @@
 # Handoff Log
 
+## 2026-09-24 — Claude (trunk) — F16-02: binding profiles, persistence and InputMap adapter [shared]
+State: CODE_READY
+Files: `scripts/settings/input_bindings.gd` (new) and its `.uid`; `scripts/settings/settings.gd`; `scripts/ui/input_binding_adapter.gd` (new) and its `.uid`; `scripts/ui/interface.gd`; `docs/engineering/settings.md` (only the section "F16 binding profiles and persistence (F16-02)"); `docs/validation/controls-expansion.md` (only the F16-02 section); `.scratch/controls-expansion/spec.md` [shared] (the descriptor line and the API list, per the spec's own refinement rule); `.scratch/controls-expansion/issues/02-binding-profiles-and-persistence.md` (Status, Outcome); `docs/engineering/ROADMAP.md` (the F16-02 row). `project.godot` is unchanged: part 1's defaults were already right.
+Change:
+- **`InputBindings`** (Rules Core) is the catalog.
+  - It has 27 actions: every gameplay action, `camera_recenter`, the dashes, and the eight `ui_*` actions the menus use. Each one has a Portuguese label, a category (Movimento, Combate, Câmera, Menus), a context mask and a required flag.
+  - There are two profiles, `keyboard_mouse` and `gamepad`, with two slots each. The defaults equal `project.godot`, and Godot's built-in events for the `ui_*` directions and the Tab pair. Numpad Enter is a fixed third `ui_accept` key, so no default is lost.
+  - A binding is a validated primitive descriptor.
+  - Conflicts count within a profile when contexts overlap. Gameplay and menu actions never overlap, `pause` is in both, and `pause`/`ui_cancel` on Escape is the one permitted overlap.
+  - `assign` is one transaction, with swap, replace and cancel. A replacement that leaves a required action unbound is refused.
+- **`Settings`** adds the new `[controls]` values and the profiles.
+  - Values: `controls_version=1`, `binding_profiles`, `camera_input_mode` (keys or mouse), `mouse_sensitivity` (0.12, 0.02 to 0.50), `mouse_invert_vertical`, `camera_deadzone` (0.2, 0.05 to 0.5) and `controller_glyph_family` (auto, xbox or playstation).
+  - Old files migrate silently, and a load never writes, so the real `settings.cfg` is untouched until the next explicit save.
+  - The save is atomic: tmp, read back, `.bak`, rename.
+  - `apply_input_bindings(draft, needs_confirmation)` saves before anything goes live. With a confirmation it also saves the confirmed profiles and a marker, and a boot with the marker restores them. `confirm_input_bindings` and `revert_input_bindings` finish the confirmation.
+  - Global Defaults now covers the new values and the profiles.
+- **`InputBindingAdapter`** is the only `InputMap` writer for catalog actions.
+  - Both profiles are live, with device −1, and the deadzones are untouched, so analog input stays analog. Actions outside the catalog are kept.
+  - `describe_event` handles physical and layout keys, Shift+Tab, Left Shift and Left Ctrl, and axis plus sign.
+  - `find_default_drift` checks the catalog against `project.godot` at every editor-build boot.
+- **`Interface`** installs the saved profiles before the menus are instanced. It reinstalls them on `Settings.changed(BINDING_PROFILES)` and restores the defaults on `_exit_tree`. It adds `get_input_binding_adapter()`.
+Why: F16-03 (Controls screen), F16-04 and F16-06 (camera settings) and F16-08 (glyph family) need one validated data contract and one safe persistence path before they wire any UI.
+Verification: no tests or drivers (F16 rule).
+- The existing suite passed (225).
+- The 300-frame headless boot and `check_resources --strict-validate` were clean.
+- The drift check was proven by one temporary broken default, then reverted.
+- The real `settings.cfg` was not rewritten.
+- Transactions, fallback, save and recovery were checked by reading only; the human pass list is in `docs/validation/controls-expansion.md`.
+Action required by trunk:
+- **F16-03** edits a draft (`InputBindings.new()` + `restore(live.capture())`) and calls `Settings.apply_input_bindings`, never the live instance. It passes the action to `describe_event(event, action)`. It uses `InputBindings.CATALOG` and `CATEGORIES` for the rows, and it wires `get_controller_glyph_family()` to F16-08's `set_glyph_override`.
+- **The suite loads the real `user://settings.cfg`.** After the user remaps a key that a scene test drives by key event, that test runs on the remap and can fail. `_exit_tree` stops the leak between tests, but not inside one. The fix is a temporary `settings_path` for the suite's `main.tscn`, which is a test-harness change the no-tests rule forbids today. Until the user allows it, remap only in a build you are not gating.
+Action required by Astra: none. The Portuguese action labels and required flags are Claude's proposal; send changes to trunk.
+
 ## 2026-09-24 — Claude (plan) — F16 routing: five lanes at once; F16-02 part 1 action defaults; F16-08 carved out [shared]
 State: PLANNED
 Files: `project.godot` (`camera_recenter`, `dash_left` and `dash_right` defaults only); `.scratch/controls-expansion/issues/02-*`, `03-*`, `04-*`, `05-*`, `06-*` (routing notes and dependencies) and `08-binding-labels-and-prompt-family.md` (new); `docs/engineering/controls-expansion-plan.md` [shared] (ownership table and routing paragraph); `docs/engineering/SPRINT.md` ("After delivery: F16"); `docs/engineering/ROADMAP.md` (F16 rows); `docs/validation/controls-expansion.md` (new, one pending section per ticket); `docs/engineering/settings.md` and `docs/engineering/player-flight.md` (pending F16 sections).

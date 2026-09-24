@@ -18,6 +18,11 @@ extends CanvasLayer
 ## connection change is noted there, every menu's keyboard hint follows its
 ## [signal InputDeviceState.prompts_changed], and a controller leaving while the HUD is
 ## on top pauses the game through the ordinary `pause` action.
+##
+## And the one [InputBindingAdapter] (F16-02), the only [InputMap] writer for the
+## catalog actions: the saved binding profiles are installed right after the settings
+## load, before any menu exists, and again whenever [Settings] changes them. On leaving
+## the tree the catalog actions go back to their `project.godot` events.
 
 
 ## The Session should act on [param action]: every [signal MenuController.action_requested]
@@ -41,6 +46,7 @@ var _settings: Settings
 ## Null when the Options screen is missing (already reported).
 var _options_screen: OptionsScreen
 var _device_state := InputDeviceState.new()
+var _binding_adapter := InputBindingAdapter.new()
 
 
 func _ready() -> void:
@@ -51,6 +57,7 @@ func _ready() -> void:
 	# A bad user file is not a setup error: the defaults are in use and play goes on.
 	for message: String in _settings.load_file():
 		push_warning("%s: %s" % [get_path(), message])
+	_install_bindings()
 	var hud_node := hud_scene.instantiate()
 	_hud = hud_node as Hud
 	if _hud == null:
@@ -70,6 +77,12 @@ func _ready() -> void:
 	_start_device_tracking()
 	_router.screen_hidden.connect(_on_screen_hidden)
 	_router.screen_shown.connect(_on_screen_shown)
+
+
+## The [InputMap] outlives this node (a test builds `main.tscn` again and again), so the
+## saved profiles leave with it.
+func _exit_tree() -> void:
+	_binding_adapter.apply_defaults()
 
 
 ## Notes the device behind every event for the prompts. [method _input] rather than
@@ -136,6 +149,14 @@ func get_hud() -> Hud:
 ## the input device for F3-03. Null only when the exports failed validation.
 func get_settings() -> Settings:
 	return _settings
+
+
+## The one [InputBindingAdapter], for F16-03's capture ([method
+## InputBindingAdapter.describe_event]). Profiles reach the [InputMap] through
+## [method Settings.apply_input_bindings], which this node installs; nothing else applies
+## them.
+func get_input_binding_adapter() -> InputBindingAdapter:
+	return _binding_adapter
 
 
 ## Reports each unset export with this node's path (CONVENTIONS "Setup errors are loud").
@@ -212,6 +233,24 @@ func _on_prompts_changed(keyboard: bool) -> void:
 func _on_settings_changed(key: StringName, value: Variant) -> void:
 	if key == Settings.INPUT_DEVICE:
 		_device_state.set_mode(value)
+	elif key == Settings.BINDING_PROFILES:
+		_apply_bindings()
+
+
+## Installs the saved binding profiles (F16-02), before any menu exists, so the first
+## screen already answers to them. An editor build first checks the catalog defaults
+## against `project.godot`: a drift means Restaurar would not restore the project's keys.
+func _install_bindings() -> void:
+	if OS.has_feature("editor"):
+		for message: String in _binding_adapter.find_default_drift():
+			push_error("%s: %s" % [get_path(), message])
+	_apply_bindings()
+
+
+## [Settings] only holds validated profiles, so a refusal here is a programming error.
+func _apply_bindings() -> void:
+	for message: String in _binding_adapter.apply_bindings(_settings.get_input_bindings()):
+		push_error("%s: %s" % [get_path(), message])
 
 
 ## A controller leaving while the HUD is on top pauses (PLANEJAMENTO Section 7), unless

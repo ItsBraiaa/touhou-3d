@@ -116,7 +116,7 @@ Astra owns layout and reusable visual components; Claude instances the cooldown 
 
 Settings remains the one local settings owner. InputBindings is a Node-free rules object holding the catalog, validated primitive bindings, defaults, contexts and draft conflict decisions. InputBindingAdapter is the only InputMap writer/event normalizer; owned once by Interface, no autoload. ControlsScreen binds the authored widget paths and draft/capture workflow. Reuse the existing InputDeviceState and extend its prompt-family detection.
 
-Proposed primitive binding descriptor: kind (key/mouse_button/joy_button/joy_axis), code (int), axis_sign (-1 or +1 for axes), physical (bool for keys), modifiers (integer mask for key/mouse chords). Preserve existing chords such as Shift+Tab and standalone modifiers such as Left Shift/Left Ctrl; capture may not lose either. Context and Portuguese labels belong to the action catalog, not the descriptor. Reject unknown kind/action, invalid indices/signs, non-finite sensitivity/deadzone and malformed arrays. Missing newly introduced actions get defaults independently.
+Proposed primitive binding descriptor: kind (key/mouse_button/joy_button/joy_axis), code (int), axis_sign (-1 or +1 for axes), physical (bool for keys), modifiers (integer mask for key/mouse chords), plus location (KeyLocation for keys, 0 when omitted; F16-02 refinement so Left Shift/Left Ctrl match project.godot exactly). Preserve existing chords such as Shift+Tab and standalone modifiers such as Left Shift/Left Ctrl; capture may not lose either. Context and Portuguese labels belong to the action catalog, not the descriptor. Reject unknown kind/action, invalid indices/signs, non-finite sensitivity/deadzone and malformed arrays. Missing newly introduced actions get defaults independently.
 
 Storage contract: extend [controls] with controls_version=1, binding_profiles, camera_input_mode ("keys" or "mouse"), mouse_sensitivity, mouse_invert_vertical, camera_deadzone and controller_glyph_family ("auto", "xbox", "playstation"). Keep the existing camera_sensitivity and invert_vertical keys for keyboard/stick orbit. Profile IDs are keyboard_mouse and gamepad; slots are 0/1. A pending profile application includes its prior confirmed profiles and marker so boot can recover. InputBindings is owned by the existing Settings instance and exposed read-only to consumers except through the draft/apply workflow. Runtime InputMap ownership stays in Interface's adapter.
 
@@ -128,16 +128,21 @@ Settings.get_mouse_sensitivity() -> float
 Settings.get_mouse_invert_vertical() -> bool
 Settings.get_camera_deadzone() -> float
 Settings.get_controller_glyph_family() -> StringName
+Settings.apply_input_bindings(draft: InputBindings, needs_confirmation: bool = false) -> Error   (F16-02: validate, save, then make live)
+Settings.confirm_input_bindings() -> Error   /   Settings.revert_input_bindings() -> Error   /   Settings.is_input_bindings_pending() -> bool
 Interface.get_input_binding_adapter() -> InputBindingAdapter
 InputBindings.capture() -> Dictionary
 InputBindings.restore(data: Dictionary) -> PackedStringArray
 InputBindings.get_bindings(profile: StringName, action: StringName) -> Array[Dictionary]
 InputBindings.find_conflicts(profile: StringName, action: StringName, binding: Dictionary) -> Array[StringName]
-InputBindings.assign(profile: StringName, action: StringName, slot: int, binding: Dictionary, resolution: StringName) -> PackedStringArray
+InputBindings.assign(profile: StringName, action: StringName, slot: int, binding: Dictionary, resolution: StringName = &"") -> PackedStringArray   (&"" none, &"swap", &"replace", &"cancel"; an empty binding clears the slot)
 InputBindings.validate_profile(profile: StringName) -> PackedStringArray
 InputBindings.restore_profile_defaults(profile: StringName) -> void
+InputBindings.restore_action_defaults(profile: StringName, action: StringName) -> PackedStringArray   (F16-02: a row's Redefinir)
+InputBindings.get_default_bindings(profile, action) / get_fixed_bindings(profile, action) -> Array[Dictionary]; static catalog: CATALOG, get_actions(category), get_label, get_category, is_required, get_contexts, uses_physical_keys, can_share, same_input, parse_binding
 InputBindingAdapter.apply_profile(profile: StringName, data: Dictionary) -> PackedStringArray
-InputBindingAdapter.describe_event(event: InputEvent) -> Dictionary
+InputBindingAdapter.apply_bindings(bindings: InputBindings) -> PackedStringArray   (F16-02: both profiles at once)
+InputBindingAdapter.describe_event(event: InputEvent, action: StringName = &"") -> Dictionary   (F16-02: the action picks physical or layout keys)
 ControlsScreen.setup(root: Control, settings: Settings, bindings: InputBindings, adapter: InputBindingAdapter) -> void
 CameraRig.request_recenter() -> void
 CameraRig.apply_control_settings(mode: StringName, mouse_sensitivity: float, mouse_invert: bool, deadzone: float) -> void

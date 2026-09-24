@@ -1,6 +1,6 @@
 # F16-02 binding-profiles-and-persistence
 
-Status: todo
+Status: done
 Type: core+adapter
 Owner: Claude
 Lane: trunk
@@ -58,4 +58,23 @@ Write no new tests or disposable test drivers. Run the existing tools/lane.ps1 l
 
 ## Outcome
 
-Not started. Produces the spec's binding APIs and saved schema; does not modify CameraRig or the controls scene.
+Done 2026-09-24 by lane trunk (part 2; part 1's defaults were already in `project.godot` and are unchanged). The contract is in `docs/engineering/settings.md`, "F16 binding profiles and persistence (F16-02)", and the record is in `docs/validation/controls-expansion.md`.
+
+- **`InputBindings`** (`scripts/settings/input_bindings.gd`):
+  - a catalog of 27 actions, with a Portuguese label, a category (Movimento, Combate, Câmera, Menus), a context mask and a required flag each;
+  - defaults equal to `project.godot` and Godot's built-in `ui_*` events. Numpad Enter stays a fixed third key of `ui_accept`, so the two slots lose no default.
+  - two profiles with two slots each, and descriptor validation;
+  - context-aware conflicts: gameplay and menu actions never overlap, `pause` is in both, and `pause`/`ui_cancel` on Escape is the one permitted overlap;
+  - transactional `assign` with swap, replace and cancel, `validate_profile`, and the profile and action defaults.
+- **`Settings`:** `controls_version=1` and the five new values. Old files migrate silently, without a write. The save is atomic (tmp, read back, `.bak`, rename). `apply_input_bindings`, `confirm_input_bindings` and `revert_input_bindings` handle the pending-confirmation marker, and boot recovers from it. Global Defaults now covers the new values and the profiles.
+- **`InputBindingAdapter`** (`scripts/ui/input_binding_adapter.gd`) is the only `InputMap` writer for the catalog. It installs both profiles live, with device −1, and never touches an action outside the catalog. Its `describe_event` keeps physical keys, layout keys, chords, standalone modifiers, and axis plus sign. `find_default_drift` is a boot-time check against `project.godot`.
+- **`Interface`** creates the adapter and installs the saved profiles right after the settings load, before any menu exists. It reinstalls on `Settings.changed(BINDING_PROFILES)`, restores the defaults on `_exit_tree`, and exposes `get_input_binding_adapter()`.
+- **Spec refinements**, recorded in the spec's API list:
+  - the descriptor gains `location`;
+  - `describe_event(event, action)`;
+  - `apply_bindings`;
+  - `restore_action_defaults`;
+  - an empty binding clears a slot;
+  - `RESOLUTION_NONE`;
+  - `Settings.apply_input_bindings`, `confirm_input_bindings`, `revert_input_bindings` and `is_input_bindings_pending`.
+- **Verification.** The existing suite passes (225), and the 300-frame boot and `check_resources` are clean. The drift check was proven live by one temporary broken default. The real `settings.cfg` is untouched. No tests or drivers were written. The human pass (restart persistence, old-file migration, a crash during unconfirmed application, a device-index change) is listed in the validation record.

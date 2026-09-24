@@ -125,7 +125,7 @@ User-requested on 2026-09-24; implementation is planned, not part of the already
 | --- | --- | --- | --- |
 | F16-00 plan-and-orchestration | Astra / sol | F3-04, F7-02 | done (spec, seven implementation tickets, layout contract and Claude kickoff) |
 | F16-01 controls-layout-and-dash-visuals | Astra / sol | F16-00 | todo |
-| F16-02 binding-profiles-and-persistence | Claude / trunk | F16-00 | todo (part 1 done 2026-09-24 by lane plan: `camera_recenter`, `dash_left` and `dash_right` defaults in `project.godot`) |
+| F16-02 binding-profiles-and-persistence | Claude / trunk | F16-00 | done 2026-09-24 (part 1 by lane plan: the three new action defaults; part 2 by trunk: `InputBindings` catalog and profiles, `Settings` `controls_version=1` with migration, atomic save and pending-confirmation recovery, `InputBindingAdapter` installed by `Interface`; settings.md "F16 binding profiles and persistence") |
 | F16-08 binding-labels-and-prompt-family | OpenCode / oc-a | F16-00 | todo |
 | F16-03 rebind-workflow-and-prompts | Claude / trunk | F16-01, F16-02, F16-08 | todo |
 | F16-04 mouse-camera-and-recenter | Claude / path | F16-00 | todo |
