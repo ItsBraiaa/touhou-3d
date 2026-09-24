@@ -221,6 +221,18 @@ Delivered by path on 2026-09-24 (part 2; the windowed pass of part 1 is in [vali
 - **The rig's own exports** `sensitivity` and `invert_vertical` in `player_ship.tscn` are overwritten at every spawn. The orbit rate is tuned with `orbit_speed_degrees`.
 - **Verification (no tests: the sprint rule).** A throwaway headless script ran the ticket's six cases (16 checks) and measured the orbit: six ticks of `camera_up` turn 0.4189 rad at 2.0, 0.0419 rad at 0.2 and −0.4189 rad at 2.0 inverted. A short windowed run showed the same. Both are in [validation/settings.md](../validation/settings.md) "Camera wiring".
 
+## F16 binding profiles and persistence (F16-02)
+
+Pending (lane trunk).
+
+## F16 binding labels and prompt family (F16-08)
+
+Pending (lane oc-a).
+
+## F16 capture workflow and prompts (F16-03)
+
+Pending (lane trunk).
+
 ## Open issues
 
 - Bus and window application are live since F3-02 ("Options binding"), the input device since F3-03 ("Input device and disconnect"), and the camera values since F3-04 ("Camera wiring").

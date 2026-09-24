@@ -3,8 +3,8 @@
 Status: todo
 Type: core+adapter
 Owner: Claude
-Lane: trunk
-Depends on: F16-03
+Lane: rescue
+Depends on: F16-00
 Parallel-safe: no
 
 ## Read first
@@ -12,6 +12,14 @@ Parallel-safe: no
 - [Spec](../spec.md): product rules, exact widget paths, data shapes and proposed APIs.
 - [Execution plan](../../../docs/engineering/controls-expansion-plan.md): ownership, task steps and review focus.
 - docs/engineering/SPRINT.md in the worktree: no-new-tests rule and lane loop.
+
+## Parts and routing (2026-09-24, Claude)
+
+This ticket moved from trunk to lane `rescue` (Claude Opus). Its files do not overlap trunk's F16-02 and F16-03 (Settings, Interface, menus and the Controls screen), so the dash runs beside them instead of after them. The old `F16-03` dependency was only trunk serialization. **`game_session.gd`, `player_controller.gd`, `combat_state.gd`, `projectile_system.gd`, `hud.*` and `player_ship.tscn` belong to rescue until part 2 lands, then return to trunk for F16-06.**
+
+- **Part 1 (starts now):** `DashModel`, PlayerController's burst, collision stop, the Flight Volume clamp and the `dash_started` / `dash_ended` / `dash_cooldown_changed` signals. Also: the `CombatState` grant (F15-12 already added `grant_invulnerability(seconds)` with `maxf`, so reuse it), the synchronous Session connection and proven tick ordering, Pause freezing, lifecycle cancel and reset, and the numeric exports in `player_ship.tscn`. The `dash_left` and `dash_right` actions exist (F16-02 part 1). Commit "(F16-05 part 1)" and land.
+- **Part 2 (after F16-01 lands):** instance Astra's `scenes/player/visuals/dash_visual.tscn` in `player_ship.tscn` and `scenes/ui/components/dash_cooldown.tscn` in `hud.tscn`, and drive them from the part 1 signals. This part sets the ticket to done.
+- **Docs:** fill only the pre-made player-flight.md section "F16 lateral dash (F16-05)", `combat-hud.md`, and the F16-05 section of `docs/validation/controls-expansion.md`.
 
 ## Goal
 
