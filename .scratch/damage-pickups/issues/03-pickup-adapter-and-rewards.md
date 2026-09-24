@@ -4,7 +4,7 @@ Status: todo
 Type: adapter
 parallel-safe: no
 Depends on: F7-01
-Lane: path
+Lane: trunk
 Model: Claude Opus 5.5, solo
 
 > **Sprint note (D-02, F13):** F13 is reinstated; `accepted` reaches audio through `StageDirector.pickup_accepted` in F13-03. Hold `Visual` as a `Node3D`, not a `MeshInstance3D`, so D-02's `power_pickup_visual.tscn` and `shield_pickup_visual.tscn` can be instanced as `Visual`. Instance them if they have landed; otherwise keep the dev meshes and log "swap pending: D-02". Collision, layers, masks, monitoring and the script stay in the Claude-owned prefab.

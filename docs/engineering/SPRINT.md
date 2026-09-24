@@ -69,7 +69,7 @@ No two agents ever share a working tree or a branch.
 | `tests/scene/test_game_session_flow.gd`, `test_game_session_combat.gd`, F10 and F11 scene tests | trunk | Sol F12-05 may change only a case that breaks because Stage 2 now has a Director, and names it in its handoff. Trunk syncs before F11-01 and keeps the change. |
 | `scripts/ui/menu_controller.gd`, `tests/scene/test_menu_registry_contract.gd` | oc-b F3-03; trunk F11-01 | Whichever starts second syncs first and keeps the other's hunks. They overlap only at the tail of `_ready`. |
 | `scripts/ui/interface.gd` | trunk F4-02, then oc-b F3-02, then F3-03 | Ordered by dependencies. |
-| `scenes/dev/arena_harness.gd` and `.tscn` | trunk F6-02, F6-03; path F9-02, F7-03, F12-02 | Serialized: path starts F9-02 only after trunk's F6-03 (part 2) has landed. No other ticket edits the harness. |
+| `scenes/dev/arena_harness.gd` and `.tscn` | trunk F6-02, F6-03, F7-03; path F9-02, F12-02 | F6-03 part 2 has landed. Trunk's F7-03 and path's F9-02 now run side by side and both only add nodes and harness code: sync right before starting, keep additions in their own functions and nodes, and the second lander merges both. No other ticket edits the harness. |
 | `docs/engineering/stage-director.md` | trunk F10-01, F12-03; sol F12-05 | F12-03 and F12-05 each write only their own section. |
 | `docs/engineering/damage-pickups.md`, `docs/validation/combat.md` | trunk F7-02; path F7-03 | Each appends its own headed section; the second lander keeps both. |
 | `docs/engineering/weapon-rendering.md` | trunk F6-02 creates it | Oc-a's F6-03 part 1 must not create it: its contract goes in doc comments and the handoff entry, and trunk's part 2 writes the section. |
@@ -104,6 +104,7 @@ Run top to bottom. When the next ticket's dependencies are not done, take the fi
 | 4 | F6-03 part 2: PlayerWeapon, `player_ship.tscn` `[shared]`, harness; closes the ticket | 2 agents | F6-02, F4-02, F6-03 part 1 (oc-a) |
 | 5 | F7-01 hit-to-combat-state-and-defeat | 3 agents | F6-02, F4-02 |
 | 6 | F7-02 bomb-clear-and-invulnerability | 2 agents | F7-01, F6-03 |
+| 6b | F7-03 pickup-adapter-and-rewards (moved from path, to run beside path's F9-02; both feed F10-01) | solo | F7-01 |
 | 7 | F10-01 stage-director-adapter | 3 agents | F8-02, F8-04, F9-02, F7-03, F4-03 |
 | 8 | F10-02 gate-and-checkpoint-adapters | 3 agents | F10-01, F8-03, F7-02 |
 | 9 | F10-03 retry-restart-flow | 3 agents | F10-02, F7-01 |
@@ -125,7 +126,7 @@ Slip rule: if F11-02 has not landed by T0 + 19.5 h, run F14-01 straight after F1
 | 3 | F5-03 bomb-phase-clears-and-hit-spheres | 2 agents | F5-02 |
 | 4 | F12-01 boss-machine-core | solo | F5-04 |
 | 5 | F9-02 dev-prefabs-and-enemy-actor | 2 agents | F9-01, F6-02, and trunk's F6-03 part 2 (arena harness). It reads the ProjectileSystem priority that F6-02 actually landed. |
-| 6 | F7-03 pickup-adapter-and-rewards | solo | F7-01 |
+| 6 | ~~F7-03~~: moved to trunk (6b), so it runs beside F9-02 | — | — |
 | 7 | F12-02 boss-controller-adapter | solo | F12-01, F9-02, F4-03 |
 | 8 | F3-04 part 1: the windowed F3 pass for F3-02 and F3-03, `docs/validation/settings.md` and screenshots | solo | F3-02, F3-03 |
 | 9 | F14-01 pre-flight: export `dev-01` in this worktree, run it, and record export-only errors in a handoff entry (no other file edits) | solo | F10-02 |

@@ -55,7 +55,7 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | F7 | Damage, bomb, pickups | `damage-pickups` | 00 plan | docs | no | — | done (one-pass planning) |
 | | | | 01 hit-to-combat-state-and-defeat | integration | no | trunk | done (2026-09-23: hits, Graze, Invulnerability blink and Defeat wired in GameSession; `tools/validate_combat.gd` COMBAT_OK; Retry restarts the stage until F10-03) |
 | | | | 02 bomb-clear-and-invulnerability | integration | no | trunk | done (2026-09-23: Bomb clear, radius damage, bombs used and dev blast; `validate_combat.gd` checks 14-21 COMBAT_OK; swap pending D-02) |
-| | | | 03 pickup-adapter-and-rewards | adapter | no | path | todo |
+| | | | 03 pickup-adapter-and-rewards | adapter | no | trunk | todo |
 | F8 | Progression cores and content | `progression-core` | 00 plan | docs | no | — | done (one-pass planning) |
 | | | | 01 definition-schemas-and-content-validation | core | yes | oc-b | done (typed schemas and validators landed 2026-09-23; no tests per sprint rule) |
 | | | | 02 encounter-machine-core | core | yes | oc-b | done (2026-09-23: `EncounterMachine` Rules Core landed; no tests per sprint rule) |
