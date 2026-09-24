@@ -3,7 +3,7 @@ extends TestCase
 ## player panel shows a bound [CombatState] and follows its changes, binding twice never
 ## connects twice, unbinding lets go of everything, the HUD never changes a combat value,
 ## and the target marker sits on the projected target and hides when there is no lock, the
-## target is freed, or it is behind the camera.
+## target is freed; an off-screen target remains visible at the edge.
 ##
 ## Expected values come from GUIDE Section 15 (paths and binding duties), the CombatState
 ## contract in `docs/engineering/combat-hud.md` (entry values, hit and Bomb rules) and the
@@ -235,7 +235,7 @@ func test_marker_centers_on_the_projected_target() -> void:
 	assert_true(center.distance_to(expected) < MARKER_EPSILON, "follows a moving target, %s vs %s" % [center, expected])
 
 
-func test_marker_hides_behind_the_camera() -> void:
+func test_marker_clamps_behind_target_to_the_screen_edge() -> void:
 	if not assert_not_null(_hud, "Hud"):
 		return
 	_bind()
@@ -243,7 +243,7 @@ func test_marker_hides_behind_the_camera() -> void:
 	assert_true(_marker().visible)
 	_target.position = TARGET_BEHIND
 	await tree.process_frame
-	assert_false(_marker().visible, "a target behind the camera is not marked")
+	assert_true(_marker().visible, "a target behind the camera keeps an edge marker")
 	_target.position = TARGET_IN_FRONT
 	await tree.process_frame
 	assert_true(_marker().visible, "and is marked again in front of it")

@@ -19,6 +19,56 @@ Verification: implementer and reviewer agents, then a headless `main.tscn` drive
 No tests (sprint rule).
 Action required by Astra: none. 2.5 s is Claude's proposal (the shrine clip is 2.4 s); retune `VICTORY_BEAT_SECONDS` if F15-04's storm calm is longer.
 Action required by path: in F15-02, keep `EnemyActor`'s `defeated` report inside its damage call, before the Death clip ("report `defeated` at once"). The Bomb-clear flag is only set during that call.
+## 2026-09-24 — Claude (path) — F15-02: enemy feedback
+State: INTEGRATED_VERIFIED
+Files: `scripts/enemies/enemy_actor.gd`; `docs/engineering/enemies.md` (new "Presentation (F15-02)", signal and export rows, Setup for Astra, Open issues); `docs/GUIDE.md` (the `enemy_actor.gd` row); `docs/engineering/ROADMAP.md` (the F15-02 row).
+Change:
+- **Anticipation clip.** Each Anticipation plays the clip named by `VisualRoot`'s `metadata/anticipation_clip` (`Yes` for Spirits, `Punch` for Sentries) on `VisualRoot/Model/AnimationPlayer`, stretched to the Anticipation (1.167 s clip over 1.0 s, speed 1.167), then returns to `Flying_Idle`. The dev scale pulse is gone.
+- **Hit flash.** Each accepted hit flashes the meshes under `VisualRoot`. The flash is an additive, unshaded, fog-free overlay that fades from 0.85 grey to black in 0.12 s and is then removed. Each actor has its own material, so no other enemy lights up. `HitReact` is not used, because held fire would restart it on every shot.
+- **Death.** `defeated` still fires at once on the lethal hit. The actor leaves `targetable` and stops registering its hit sphere, and the Director scores and the Encounter advances. Then `Death` plays for 0.667 s, and the actor frees itself.
+- **Facing.** `VisualRoot` turns toward the player (yaw only, eased at rate 6 per second, snapped at spawn).
+- **Threats.** An Enemy warns once, on its first off-screen Anticipation. This is Astra's "new threat" rule.
+- A visual that lacks the player or a named clip gets one `push_warning`, and that cue is skipped.
+Verification: a headless throwaway driver (not in the repo), run after syncing F15-08's twilight and seal prefabs. Every check passed:
+- Arena harness: the clips and their speeds, the flash rising and then removed while the other enemy stays dark, the yaw target and the eased turn, one warning from three off-screen Anticipations, and a lethal hit. After that hit, `defeated` fired once at once, the actor was out of `targetable`, a Bomb at its center found 0 targets, it was still dying at 0.53 s and was freed by 0.73 s.
+- Retry: Stage 1 from CP1-A. Three S1-05 enemies were killed and died mid-Death; the score rose at once. A Defeat followed, all three were still dying under the pause, and after Retry none was left in the tree. The stage then cleared.
+- A Direct Stage 2 clear.
+- No `SCRIPT ERROR` and no clip warning.
+No tests (sprint rule).
+Action required by Astra: none required. To change the Anticipation gesture, edit `metadata/anticipation_clip` on a visual. The flash colour and length and the turn rate are Claude's proposals; send Claude values to change them.
+Action required by trunk: none. F15-01's victory beat will show a common enemy's `Death` too, since the actor now outlives its report by 0.667 s.
+
+## 2026-09-24 — OpenCode (oc-a) — F15-09 HUD edge cues
+State: DELIVERED
+Files: `scripts/ui/hud.gd`, `tests/scene/test_hud_contract.gd` (obsolete expectation only), `docs/engineering/ROADMAP.md`.
+Change: The locked target marker now remains visible when its projection is off-screen or behind the camera, clamped inside the screen edge and rotated toward the target. Hud builds a subtle full-screen boundary vignette in code and connects the bound ship's `edge_proximity_changed` through `Targeting`'s parent, with a short fade tween. No `hud.tscn` or Session edit.
+Verification: The existing HUD contract expectation for behind-camera hiding was minimally updated because F15-09 intentionally replaces it with an edge marker; no new test was added. `tools/lane.ps1 land` is the gate.
+Action required by trunk: the pre-existing behind-camera marker expectation is superseded by F15-09 behavior if an acceptance test still asserts hiding it.
+## 2026-09-24 — Astra (sol) — F15-08 enemy colour variants [shared]
+State: DELIVERED
+Files: `scenes/dev/spirit_twilight.tscn`, `scenes/dev/sentry_seal.tscn`, `scenes/stages/stage_01.tscn`, `scenes/stages/stage_02.tscn`, `content/stages/stage_01/s1_02.tres`, `s1_04.tres`, `s1_05.tres`, `content/stages/stage_02/s2_01.tres`, `s2_02.tres`, `s2_03.tres`, `s2_05.tres`, `docs/engineering/ROADMAP.md`.
+Change: New actor prefabs instance Astra's Twilight Spirit and seal Sentry visual roots with the original actor script, HitVolume radius, and emitter. Stage 1 assigns Lume to S1-02 wave 1, Twilight to wave 2, seal Sentries to S1-04, and mixed Spirit colors with lantern Sentries to S1-05. Stage 2's ordinary Spirit/Sentry waves use the violet pair. Each new kind maps to the same Spirit or Sentry EnemyDefinition resource, so health, score, pattern, collision and rewards remain unchanged. No tests added (sprint rule).
+Action required by Claude: none; scene wiring is declared here because it is Claude-owned under GUIDE Section 3.
+
+
+## 2026-09-24 — OpenCode (oc-a) — F15-06 checkpoint glow and Gate fade
+State: DELIVERED
+Files: `scripts/progression/checkpoint.gd`, `scripts/progression/gate.gd`, `scripts/progression/stage_director.gd`, `docs/engineering/ROADMAP.md`.
+Change: Checkpoints create an activation OmniLight3D and bloom it on first activation; `_apply_progress()` restores each glow immediately from the machine state for Retry and Restart. Gates now tween `ClosedVisual` transparency when opening, while `restore_open()` cancels presentation tweens and restores collision, visibility and transparency immediately and idempotently. Stage Director call sites remain in small private presentation/restore functions for the shared-file merge.
+Verification: `tools/lane.ps1 land` and the short headless boot are the gate; no tests added (sprint rule).
+Action required by sol: merge the small F15-06 additions in `stage_director.gd` when landing F15-04.
+## 2026-09-24 — Astra (sol) — F15-04 storm resolution [shared]
+State: DELIVERED
+Files: `scenes/stages/stage_02.tscn`, `scenes/stages/stage_01.tscn` (one export), `scripts/progression/stage_director.gd`, `docs/engineering/ROADMAP.md`.
+Change: Stage 2's `Environment/StormResolution` plays `storm_to_calm` for 2.4 s with `process_mode = 3`, easing fog density 0.0012 → 0.00025, sky background energy 1.0 → 1.45, and StormLight energy 1.0 → 0.62. The Director plays a defeat presentation only for `defeat_presentation_boss_id`: `storm_guardian` in Stage 2 and `lantern_guardian` in Stage 1. Retry rewinds the presentation to its storm or corrupted state. Tempest Sentinel defeat leaves Stage 2 weather untouched. No tests added (sprint rule).
+Action required by oc-a: keep F15-06's checkpoint and Gate call sites in their own functions when merging `stage_director.gd`; retain the keyed presentation and Retry rewind.
+
+
+## 2026-09-24 — Astra (sol) — F15-05 UI truth [shared]
+State: DELIVERED
+Files: `scenes/ui/controls.tscn`, `scenes/ui/results.tscn`, `docs/engineering/ROADMAP.md`.
+Change: The camera binding now says "Setas". Results places Menu principal and Créditos in the first two button slots, so final victory shows no empty slot when Continue and Replay are hidden. Continue or Replay remains available in the third slot in other modes. No tests added (sprint rule).
+Action required by Claude: none.
 
 ## 2026-09-24 — Claude (path) — Audio endings: boss and stage endings each play once, in order
 State: INTEGRATED_VERIFIED

@@ -7,6 +7,8 @@
 [ext_resource type="Resource" path="res://content/stages/stage_01/stage_01.tres" id="2_stage_definition"]
 [ext_resource type="PackedScene" path="res://scenes/dev/spirit.tscn" id="3_spirit"]
 [ext_resource type="PackedScene" path="res://scenes/dev/sentry.tscn" id="4_sentry"]
+[ext_resource type="PackedScene" path="res://scenes/dev/spirit_twilight.tscn" id="15_spirit_twilight"]
+[ext_resource type="PackedScene" path="res://scenes/dev/sentry_seal.tscn" id="16_sentry_seal"]
 [ext_resource type="Script" path="res://scripts/definitions/enemy_definition.gd" id="5_enemy_definition"]
 [ext_resource type="Resource" path="res://content/enemies/spirit.tres" id="6_spirit_definition"]
 [ext_resource type="Resource" path="res://content/enemies/sentry.tres" id="7_sentry_definition"]
@@ -810,11 +812,15 @@ stage_definition = ExtResource("2_stage_definition")
 actor_scenes = Dictionary[StringName, PackedScene]({
 &"lantern_guardian": ExtResource("12_lantern_guardian"),
 &"sentry": ExtResource("4_sentry"),
-&"spirit": ExtResource("3_spirit")
+&"spirit": ExtResource("3_spirit"),
+&"spirit_twilight": ExtResource("15_spirit_twilight"),
+&"sentry_seal": ExtResource("16_sentry_seal")
 })
 enemy_definitions = Dictionary[StringName, ExtResource("5_enemy_definition")]({
 &"sentry": ExtResource("7_sentry_definition"),
-&"spirit": ExtResource("6_spirit_definition")
+&"spirit": ExtResource("6_spirit_definition"),
+&"spirit_twilight": ExtResource("6_spirit_definition"),
+&"sentry_seal": ExtResource("7_sentry_definition")
 })
 boss_definitions = Dictionary[StringName, ExtResource("13_boss_definition")]({
 &"lantern_guardian": ExtResource("14_lantern_guardian_definition")
@@ -828,6 +834,7 @@ guard_links = Dictionary[StringName, NodePath]({
 })
 defeat_presentation = NodePath("Environment/ShrineLighting")
 defeat_animation = &"corrupted_to_calm"
+defeat_presentation_boss_id = &"lantern_guardian"
 metadata/stage_id = "stage_01"
 metadata/handoff_state = "SCENE_READY_STATIC"
 

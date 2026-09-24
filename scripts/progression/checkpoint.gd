@@ -17,10 +17,22 @@ const RESPAWN_PATH := ^"Respawn"
 @export var checkpoint_id: StringName = &""
 
 var _respawn: Node3D
+var _glow: OmniLight3D
+var _glow_tween: Tween
+var _glow_active: bool = false
+
+const GLOW_ENERGY := 1.8
 
 
 func _ready() -> void:
 	_respawn = get_node_or_null(RESPAWN_PATH) as Node3D
+	_glow = OmniLight3D.new()
+	_glow.name = "ActivationGlow"
+	_glow.light_color = Color(0.35, 0.95, 0.85)
+	_glow.omni_range = 6.0
+	_glow.shadow_enabled = false
+	_glow.light_energy = 0.0
+	add_child(_glow)
 	if checkpoint_id.is_empty() or _respawn == null:
 		push_error("%s: a Checkpoint needs a 'checkpoint_id' and a Node3D at '%s'" % [get_path(), RESPAWN_PATH])
 	body_entered.connect(_on_body_entered)
@@ -34,6 +46,29 @@ func set_armed(armed: bool) -> void:
 ## The global transform of `Respawn`, where Retry puts the ship (facing -Z on Stage 1).
 func get_respawn_transform() -> Transform3D:
 	return _respawn.global_transform if _respawn != null else global_transform
+
+
+## Presents a first activation with a brief light bloom, then leaves the Checkpoint lit.
+func activate_glow() -> void:
+	if _glow == null or _glow_active:
+		return
+	_glow_active = true
+	if _glow_tween != null:
+		_glow_tween.kill()
+	_glow.light_energy = 0.0
+	_glow_tween = create_tween()
+	_glow_tween.tween_property(_glow, ^"light_energy", 4.0, 0.28)
+	_glow_tween.tween_property(_glow, ^"light_energy", GLOW_ENERGY, 0.5)
+
+
+## Rebuilds the presentation from restored progression without animation.
+func restore_glow(active: bool) -> void:
+	_glow_active = active
+	if _glow_tween != null:
+		_glow_tween.kill()
+	_glow_tween = null
+	if _glow != null:
+		_glow.light_energy = GLOW_ENERGY if active else 0.0
 
 
 func _on_body_entered(body: Node3D) -> void:
