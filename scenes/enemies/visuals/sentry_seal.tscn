@@ -817,6 +817,7 @@ rings = 48
 ring_segments = 8
 
 [node name="VisualRoot" type="Node3D" unique_id=1750619053]
+metadata/anticipation_clip = "Punch"
 
 [node name="Model" type="Node3D" parent="." unique_id=1839102925 instance=ExtResource("1_hbrms")]
 transform = Transform3D(1.2885047, 0, 0, 0, 1.2885047, 0, 0, 0, 1.2885047, 0, -2.9184206, 0.5916066)

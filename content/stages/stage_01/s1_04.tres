@@ -17,3 +17,4 @@ completion = 1
 waves = Array[ExtResource("3_cgupt")]([SubResource("Resource_t3veu")])
 gate_id = &"Gate_S1_04"
 metadata/dev = true
+metadata/reviewed = true

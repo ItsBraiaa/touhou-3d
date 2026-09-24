@@ -81,8 +81,8 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | | | | 03 lantern-guardian-in-s1-07 | integration | no | trunk (part 1: oc-a) | todo |
 | | | | 04 stage-02-content-draft | content | yes | oc-b | done (2026-09-23: dev draft of `content/stages/stage_02/` landed, validates and matches the scene; Astra tunes values in D-06) |
 | | | | 05 stage-02-director-integration | adapter | no | sol | todo |
-| | | | 06 tempest-sentinel-miniboss | integration | no | sol | todo |
-| | | | 07 storm-guardian | integration | no | sol | todo |
+| | | | 06 tempest-sentinel-miniboss | integration | no | sol (part 1: oc-a) | todo |
+| | | | 07 storm-guardian | integration | no | sol (part 1: oc-a) | todo |
 | F13 | Audio | `audio` | 00 plan | docs | no | — | done (cut, then reinstated by the sprint plan, 2026-09-23) |
 | | | | 01 audio-limiter-core | core | yes | oc-a | done |
 | | | | 02 audio-controller-adapter | adapter | no | oc-a | done (no new tests, by the sprint rule; headless Dummy-driver check recorded in audio.md) |
@@ -94,7 +94,7 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | | | | 02 combat-visuals | design | — | sol | done (2026-09-23: six visuals and focused-slider fix verified) |
 | | | | 03 lantern-guardian-scene | design | — | sol | done (2026-09-23: Ghost prefab, clips and dusk render verified) |
 | | | | 04 stage-2-boss-scenes | design | — | sol | done (2026-09-23: Tempest Sentinel and Storm Guardian prefabs, clips and Stage 2 renders verified) |
-| | | | 05 stage-1-tuning-and-pacing | design | — | sol | todo |
+| | | | 05 stage-1-tuning-and-pacing | design | — | sol | done (2026-09-23: content values, names, clip candidates and provisional 221 s estimate) |
 | | | | 06 stage-2-content-review | design | — | sol | todo (pass 1 values/reward review and provisional pacing estimate landed; passes 2–3 pending) |
 | | | | 07 shrine-lighting-and-boss-rulings | design | — | sol | doing (Part B rulings delivered; Parts A and C await F12-03) |
 
@@ -140,6 +140,8 @@ Dependencies Claude has on scene and content work. These are needs by Feature, n
 | F14 | Nothing new; credits and licenses must already cover every integrated asset. F14-02 lists any gaps it finds. |
 
 ## Received from Astra
+
+2026-09-23: D-05 reviewed Stage 1 content and shared Spirit/Sentry values, named both checkpoints and selected candidate Anticipation clips. [stage-01-pacing.md](../validation/stage-01-pacing.md) estimates an efficient clear at about 221 s against the 240 s design target; it is not a measured result. Trunk owns clip playback and any PlayerShip value follow-up; D-06 must recompute its Stage 2 estimate from the revised shared enemy health.
 
 2026-09-23: D-06 pass 1 reviewed F12-04's Stage 2 content and named CP2-A/CP2-B; [stage-02-pacing.md](../validation/stage-02-pacing.md) records the exact reward audit and conditional ~319 s efficient / ~392 s normal estimates. The ≥300 s requirement still needs a measured clear; Seal and boss tuning remain for passes 2 and 3.
 

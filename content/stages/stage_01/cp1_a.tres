@@ -8,5 +8,6 @@ id = &"CP1-A"
 after_encounter_id = &"S1-04"
 resume_encounter_id = &"S1-05"
 node_path = NodePath("Checkpoints/CP1-A")
-display_name = "CP1-A"
+display_name = "Portal Selado"
 metadata/dev = true
+metadata/reviewed = true

@@ -4,8 +4,14 @@ Status: todo
 Type: integration
 parallel-safe: no
 Depends on: F12-05, F12-02, F12-03, D-04
-Lane: sol
-Model: GPT Sol (Codex)
+Lane: sol (part 1: oc-a)
+Model: part 1 GPT 5.6 Luna (fallback DeepSeek V4.1 Flash); part 2 GPT Sol (Codex)
+
+> **Split (SPRINT.md):**
+> - **Part 1, lane oc-a** (depends on F12-01, F5-04 and D-04): `content/bosses/tempest_sentinel.tres` and `sentinel_aimed_burst.tres` and `sentinel_rotating_fan.tres` under `content/patterns/`. Take their values from this ticket's Deliverables, and give every file `metadata/dev = true`. No tests.
+> - **Order the sub-resources.** Declare every `[sub_resource]` after the ones it references: steps, then attacks, then phases, then `[resource]`. Godot rejects forward references, and `land`'s resource check refuses the file otherwise.
+> - **Commit part 1** with `(F12-06 part 1)` in its message.
+> - **Part 2, lane sol** (after part 1 and this ticket's other dependencies): the scene's root script and exports, the `stage_02.tscn` exports, and the integration. It closes the ticket. It only references part 1's files; a needed value change becomes a note.
 
 > **Ruling 3 follow-up (D-07 Part B), part of this ticket:** Astra authored `metadata/two_phase_offset_left` and `metadata/two_phase_offset_right` on `Phase1` and `Phase2` in `hud.tscn`. In `Hud.show_boss`, when `phase_count == 2`, apply those offsets. Keep the default layout for three Phases. This is `scripts/ui/hud.gd`, edited here with SPRINT's sprint permission. Name it in the handoff entry.
 

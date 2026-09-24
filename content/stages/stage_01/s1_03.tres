@@ -24,3 +24,4 @@ waves = Array[ExtResource("3_wq2mm")]([SubResource("Resource_jgmtt")])
 rewards = Array[ExtResource("1_6inej")]([SubResource("Resource_2kdtw")])
 gate_id = &"Gate_S1_03"
 metadata/dev = true
+metadata/reviewed = true

@@ -1,6 +1,6 @@
 # D-05 Stage 1 tuning and pacing
 
-Status: todo
+Status: done
 Type: design
 Owner: Astra (GPT Sol)
 Lane: sol
@@ -97,6 +97,14 @@ Consumers:
 - F14-02: the acceptance record;
 - trunk: applies the weapon proposals;
 - the user: the fallback, at the SPRINT checkpoint.
+
+## Outcome
+
+Reviewed the ten Stage 1 resources, two common-enemy Definitions, two patterns and both dev hit spheres. Health is 20 → 30 for Spirits and 30 → 45 for Sentries; attack intervals are 1.5 → 1.4 s and 2.0 → 1.8 s; spreads are 12 → 14° and 70 → 78°. The 1 s second-Wave delays, hit radii, movement and other pattern values remain as authored. `metadata/reviewed = true` accompanies each reviewed Resource while `metadata/dev = true` stays for existing validation. CP1-A is `Portal Selado`; CP1-B is `Entrada do Santuário`.
+
+The four visuals carry candidate Anticipation metadata: Spirit `Yes`, Sentry `Punch`, both 1.167 s at source speed and about 1.17× for a one-second cue. The inspected mid-pose render is `docs/validation/stage-01-anticipation.png`; `EnemyActor` still plays its scale pulse because it has no clip export. No PlayerShip weapon or Bomb change is proposed; keep the measured 25° lock assist and the current 10-unit, 20-damage Bomb for now, with D-07 Part C keeping boss Phase health above Bomb damage.
+
+`docs/validation/stage-01-pacing.md` estimates about 221 s for an efficient Stage 1 clear against the 240 s target. It labels the Lantern Guardian duration provisional, records no measured Clear Time, and lists an unapplied five-minute fallback for the user. A direct Results measurement awaits F10-03, F11-01 and F12-03. The D-06 pass 1 Stage 2 estimate used provisional 20/30 common-enemy health and must be recomputed in its later pass.
 
 ## Kickoff prompt
 
