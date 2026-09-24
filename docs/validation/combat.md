@@ -100,3 +100,45 @@ headless; the screenshot comes from the windowed run before those fixes.
 `combat-bomb.png`: one tick after the Bomb. The translucent blast fills the 10-unit
 radius, and the dummy inside flashes. The outer hostile ring and the player shot remain.
 The HUD shows one Bomb left.
+
+# Pickups — 2026-09-23 (F7-03)
+
+## Automated
+
+`tools/test.ps1`: 225 passed, 0 failed; no test added (the sprint's no-new-tests rule).
+
+## Harness pass: `scenes/dev/arena_harness.tscn`
+
+A throwaway `SceneTree` script (not in the repo) loaded the real arena harness, flew its
+ship by position and checked what reached the harness's `CombatState`. `PICKUPS_OK` for
+every check, headless and then in a 1280 × 720 window. The only `ERROR:` line is the one
+the bad-setup case expects. Expected values come from PLANEJAMENTO Section 4: five Power
+Pickups per level, Power Level 3 at most, 50 per excess Pickup, and a Shield Pickup that
+stays while the Shield is up.
+
+| Case (the ticket's list) | Measured |
+| --- | --- |
+| Dev prefabs follow the contract | Both roots are `Pickup`, layer 0, mask 2, monitoring on, monitorable off, the right `kind`, a 0.9 sphere and a `Node3D` `Visual` |
+| Without `setup`, and after `setup(&"", ...)` | Both stayed, did not move and credited nothing with the ship on them; the bad one reported one `ERROR:` naming its node path |
+| Another layer-2 body | A second `CharacterBody3D` on layer 2 sat on a Pickup for 8 ticks: not accepted |
+| Duplicate callbacks | The ship on a Pickup plus two extra `body_entered` emissions that tick, then 5 overlapping ticks: progress 1, `accepted` once, freed |
+| Paused | No drift with the ship 4 away and no acceptance with the ship on it, over 8 ticks each; left alone after resuming away from it |
+| Defeated | No acceptance over 8 ticks on it; after `start(1)` it was taken once |
+| Attraction range | Unmoved over 10 ticks at distance 10; at distance 4 the gap fell to 3.30 in 3 ticks and it was taken |
+| The row, flown at 8 units per second | `power_changed` gave (1,1) (1,2) (1,3) (1,4) (2,0) (2,1) (2,2) (2,3) (2,4) (3,0); the eleventh gave `score_awarded(50)` once and `accepted` carried 50; each of the eleven ids accepted once; only the Shield Pickup left |
+| Shield Pickup while shielded | Unmoved over 10 ticks with the ship 4 away, and still there after 10 ticks with the ship on it |
+| After the Shield breaks | One `take_hit()` with the ship on it: taken within 3 ticks with no new `body_entered`, the Shield back on, the Pickup freed |
+
+The readout after the row read `power 3`, `progress 0 of 5 shield on`, `pickups 11 excess
+score +50`.
+
+![Pickups](pickups-arena.png)
+
+`pickups-arena.png`: mid-row, seven Pickups taken. The readout shows Power 2 with progress
+2 of 5, and the HUD's Power 2 bar matches. The next gold crystals drift toward the ship
+while the ones farther ahead wait.
+
+## Not verified
+
+- A physical keyboard or pad: the ship was moved by position, not flown by input.
+- Stage use: nothing spawns Pickups in a stage until F10-01.

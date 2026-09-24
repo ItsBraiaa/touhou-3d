@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=11 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/tests/combat_arena.tscn" id="1_arena"]
 [ext_resource type="Script" path="res://scenes/dev/arena_harness.gd" id="2_harness"]
@@ -8,14 +8,19 @@
 [ext_resource type="SphereMesh" path="res://scenes/dev/projectile_hostile_mesh.tres" id="6_hostile_bullet"]
 [ext_resource type="Script" path="res://scenes/dev/dev_spray.gd" id="7_dev_spray"]
 [ext_resource type="PackedScene" path="res://scenes/dev/target_dummy.tscn" id="8_dummy"]
+[ext_resource type="PackedScene" path="res://scenes/dev/power_pickup.tscn" id="9_power_pickup"]
+[ext_resource type="PackedScene" path="res://scenes/dev/shield_pickup.tscn" id="10_shield_pickup"]
 
-[node name="ArenaHarness" type="Node3D" node_paths=PackedStringArray("arena", "readout", "hud", "projectile_system", "dummy_root")]
+[node name="ArenaHarness" type="Node3D" node_paths=PackedStringArray("arena", "readout", "hud", "projectile_system", "dummy_root", "pickup_root")]
 script = ExtResource("2_harness")
 arena = NodePath("CombatArena")
 readout = NodePath("DebugLayer/Readout")
 hud = NodePath("HudLayer/HUD")
 projectile_system = NodePath("ProjectileSystem")
 dummy_root = NodePath("Dummies")
+pickup_root = NodePath("Pickups")
+power_pickup_scene = ExtResource("9_power_pickup")
+shield_pickup_scene = ExtResource("10_shield_pickup")
 
 [node name="CombatArena" parent="." instance=ExtResource("1_arena")]
 
@@ -55,3 +60,5 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 11, -10)
 
 [node name="DummyFar" parent="Dummies" instance=ExtResource("8_dummy")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 14, -34)
+
+[node name="Pickups" type="Node3D" parent="."]

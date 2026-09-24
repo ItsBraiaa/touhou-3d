@@ -15,6 +15,22 @@ Action required by <other agent>: <what they must do, or "none">
 
 ---
 
+## 2026-09-23 21:54 — Claude (trunk) — F7-03: Pickup adapter and dev pickup prefabs
+State: CODE_READY
+Files:
+- New: `scripts/combat/pickup.gd` (`Pickup`), `scenes/dev/power_pickup.tscn`, `scenes/dev/shield_pickup.tscn`, `docs/validation/pickups-arena.png`.
+- Edited: `scenes/dev/arena_harness.gd` and `.tscn` (a `Pickups` node, the row spawn, the readout lines, dev key H).
+- Docs: `docs/engineering/damage-pickups.md` ("Pickup contract"), `docs/validation/combat.md` ("Pickups"), `docs/GUIDE.md` (Section 6 `pickup.gd` row, Section 7 "Pickup accepted" row), the ROADMAP F7-03 row and "Requests to Astra" F7 row, and the ticket.
+
+Change:
+- **`Pickup`** is the Adapter on a Pickup root `Area3D`: accepted once on contact with the player body through `CombatState.collect_power_pickup()` or `collect_shield_pickup()`, then `accepted(pickup_id, kind, score_awarded)` and `queue_free()`. A Shield Pickup stays, unattracted, while the ship is shielded and is taken on the first tick after the Shield breaks. It drifts toward the player within `attraction_range` (6.0) at `attraction_speed` (14.0).
+- **Dev prefabs** instance Astra's D-02 `power_pickup_visual.tscn` and `shield_pickup_visual.tscn` as `Visual` (no file of Astra's edited; no swap pending). Root: layer 0, mask 2, monitoring on, monitorable off, a 0.9 sphere.
+- **Arena harness:** eleven Power Pickups in a row and one Shield Pickup; readout shows progress, Shield, Pickups taken and excess score; H breaks the Shield.
+- **Tests.** None added (sprint rule). A throwaway script drove the harness: `PICKUPS_OK` headless and windowed.
+
+Why: F7-03, which feeds F10-01's reward spawning.
+Action required by Astra: none now. For final Pickup scenes keep the root contract in damage-pickups.md "Pickup contract", tune `attraction_range` and `attraction_speed` there, and send Claude the paths.
+
 ## 2026-09-23 21:35 — Astra (sol) — Stage 2 content review (D-06 pass 1) [shared]
 State: SCENE_READY
 Files: `content/stages/stage_02/*.tres`, `docs/validation/stage-02-pacing.md`, `docs/engineering/ROADMAP.md`, `docs/HANDOFF_LOG.md`, and D-06's ticket.
