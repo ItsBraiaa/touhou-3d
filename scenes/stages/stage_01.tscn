@@ -1,5 +1,15 @@
 [gd_scene format=3]
 
+[ext_resource type="Script" path="res://scripts/progression/stage_director.gd" id="1_director"]
+[ext_resource type="Resource" path="res://content/stages/stage_01/stage_01.tres" id="2_stage_definition"]
+[ext_resource type="PackedScene" path="res://scenes/dev/spirit.tscn" id="3_spirit"]
+[ext_resource type="PackedScene" path="res://scenes/dev/sentry.tscn" id="4_sentry"]
+[ext_resource type="Script" path="res://scripts/definitions/enemy_definition.gd" id="5_enemy_definition"]
+[ext_resource type="Resource" path="res://content/enemies/spirit.tres" id="6_spirit_definition"]
+[ext_resource type="Resource" path="res://content/enemies/sentry.tres" id="7_sentry_definition"]
+[ext_resource type="PackedScene" path="res://scenes/dev/power_pickup.tscn" id="8_power_pickup"]
+[ext_resource type="PackedScene" path="res://scenes/dev/shield_pickup.tscn" id="9_shield_pickup"]
+
 [sub_resource type="StandardMaterial3D" id="Stone"]
 albedo_color = Color(0.17, 0.25, 0.25, 1)
 roughness = 0.9
@@ -667,6 +677,20 @@ size = Vector3(32, 0.45, 1.7)
 material = SubResource("LanternGold")
 
 [node name="Stage" type="Node3D"]
+script = ExtResource("1_director")
+stage_definition = ExtResource("2_stage_definition")
+actor_scenes = Dictionary[StringName, PackedScene]({
+&"lantern_guardian": ExtResource("4_sentry"),
+&"sentry": ExtResource("4_sentry"),
+&"spirit": ExtResource("3_spirit")
+})
+enemy_definitions = Dictionary[StringName, ExtResource("5_enemy_definition")]({
+&"lantern_guardian": ExtResource("7_sentry_definition"),
+&"sentry": ExtResource("7_sentry_definition"),
+&"spirit": ExtResource("6_spirit_definition")
+})
+power_pickup_scene = ExtResource("8_power_pickup")
+shield_pickup_scene = ExtResource("9_shield_pickup")
 metadata/stage_id = "stage_01"
 metadata/handoff_state = "SCENE_READY_STATIC"
 

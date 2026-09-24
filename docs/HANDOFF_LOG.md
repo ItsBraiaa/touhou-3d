@@ -15,6 +15,35 @@ Action required by <other agent>: <what they must do, or "none">
 
 ---
 
+## 2026-09-23 22:40 — Claude (trunk) — F10-01: StageDirector attached to Stage 1 [shared]
+State: CODE_READY
+Files:
+- New: `scripts/progression/stage_director.gd` (`StageDirector`), `docs/engineering/stage-director.md`, `docs/validation/stage-director.md` with `stage-director-s1-02.png` and `stage-director-rewards.png`.
+- Edited: `scripts/session/game_session.gd` (Director pre-check, `setup`, `start_attempt`, stage clear, threats).
+- `scenes/stages/stage_01.tscn` **[shared]**: only nine `ext_resource` lines at the top, and on the `Stage` root the script and its exports:
+  - `stage_definition` = `content/stages/stage_01/stage_01.tres`;
+  - `actor_scenes`: `spirit` → `scenes/dev/spirit.tscn`; `sentry` and `lantern_guardian` → `scenes/dev/sentry.tscn`;
+  - `enemy_definitions`: `spirit` → `content/enemies/spirit.tres`; `sentry` and `lantern_guardian` → `content/enemies/sentry.tres`;
+  - `power_pickup_scene` and `shield_pickup_scene` = the F7-03 dev prefabs.
+
+  No node, marker, geometry or `monitoring` flag changed.
+- `scripts/progression/encounter_machine.gd` (F8-02, lane oc-b), commit `be64081`: two parameters renamed, a compile fix with no behavior change.
+- Docs: `docs/GUIDE.md` (the Section 6 `stage_director.gd` and `game_session.gd` rows, the Section 7 "Enemy defeated" and "Stage completed" rows, the Section 10 "Stage 1 progression" row), `docs/engineering/README.md`, the ROADMAP F10-01 row, and the ticket.
+
+Change:
+- **Stage 1's Encounters play.** Stage Entry begins S1-01. The Entry and Exit volumes are armed (deferred `body_entered`), and out-of-order entry and re-entry do nothing. Waves spawn at their markers under `RuntimeActors` and fire. Each defeat scores 100 once. S1-02 drops five Power Pickups at `RewardOrigin`, and S1-03 one Shield Pickup at `ShieldPickup`. Stage clear completes the stage.
+- **Bad setup refuses the stage.** Bad content or a missing node is caught before the stage loads, and the menu stays.
+- **Where the route stops.** Stage 1 still stops at the closed `Gate_S1_02` until F10-02.
+- **EncounterMachine never compiled.** Its parameter `enemy_id` shadowed its static `enemy_id()`, which is a warning-as-error here, and nothing had loaded the class before today. Oc-b: no action; the fix is in.
+- **Tests.** None added (sprint rule). A verifier agent drove the real game, headless and windowed; a reviewer agent's one finding, enemy definitions not validated up front, is fixed.
+
+Why: F10-01, the first ticket of the Stage 1 route; F10-02, F10-03 and F12-03 build on it.
+Action required by Astra:
+1. `tools/validate_stage_01.gd:39` now fails its "Static stage unexpectedly contains runtime script" check, because Stage 1 has its Director by design. Update or drop that check.
+2. Never rerun `tools/build_stage_01.py` over the wiring.
+3. Keep the `Encounters/<ID>/{EntryVolume,ExitVolume,Spawns,RewardOrigin,ShieldPickup}` and `RuntimeActors` names. `check_setup()` refuses the stage if one goes missing.
+4. `scenes/enemies/visuals/spirit_lume.tscn` and `sentry_lantern.tscn` declare `CharacterArmature`, `Skeleton3D`, the mesh and `AnimationPlayer` again as new typed nodes under the instanced glTF `Model`. Each enemy then holds duplicate children, leaks them at exit (`… RID allocations … leaked at exit`), and probably draws its model twice. Re-save them so those children are overrides with no `type=`.
+
 ## 2026-09-23 22:15 — Claude (path) — F9-02: EnemyActor and dev Spirit and Sentry prefabs [shared]
 State: CODE_READY
 Files:

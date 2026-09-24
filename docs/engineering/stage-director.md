@@ -40,7 +40,7 @@ It does not own any progression rule (the machine's), enemy behavior (F9's `Enem
 
 | Method | Called by | Effect |
 | --- | --- | --- |
-| `check_setup() -> PackedStringArray` | Session `_load_stage`, before the stage enters the tree | Every problem, each naming the stage id and the path: an unset required export, `stage_definition.validate()`, a missing `Encounters/<id>` or its `EntryVolume`/`ExitVolume` `Area3D`, a Wave marker that is not a `Node3D` under its Encounter, a Wave kind with no `actor_scenes` or `enemy_definitions` entry, a reward `origin_marker` that is not a `Node3D`, and a missing `RuntimeActors`. Relative paths only. Empty when the stage can play. |
+| `check_setup() -> PackedStringArray` | Session `_load_stage`, before the stage enters the tree | Every problem, each naming the stage id and the path: an unset required export, `stage_definition.validate()`, a missing `Encounters/<id>` or its `EntryVolume`/`ExitVolume` `Area3D`, a volume with no `CollisionShape3D` child holding a `BoxShape3D` (the Encounter bounds come from them), a Wave marker that is not a `Node3D` under its Encounter, a Wave kind with no `actor_scenes` or `enemy_definitions` entry, an `enemy_definitions` entry whose `validate()` fails, a reward `origin_marker` that is not a `Node3D`, and a missing `RuntimeActors`. Relative paths only. Empty when the stage can play. An enemy refuses an invalid definition, and a Wave that never spawns never completes, so bad content refuses the stage instead of freezing it (reviewer finding). |
 | `setup(run_state, combat_state, projectile_system, player)` | Session, once, after the ship and its bindings | Creates the machine, `setup(stage_definition)`, connects `wave_requested`, `rewards_requested`, `encounter_completed` and `stage_cleared` once; sets `monitoring = true` on every EntryVolume and ExitVolume and connects `body_entered` with `CONNECT_DEFERRED`, bound to the Encounter id. A second call is reported and changes nothing. |
 | `start_attempt(attempt_seed: int)` | Session, after every `begin_attempt()` | A new `RandomNumberGenerator` seeded with `attempt_seed`, injected into every enemy of the Attempt; then `notify_entered(first Encounter)`, because `PlayerStart` (Z 20) already lies inside S1-01's EntryVolume. |
 | `get_active_encounter_bounds() -> AABB` | Enemies at spawn; F12 boss containment | The world-space merge of the active Encounter's EntryVolume and ExitVolume boxes: X -45..45, Y 0..75 and the Encounter's Z range on Stage 1. `AABB()` when none is active. |
@@ -73,6 +73,22 @@ It does not own any progression rule (the machine's), enemy behavior (F9's `Enem
 - `Pickup` and its dev prefabs (F7-03).
 - `RunState.add_score`, `complete_stage` (F2-03); `CombatState` (F4-01); `ProjectileSystem` (F6-02); `Hud.show_threat` (F4-03).
 
+## Invariants and tests
+
+The sprint's no-new-tests rule (2026-09-23) replaced the ticket's fifteen scene tests with a driven run of the real main scene; results in [validation/stage-director.md](../validation/stage-director.md).
+
+| Invariant (ENGINEERING_BRIEF 4.G and Section 8, STAGE_DESIGN, the ticket) | Evidence |
+| --- | --- |
+| Duplicate death callbacks score and count once | validation check 5 |
+| Returning through triggers spawns and rewards nothing (re-entry) | check 7 |
+| Flying over a trigger out of order cannot start a later Encounter (trigger side of "flying over a locked gate cannot skip the required encounter") | check 6 |
+| Waves spawn at their markers, in order, the second after the first is defeated | checks 2, 3 |
+| Rewards drop once, at their marker, with the exact count | checks 4, 8 |
+| Invalid setup or content refuses the stage before anything unloads | check 10, and the reviewer's invalid-definition probe |
+| Stage clear completes the stage, deferred | check 11 |
+| Restart builds a new Director with no doubled connections | check 14 |
+| A stage without a Director still flies | check 13 |
+
 ## Setup for Astra
 
 - `stage_director.gd` is on Stage 1's `Stage` with the exports above; nothing else in `stage_01.tscn` changed, and `monitoring` stays false in the file.
@@ -84,3 +100,6 @@ It does not own any progression rule (the machine's), enemy behavior (F9's `Enem
 
 - **Stage 1 stops at `Gate_S1_02`** until F10-02 opens Gates; S1-05 waits for CP1-A, which F10-02 activates.
 - **No scene tests** (sprint rule).
+- **`tools/validate_stage_01.gd` (Astra's) now fails** its "static stage has no runtime script" check, by design: Stage 1 has its Director. Its owner updates the check; `tools/build_stage_01.py` must never be rerun over the wiring.
+- **Exit-time leaks from the enemy visuals** (`spirit_lume.tscn`, `sentry_lantern.tscn` duplicate their glTF children): Astra's, recorded in validation/stage-director.md.
+- **EncounterMachine compile fix.** F10-01 found that `encounter_machine.gd` never compiled (two parameters named `enemy_id` shadowed its static `enemy_id()`); commit `be64081` renamed them, with no behavior change.

@@ -87,6 +87,13 @@ func check_setup() -> PackedStringArray:
 		return errors
 	for encounter: EncounterDefinition in stage_definition.encounters:
 		errors.append_array(_check_encounter(encounter))
+	# An enemy refuses a definition that does not validate, and a Wave that never spawns
+	# never completes: refuse the stage instead.
+	for kind: StringName in enemy_definitions:
+		var definition := enemy_definitions[kind]
+		if definition != null:
+			for message: String in definition.validate():
+				errors.append("stage '%s': enemy_definitions '%s': %s" % [stage_id, kind, message])
 	return errors
 
 
@@ -156,9 +163,13 @@ func _check_encounter(encounter: EncounterDefinition) -> PackedStringArray:
 	if root == null:
 		errors.append("stage '%s': no Encounter node at '%s'" % [stage_id, path])
 		return errors
-	for volume: NodePath in [ENTRY_VOLUME_NAME, EXIT_VOLUME_NAME]:
-		if not root.get_node_or_null(volume) is Area3D:
-			errors.append("stage '%s': no Area3D at '%s/%s'" % [stage_id, path, volume])
+	for volume_name: NodePath in [ENTRY_VOLUME_NAME, EXIT_VOLUME_NAME]:
+		var volume := root.get_node_or_null(volume_name) as Area3D
+		if volume == null:
+			errors.append("stage '%s': no Area3D at '%s/%s'" % [stage_id, path, volume_name])
+		elif _box_shape(volume) == null:
+			# The Encounter bounds, and so every enemy's spawn, come from these boxes.
+			errors.append("stage '%s': '%s/%s' has no CollisionShape3D child with a BoxShape3D" % [stage_id, path, volume_name])
 	for wave: WaveDefinition in encounter.waves:
 		for index: int in wave.spawn_markers.size():
 			var marker := wave.spawn_markers[index]
@@ -208,7 +219,9 @@ func _on_wave_requested(encounter_id: StringName, wave_index: int) -> void:
 			continue
 		_runtime_actors.add_child(actor)
 		actor.global_transform = (root.get_node(marker_path) as Node3D).global_transform
-		actor.spawn_setup(definition, enemy_id, encounter_id, _rng, _projectile_system, _player, bounds)
+		if not actor.spawn_setup(definition, enemy_id, encounter_id, _rng, _projectile_system, _player, bounds):
+			actor.queue_free()  # It reported why; a refused actor is the caller's to free.
+			continue
 		actor.defeated.connect(_on_enemy_defeated)
 		actor.threat_reported.connect(threat_reported.emit)
 		_live_enemies[enemy_id] = definition.score
@@ -280,14 +293,21 @@ func _encounter_root(encounter_id: StringName) -> Node:
 	return get_node(NodePath("%s/%s" % [ENCOUNTERS_PATH, encounter_id]))
 
 
-## The world-space box of the volume's first box-shaped [CollisionShape3D].
+## The world-space box of the volume's first box-shaped [CollisionShape3D], which
+## [method check_setup] guarantees.
 func _volume_box(volume: Area3D) -> AABB:
+	var shape_node := _box_shape(volume)
+	var size := (shape_node.shape as BoxShape3D).size
+	return shape_node.global_transform * AABB(-size * 0.5, size)
+
+
+## The volume's first [CollisionShape3D] child holding a [BoxShape3D], or null.
+func _box_shape(volume: Area3D) -> CollisionShape3D:
 	for child: Node in volume.get_children():
 		var shape_node := child as CollisionShape3D
 		if shape_node != null and shape_node.shape is BoxShape3D:
-			var size := (shape_node.shape as BoxShape3D).size
-			return shape_node.global_transform * AABB(-size * 0.5, size)
-	return AABB(volume.global_position, Vector3.ZERO)
+			return shape_node
+	return null
 
 
 func _stage_id() -> StringName:
