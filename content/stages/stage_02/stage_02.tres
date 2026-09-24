@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="StageDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/definitions/checkpoint_definition.gd" id="1_085l3"]
+[ext_resource type="Resource" path="res://content/stages/stage_02/cp2_a.tres" id="2_6g2dr"]
+[ext_resource type="Resource" path="res://content/stages/stage_02/cp2_b.tres" id="3_lt7r1"]
+[ext_resource type="Script" path="res://scripts/definitions/encounter_definition.gd" id="4_ac2qe"]
+[ext_resource type="Resource" path="res://content/stages/stage_02/s2_01.tres" id="5_720qf"]
+[ext_resource type="Resource" path="res://content/stages/stage_02/s2_02.tres" id="6_fy5ja"]
+[ext_resource type="Resource" path="res://content/stages/stage_02/s2_03.tres" id="7_c1o1h"]
+[ext_resource type="Resource" path="res://content/stages/stage_02/s2_04.tres" id="8_2285o"]
+[ext_resource type="Resource" path="res://content/stages/stage_02/s2_05.tres" id="9_d7d13"]
+[ext_resource type="Resource" path="res://content/stages/stage_02/s2_06.tres" id="10_yfw1r"]
+[ext_resource type="Resource" path="res://content/stages/stage_02/s2_07.tres" id="11_epogi"]
+[ext_resource type="Script" path="res://scripts/definitions/stage_definition.gd" id="12_6p3bv"]
+
+[resource]
+script = ExtResource("12_6p3bv")
+id = &"stage_02"
+encounters = Array[ExtResource("4_ac2qe")]([ExtResource("5_720qf"), ExtResource("6_fy5ja"), ExtResource("7_c1o1h"), ExtResource("8_2285o"), ExtResource("9_d7d13"), ExtResource("10_yfw1r"), ExtResource("11_epogi")])
+checkpoints = Array[ExtResource("1_085l3")]([ExtResource("2_6g2dr"), ExtResource("3_lt7r1")])
+metadata/dev = true
