@@ -136,12 +136,20 @@ and checks the copy independently. The zip is git-ignored and never committed.
   `verify/Touhou-3D/project` failed with `Invalid project path specified`. It now archives the
   `Touhou-3D` folder itself, so the zip has the documented `Touhou-3D/` root. No gameplay,
   scene or content file changed.
-- **Output** (run on the clean tree at this ticket's commit):
+- **Second fix.** Part 1 captured the child processes' output with `2>&1` while
+  `$ErrorActionPreference` was `Stop`, so godot.ps1's `Using Godot:` line on stderr aborted the
+  verify step. The capture now scopes the preference to `Continue`, so a child's stderr is
+  read, not thrown.
+- **Output** (clean tree at this ticket's package commit, `8ee9217`):
 
   ```
-  PENDING PACKAGE RUN
+  PACKAGE_ARCHIVE 79756718 bytes, 743 staged files: C:\Users\Braia\Documents\touhou-3d-oc-b\build\package\Touhou-3D-20260924.zip
+  PACKAGE_OK
   ```
 
-  The three checks on the extracted copy are: the project `--import` exits 0, the extracted
-  `tests/run_tests.gd` exits 0 with no `SCRIPT ERROR`, and
-  `game/Touhou-3D.console.exe --headless --quit-after 300` exits 0 with no `ERROR:` line.
+  The three checks on the extracted copy passed: the project `--import` exited 0; the extracted
+  `tests/run_tests.gd` exited 0 with `TESTS_PASSED 225`, `TESTS_FAILED 0` and no `SCRIPT ERROR`;
+  and `game/Touhou-3D.console.exe --headless --quit-after 300` exited 0 with only the engine
+  banner, no `ERROR:` line. `PACKAGE_OK`, exit 0. This record's own commit changes this page,
+  so the final repackage after it differs by a few hundred bytes; `PACKAGE_OK` and the
+  743-file count are stable.
