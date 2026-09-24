@@ -50,12 +50,12 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | | | | 04 pattern-emitter-core | core | yes | oc-a | done (no new tests, by the sprint rule) |
 | F6 | Weapon and rendering | `weapon-rendering` | 00 plan | docs | no | — | done (one-pass planning) |
 | | | | 01 rendering-spike | spike | no | — | cut (folded into 02 by the sprint plan: MultiMesh by default, benchmark inside 02) |
-| | | | 02 projectile-system-adapter | adapter | no | trunk | done (2026-09-23: MultiMesh ProjectileSystem on ProjectileRoot, capacity 2048; 3000 Projectiles at 1118 FPS with other lanes running; swap pending D-02) |
-| | | | 03 weapon-model-and-player-weapon | core+adapter | no | trunk (part 1: oc-a) | done (2026-09-23: WeaponModel by oc-a, PlayerWeapon, dev Familiars and target dummies by trunk; swap pending D-02) |
+| | | | 02 projectile-system-adapter | adapter | no | trunk | done (2026-09-23: MultiMesh ProjectileSystem on ProjectileRoot, capacity 2048; 3000 Projectiles at 1118 FPS with other lanes running; D-02 meshes swapped in by F14-01) |
+| | | | 03 weapon-model-and-player-weapon | core+adapter | no | trunk (part 1: oc-a) | done (2026-09-23: WeaponModel by oc-a, PlayerWeapon, dev Familiars and target dummies by trunk; D-02 Familiar swapped in by F14-01) |
 | | | | 04 aim-assist-under-lock-framing | adapter | no | path | done (2026-09-23: under a lock the Aim Assist cone is measured from the camera, `lock_assist_degrees` 25; a locked Spirit falls in 2.0 to 2.7 s from 10 to 50 units; no new tests, by the sprint rule) |
 | F7 | Damage, bomb, pickups | `damage-pickups` | 00 plan | docs | no | — | done (one-pass planning) |
 | | | | 01 hit-to-combat-state-and-defeat | integration | no | trunk | done (2026-09-23: hits, Graze, Invulnerability blink and Defeat wired in GameSession; `tools/validate_combat.gd` COMBAT_OK; Retry restarts the stage until F10-03) |
-| | | | 02 bomb-clear-and-invulnerability | integration | no | trunk | done (2026-09-23: Bomb clear, radius damage, bombs used and dev blast; `validate_combat.gd` checks 14-21 COMBAT_OK; swap pending D-02) |
+| | | | 02 bomb-clear-and-invulnerability | integration | no | trunk | done (2026-09-23: Bomb clear, radius damage, bombs used and dev blast; `validate_combat.gd` checks 14-21 COMBAT_OK; D-02 blast swapped in by F14-01) |
 | | | | 03 pickup-adapter-and-rewards | adapter | no | trunk | done (2026-09-23: `Pickup` adapter and dev Power and Shield prefabs with D-02's visuals; arena harness row verified headless and windowed, no new tests per the sprint rule) |
 | F8 | Progression cores and content | `progression-core` | 00 plan | docs | no | — | done (one-pass planning) |
 | | | | 01 definition-schemas-and-content-validation | core | yes | oc-b | done (typed schemas and validators landed 2026-09-23; no tests per sprint rule) |
@@ -91,7 +91,7 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | | | | 03 audio-event-wiring | integration | no | path | done (2026-09-24: `AudioController` on `Main/Audio` with D-01's 17 effects and volumes, no music; every producer connected once where the Session owns it, `stop_all()` on unload and Retry; driven from the menu through Retry, two Restarts, the Lantern Guardian and Return to Menu, headless and windowed; no new tests per the sprint rule; listening pass owed) |
 | | | | 04 apply-astras-revised-sfx-selection | integration | no | path | todo |
 | F14 | Delivery | `delivery` | 00 plan | docs | no | — | done (one-pass planning) |
-| | | | 01 export-and-run-outside-editor | integration | no | trunk | todo (blocks itself until the user installs the Godot 4.7.2 export templates) |
+| | | | 01 export-and-run-outside-editor | integration | no | trunk | in progress (2026-09-24: swap step landed: D-02 meshes, Familiar and blast, D-07 shrine exports; D-05 asked no weapon change. Export waits for F13-04, 15:30 at the latest) |
 | | | | 02 package-and-acceptance-record | tooling | no | oc-b | todo |
 | D | Design sprint (Astra) | `design-sprint` | 01 sfx-selection-and-import | design | — | sol | done (listening pass owed by the human pass) |
 | | | | 02 combat-visuals | design | — | sol | done (2026-09-23: six visuals and focused-slider fix verified) |

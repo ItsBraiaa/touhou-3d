@@ -87,7 +87,7 @@ const PHYSICS_PRIORITY := 50
 ## the smallest boss Phase health (F12).
 @export var bomb_damage: int = 20
 ## The blast visual, a [BombBlast] scene the Session instances at the Core for each Bomb;
-## the dev `scenes/dev/bomb_blast.tscn` until D-02. Optional: unset shows nothing.
+## `scenes/dev/bomb_blast.tscn`, which wraps D-02's blast. Optional: unset shows nothing.
 @export var bomb_visual_scene: PackedScene
 
 var _model := WeaponModel.new()

@@ -1,5 +1,19 @@
 # Handoff Log
 
+## 2026-09-24 11:55 — Claude (trunk) — F14-01 swap step: D-02 and D-07 applied [shared]
+State: CODE_READY
+Files: `scenes/stages/stage_01.tscn` **[shared]** (the `Stage` node's exports only); `scenes/main.tscn`; `scenes/player/player_ship.tscn`; `scenes/dev/bomb_blast.gd` and `.tscn`; `scripts/combat/player_weapon.gd` (one doc line); `docs/engineering/ROADMAP.md` (the F6-02, F6-03, F7-02 and F14-01 rows).
+Change: every pending swap and every value Astra asked trunk to set, before the export:
+- **D-07 Part A.** On Stage 1's `Stage`: `defeat_presentation = NodePath("Environment/ShrineLighting")` and `defeat_animation = &"corrupted_to_calm"` (the node line gained `node_paths`). No node, light, geometry or marker changed. `check_setup()` returns no message, and the clip is found.
+- **D-02 Projectiles.** `Main/ProjectileRoot` now uses `scenes/combat/visuals/projectile_player_mesh.tres` (the octahedron) and `projectile_hostile_mesh.tres`. The dev meshes in `scenes/dev/` are no longer referenced.
+- **D-02 Familiar.** `PlayerShip/Weapon.familiar_scene` → `scenes/combat/visuals/familiar.tscn`.
+- **D-02 Bomb blast.** `scenes/dev/bomb_blast.tscn` is now a `BombBlast` root around an instance of `bomb_blast_visual.tscn` (`Visual`). `setup(radius)` scales the unit rings to `bomb_radius`, and the node frees itself when `blast` finishes. The dev sphere and its fade code are gone.
+- **D-05.** It asked for no weapon or Bomb change, so `player_ship.tscn` keeps the code defaults: lock assist 25°, Bomb radius 10, damage 20.
+- The D-02 Pickup visuals (F7-03) and D-03/D-04 boss scenes (F12-03, F12-06, F12-07) were already in place.
+
+Verification: `validate_combat.gd` headless ends `COMBAT_OK`, including check 18 "the blast visual appeared and freed itself within 0.4 s". `validate_stage_01.gd` reports `failures=0`. A scratch check read the four swapped values back. No tests (sprint rule).
+Action required by Astra: none. The shrine clip now plays on the Lantern Guardian's defeat; the build will show it.
+
 ## 2026-09-24 — Claude (path) — F10-05 Retry restores the checkpoint's pickups
 State: CODE_READY
 Files: `scripts/progression/stage_director.gd`; `docs/engineering/stage-director.md`; `docs/validation/stage-director.md`; `docs/validation/stage-director-retry-pickups.png` (new); `docs/validation/stage-01-progression.md`; `docs/GUIDE.md`; `docs/engineering/ROADMAP.md`; F10-05 ticket.
