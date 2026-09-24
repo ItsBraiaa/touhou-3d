@@ -4,7 +4,10 @@ extends SceneTree
 ## Projectiles at the ship's Core through the real [ProjectileSystem], and checks what
 ## reached [CombatState], [RunState], the ship and the Interface: the Shield, damage,
 ## Invulnerability and its flicker, Graze, pause, Defeat, Retry, Return to Menu,
-## excess-Power score and Restart. It captures the screenshots recorded in
+## excess-Power score and Restart, and since F7-02 the Bomb: one press, one Bomb, the
+## clear within the radius that awards no Graze, the damage to a target in range, the
+## blast visual, the 2 s of Invulnerability, and no Bomb under Pause, from the B press
+## that resumes it, with none left or when defeated. It captures the screenshots recorded in
 ## `docs/validation/combat.md` and exits non-zero when a check fails.
 ##
 ## Run it headless first, then with a display for the PNGs:
@@ -13,7 +16,8 @@ extends SceneTree
 ##
 ## Expected values come from PLANEJAMENTO Section 4 and the F7-01 ticket, not from the
 ## cores: a common bullet takes 10 of 100 Health, the Shield absorbs one whole hit,
-## Invulnerability lasts 1 second, a Graze is worth 10 and an excess Power Pickup 50.
+## Invulnerability lasts 1 second, a Graze is worth 10 and an excess Power Pickup 50, and
+## a Bomb grants 2 seconds and clears only hostile fire within its radius.
 
 
 const MAIN_SCENE_PATH := "res://scenes/main.tscn"
@@ -50,6 +54,21 @@ const DEFEAT_TICKS := 60
 const TIMEOUT_TICKS := 180
 const RETRY_LOCATION_PATH := ^"Defeat/Layout/RetryLocation"
 const CORE_VISUAL_PATH := ^"DamageCore/CoreVisual"
+const TARGET_DUMMY_PATH := "res://scenes/dev/target_dummy.tscn"
+## F7-02: distances from the Core inside the Bomb radius, a ring inside it, and how far
+## beyond it the outside ones sit; the ring size; how long static test Projectiles live.
+const BOMB_INSIDE := 4.0
+const BOMB_INSIDE_RING := 6.0
+const BOMB_OUTSIDE_MARGIN := 2.0
+const RING_SIZE := 16
+const STATIC_LIFETIME := 3.0
+## Ticks a Bomb press is held; one press must spend one Bomb however long it is held.
+const BOMB_HELD_TICKS := 30
+## Seconds after the Bomb of a hit it rejects and of one that lands (PLANEJAMENTO: 2 s).
+const BOMB_EARLY_HIT := 1.5
+const BOMB_LATE_HIT := 2.1
+## Ticks a [method _fire] Projectile takes from its spawn to the Core.
+const FLIGHT_TICKS_TO_CORE := 5
 
 var _session: GameSession
 var _failures: int = 0
@@ -100,6 +119,7 @@ func run() -> void:
 	await _menu_from_defeat()
 	await _excess_power()
 	await _restart_twice()
+	await _bombs()
 	_finish()
 
 
@@ -326,6 +346,175 @@ func _restart_twice() -> void:
 	_report(_graze() - graze == 1 and _score() - score == GRAZE_POINTS,
 			"13 after two restart_stage requests one Graze adds graze +%d and score +%d (%d reported)" % [
 				_graze() - graze, _score() - score, _grazes_reported - reported])
+
+
+## Checks 14 to 21 (F7-02): the Bomb through the real input path, on a fresh stage entry
+## with two Bombs. The press is a `bomb` event, which only [PlayerWeapon] reads.
+func _bombs() -> void:
+	var combat := _session.get_combat_state()
+	_request(&"restart_stage")
+	await _ticks(5)
+	# 14: a press with Pause on top, then gamepad B on Pause, which resumes; neither bombs.
+	await _push_action(&"pause")
+	_push_bomb(true)
+	_push_bomb(false)
+	await _push_action(&"pause")
+	await _ticks(10)
+	var after_paused_press := combat.get_bombs()
+	await _push_action(&"pause")
+	_push_joypad_b()
+	var resumed := not paused
+	await _ticks(10)
+	_report(after_paused_press == ENTRY_BOMBS and resumed and combat.get_bombs() == ENTRY_BOMBS,
+			"14 a bomb press under Pause and the B press that resumes Pause spend nothing: %d then %d of %d Bombs, resumed %s" % [
+				after_paused_press, combat.get_bombs(), ENTRY_BOMBS, resumed])
+	# 15 to 17: one held press, with hostile fire inside and outside the radius, a hostile in
+	# the Graze Volume, a player shot, and a target dummy inside and one outside.
+	var weapon := _ship().weapon
+	var core := _ship().damage_core.global_position
+	var inside_dummy := _add_dummy(core + Vector3(BOMB_INSIDE, 0.0, 0.0))
+	var outside_dummy := _add_dummy(core + Vector3(0.0, 0.0, -weapon.bomb_radius - BOMB_OUTSIDE_MARGIN))
+	await _ticks(2)
+	var graze := _graze()
+	var reported_grazes := _grazes_reported
+	var bombs_used := _bombs_used()
+	await physics_frame
+	# Spawned in the tick the Bomb goes off, before the field moves: the Graze-Volume one
+	# would graze on this very tick if the clear did not come first.
+	core = _ship().damage_core.global_position
+	_spawn_static(core + Vector3(BOMB_INSIDE, 1.0, 0.0), ProjectileSpawn.Faction.HOSTILE)
+	_spawn_static(core + GRAZE_MISS, ProjectileSpawn.Faction.HOSTILE)
+	_spawn_static(core + Vector3(-weapon.bomb_radius - BOMB_OUTSIDE_MARGIN, 0.0, 0.0), ProjectileSpawn.Faction.HOSTILE)
+	_spawn_static(core + Vector3(0.0, 0.0, -BOMB_INSIDE), ProjectileSpawn.Faction.PLAYER)
+	for index: int in RING_SIZE:
+		var angle := TAU * index / RING_SIZE
+		var direction := Vector3(cos(angle), 0.0, sin(angle))
+		_spawn_static(core + direction * BOMB_INSIDE_RING, ProjectileSpawn.Faction.HOSTILE)
+		_spawn_static(core + direction * (weapon.bomb_radius + BOMB_OUTSIDE_MARGIN), ProjectileSpawn.Faction.HOSTILE)
+	var hostile_before := _session.projectile_system.count(ProjectileSpawn.Faction.HOSTILE)
+	# The Bomb's own Invulnerability would hide the Graze on its own; lifted for the Bomb's
+	# tick only, so check 16b fails if the clear does not come first.
+	combat.bomb_activated.connect(_lift_invulnerability_for_one_tick, CONNECT_ONE_SHOT)
+	_push_bomb(true)
+	await _ticks(1)
+	var bomb_frame := Engine.get_physics_frames()
+	_session.projectile_system.set_player_invulnerable(combat.is_invulnerable())
+	var hostile_after := _session.projectile_system.count(ProjectileSpawn.Faction.HOSTILE)
+	var player_after := _session.projectile_system.count(ProjectileSpawn.Faction.PLAYER)
+	# Read now: by the time the checks below run the blast has already freed itself.
+	var blast_seen := _blast() != null
+	await _capture("bomb")
+	await _ticks(BOMB_HELD_TICKS)
+	_push_bomb(false)
+	await _ticks(2)
+	var outside_count := 1 + RING_SIZE
+	_report(combat.get_bombs() == ENTRY_BOMBS - 1 and _bombs_used() - bombs_used == 1,
+			"15 one press held %d ticks spends one Bomb: %d left, bombs_used +%d" % [
+				BOMB_HELD_TICKS, combat.get_bombs(), _bombs_used() - bombs_used])
+	_report(hostile_after == outside_count and player_after == 1 and hostile_before == outside_count + 2 + RING_SIZE,
+			"16 the Bomb clears hostile fire within %.1f only: hostile %d -> %d (%d outside kept), player shots %d kept; Graze +%d (%d reported)" % [
+				weapon.bomb_radius, hostile_before, hostile_after, outside_count, player_after,
+				_graze() - graze, _grazes_reported - reported_grazes])
+	_report(_graze() == graze and _grazes_reported == reported_grazes,
+			"16b the cleared Projectile in the Graze Volume awards no Graze")
+	_report(inside_dummy.damage_taken == weapon.bomb_damage and inside_dummy.hit_count == 1 and outside_dummy.damage_taken == 0,
+			"17 the Bomb damages the target in range once (%d damage in %d hit, %d expected) and not the one outside (%d)" % [
+				inside_dummy.damage_taken, inside_dummy.hit_count, weapon.bomb_damage, outside_dummy.damage_taken])
+	# 18: the visual appears at the Core and frees itself.
+	await _ticks(roundi(BombBlast.FADE_SECONDS * Engine.physics_ticks_per_second) + 10)
+	_report(blast_seen and _blast() == null,
+			"18 the blast visual appeared (%s) and freed itself within %.1f s" % [blast_seen, BombBlast.FADE_SECONDS])
+	# 19: 2 s of Invulnerability from the Bomb: a hit at 1.5 s passes, one at 2.1 s lands.
+	var hits := _hits_reported
+	await _until_frame(bomb_frame + roundi(BOMB_EARLY_HIT * Engine.physics_ticks_per_second) - FLIGHT_TICKS_TO_CORE)
+	_fire(SPAWN_OFFSET)
+	await _ticks(FLIGHT_TICKS)
+	var early := _hits_reported - hits
+	await _until_frame(bomb_frame + roundi(BOMB_LATE_HIT * Engine.physics_ticks_per_second) - FLIGHT_TICKS_TO_CORE)
+	_fire(SPAWN_OFFSET)
+	await _ticks(FLIGHT_TICKS)
+	var late := _hits_reported - hits - early
+	_report(early == 0 and late == 1,
+			"19 after the Bomb a hit at %.1f s is rejected (%d reported) and one at %.1f s lands (%d reported)" % [
+				BOMB_EARLY_HIT, early, BOMB_LATE_HIT, late])
+	# 20: the second press spends the last Bomb, a third does nothing.
+	await _until_vulnerable()
+	await _press_bomb()
+	var after_second := combat.get_bombs()
+	await _press_bomb()
+	_report(after_second == 0 and combat.get_bombs() == 0 and _bombs_used() - bombs_used == 2,
+			"20 the second press spends the last Bomb (%d left) and a third does nothing (%d left, bombs_used +%d)" % [
+				after_second, combat.get_bombs(), _bombs_used() - bombs_used])
+	# 21: defeated with two Bombs, a press spends nothing.
+	_request(&"restart_stage")
+	await _ticks(5)
+	combat.take_hit()
+	combat.tick(CombatState.HIT_INVULNERABILITY)
+	combat.take_hit(1000)
+	var defeated := combat.is_defeated() and _session.interface.current_screen() == ScreenRouter.DEFEAT
+	await _press_bomb()
+	_report(defeated and combat.get_bombs() == ENTRY_BOMBS,
+			"21 defeated (%s), a bomb press spends nothing: %d of %d Bombs" % [defeated, combat.get_bombs(), ENTRY_BOMBS])
+	_request(&"return_to_menu")
+	await process_frame
+
+
+## Connected after the Session, so it runs once its Bomb handler has set the field.
+func _lift_invulnerability_for_one_tick() -> void:
+	_session.projectile_system.set_player_invulnerable(false)
+
+
+func _press_bomb() -> void:
+	_push_bomb(true)
+	await _ticks(BOMB_HELD_TICKS)
+	_push_bomb(false)
+	await _ticks(2)
+
+
+func _push_bomb(pressed: bool) -> void:
+	var event := InputEventAction.new()
+	event.action = &"bomb"
+	event.pressed = pressed
+	root.push_input(event)
+
+
+## Gamepad B, which is `ui_cancel` and `bomb` (CONVENTIONS "Input actions").
+func _push_joypad_b() -> void:
+	for pressed: bool in [true, false]:
+		var event := InputEventJoypadButton.new()
+		event.button_index = JOY_BUTTON_B
+		event.pressed = pressed
+		root.push_input(event)
+
+
+func _add_dummy(at: Vector3) -> TargetDummy:
+	var dummy := (load(TARGET_DUMMY_PATH) as PackedScene).instantiate() as TargetDummy
+	_session.world_root.add_child(dummy)
+	dummy.global_position = at
+	dummy.setup(_session.projectile_system)
+	return dummy
+
+
+func _spawn_static(at: Vector3, faction: ProjectileSpawn.Faction) -> void:
+	var request := ProjectileSpawn.new(at, Vector3.ZERO, faction, STATIC_LIFETIME)
+	if _session.projectile_system.spawn(request) == ProjectileField.NO_PROJECTILE:
+		_report(false, "the field refused a test Projectile")
+
+
+func _blast() -> BombBlast:
+	for child: Node in _session.world_root.get_children():
+		if child is BombBlast:
+			return child as BombBlast
+	return null
+
+
+func _bombs_used() -> int:
+	return _session.get_run_state().stage_result()["bombs_used"]
+
+
+func _until_frame(frame: int) -> void:
+	while Engine.get_physics_frames() < frame:
+		await physics_frame
 
 
 ## Spawns a hostile Projectile at the Core's center plus [param from], flying back

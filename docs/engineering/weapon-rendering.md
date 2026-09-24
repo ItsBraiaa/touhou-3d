@@ -51,6 +51,7 @@ Nothing here touches `CombatState` or `RunState`.
 | `spawn(request: ProjectileSpawn) -> int` | F5-04 emitters, F6-03's weapon, `DevSpray` | The field's `spawn`. The first refusal of a stage prints one `push_warning` with the refused count. |
 | `clear_hostile_in_radius(center, radius) -> int`, `clear_hostile_all() -> int`, `targets_in_radius(center, radius) -> PackedInt64Array`, `count(faction) -> int` | F7-02, F10, F12, the harness | Passthroughs to the field. |
 | `register_target(target_id: int, center: Vector3, radius: float, on_damage: Callable)` | enemy adapters (F9-02, F12-02), F6-03's dummy, every physics tick | Registers the hit sphere for the coming tick and keeps `on_damage` (`func(damage: int) -> void`) by id. When the field reports `enemy_hit` for that id, `on_damage.call(damage)` runs if the Callable is still valid. |
+| `damage_targets_in_radius(center: Vector3, radius: float, damage: int) -> int` | Session `_on_bomb_activated` (F7-02) | Calls `on_damage(damage)` once on every target registered for the coming tick whose sphere overlaps the radius (a target registered twice is damaged once) and returns how many. It must run after the actors registered this tick, as the weapon's physics priority (50) guarantees. |
 | `set_player_invulnerable(active: bool)` | F7-01, mirroring `CombatState.is_invulnerable()` | Passed to the field's sweep every tick: while true a Core contact passes through and no Graze is awarded. |
 | `get_field() -> ProjectileField` | tests, dev tools | The field itself. |
 
@@ -91,6 +92,7 @@ Before the first `setup` the field has a unit placeholder Flight Volume at the o
 | `shot_speed`, `shot_lifetime`, `shot_radius` | `float` | 60, 1.2, 0.15 | yes | Every shot: 72 units of range, beyond the 60-unit lock range. |
 | `shot_damage`, `familiar_shot_damage` | `int` | 1, 1 | yes | Damage a main or a Familiar shot carries to `on_damage`. |
 | The six `Tuning` values | `float` | as `WeaponModel.Tuning` | yes | Copied into the model in `_ready`. |
+| `bomb_radius`, `bomb_damage`, `bomb_visual_scene` | `float`, `int`, `PackedScene` | 10.0, 20, `scenes/dev/bomb_blast.tscn` | the scene is optional | The "Bomb" group (F7-02): read by the Session's Bomb handler, not by the weapon ([damage-pickups.md](damage-pickups.md) "Bomb"). |
 
 A missing reference, a missing `Left` or `Right` marker, or a Familiar scene with a collision object is reported with `push_error` and disables the weapon.
 
@@ -104,6 +106,9 @@ A target that has left the tree but is not freed yet is ignored for Aim Assist. 
 | `set_fire_enabled(enabled: bool)` | `PlayerController.set_controls_enabled()` | While false: no shots and no Bomb feed, and the held Bomb button is forgotten. |
 
 ### Each physics tick (set up and enabled)
+
+The weapon's `process_physics_priority` is `PHYSICS_PRIORITY` (50, since F7-02): after every actor (0), so this tick's lock, yaw, ship position and enemy registrations are what a shot or a Bomb sees, and before the `ProjectileSystem` (100), which moves this tick's shots.
+
 
 1. `WeaponModel.tick(delta, Input.is_action_pressed(&"fire"), power_level)`.
 2. `_fire(shots)`, the single fire path (F13-03 adds `shots_fired` here). For each shot:

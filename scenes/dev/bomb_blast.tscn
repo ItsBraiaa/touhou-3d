@@ -1,0 +1,24 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scenes/dev/bomb_blast.gd" id="1_blast"]
+
+[sub_resource type="StandardMaterial3D" id="BlastMaterial"]
+transparency = 1
+shading_mode = 0
+cull_mode = 2
+albedo_color = Color(0.75, 0.95, 1, 0.35)
+
+[sub_resource type="SphereMesh" id="BlastMesh"]
+material = SubResource("BlastMaterial")
+radius = 1.0
+height = 2.0
+radial_segments = 24
+rings = 12
+
+[node name="BombBlast" type="Node3D" node_paths=PackedStringArray("sphere")]
+script = ExtResource("1_blast")
+sphere = NodePath("Sphere")
+
+[node name="Sphere" type="MeshInstance3D" parent="."]
+mesh = SubResource("BlastMesh")
+cast_shadow = 0

@@ -164,6 +164,21 @@ func targets_in_radius(center: Vector3, radius: float) -> PackedInt64Array:
 	return _field.targets_in_radius(center, radius)
 
 
+## Deals [param damage] once to every target registered for the coming tick whose sphere
+## overlaps [param radius] around [param center] (a Bomb), through its `on_damage`, and
+## returns how many were damaged. The field keeps one sphere per id, so a target registered
+## twice is damaged once; one that stopped registering is not damaged. Call it after the actors have registered this
+## tick: from a physics step whose priority is above theirs, as [PlayerWeapon]'s is.
+func damage_targets_in_radius(center: Vector3, radius: float, damage: int) -> int:
+	var damaged := 0
+	for target_id: int in _field.targets_in_radius(center, radius):
+		var on_damage: Callable = _callbacks.get(target_id, Callable())
+		if on_damage.is_valid():
+			on_damage.call(damage)
+			damaged += 1
+	return damaged
+
+
 ## Alive Projectiles of [param faction].
 func count(faction: ProjectileSpawn.Faction) -> int:
 	return _field.count(faction)

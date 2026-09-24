@@ -62,3 +62,41 @@ after that change was `COMBAT_OK` again. The screenshots come from the run befor
 - A physical keyboard or pad; every input is synthetic.
 - That the controls are off on Defeat: covered by `_set_paused(true)` (tree paused and
   `set_controls_enabled(false)`), not measured by the tool.
+
+# Bomb — 2026-09-23 (F7-02)
+
+## Automated
+
+`tools/test.ps1`: 225 passed, 0 failed, no `SCRIPT ERROR`; no test added or changed (the
+sprint's no-new-tests rule).
+
+## Scripted pass: `tools/validate_combat.gd`, checks 14 to 21
+
+`COMBAT_OK` for all 21 checks, headless and then in a 1280 × 720 window, with no
+`SCRIPT ERROR` or `ERROR:` line. The Bomb checks run on a fresh stage entry with two
+Bombs, and every press is a `bomb` event that only the `PlayerWeapon` reads.
+
+| # | Check | Measured |
+| --- | --- | --- |
+| 14 | A `bomb` press under Pause, then gamepad B on Pause (which resumes) | 2 of 2 Bombs after each; B resumed the game |
+| 15 | One press held 30 ticks | 1 Bomb left, `bombs_used` +1 |
+| 16 | 35 hostile Projectiles: 18 inside the 10-unit radius (a single, the Graze-Volume one and a ring of 16) and 17 outside it (a single and a ring of 16); one player shot inside | Hostile 35 → 17, all 17 outside kept; the player shot kept |
+| 16b | The hostile one 0.6 from the Core, spawned in the Bomb's own tick, with the Bomb's Invulnerability lifted for that tick so the clear alone decides | Graze +0, none reported |
+| 17 | A `TargetDummy` 4 from the Core and one 12 away | The inside one took 20 damage in 1 hit; the outside one 0 |
+| 18 | The blast | Appeared under `WorldRoot` and freed itself within 0.4 s |
+| 19 | Invulnerability after the Bomb | A Core hit at 1.5 s passed through (0 reported); one at 2.1 s landed (1 reported) |
+| 20 | Second and third presses | The second spent the last Bomb; the third did nothing; `bombs_used` +2 in all |
+| 21 | Defeated with two Bombs, then a press | Still 2 Bombs |
+
+The reviewer found that check 16b could not fail as first written: the Bomb's own
+Invulnerability, mirrored to the field before its sweep, blocked the Graze without the
+clear. The tool now lifts it for the Bomb's tick only. With the clear removed from
+`_on_bomb_activated`, checks 16 and 16b both fail (hostile 35 → 35, Graze +1); with it,
+both pass. That rerun, and the one after the handler was reordered to damage last, were
+headless; the screenshot comes from the windowed run before those fixes.
+
+![Bomb](combat-bomb.png)
+
+`combat-bomb.png`: one tick after the Bomb. The translucent blast fills the 10-unit
+radius, and the dummy inside flashes. The outer hostile ring and the player shot remain.
+The HUD shows one Bomb left.

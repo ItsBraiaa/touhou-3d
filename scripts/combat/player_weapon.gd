@@ -10,7 +10,8 @@ extends Node
 ## is no homing, and the field kills it on scenery for its whole travel (ADR-0004). The
 ## Bomb button is tracked from `bomb` events, never from `Input.is_action_just_pressed`,
 ## because gamepad B is also `ui_cancel` (F2-04); a Bomb shows up as
-## [signal CombatState.bomb_activated]. What a Bomb clears and damages is F7-02's.
+## [signal CombatState.bomb_activated]; the Session reacts to it with this weapon's
+## [member bomb_radius], [member bomb_damage] and [member bomb_visual_scene] (F7-02).
 
 
 ## Radius of a Familiar's small visual orbit around its anchor, in world units. The shot
@@ -23,6 +24,10 @@ const ANCHOR_NAMES: Array[StringName] = [&"Left", &"Right"]
 ## Least distance, along the view, the aim point keeps ahead of a shot's origin, so a close
 ## target never turns "forward" up or back.
 const MIN_AIM_AHEAD := 8.0
+## Physics priority: after every actor (default 0), so this tick's lock, yaw and enemy
+## registrations are what a shot or a Bomb sees, and before the [ProjectileSystem]
+## ([constant ProjectileSystem.TICK_PRIORITY]), which moves this tick's shots.
+const PHYSICS_PRIORITY := 50
 
 @export_group("Scene references")
 ## Where the main shot leaves, in ship coordinates (`PlayerShip/Muzzle`). Required.
@@ -64,6 +69,17 @@ const MIN_AIM_AHEAD := 8.0
 ## Aim Assist cone of a Familiar shot at Power Level 3, in degrees.
 @export var familiar_assist_degrees_level_3: float = 20.0
 
+@export_group("Bomb")
+## Radius around the Core, in world units, of a Bomb's hostile clear and enemy damage.
+## Claude's proposal; Astra tunes it.
+@export var bomb_radius: float = 10.0
+## Damage a Bomb deals to every enemy in range. Claude's proposal; it must stay below
+## the smallest boss Phase health (F12).
+@export var bomb_damage: int = 20
+## The blast visual, a [BombBlast] scene the Session instances at the Core for each Bomb;
+## the dev `scenes/dev/bomb_blast.tscn` until D-02. Optional: unset shows nothing.
+@export var bomb_visual_scene: PackedScene
+
 var _model := WeaponModel.new()
 ## Null until [method setup].
 var _combat_state: CombatState
@@ -87,6 +103,7 @@ var _request := ProjectileSpawn.new()
 
 func _ready() -> void:
 	_ship = get_parent() as Node3D
+	process_physics_priority = PHYSICS_PRIORITY
 	if not _validate_setup():
 		process_mode = Node.PROCESS_MODE_DISABLED
 		return

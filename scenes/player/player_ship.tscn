@@ -6,6 +6,7 @@
 [ext_resource type="Script" path="res://scripts/player/targeting.gd" id="4_target"]
 [ext_resource type="Script" path="res://scripts/combat/player_weapon.gd" id="5_weapon"]
 [ext_resource type="PackedScene" path="res://scenes/dev/familiar.tscn" id="6_familiar"]
+[ext_resource type="PackedScene" path="res://scenes/dev/bomb_blast.tscn" id="7_bomb_blast"]
 
 [sub_resource type="StandardMaterial3D" id="Teal"]
 albedo_color = Color(0.08, 0.95, 0.84, 1)
@@ -117,6 +118,7 @@ muzzle = NodePath("../Muzzle")
 familiar_anchors = NodePath("../FamiliarAnchors")
 camera_rig = NodePath("../CameraRig")
 familiar_scene = ExtResource("6_familiar")
+bomb_visual_scene = ExtResource("7_bomb_blast")
 
 [node name="Targeting" type="Node" parent="." node_paths=PackedStringArray("camera")]
 script = ExtResource("4_target")

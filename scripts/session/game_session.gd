@@ -9,7 +9,8 @@ extends Node
 ## It is also the combat adapter the combat cores name: it turns the [ProjectileSystem]'s
 ## Core hits and Grazes into [CombatState] and [RunState] changes, mirrors Invulnerability
 ## to the field and the ship, forwards excess-Power score, and freezes the Attempt under
-## Defeat when the player is defeated.
+## Defeat when the player is defeated. It also answers a Bomb with its clear, its damage
+## and its visual.
 ##
 ## Nothing here decides gameplay: movement, targeting and the Run's accounting belong to
 ## their cores. Stage completion and results arrive with F10 and F11.
@@ -73,6 +74,7 @@ func _ready() -> void:
 	_combat_state.invulnerability_changed.connect(_on_invulnerability_changed)
 	_combat_state.score_awarded.connect(_on_score_awarded)
 	_combat_state.defeated.connect(_on_player_defeated)
+	_combat_state.bomb_activated.connect(_on_bomb_activated)
 	interface.action_requested.connect(_on_action_requested)
 	interface.show_home(ScreenRouter.MAIN_MENU)
 
@@ -288,6 +290,36 @@ func _on_invulnerability_changed(invulnerable: bool) -> void:
 	projectile_system.set_player_invulnerable(invulnerable)
 	if _player != null:
 		_player.set_invulnerable_visual(invulnerable)
+
+
+## A Bomb went off, its edge and its 2 s of Invulnerability already the core's. Clears
+## the hostile fire within the weapon's radius of the Core (awarding nothing), counts the
+## Bomb in the Attempt, shows the blast, and last damages every enemy registered in range
+## once: a kill may end the stage (F10), so nothing may follow it. The weapon feeds the
+## button after every actor has registered, so this tick's spheres count.
+func _on_bomb_activated() -> void:
+	if _player == null:
+		return
+	var weapon := _player.weapon
+	var center := _player.damage_core.global_position
+	projectile_system.clear_hostile_in_radius(center, weapon.bomb_radius)
+	_run_state.note_bomb_used()
+	_show_bomb_blast(weapon, center)
+	projectile_system.damage_targets_in_radius(center, weapon.bomb_radius, weapon.bomb_damage)
+
+
+## Instances the weapon's blast visual at [param center], if it has one.
+func _show_bomb_blast(weapon: PlayerWeapon, center: Vector3) -> void:
+	if weapon.bomb_visual_scene == null:
+		return
+	var blast := weapon.bomb_visual_scene.instantiate()
+	if not blast is BombBlast:
+		push_error("%s: 'bomb_visual_scene' %s does not have a BombBlast root" % [get_path(), weapon.bomb_visual_scene.resource_path])
+		blast.free()
+		return
+	world_root.add_child(blast)
+	(blast as BombBlast).global_position = center
+	(blast as BombBlast).setup(weapon.bomb_radius)
 
 
 ## The only path from an excess Power Pickup (F7-03) to the Run's score.

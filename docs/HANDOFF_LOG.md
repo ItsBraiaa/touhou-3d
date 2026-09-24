@@ -15,6 +15,28 @@ Action required by <other agent>: <what they must do, or "none">
 
 ---
 
+## 2026-09-23 21:21 — Claude (trunk) — F7-02: Bomb clear, radius damage and bombs used [shared]
+State: CODE_READY
+Files:
+- `scripts/session/game_session.gd`, `scripts/combat/projectile_system.gd` (`damage_targets_in_radius`), `scripts/combat/player_weapon.gd` (the "Bomb" exports and physics priority 50).
+- `scenes/player/player_ship.tscn` **[shared]**: only `Weapon.bomb_visual_scene` = `scenes/dev/bomb_blast.tscn`.
+- New: `scenes/dev/bomb_blast.gd` and `.tscn`, `docs/validation/combat-bomb.png`.
+- Edited: `tools/validate_combat.gd` (checks 14 to 21).
+- Docs: `docs/engineering/damage-pickups.md` ("Bomb"), `docs/engineering/weapon-rendering.md`, `docs/validation/combat.md`, `docs/GUIDE.md` (Section 6 rows for `player_weapon.gd`, `projectile_system.gd` and `game_session.gd`), and the ROADMAP F7-02 row.
+
+Change:
+- **What a Bomb press does.** It spends one Bomb, clears hostile fire within 10 units of the Core (awarding no Graze), counts in `bombs_used`, shows a translucent dev blast, and damages every registered enemy in range once for 20.
+- **Where it is refused.** No Bomb under Pause, from the gamepad B that resumes Pause, with none left, or when defeated.
+- **Weapon order.** `PlayerWeapon` now ticks after the actors, at physics priority 50. A Bomb sees this tick's enemies, and shots use this tick's yaw and lock.
+- **Tests.** None added or changed (sprint rule). `validate_combat.gd` gives `COMBAT_OK`.
+
+Why: F7-02.
+
+Action required by Astra:
+- **Tuning.** `PlayerShip/Weapon` has a "Bomb" group: `bomb_radius` (10.0), `bomb_damage` (20) and `bomb_visual_scene`, all yours to tune.
+- **Swap pending: D-02.** Put the final blast inside a `BombBlast` root (`setup(radius)`, unit radius). It must keep later attacks readable.
+- **Boss Phases.** Keep `bomb_damage` below the smallest boss Phase health.
+
 ## 2026-09-23 21:07 — Claude (trunk) — F6-03 part 2: PlayerWeapon, Familiars, target dummies; closes F6-03 [shared]
 State: CODE_READY
 Files:
