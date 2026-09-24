@@ -109,6 +109,20 @@ const _SHARES: Dictionary[StringName, StringName] = {&"pause": &"ui_cancel"}
 ## A standalone modifier key reports its own bit as pressed; the descriptor drops it, so
 ## Left Shift is `{code: KEY_SHIFT, modifiers: 0}` as in `project.godot`.
 const _SELF_MODIFIER := {KEY_SHIFT: KEY_MASK_SHIFT, KEY_CTRL: KEY_MASK_CTRL, KEY_ALT: KEY_MASK_ALT, KEY_META: KEY_MASK_META}
+## The special keys Godot 4.7 names in [enum Key], as inclusive ranges; the codes between
+## them are unassigned. [constant KEY_UNKNOWN] is not a key one can bind.
+const _SPECIAL_KEY_RANGES: Array[Vector2i] = [
+	Vector2i(KEY_ESCAPE, KEY_F35),
+	Vector2i(KEY_MENU, KEY_HYPER),
+	Vector2i(KEY_HELP, KEY_HELP),
+	Vector2i(KEY_BACK, KEY_VOLUMEUP),
+	Vector2i(KEY_MEDIAPLAY, KEY_JIS_KANA),
+	Vector2i(KEY_KP_MULTIPLY, KEY_KP_9),
+]
+## The highest Unicode code point. Below [constant KEY_SPECIAL] any printable character is
+## taken, not only the [enum Key] ones, since a platform may report a layout key's own
+## character as its keycode.
+const _UNICODE_MAX := 0x10FFFF
 
 ## Profile id -> action -> [constant SLOT_COUNT] normalized slots, bound ones first.
 var _profiles: Dictionary = {}
@@ -146,8 +160,9 @@ static func joy_axis_binding(axis: int, axis_sign: int) -> Dictionary:
 ## [param value] as a normalized descriptor (every field present, a modifier key's own bit
 ## dropped), or an empty Dictionary when it is blank or invalid. With [param profile], a
 ## descriptor of the other device is invalid too. Rejected: an unknown field or kind, a
-## field of the wrong type, a code outside its kind's range, a sign on anything but an
-## axis, a negative trigger, and modifier bits outside [constant MODIFIER_MASK].
+## field of the wrong type, a code outside its kind's range (for a key, a code no key
+## reports), a sign on anything but an axis, a negative trigger, and modifier bits
+## outside [constant MODIFIER_MASK].
 static func parse_binding(value: Variant, profile: StringName = &"") -> Dictionary:
 	if not _binding_problem(value, profile).is_empty():
 		return {}
@@ -165,7 +180,12 @@ static func profile_for(binding: Dictionary) -> StringName:
 ## Whether two descriptors are the same physical input: same kind and code, the same
 ## chord, the same axis direction (opposite signs are distinct), and compatible key
 ## locations. The physical flag is ignored, so a physical key and a layout key with the
-## same code count as one key. A blank or invalid descriptor matches nothing.
+## same code count as one key. That is exact for the special keys (Escape, Enter, Tab,
+## the arrows) on any layout, and for every key on US QWERTY. On another layout a physical
+## and a layout character key are compared by code, not by key, since this Node-free core
+## does not know the layout: only `pause` (physical) and the menu-only actions (layout)
+## meet this way, and F16-03's capture resolves it with the layout. A blank or invalid
+## descriptor matches nothing.
 static func same_input(a: Dictionary, b: Dictionary) -> bool:
 	return _same_input(parse_binding(a), parse_binding(b))
 
@@ -343,9 +363,13 @@ func capture() -> Dictionary:
 
 ## Restores both profiles from [param data] (as from [method capture], or a settings
 ## file). A missing profile or action takes its default silently, so actions added to the
-## catalog later get their defaults. Malformed slots fall back to that action's default,
-## and a profile left inconsistent (a conflict, a required action unbound) falls back to
-## that profile's defaults; each fallback and each unknown key is one diagnostic.
+## catalog later get their defaults. Malformed slots fall back to that action's default.
+## A fallen-back action leaves out each default input that an action kept from
+## [param data] holds and cannot share, so the player's remaps survive it; a required one
+## that would be left unbound takes those inputs back from their holders instead. A
+## profile left inconsistent (the kept bindings conflict, or a take-back leaves a
+## required holder unbound) falls back to that profile's defaults. Each fallback, each
+## default left out or taken back and each unknown key is one diagnostic.
 func restore(data: Dictionary) -> PackedStringArray:
 	var messages := PackedStringArray()
 	for key: Variant in data:
@@ -489,8 +513,10 @@ func restore_action_defaults(profile: StringName, action: StringName) -> PackedS
 
 
 ## Stores [param value] as [param profile], or [param fallback] when it is not a
-## Dictionary or the result is inconsistent; each malformed action falls back to its own
-## default first. Returns one diagnostic per fallback or unknown action.
+## Dictionary or the result is inconsistent; each missing or malformed action falls back
+## to its own default first, settled against the kept actions ([method
+## _settle_defaults]). Returns one diagnostic per fallback, default left out or taken
+## back, or unknown action.
 func _restore_profile(profile: StringName, value: Variant, fallback: Dictionary) -> PackedStringArray:
 	var messages := PackedStringArray()
 	_profiles[profile] = fallback
@@ -502,6 +528,7 @@ func _restore_profile(profile: StringName, value: Variant, fallback: Dictionary)
 		if not _is_catalog_action(key):
 			messages.append("InputBindings: %s has the unknown action %s; ignored" % [profile, key])
 	var result: Dictionary = {}
+	var kept: Array[StringName] = []
 	for action: StringName in CATALOG:
 		result[action] = fallback[action]
 		if not source.has(action):
@@ -512,14 +539,67 @@ func _restore_profile(profile: StringName, value: Variant, fallback: Dictionary)
 			problem = "leaves a required action unbound"
 		if problem.is_empty():
 			result[action] = slots
+			kept.append(action)
 		else:
 			messages.append("InputBindings: %s/%s %s; its default is in use" % [profile, action, problem])
+	for action: StringName in CATALOG:
+		if not kept.has(action):
+			messages.append_array(_settle_defaults(profile, action, result, kept))
 	var errors := _profile_errors(profile, result)
 	if errors.is_empty():
 		_profiles[profile] = result
 	else:
 		messages.append_array(errors)
 		messages.append("InputBindings: the %s profile is inconsistent; its defaults are in use" % profile)
+	return messages
+
+
+## Settles the default slots of [param action] in [param result] against the actions of
+## [param kept] (read from the file), so a fallback undoes as few remaps as it can: each
+## default input that a kept action holds and cannot share is left out. A required action
+## left with no binding that way takes those inputs back from their holders instead; a
+## holder then left without its own required binding makes the profile inconsistent. The
+## defaults never conflict among themselves, so only kept actions are checked. Returns
+## one diagnostic per input left out or taken back.
+static func _settle_defaults(profile: StringName, action: StringName, result: Dictionary, kept: Array[StringName]) -> PackedStringArray:
+	var messages := PackedStringArray()
+	var unheld: Array = []
+	var taken: Array[Dictionary] = []
+	var holders: Array[StringName] = []
+	for binding: Dictionary in result[action]:
+		var holder: StringName = &""
+		for other: StringName in kept:
+			if not holder.is_empty() or can_share(action, other):
+				continue
+			for bound: Dictionary in _bound(profile, other, result[other]):
+				if _same_input(bound, binding):
+					holder = other
+		if holder.is_empty():
+			unheld.append(binding)
+		else:
+			taken.append(binding)
+			holders.append(holder)
+	if taken.is_empty():
+		return messages
+	var slots := _packed(unheld)
+	if not is_required(action) or not (slots[0] as Dictionary).is_empty():
+		result[action] = slots
+		for index: int in taken.size():
+			messages.append("InputBindings: %s/%s leaves out its default %s, which %s holds" % [profile, action, taken[index], holders[index]])
+		return messages
+	for other: StringName in kept:
+		if can_share(action, other):
+			continue
+		var other_slots: Array = []
+		for bound: Dictionary in result[other]:
+			var reclaimed := false
+			for binding: Dictionary in taken:
+				reclaimed = reclaimed or _same_input(bound, binding)
+			if reclaimed:
+				messages.append("InputBindings: %s/%s is required, so it takes its default %s back from %s" % [profile, action, bound, other])
+			else:
+				other_slots.append(bound)
+		result[other] = _packed(other_slots)
 	return messages
 
 
@@ -635,8 +715,8 @@ static func _binding_problem(value: Variant, profile: StringName) -> String:
 		return "has unknown modifier bits %d" % modifiers
 	match String(kind):
 		KIND_KEY:
-			if code <= 0 or (code & ~KEY_CODE_MASK) != 0:
-				return "has the invalid key code %d" % code
+			if not _is_key_code(code):
+				return "has the key code %d, which no key reports" % code
 			if location < KEY_LOCATION_UNSPECIFIED or location > KEY_LOCATION_RIGHT:
 				return "has the invalid key location %d" % location
 			if axis_sign != 0:
@@ -662,6 +742,19 @@ static func _binding_problem(value: Variant, profile: StringName) -> String:
 	if String(kind) != KIND_MOUSE_BUTTON and modifiers != 0:
 		return "is a %s with modifiers" % kind
 	return ""
+
+
+## Whether a key can report [param code] (without modifier bits): a printable character
+## (control characters and surrogates excluded), or a special key Godot names.
+static func _is_key_code(code: int) -> bool:
+	if code >= KEY_SPECIAL:
+		for named: Vector2i in _SPECIAL_KEY_RANGES:
+			if code >= named.x and code <= named.y:
+				return true
+		return false
+	if code < KEY_SPACE or code > _UNICODE_MAX:
+		return false
+	return not (code >= 0x7F and code <= 0x9F) and not (code >= 0xD800 and code <= 0xDFFF)
 
 
 ## A valid descriptor with every field present and a modifier key's own bit dropped.

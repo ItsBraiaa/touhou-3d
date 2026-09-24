@@ -270,15 +270,16 @@ Gameplay keys are physical (by position). Keys of menu-only actions are keycodes
 | Field | Type | Meaning |
 | --- | --- | --- |
 | `kind` | String | `"key"`, `"mouse_button"`, `"joy_button"` or `"joy_axis"`. The keyboard-and-mouse profile takes the first two, the gamepad profile the last two. |
-| `code` | int | A key: the physical keycode when `physical`, otherwise the layout keycode (1 to `KEY_CODE_MASK`). A mouse button: 1 to 9, including the wheel. A joypad button: 0 to `JOY_BUTTON_MAX` − 1. An axis: 0 to `JOY_AXIS_MAX` − 1. |
+| `code` | int | A key: the physical keycode when `physical`, otherwise the layout keycode. It must be a code a key reports: a printable character (from `KEY_SPACE` to U+10FFFF, without the control characters and surrogates), or one of the special keys Godot 4.7 names in `Key` (`KEY_UNKNOWN` and the unassigned codes between them are refused). A mouse button: 1 to 9, including the wheel. A joypad button: 0 to `JOY_BUTTON_MAX` − 1. An axis: 0 to `JOY_AXIS_MAX` − 1. |
 | `axis_sign` | int | −1 or +1 for an axis; a trigger (axis 4 or 5) only has +1. It is 0 for everything else. |
 | `physical` | bool | Keys only. |
 | `modifiers` | int | A `KEY_MASK_SHIFT`/`CTRL`/`ALT`/`META` chord for a key or mouse button, such as Shift+Tab. A modifier key's own bit is dropped, so Left Shift stays a standalone key. |
 | `location` | int | Keys only: `KeyLocation`, to tell Left Shift and Left Ctrl from the right-hand keys. **Refinement of the spec's five fields**, needed to match `project.godot` exactly. It may be omitted on input (read as 0), and it is always present in a normalized descriptor. |
 
 - A blank slot is `{}`. Each action has `SLOT_COUNT` (2) slots per profile. Bound slots come first and a repeat is dropped (packed).
-- Rejected: a non-Dictionary, an unknown field or kind, a wrong-typed field, a code out of range, a sign on a non-axis or a negative trigger, unknown modifier bits, and a descriptor of the other profile's device.
+- Rejected: a non-Dictionary, an unknown field or kind, a wrong-typed field, a code out of range (for a key, a code no key reports), a sign on a non-axis or a negative trigger, unknown modifier bits, and a descriptor of the other profile's device.
 - `same_input(a, b)` is true for the same kind and code, the same chord, the same axis sign (opposite signs are distinct) and compatible key locations (unspecified matches either side). It ignores `physical`, so a physical key and a layout key with the same code count as one key.
+  - **Known limit: mixed key spaces on a non-QWERTY layout.** The comparison is exact for the special keys (Escape, Enter, Tab, the arrows) on any layout, and for every key on US QWERTY. On another layout, a physical and a layout character key are compared by code, not by key, because the Node-free core does not know the layout. Only `pause` (physical, since it is a gameplay action too) and the menu-only actions (layout) meet this way. On AZERTY, for example, `pause` on physical Q and `ui_accept` on layout A are the same key but are not reported, while physical A and layout A are two keys that are reported. The defaults are special keys, so they are not affected. **For F16-03:** when a capture puts a character key on `pause`, or on a menu-only action while `pause` holds one, compare in the layout's space (`DisplayServer.keyboard_get_keycode_from_physical`) in the capture flow before calling `assign`.
 - Helpers: `key_binding(code, physical := true, modifiers := 0, location := 0)`, `mouse_button_binding(button, modifiers := 0)`, `joy_button_binding(button)`, `joy_axis_binding(axis, sign)`, `parse_binding(value, profile := &"") -> Dictionary` (normalized, or `{}`), and `profile_for(binding) -> StringName`.
 
 ### Contexts and conflicts
@@ -310,10 +311,11 @@ Gameplay keys are physical (by position). Keys of menu-only actions are keycodes
 - **`capture()`** deep-copies both profiles: profile id → action → slots. **`restore(data)`** has these fallbacks:
   - a missing profile or action takes its default silently, so a later new action is defaulted independently;
   - malformed slots fall back to that action's default;
+  - a fallen-back (missing or malformed) action leaves out each default input that an action kept from the file holds and cannot share, so the player's remaps survive. A required action that this would leave with no binding takes those inputs back from their holders instead. For example, with `fire` on K and `lock_target` on J, a malformed `fire` falls back to J, which `lock_target` holds. `fire` is required, so it takes J back, `lock_target` is left blank, and every other remap stays. An optional action in `fire`'s place would be left blank instead;
   - an unknown key is reported and ignored;
-  - a profile that is still inconsistent afterwards (a conflict, or a required action unbound) falls back to its defaults.
+  - a profile that is still inconsistent afterwards falls back to its defaults. That happens only when the kept bindings conflict with each other, or when a take-back leaves a required holder with no binding.
 
-  Each fallback returns one diagnostic.
+  Each fallback, each default left out and each take-back returns one diagnostic.
 - **Static checks for data from outside:** `check_profile_data(profile, data) -> PackedStringArray` is strict (every action present, and nothing else), and `normalize_profile(data)` normalizes data that passed it.
 
 ### Settings: new values

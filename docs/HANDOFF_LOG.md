@@ -1,5 +1,18 @@
 # Handoff Log
 
+## 2026-09-24 — Claude (trunk) — F16-02: review fixes
+State: CODE_READY
+Files: `scripts/settings/input_bindings.gd`; `docs/engineering/settings.md` (only the section "F16 binding profiles and persistence (F16-02)"); `docs/validation/controls-expansion.md` (only the F16-02 section); `.scratch/controls-expansion/issues/02-binding-profiles-and-persistence.md` (Outcome).
+Change:
+- **The per-action fallback no longer resets a profile.** Before, a missing or malformed action took its default without looking at the file's remaps, so a default held by a remap made the whole profile fall back and lose every remap. Now each default input that an action kept from the file holds, and cannot share, is left out. A required action that would be left unbound that way takes the input back from its holder instead. For example, after a K/J swap of `fire` and `lock_target`, a malformed `fire` gets J back and `lock_target` is left blank. The whole profile falls back only when the file's own bindings conflict, or when a take-back leaves a required holder unbound. Each input left out or taken back gets one diagnostic.
+- **Key codes must be codes a key reports.** Before, any integer from 1 to `KEY_CODE_MASK` passed, so a corrupt file could satisfy a required action with an unpressable key such as code 5. Now a code must be a printable character (from Space to U+10FFFF, with no control characters or surrogates) or one of the special keys Godot 4.7 names. The ranges were taken from the engine's own `Key` enum dump. `KEY_UNKNOWN` and the unassigned special codes are refused, and such an action falls back per action.
+- **Known limit, documented, not fixed:** `pause` takes physical keys and the menu-only actions take layout keys, and the Node-free core compares them by code. That is exact for the special keys on any layout, and for every key on US QWERTY. On another layout it is not exact for character keys. The core cannot know the layout, so the fix belongs to F16-03's capture.
+Why: review findings on F16-02 part 2. The ticket's acceptance line says malformed binding data falls back per action, and required actions must stay pressable.
+Verification: no tests or drivers (F16 rule). The existing suite and `check_resources --strict-validate` were clean. The fallback and the code check were verified by reading only.
+Action required by trunk:
+- **F16-03:** when a capture puts a character key on `pause`, or on a menu-only action while `pause` holds a character key, compare the two in the layout's space (`DisplayServer.keyboard_get_keycode_from_physical`) before calling `assign`. The details are in settings.md, under "The binding descriptor".
+Action required by Astra: none.
+
 ## 2026-09-24 — Claude (trunk) — F16-02: binding profiles, persistence and InputMap adapter [shared]
 State: CODE_READY
 Files: `scripts/settings/input_bindings.gd` (new) and its `.uid`; `scripts/settings/settings.gd`; `scripts/ui/input_binding_adapter.gd` (new) and its `.uid`; `scripts/ui/interface.gd`; `docs/engineering/settings.md` (only the section "F16 binding profiles and persistence (F16-02)"); `docs/validation/controls-expansion.md` (only the F16-02 section); `.scratch/controls-expansion/spec.md` [shared] (the descriptor line and the API list, per the spec's own refinement rule); `.scratch/controls-expansion/issues/02-binding-profiles-and-persistence.md` (Status, Outcome); `docs/engineering/ROADMAP.md` (the F16-02 row). `project.godot` is unchanged: part 1's defaults were already right.

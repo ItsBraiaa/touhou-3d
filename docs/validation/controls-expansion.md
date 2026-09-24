@@ -27,11 +27,12 @@ Pending.
 - **Per-action fallback.** One malformed action falls back to its own default and leaves the other actions and the other profile alone:
   - a non-Array or over-long slot list;
   - an unknown kind or field, or a wrong-typed field;
-  - a code out of range, a sign on a non-axis, or a negative trigger;
+  - a code out of range, a key code no key reports (a control character, an unassigned special code, `KEY_UNKNOWN`), a sign on a non-axis, or a negative trigger;
   - a joypad descriptor in the keyboard profile;
   - a required action left blank.
 
-  A profile still inconsistent after that falls back as a whole. Unknown actions and profiles are reported and ignored.
+  A missing or malformed action's default never undoes a remap (review fix): each default input that a kept action holds is left out, and a required action that would be left unbound takes it back from the holder instead (`fire` malformed after a K/J swap with `lock_target`: `fire` gets J back, `lock_target` is blank, the other remaps stay). A profile still inconsistent after that falls back as a whole, which now needs the file's own bindings to conflict or a take-back to leave a required holder unbound. Unknown actions and profiles are reported and ignored.
+- **Known limit, for F16-03.** `pause` takes physical keys and the menu-only actions take layout keys, and the Node-free core compares them by code. That is exact for the special keys on any layout and for every key on US QWERTY, but not for character keys on another layout (AZERTY `pause` on physical Q and `ui_accept` on layout A are one key, not reported). F16-03's capture compares them in the layout's space.
 - **Transactions.**
   - Swap and Replace work on a deep copy, and are committed only when the whole profile validates.
   - Replace is refused when it leaves a required action (every menu action, movement, fire, pause) unbound.

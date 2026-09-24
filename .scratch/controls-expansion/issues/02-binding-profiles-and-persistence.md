@@ -78,3 +78,7 @@ Done 2026-09-24 by lane trunk (part 2; part 1's defaults were already in `projec
   - `RESOLUTION_NONE`;
   - `Settings.apply_input_bindings`, `confirm_input_bindings`, `revert_input_bindings` and `is_input_bindings_pending`.
 - **Verification.** The existing suite passes (225), and the 300-frame boot and `check_resources` are clean. The drift check was proven live by one temporary broken default. The real `settings.cfg` is untouched. No tests or drivers were written. The human pass (restart persistence, old-file migration, a crash during unconfirmed application, a device-index change) is listed in the validation record.
+- **Review fixes** (commit "F16-02 part 2: review fixes"):
+  - a missing or malformed action's default no longer throws away the profile's remaps. Each default input that a kept action holds is left out; a required action that would be left unbound takes it back from its holder instead. The whole profile falls back only when the file's own bindings conflict, or a take-back leaves a required holder unbound;
+  - a key code must be one a key reports: a printable character, or a special key Godot 4.7 names. A control character, an unassigned special code or `KEY_UNKNOWN` falls back per action;
+  - **known limit, handed to F16-03:** `pause` (physical) and the menu-only actions (layout) are compared by code, which is exact for special keys and on US QWERTY but not for character keys on another layout. F16-03's capture compares them in the layout's space. It is recorded in settings.md.
