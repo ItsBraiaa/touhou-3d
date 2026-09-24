@@ -125,14 +125,15 @@ User-requested on 2026-09-24; implementation is planned, not part of the already
 | --- | --- | --- | --- |
 | F16-00 plan-and-orchestration | Astra / sol | F3-04, F7-02 | done (spec, seven implementation tickets, layout contract and Claude kickoff) |
 | F16-01 controls-layout-and-dash-visuals | Astra / sol | F16-00 | todo |
-| F16-02 binding-profiles-and-persistence | Claude / trunk | F16-00 | todo |
-| F16-03 rebind-workflow-and-prompts | Claude / trunk | F16-01, F16-02 | todo |
-| F16-04 mouse-camera-and-recenter | Claude / path | F16-02 | todo |
-| F16-05 invulnerable-lateral-dash | Claude / trunk | F16-03 | todo |
+| F16-02 binding-profiles-and-persistence | Claude / trunk | F16-00 | todo (part 1 done 2026-09-24 by lane plan: `camera_recenter`, `dash_left` and `dash_right` defaults in `project.godot`) |
+| F16-08 binding-labels-and-prompt-family | OpenCode / oc-a | F16-00 | todo |
+| F16-03 rebind-workflow-and-prompts | Claude / trunk | F16-01, F16-02, F16-08 | todo |
+| F16-04 mouse-camera-and-recenter | Claude / path | F16-00 | todo |
+| F16-05 invulnerable-lateral-dash | Claude / rescue | F16-00 (part 2: F16-01) | todo |
 | F16-06 session-camera-and-controls-integration | Claude / trunk | F16-03, F16-04, F16-05 | todo |
 | F16-07 controls-visual-and-device-acceptance | Astra / sol; Claude engineering fixes | F16-06 | todo |
 
-Claude schedules this feature around existing lane occupancy. F16-01/02 may overlap; F16-04 may overlap 03/05. Session, InputMap, player ship and integration edits are serialized in trunk. This section does not dispatch or interrupt another lane.
+Routing (2026-09-24, Claude): five lanes run at once, sol F16-01, trunk F16-02, path F16-04, rescue F16-05 part 1 and oc-a F16-08, because their files are disjoint (SPRINT.md, "After delivery: F16"). Trunk's F16-03 follows F16-01, F16-02 and F16-08; rescue's F16-05 part 2 follows F16-01; F16-06 converges in trunk; sol's F16-07 closes.
 
 ## Risk
 

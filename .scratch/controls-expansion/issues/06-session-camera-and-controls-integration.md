@@ -59,4 +59,4 @@ Write no new tests or disposable test drivers. Run the existing tools/lane.ps1 l
 
 ## Outcome
 
-Not started. Starts only after 03/04/05 landed; path and sol must not be editing these runtime files.
+Not started. Starts only after 03/04/05 landed; path and sol must not be editing these runtime files. F16-05 in lane rescue hands `game_session.gd`, `player_controller.gd`, `hud.*` and `player_ship.tscn` back to trunk when its part 2 lands (routing, 2026-09-24).
