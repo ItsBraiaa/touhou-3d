@@ -38,3 +38,18 @@ Each of Encounters/S2-03/Seals/Seal1..3 now explicitly exports health = 10 (inhe
 D-05 has since landed shared Spirit health 30 and Sentry health 45, superseding pass 1's 20/30 assumptions. Keeping every other provisional budget unchanged, the incremental health adds 20/13.5 s in S2-01, 70/13.5 in S2-02, 90/13.5 in S2-03 and 70/17.5 in S2-05: about 17.3 s efficient. Normal uses 10.8/14.0 DPS and adds about 21.7 s. The revised conditional totals are therefore **about 336 s efficient and 414 s normal**, still estimates, still dependent on pass 3's actual boss health/attack review. The historical pass-1 table above is retained with its original assumptions. No measured five-minute claim is made.
 
 Reward structure remains seven Power and two Shield pickups; the two ledge Power plus three Seal Power items permit Power 3 before S2-04. F12-05's walkthrough observed precisely those five early Power ids. Boss tuning and the uninterrupted strong-play measurement remain pending. Gate: tools/lane.ps1 land; no new tests or content structure changes.
+
+## Pass 3 — integrated bosses and reviewed values (2026-09-24)
+
+F12-06 and F12-07 have replaced both Sentry stand-ins. The measured locked Power-3 boss hit rate from `docs/validation/bosses.md` is 22.1 damage/s at about 38 units. Phase health now follows the Stage 2 target durations at that rate:
+
+| Boss | Phase health before → after | Phase duration at 22.1/s | Other change |
+| --- | --- | --- | --- |
+| Tempest Sentinel | 520/780 → 440/660 | 19.9/29.9 s | Charged aim and rotating fan numbers retained. |
+| Storm Guardian | 1040/1040/1300 → 885/885/1105 | 40.0/40.0/50.0 s | Spiral volley 8 → 6 projectiles for wider corridors. |
+
+Both Definitions and all five boss patterns carry `metadata/reviewed = true` alongside `metadata/dev = true`. Named Attacks, 500/1000 score, 1.0 s entries, and 0/0.75 s transitions stay as drafted. The 20-damage Bomb is below the smallest 440-health Phase. Sentinel aim alternates high and low; fans alternate following the player's height with a fixed high shift. Storm spirals climb and descend, rings alternate high and low with a 72° gap, and the final Attack schedules aim and spiral steps in sequence. These values are readable proposals until a full play pass checks actual safe corridors.
+
+The pass-2 route estimate remains **about 336 s efficient** when the boss can sustain the observed locked hit rate. The provisional 50 s and 130 s boss budgets in the historical table are now represented by actual health rather than assumptions. A normal route with about 75% of that boss hit rate raises its boss time by roughly 60 s against the efficient route; combining it with the pass-2 common-enemy and traversal assumptions gives **about 426 s normal**. Both totals include the two 1 s Wave delays, 10-health Seals, short Phase transitions, and Bomb savings. They are estimates, not Results Clear Times.
+
+The exact rewards remain seven Power and two Shield. A Direct Stage 2 player starting at Power 2 can collect five Power before the miniboss and reach Power 3; a Campaign player already at Power 3 gets excess-pickup score. No uninterrupted strong-play Stage 2 clear was measured. The ≥300 active-second acceptance line remains **not verified** and belongs to the F11-03/F14-02 human protocol. No content structure bug or Stage-2-only common-enemy request was found.

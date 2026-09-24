@@ -15,3 +15,4 @@ projectile_radius = 0.22
 damage = 10
 spread_degrees = 18.0
 metadata/dev = true
+metadata/reviewed = true

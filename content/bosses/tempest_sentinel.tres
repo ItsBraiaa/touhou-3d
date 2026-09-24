@@ -29,7 +29,7 @@ reposition_seconds = 1.0
 
 [sub_resource type="Resource" id="Phase_Charged_Flash"]
 script = ExtResource("2_phase")
-health = 520
+health = 440
 attack = SubResource("Attack_Charged_Flash")
 transition_seconds = 0.0
 
@@ -55,7 +55,7 @@ reposition_seconds = 1.0
 
 [sub_resource type="Resource" id="Phase_Gale_Fans"]
 script = ExtResource("2_phase")
-health = 780
+health = 660
 attack = SubResource("Attack_Gale_Fans")
 transition_seconds = 0.75
 
@@ -67,3 +67,4 @@ score = 500
 entry_seconds = 1.0
 phases = Array[ExtResource("2_phase")]([SubResource("Phase_Charged_Flash"), SubResource("Phase_Gale_Fans")])
 metadata/dev = true
+metadata/reviewed = true
