@@ -220,6 +220,8 @@ A sweep of every "Out of scope", "Open issues" and design line against the code 
 | F15-08 | sol, last, only if time before 16:30 | **Enemy colour variants.** Twilight Spirits and seal Sentries, per ENEMY_VISUAL_HANDOFF's suggested assignment, and the violet pair in Stage 2. Same definitions. | new `scenes/dev/` prefabs, the stage `actor_scenes` exports, the content `enemy_kinds` |
 | F15-09 | oc-a, after F15-06 | **HUD cues.** A locked target that goes off-screen shows an edge marker, clamped to the screen edge and pointing toward it, instead of being hidden. A subtle edge vignette fades in as the ship nears the Flight Volume boundary, driven by `edge_proximity_changed`. It is built in code, with no `hud.tscn` edit. | `scripts/ui/hud.gd` (the proximity connection goes through `Hud.bind`, so no Session edit) |
 | F15-10 | trunk, after F15-01 | **Defeat beat.** A short non-pausing beat (about 1 s, controls off) before the Defeat overlay, reusing F15-01's mechanism. Pause is refused during it. | `scripts/session/game_session.gd` |
+| F15-11 | trunk, after F15-10 | **Power Progress carries into Campaign Stage 2** (the user said yes). Stage 2 of a Campaign starts with Stage 1's final Power Level and its partial Power Progress, and Restart there returns to those entry values. Direct Stage 2 still starts at Power Level 2 with 0 progress. | `scripts/session/run_state.gd` (entry values), `scripts/session/game_session.gd` (continue path) |
+| F15-12 | trunk, after F15-11 | **Invulnerability after Retry** (the user said yes). The ship that respawns at a Checkpoint gets 2 s of Invulnerability, with the existing flicker. The value is Claude's proposal; Astra tunes it. Restart from the stage entry does not get it. | `scripts/combat/combat_state.gd` (a small `grant_invulnerability(seconds)` that is ignored while paused or defeated), `scripts/session/game_session.gd` (`_retry`) |
 
 **Shared files today.** `stage_director.gd` is edited by F15-04 and F15-06, and `game_session.gd` by F15-01 only. The same rule as always: sync right before you start, keep your additions in their own functions, and the second lander merges both.
 
@@ -231,7 +233,7 @@ A sweep of every "Out of scope", "Open issues" and design line against the code 
 - a hit that cancels its own Graze: a core rule, and it needs a ruling;
 - a mouse camera: the label is fixed instead;
 - more display options, positional audio, a destination marker;
-- respawn Invulnerability and carrying Power Progress into Stage 2: the user's call.
+- respawn Invulnerability and carrying Power Progress into Stage 2: the user said yes to both, so they are F15-11 and F15-12.
 
 ## Model budgets (OpenCode: one shared meter)
 
