@@ -18,6 +18,29 @@ Action required by trunk (F16-06):
 - In mouse mode the arrow-key `camera_*` bindings still orbit, because keys and the stick share those actions. If that should change, it is a binding decision for F16-02/03, not a rig change.
 
 Action required by Astra: none. The new values are exports on `PlayerShip/CameraRig`, in the groups Orbit, Mouse look and Recenter, if you want to tune them in F16-07.
+## 2026-09-24 — Astra (sol) — F16-01 controls layout, glyphs and dash visuals [shared]
+State: INTEGRATED_VERIFIED. The landing gate passed the existing suite (225 passed), 300-frame boot and resource check; `lane/sol` landed on `dev-01`.
+Files: `scenes/ui/controls.tscn`, `scenes/ui/components/binding_row.tscn`, `scenes/ui/components/dash_cooldown.tscn`, `scenes/player/visuals/dash_visual.tscn`, `assets/ui/controls/glyphs/*.png` and import sidecars, `docs/ASSET_CREDITS.md`, F16-01 section of `docs/validation/controls-expansion.md`, ticket Outcome and ROADMAP row. No scripts, InputMap, camera or dash rules changed.
+Node inventory: `Layout/ControlsPanel/Tabs/{KeyboardMouse,Gamepad,Camera}`; `Layout/ControlsPanel/{DeviceFamily,BindingScroll/Rows,ActionHelp,CameraSettings/{Mode,MouseSensitivity,OrbitSensitivity,MouseInvert,OrbitInvert,Deadzone}}`; `Layout/{RestoreTabButton,ApplyButton,BackButton,NavigationHint}`; `Overlays/{CaptureDialog,ConflictDialog,DirtyDialog,ConfirmBindingsDialog}` (each has `Title`, `Message`, `Buttons`). Components: `BindingRow/{ActionLabel,PrimaryButton,SecondaryButton,ResetButton}`; `DashCooldown/{Label,Progress,ReadyAccent}`; `DashVisual/{TrailLeft,TrailRight,ProtectionAccent}`.
+Screenshots: `docs/validation/controls-expansion/controls-1280x720.png`, `controls-1600x900.png`, `controls-1920x1080.png`. Godot 4.7.2 OpenGL Compatibility rendered each viewport. Text, columns, scroll area and fixed footer were visually inspected; physical controller input and runtime remapping remain for F16-03/F16-07.
+Gate follow-up: the existing MenuController expects Controls to focus BackButton on entry. BackButton remains first in scene tree order to preserve both menu contract assertions; F16-03 takes over the tabs-first focus loop.
+Action required by Claude: F16-03 replaces the six `Preview*` rows in `BindingScroll/Rows` when populating the catalog and preserves the node paths above. F16-05 part 2 instances the two reusable dash components and drives their visibility/value. `DashVisual` is cosmetic, script-free and has no collision. All 36 glyph IDs from F16-08 have PNG files, with text labels for fallback.
+
+## 2026-09-24 — Astra (water-flow) — Stage 2 downhill water
+State: DELIVERED
+Files: `assets/environment/stage_02/water.gdshader`; `.scratch/stage-02-area/issues/03-water-flow-direction.md`; `docs/engineering/ROADMAP.md`.
+Change: Reversed the two time-driven UV terms in Stage 2's shared water shader. All six streams and four waterfalls now animate in the opposite direction, toward the lower route, while the geometry and wave motion are unchanged.
+Verification: `tools/lane.ps1 land` is the sprint gate; no new tests.
+Action required by Claude: none.
+## 2026-09-24 — OpenCode (oc-a) — F16-08: binding labels and prompt family
+State: DELIVERED
+Files: `scripts/ui/binding_labels.gd` (new, with its `.uid`); `scripts/ui/input_device_state.gd` (additions only); `.scratch/controls-expansion/issues/08-binding-labels-and-prompt-family.md`; `docs/engineering/settings.md` (its F16-08 section); `docs/validation/controls-expansion.md` (its F16-08 section); `docs/engineering/ROADMAP.md` (the F16-08 row).
+Change:
+- **`BindingLabels`** (`scripts/ui/binding_labels.gd`, static, Node-free): reads the F16 descriptor `{kind, code, axis_sign, physical, modifiers}`. `describe(binding, family)` gives the row text (physical keys via `DisplayServer.keyboard_get_label_from_physical` then `OS.get_keycode_string`, modifier prefixes with standalone modifiers kept, a short Portuguese Space/Escape/arrow table, mouse 1–9, per-family Xbox/PlayStation joypad buttons and axes, `Botão %d` for an unknown index); `glyph_id(binding, family)` gives Astra's `xbox_*`/`ps_*`/`dpad_*`/`stick_*` id or `&""`; `glyph_path(id)` is `res://assets/ui/controls/glyphs/<id>.png`. Malformed data describes as `—` and is never an error.
+- **`InputDeviceState`** gained `prompt_family_changed`, `set_glyph_override`, `get_prompt_family`, a memory-only last-pad device id, and the `MOUSE_MOTION_THRESHOLD` (8 px) accumulator: a mouse button counts as keyboard/mouse use at once, mouse motion only once its accumulated relative length since the last gamepad event passes 8 px. Every existing function, signal and behavior is unchanged.
+Verification: no tests or driver scripts (the ticket's rule). The read-through against the spec and the ticket is recorded in `docs/validation/controls-expansion.md` (F16-08). `tools/lane.ps1 land` is the gate; the resource check (82 scripts), the 300-frame boot smoke and the existing suite pass. Physical Xbox/PlayStation behaviour and the glyph art belong to F16-07.
+Action required by trunk: when F16-03 lands, use `BindingLabels.describe()` / `glyph_id()` / `glyph_path()` for the prompts, connect `InputDeviceState.prompt_family_changed`, and drive `set_glyph_override` from Options' "Ícones do controle".
+Action required by Astra: in F16-01, name the glyph files `res://assets/ui/controls/glyphs/<id>.png` with the ids in the ticket (for example `xbox_a`, `ps_cross`, `dpad_left`, `stick_right_up`); a missing file falls back to the `describe()` text.
 
 ## 2026-09-24 — Claude (plan) — F16 routing: five lanes at once; F16-02 part 1 action defaults; F16-08 carved out [shared]
 State: PLANNED

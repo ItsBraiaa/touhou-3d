@@ -227,7 +227,31 @@ Pending (lane trunk).
 
 ## F16 binding labels and prompt family (F16-08)
 
-Pending (lane oc-a).
+Delivered in lane oc-a on 2026-09-24, carved out of F16-03, so that trunk's controls workflow only consumes it. It adds a Node-free label table and extends `InputDeviceState` with controller-family detection. No existing function, signal or behavior of `InputDeviceState` changed: `menu_controller.gd` and F15-07's footers keep working.
+
+### `BindingLabels` (`scripts/ui/binding_labels.gd`, Rules Core, `class_name BindingLabels extends RefCounted`)
+
+Static only, no state, never asserts. It reads the F16 primitive descriptor `{kind, code, axis_sign, physical, modifiers}`, where `kind` is `"key"`, `"mouse_button"`, `"joy_button"` or `"joy_axis"`, under the prompt family `&"keyboard_mouse"`, `&"xbox"` or `&"playstation"`.
+
+| Member | Meaning |
+| --- | --- |
+| `UNBOUND` | `"—"`, the layout's unbound label; a malformed or unknown descriptor describes as it. |
+| `describe(binding, family) -> String` | Readable text for one descriptor. A physical key goes through `DisplayServer.keyboard_get_label_from_physical` then `OS.get_keycode_string`; a non-physical key through `OS.get_keycode_string`. The `modifiers` mask prefixes `Shift+`, `Ctrl+`, `Alt+` and `Meta+`, and a standalone modifier key is its own label, never `Shift+Shift`. A short Portuguese table maps Space → `Espaço`, Escape → `Esc` and the four arrows → `Seta ←/→/↑/↓`; Enter, Tab, Shift, Ctrl and Alt stay as Godot names them. Mouse buttons map 1–9 to `Mouse 1`–`Mouse 3`, `Roda ↑/↓/←/→` and `Mouse 4/5`. Joypad buttons map by family (Xbox `A/B/X/Y`, `View/Xbox/Menu`, `LS/RS`, `LB/RB`; PlayStation `✕/○/□/△`, `Create/PS/Options`, `L3/R3`, `L1/R1`; D-pad `↑↓←→` in both), and unknown indices are `Botão %d`. Axes 0–3 are `Analógico esq./dir.` with the sign's arrow, axis 4/5 are `LT/RT` or `L2/R2`. |
+| `glyph_id(binding, family) -> StringName` | Astra's stable glyph id (`xbox_*`, `ps_*`, `dpad_*`, `stick_*`) or `&""` when there is none: keys, mouse buttons, the Guide/PS button and the `keyboard_mouse` family. |
+| `glyph_path(id) -> String` | `res://assets/ui/controls/glyphs/<id>.png`, the file convention F16-01 names its glyphs by; an empty id gives an empty path. F16-03 falls back to `describe()` text when `ResourceLoader.exists()` is false. |
+
+### `InputDeviceState` additions
+
+| Member | Meaning |
+| --- | --- |
+| `signal prompt_family_changed(family: StringName)` | The prompt family changed. Emitted only on a change, from an event, a pad connection change or an override change. |
+| `set_glyph_override(family: StringName)` | `&"auto"`, `&"xbox"` or `&"playstation"`; anything else is treated as `&"auto"`. |
+| `get_prompt_family() -> StringName` | `&"keyboard_mouse"` while `shows_keyboard_prompts()` is true; otherwise the override when one is set; otherwise, for `&"auto"`, `&"playstation"` when the last pad's lowercased `Input.get_joy_name()` contains `playstation`, `ps3`, `ps4`, `ps5`, `dualsense`, `dualshock`, `sony` or `wireless controller`, and `&"xbox"` otherwise. The last pad's device id is kept in memory only, never in settings. |
+| Mouse use | A mouse button press counts as keyboard/mouse activity at once; mouse motion counts only once its accumulated relative length since the last gamepad event passes `MOUSE_MOTION_THRESHOLD` (8 px), so jitter cannot flip the prompts. Keys, joypad buttons and sticks are unchanged. |
+
+### Wiring for F16-03
+
+`Interface` keeps the one `InputDeviceState`. F16-03 reads `get_prompt_family()` to choose between text caps and the glyph family, connects `prompt_family_changed` to re-render prompts, and drives `set_glyph_override` from Options' "Ícones do controle". The glyph files are Astra's (F16-01); a missing file uses `describe()` text.
 
 ## F16 capture workflow and prompts (F16-03)
 

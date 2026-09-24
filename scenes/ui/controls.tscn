@@ -1,9 +1,26 @@
 [gd_scene format=3]
+
 [ext_resource type="Theme" path="res://assets/ui/menu_theme.tres" id="1_theme"]
 [ext_resource type="Texture2D" path="res://assets/ui/menu_forest.svg" id="2_forest"]
-[ext_resource type="Texture2D" path="res://assets/ui/menu_mountain.svg" id="3_mountain"]
-[ext_resource type="Texture2D" path="res://assets/ui/wind_emblem.svg" id="4_emblem"]
-[ext_resource type="Script" path="res://scripts/ui/menu_controller.gd" id="5_controller"]
+[ext_resource type="Texture2D" path="res://assets/ui/wind_emblem.svg" id="3_emblem"]
+[ext_resource type="Script" path="res://scripts/ui/menu_controller.gd" id="4_controller"]
+[ext_resource type="PackedScene" path="res://scenes/ui/components/binding_row.tscn" id="5_row"]
+
+[sub_resource type="StyleBoxFlat" id="ContentPanel"]
+bg_color = Color(0.025, 0.055, 0.08, 0.98)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.27, 0.5, 0.53, 1)
+
+[sub_resource type="StyleBoxFlat" id="DialogPanel"]
+bg_color = Color(0.035, 0.079, 0.106, 1)
+border_width_left = 3
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.45, 0.87, 0.9, 1)
 
 [node name="Controls" type="Control"]
 layout_mode = 3
@@ -13,7 +30,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 theme = ExtResource("1_theme")
-script = ExtResource("5_controller")
+script = ExtResource("4_controller")
 
 [node name="Background" type="TextureRect" parent="."]
 layout_mode = 1
@@ -40,372 +57,474 @@ offset_bottom = 360.0
 mouse_filter = 2
 
 [node name="Emblem" type="TextureRect" parent="Layout"]
-layout_mode = 0
-offset_left = 64.0
-offset_top = 42.0
-offset_right = 106.0
-offset_bottom = 84.0
-mouse_filter = 2
-texture = ExtResource("4_emblem")
-expand_mode = 1
-
-[node name="Brand" type="Label" parent="Layout"]
-layout_mode = 0
-offset_left = 122.0
-offset_top = 46.0
-offset_right = 562.0
+offset_left = 48.0
+offset_top = 38.0
+offset_right = 88.0
 offset_bottom = 78.0
 mouse_filter = 2
-text = "GUARDIÃ DOS VENTOS"
-theme_override_font_sizes/font_size = 17
-theme_override_colors/font_color = Color(0.48, 0.62, 0.63, 1)
+texture = ExtResource("3_emblem")
+expand_mode = 1
 
 [node name="Heading" type="Label" parent="Layout"]
-layout_mode = 0
-offset_left = 64.0
-offset_top = 112.0
-offset_right = 1124.0
-offset_bottom = 177.0
+offset_left = 100.0
+offset_top = 38.0
+offset_right = 650.0
+offset_bottom = 82.0
 mouse_filter = 2
-text = "Comandos"
-theme_override_font_sizes/font_size = 44
-
-
-[node name="Bindings" type="Panel" parent="Layout"]
-layout_mode = 0
-offset_left = 64.0
-offset_top = 206.0
-offset_right = 1216.0
-offset_bottom = 582.0
-
-
-[node name="ActionHeader" type="Label" parent="Layout"]
-layout_mode = 0
-offset_left = 88.0
-offset_top = 222.0
-offset_right = 538.0
-offset_bottom = 250.0
-mouse_filter = 2
-text = "AÇÃO"
-theme_override_font_sizes/font_size = 15
-theme_override_colors/font_color = Color(0.48, 0.62, 0.63, 1)
-
-[node name="KeyboardHeader" type="Label" parent="Layout"]
-layout_mode = 0
-offset_left = 540.0
-offset_top = 222.0
-offset_right = 870.0
-offset_bottom = 250.0
-mouse_filter = 2
-text = "TECLADO"
-theme_override_font_sizes/font_size = 15
-theme_override_colors/font_color = Color(0.48, 0.62, 0.63, 1)
-
-[node name="ControllerHeader" type="Label" parent="Layout"]
-layout_mode = 0
-offset_left = 910.0
-offset_top = 222.0
-offset_right = 1170.0
-offset_bottom = 250.0
-mouse_filter = 2
-text = "CONTROLE"
-theme_override_font_sizes/font_size = 15
-theme_override_colors/font_color = Color(0.48, 0.62, 0.63, 1)
-
-[node name="Action0" type="Label" parent="Layout"]
-layout_mode = 0
-offset_left = 88.0
-offset_top = 267.0
-offset_right = 518.0
-offset_bottom = 297.0
-mouse_filter = 2
-text = "Mover"
-theme_override_font_sizes/font_size = 19
-
-
-[node name="Key0" type="Label" parent="Layout"]
-layout_mode = 0
-offset_left = 540.0
-offset_top = 267.0
-offset_right = 890.0
-offset_bottom = 297.0
-mouse_filter = 2
-text = "W A S D"
-theme_override_font_sizes/font_size = 19
-
-
-[node name="Pad0" type="Label" parent="Layout"]
-layout_mode = 0
-offset_left = 910.0
-offset_top = 267.0
-offset_right = 1190.0
-offset_bottom = 297.0
-mouse_filter = 2
-text = "Analógico esquerdo"
-theme_override_font_sizes/font_size = 19
-
-
-[node name="Action1" type="Label" parent="Layout"]
-layout_mode = 0
-offset_left = 88.0
-offset_top = 304.0
-offset_right = 518.0
-offset_bottom = 334.0
-mouse_filter = 2
-text = "Subir / descer"
-theme_override_font_sizes/font_size = 19
-
-
-[node name="Key1" type="Label" parent="Layout"]
-layout_mode = 0
-offset_left = 540.0
-offset_top = 304.0
-offset_right = 890.0
-offset_bottom = 334.0
-mouse_filter = 2
-text = "Espaço / Ctrl"
-theme_override_font_sizes/font_size = 19
-
-
-[node name="Pad1" type="Label" parent="Layout"]
-layout_mode = 0
-offset_left = 910.0
-offset_top = 304.0
-offset_right = 1190.0
-offset_bottom = 334.0
-mouse_filter = 2
-text = "RB / LB"
-theme_override_font_sizes/font_size = 19
-
-
-[node name="Action2" type="Label" parent="Layout"]
-layout_mode = 0
-offset_left = 88.0
-offset_top = 341.0
-offset_right = 518.0
-offset_bottom = 371.0
-mouse_filter = 2
-text = "Câmera"
-theme_override_font_sizes/font_size = 19
-
-
-[node name="Key2" type="Label" parent="Layout"]
-layout_mode = 0
-offset_left = 540.0
-offset_top = 341.0
-offset_right = 890.0
-offset_bottom = 371.0
-mouse_filter = 2
-text = "Setas"
-theme_override_font_sizes/font_size = 19
-
-
-[node name="Pad2" type="Label" parent="Layout"]
-layout_mode = 0
-offset_left = 910.0
-offset_top = 341.0
-offset_right = 1190.0
-offset_bottom = 371.0
-mouse_filter = 2
-text = "Analógico direito"
-theme_override_font_sizes/font_size = 19
-
-
-[node name="Action3" type="Label" parent="Layout"]
-layout_mode = 0
-offset_left = 88.0
-offset_top = 378.0
-offset_right = 518.0
-offset_bottom = 408.0
-mouse_filter = 2
-text = "Disparar"
-theme_override_font_sizes/font_size = 19
-
-
-[node name="Key3" type="Label" parent="Layout"]
-layout_mode = 0
-offset_left = 540.0
-offset_top = 378.0
-offset_right = 890.0
-offset_bottom = 408.0
-mouse_filter = 2
-text = "J"
-theme_override_font_sizes/font_size = 19
-
-
-[node name="Pad3" type="Label" parent="Layout"]
-layout_mode = 0
-offset_left = 910.0
-offset_top = 378.0
-offset_right = 1190.0
-offset_bottom = 408.0
-mouse_filter = 2
-text = "RT"
-theme_override_font_sizes/font_size = 19
-
-
-[node name="Action4" type="Label" parent="Layout"]
-layout_mode = 0
-offset_left = 88.0
-offset_top = 415.0
-offset_right = 518.0
-offset_bottom = 445.0
-mouse_filter = 2
-text = "Foco"
-theme_override_font_sizes/font_size = 19
-
-
-[node name="Key4" type="Label" parent="Layout"]
-layout_mode = 0
-offset_left = 540.0
-offset_top = 415.0
-offset_right = 890.0
-offset_bottom = 445.0
-mouse_filter = 2
-text = "Shift"
-theme_override_font_sizes/font_size = 19
-
-
-[node name="Pad4" type="Label" parent="Layout"]
-layout_mode = 0
-offset_left = 910.0
-offset_top = 415.0
-offset_right = 1190.0
-offset_bottom = 445.0
-mouse_filter = 2
-text = "LT"
-theme_override_font_sizes/font_size = 19
-
-
-[node name="Action5" type="Label" parent="Layout"]
-layout_mode = 0
-offset_left = 88.0
-offset_top = 452.0
-offset_right = 518.0
-offset_bottom = 482.0
-mouse_filter = 2
-text = "Fixar / trocar alvo"
-theme_override_font_sizes/font_size = 19
-
-
-[node name="Key5" type="Label" parent="Layout"]
-layout_mode = 0
-offset_left = 540.0
-offset_top = 452.0
-offset_right = 890.0
-offset_bottom = 482.0
-mouse_filter = 2
-text = "K / Tab"
-theme_override_font_sizes/font_size = 19
-
-
-[node name="Pad5" type="Label" parent="Layout"]
-layout_mode = 0
-offset_left = 910.0
-offset_top = 452.0
-offset_right = 1190.0
-offset_bottom = 482.0
-mouse_filter = 2
-text = "Y / X"
-theme_override_font_sizes/font_size = 19
-
-
-[node name="Action6" type="Label" parent="Layout"]
-layout_mode = 0
-offset_left = 88.0
-offset_top = 489.0
-offset_right = 518.0
-offset_bottom = 519.0
-mouse_filter = 2
-text = "Bomba"
-theme_override_font_sizes/font_size = 19
-
-
-[node name="Key6" type="Label" parent="Layout"]
-layout_mode = 0
-offset_left = 540.0
-offset_top = 489.0
-offset_right = 890.0
-offset_bottom = 519.0
-mouse_filter = 2
-text = "L"
-theme_override_font_sizes/font_size = 19
-
-
-[node name="Pad6" type="Label" parent="Layout"]
-layout_mode = 0
-offset_left = 910.0
-offset_top = 489.0
-offset_right = 1190.0
-offset_bottom = 519.0
-mouse_filter = 2
-text = "B"
-theme_override_font_sizes/font_size = 19
-
-
-[node name="Action7" type="Label" parent="Layout"]
-layout_mode = 0
-offset_left = 88.0
-offset_top = 526.0
-offset_right = 518.0
-offset_bottom = 556.0
-mouse_filter = 2
-text = "Pausa"
-theme_override_font_sizes/font_size = 19
-
-
-[node name="Key7" type="Label" parent="Layout"]
-layout_mode = 0
-offset_left = 540.0
-offset_top = 526.0
-offset_right = 890.0
-offset_bottom = 556.0
-mouse_filter = 2
-text = "Esc"
-theme_override_font_sizes/font_size = 19
-
-
-[node name="Pad7" type="Label" parent="Layout"]
-layout_mode = 0
-offset_left = 910.0
-offset_top = 526.0
-offset_right = 1190.0
-offset_bottom = 556.0
-mouse_filter = 2
-text = "Menu / Start"
-theme_override_font_sizes/font_size = 19
-
+text = "CONTROLES"
+theme_override_font_sizes/font_size = 32
 
 [node name="BackButton" type="Button" parent="Layout"]
 layout_mode = 0
-offset_left = 64.0
-offset_top = 606.0
-offset_right = 244.0
-offset_bottom = 658.0
+offset_left = 1052.0
+offset_top = 634.0
+offset_right = 1232.0
+offset_bottom = 682.0
 text = "Voltar"
 alignment = 0
 focus_mode = 2
 focus_next = NodePath("../../Layout/BackButton")
 focus_previous = NodePath("../../Layout/BackButton")
 
+[node name="ControlsPanel" type="Panel" parent="Layout"]
+offset_left = 48.0
+offset_top = 158.0
+offset_right = 1232.0
+offset_bottom = 606.0
+theme_override_styles/panel = SubResource("ContentPanel")
+
+[node name="Tabs" type="HBoxContainer" parent="Layout/ControlsPanel"]
+offset_left = 16.0
+offset_top = -54.0
+offset_right = 680.0
+offset_bottom = -2.0
+theme_override_constants/separation = 8
+
+[node name="KeyboardMouse" type="Button" parent="Layout/ControlsPanel/Tabs"]
+custom_minimum_size = Vector2(215, 48)
+layout_mode = 2
+text = "Teclado e mouse"
+focus_mode = 2
+
+[node name="Gamepad" type="Button" parent="Layout/ControlsPanel/Tabs"]
+custom_minimum_size = Vector2(166, 48)
+layout_mode = 2
+text = "Controle"
+focus_mode = 2
+
+[node name="Camera" type="Button" parent="Layout/ControlsPanel/Tabs"]
+custom_minimum_size = Vector2(166, 48)
+layout_mode = 2
+text = "Câmera"
+focus_mode = 2
+
+[node name="DeviceFamily" type="OptionButton" parent="Layout/ControlsPanel"]
+offset_left = 850.0
+offset_top = -52.0
+offset_right = 1164.0
+offset_bottom = -4.0
+focus_mode = 2
+selected = 0
+item_count = 3
+popup/item_0/text = "Ícones: Automático"
+popup/item_0/id = 0
+popup/item_1/text = "Ícones: Xbox"
+popup/item_1/id = 1
+popup/item_2/text = "Ícones: PlayStation"
+popup/item_2/id = 2
+
+[node name="SectionTitle" type="Label" parent="Layout/ControlsPanel"]
+offset_left = 24.0
+offset_top = 15.0
+offset_right = 1000.0
+offset_bottom = 44.0
+text = "MOVIMENTO  /  COMBATE  /  CÂMERA  /  MENUS"
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.58, 0.86, 0.84, 1)
+
+[node name="ColumnHeadings" type="HBoxContainer" parent="Layout/ControlsPanel"]
+offset_left = 24.0
+offset_top = 50.0
+offset_right = 1154.0
+offset_bottom = 80.0
+theme_override_constants/separation = 8
+
+[node name="Action" type="Label" parent="Layout/ControlsPanel/ColumnHeadings"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 1.6
+text = "AÇÃO"
+theme_override_font_sizes/font_size = 14
+
+[node name="Primary" type="Label" parent="Layout/ControlsPanel/ColumnHeadings"]
+custom_minimum_size = Vector2(166, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "PRINCIPAL"
+theme_override_font_sizes/font_size = 14
+
+[node name="Secondary" type="Label" parent="Layout/ControlsPanel/ColumnHeadings"]
+custom_minimum_size = Vector2(166, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "ALTERNATIVO"
+theme_override_font_sizes/font_size = 14
+
+[node name="Reset" type="Label" parent="Layout/ControlsPanel/ColumnHeadings"]
+custom_minimum_size = Vector2(48, 0)
+layout_mode = 2
+text = "PADRÃO"
+theme_override_font_sizes/font_size = 14
+
+[node name="BindingScroll" type="ScrollContainer" parent="Layout/ControlsPanel"]
+offset_left = 24.0
+offset_top = 84.0
+offset_right = 1155.0
+offset_bottom = 370.0
+horizontal_scroll_mode = 0
+vertical_scroll_mode = 2
+
+[node name="Rows" type="VBoxContainer" parent="Layout/ControlsPanel/BindingScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="PreviewForward" parent="Layout/ControlsPanel/BindingScroll/Rows" instance=ExtResource("5_row")]
+layout_mode = 2
+metadata/action_id = "move_forward"
+
+[node name="PreviewDash" parent="Layout/ControlsPanel/BindingScroll/Rows" instance=ExtResource("5_row")]
+layout_mode = 2
+metadata/action_id = "dash_left"
+
+[node name="ActionLabel" parent="Layout/ControlsPanel/BindingScroll/Rows/PreviewDash" index="0"]
+text = "Impulso à esquerda"
+
+[node name="PrimaryButton" parent="Layout/ControlsPanel/BindingScroll/Rows/PreviewDash" index="1"]
+text = "Q"
+
+[node name="PreviewRecenter" parent="Layout/ControlsPanel/BindingScroll/Rows" instance=ExtResource("5_row")]
+layout_mode = 2
+metadata/action_id = "camera_recenter"
+
+[node name="ActionLabel" parent="Layout/ControlsPanel/BindingScroll/Rows/PreviewRecenter" index="0"]
+text = "Centralizar câmera"
+
+[node name="PrimaryButton" parent="Layout/ControlsPanel/BindingScroll/Rows/PreviewRecenter" index="1"]
+text = "R"
+
+[node name="SecondaryButton" parent="Layout/ControlsPanel/BindingScroll/Rows/PreviewRecenter" index="2"]
+text = "Mouse 3"
+
+[node name="PreviewDashRight" parent="Layout/ControlsPanel/BindingScroll/Rows" instance=ExtResource("5_row")]
+layout_mode = 2
+metadata/action_id = "dash_right"
+
+[node name="ActionLabel" parent="Layout/ControlsPanel/BindingScroll/Rows/PreviewDashRight" index="0"]
+text = "Impulso à direita"
+
+[node name="PrimaryButton" parent="Layout/ControlsPanel/BindingScroll/Rows/PreviewDashRight" index="1"]
+text = "E"
+
+[node name="PreviewFire" parent="Layout/ControlsPanel/BindingScroll/Rows" instance=ExtResource("5_row")]
+layout_mode = 2
+metadata/action_id = "fire"
+
+[node name="ActionLabel" parent="Layout/ControlsPanel/BindingScroll/Rows/PreviewFire" index="0"]
+text = "Disparar"
+
+[node name="PrimaryButton" parent="Layout/ControlsPanel/BindingScroll/Rows/PreviewFire" index="1"]
+text = "J"
+
+[node name="PreviewPause" parent="Layout/ControlsPanel/BindingScroll/Rows" instance=ExtResource("5_row")]
+layout_mode = 2
+metadata/action_id = "pause"
+
+[node name="ActionLabel" parent="Layout/ControlsPanel/BindingScroll/Rows/PreviewPause" index="0"]
+text = "Pausar"
+
+[node name="PrimaryButton" parent="Layout/ControlsPanel/BindingScroll/Rows/PreviewPause" index="1"]
+text = "Esc"
+
+[node name="ActionHelp" type="Label" parent="Layout/ControlsPanel"]
+offset_left = 24.0
+offset_top = 382.0
+offset_right = 1155.0
+offset_bottom = 428.0
+text = "Selecione um comando para alterar.  —  indica um espaço livre."
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.72, 0.86, 0.85, 1)
+
+[node name="CameraSettings" type="VBoxContainer" parent="Layout/ControlsPanel"]
+visible = false
+offset_left = 24.0
+offset_top = 84.0
+offset_right = 1155.0
+offset_bottom = 370.0
+theme_override_constants/separation = 5
+
+[node name="Mode" type="OptionButton" parent="Layout/ControlsPanel/CameraSettings"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+item_count = 2
+popup/item_0/text = "Câmera: Teclas"
+popup/item_0/id = 0
+popup/item_1/text = "Câmera: Mouse"
+popup/item_1/id = 1
+
+[node name="MouseSensitivity" type="HSlider" parent="Layout/ControlsPanel/CameraSettings"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+min_value = 0.1
+max_value = 3.0
+step = 0.05
+value = 1.0
+tooltip_text = "Sensibilidade do mouse"
+
+[node name="OrbitSensitivity" type="HSlider" parent="Layout/ControlsPanel/CameraSettings"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+min_value = 0.1
+max_value = 3.0
+step = 0.05
+value = 1.0
+tooltip_text = "Sensibilidade das teclas e do controle"
+
+[node name="MouseInvert" type="CheckButton" parent="Layout/ControlsPanel/CameraSettings"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+text = "Inverter vertical do mouse"
+
+[node name="OrbitInvert" type="CheckButton" parent="Layout/ControlsPanel/CameraSettings"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+text = "Inverter vertical das teclas e do controle"
+
+[node name="Deadzone" type="HSlider" parent="Layout/ControlsPanel/CameraSettings"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+min_value = 0.05
+max_value = 0.5
+step = 0.01
+value = 0.2
+tooltip_text = "Zona morta do analógico"
+
+[node name="RestoreTabButton" type="Button" parent="Layout"]
+offset_left = 48.0
+offset_top = 634.0
+offset_right = 336.0
+offset_bottom = 682.0
+text = "Restaurar esta aba"
+focus_mode = 2
+
+[node name="ApplyButton" type="Button" parent="Layout"]
+offset_left = 872.0
+offset_top = 634.0
+offset_right = 1036.0
+offset_bottom = 682.0
+text = "Aplicar"
+focus_mode = 2
+
 [node name="NavigationHint" type="Label" parent="Layout"]
 layout_mode = 0
-offset_left = 64.0
-offset_top = 664.0
-offset_right = 734.0
-offset_bottom = 689.0
+offset_left = 350.0
+offset_top = 644.0
+offset_right = 854.0
+offset_bottom = 672.0
 mouse_filter = 2
 text = "↑ ↓  Navegar     Enter  Confirmar"
+horizontal_alignment = 1
 theme_override_font_sizes/font_size = 15
-theme_override_colors/font_color = Color(0.48, 0.62, 0.63, 1)
+theme_override_colors/font_color = Color(0.7, 0.87, 0.86, 1)
 
-[node name="ChapterLabel" type="Label" parent="Layout"]
-layout_mode = 0
-offset_left = 900.0
-offset_top = 664.0
-offset_right = 1230.0
-offset_bottom = 689.0
+[node name="Overlays" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 2
-text = "UMA JORNADA ENTRE ESPÍRITOS"
-theme_override_font_sizes/font_size = 13
-theme_override_colors/font_color = Color(0.48, 0.62, 0.63, 1)
+
+[node name="CaptureDialog" type="Panel" parent="Overlays"]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -124.0
+offset_right = 300.0
+offset_bottom = 124.0
+theme_override_styles/panel = SubResource("DialogPanel")
+
+[node name="Title" type="Label" parent="Overlays/CaptureDialog"]
+offset_left = 26.0
+offset_top = 24.0
+offset_right = 574.0
+offset_bottom = 63.0
+text = "AGUARDANDO COMANDO"
+theme_override_font_sizes/font_size = 24
+
+[node name="Message" type="Label" parent="Overlays/CaptureDialog"]
+offset_left = 26.0
+offset_top = 76.0
+offset_right = 574.0
+offset_bottom = 158.0
+text = "Solte o controle e pressione uma tecla ou botão.\nTempo restante: 10 s"
+theme_override_font_sizes/font_size = 18
+autowrap_mode = 3
+
+[node name="Buttons" type="HBoxContainer" parent="Overlays/CaptureDialog"]
+offset_left = 26.0
+offset_top = 180.0
+offset_right = 574.0
+offset_bottom = 228.0
+alignment = 2
+
+[node name="CancelButton" type="Button" parent="Overlays/CaptureDialog/Buttons"]
+layout_mode = 2
+text = "Cancelar"
+
+[node name="ConflictDialog" type="Panel" parent="Overlays"]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -124.0
+offset_right = 300.0
+offset_bottom = 124.0
+theme_override_styles/panel = SubResource("DialogPanel")
+
+[node name="Title" type="Label" parent="Overlays/ConflictDialog"]
+offset_left = 26.0
+offset_top = 24.0
+offset_right = 574.0
+offset_bottom = 63.0
+text = "COMANDO EM USO"
+theme_override_font_sizes/font_size = 24
+
+[node name="Message" type="Label" parent="Overlays/ConflictDialog"]
+offset_left = 26.0
+offset_top = 76.0
+offset_right = 574.0
+offset_bottom = 158.0
+text = "Este comando já está atribuído a outra ação.\nTrocar os comandos ou escolher outro?"
+theme_override_font_sizes/font_size = 18
+autowrap_mode = 3
+
+[node name="Buttons" type="HBoxContainer" parent="Overlays/ConflictDialog"]
+offset_left = 26.0
+offset_top = 180.0
+offset_right = 574.0
+offset_bottom = 228.0
+alignment = 2
+theme_override_constants/separation = 8
+
+[node name="CancelButton" type="Button" parent="Overlays/ConflictDialog/Buttons"]
+layout_mode = 2
+text = "Escolher outro"
+
+[node name="SwapButton" type="Button" parent="Overlays/ConflictDialog/Buttons"]
+layout_mode = 2
+text = "Trocar"
+
+[node name="DirtyDialog" type="Panel" parent="Overlays"]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -124.0
+offset_right = 300.0
+offset_bottom = 124.0
+theme_override_styles/panel = SubResource("DialogPanel")
+
+[node name="Title" type="Label" parent="Overlays/DirtyDialog"]
+offset_left = 26.0
+offset_top = 24.0
+offset_right = 574.0
+offset_bottom = 63.0
+text = "ALTERAÇÕES PENDENTES"
+theme_override_font_sizes/font_size = 24
+
+[node name="Message" type="Label" parent="Overlays/DirtyDialog"]
+offset_left = 26.0
+offset_top = 76.0
+offset_right = 574.0
+offset_bottom = 158.0
+text = "Há comandos não aplicados.\nDeseja aplicar antes de sair?"
+theme_override_font_sizes/font_size = 18
+autowrap_mode = 3
+
+[node name="Buttons" type="HBoxContainer" parent="Overlays/DirtyDialog"]
+offset_left = 26.0
+offset_top = 180.0
+offset_right = 574.0
+offset_bottom = 228.0
+alignment = 2
+theme_override_constants/separation = 8
+
+[node name="CancelButton" type="Button" parent="Overlays/DirtyDialog/Buttons"]
+layout_mode = 2
+text = "Continuar editando"
+
+[node name="DiscardButton" type="Button" parent="Overlays/DirtyDialog/Buttons"]
+layout_mode = 2
+text = "Descartar"
+
+[node name="ApplyButton" type="Button" parent="Overlays/DirtyDialog/Buttons"]
+layout_mode = 2
+text = "Aplicar"
+
+[node name="ConfirmBindingsDialog" type="Panel" parent="Overlays"]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -124.0
+offset_right = 300.0
+offset_bottom = 124.0
+theme_override_styles/panel = SubResource("DialogPanel")
+
+[node name="Title" type="Label" parent="Overlays/ConfirmBindingsDialog"]
+offset_left = 26.0
+offset_top = 24.0
+offset_right = 574.0
+offset_bottom = 63.0
+text = "CONFIRMAR COMANDOS"
+theme_override_font_sizes/font_size = 24
+
+[node name="Message" type="Label" parent="Overlays/ConfirmBindingsDialog"]
+offset_left = 26.0
+offset_top = 76.0
+offset_right = 574.0
+offset_bottom = 158.0
+text = "Confirme para manter os novos comandos.\nReversão automática em 10 s."
+theme_override_font_sizes/font_size = 18
+autowrap_mode = 3
+
+[node name="Buttons" type="HBoxContainer" parent="Overlays/ConfirmBindingsDialog"]
+offset_left = 26.0
+offset_top = 180.0
+offset_right = 574.0
+offset_bottom = 228.0
+alignment = 2
+theme_override_constants/separation = 8
+
+[node name="RevertButton" type="Button" parent="Overlays/ConfirmBindingsDialog/Buttons"]
+layout_mode = 2
+text = "Reverter"
+
+[node name="ConfirmButton" type="Button" parent="Overlays/ConfirmBindingsDialog/Buttons"]
+layout_mode = 2
+text = "Manter"
