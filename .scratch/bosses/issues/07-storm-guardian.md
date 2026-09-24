@@ -1,6 +1,6 @@
 # F12-07 Storm Guardian in S2-07
 
-Status: todo
+Status: done
 Type: integration
 parallel-safe: no
 Depends on: F12-06, D-04
@@ -111,6 +111,10 @@ No GDScript changes; F12-03's boss branch and HUD wiring already carry everythin
 - One commit, `bosses: [shared] integrate the Storm Guardian in S2-07`, then the lane's land step from `docs/engineering/SPRINT.md`.
 
 ## Handoff notes for Astra
+
+## Outcome
+
+2026-09-24, Astra (sol), part 2: attached BossController and D-04's four clips to the Storm Guardian prefab, and replaced only the S2-07 Sentry stand-in with the real scene and three-Phase BossDefinition in Stage 2's Director exports. No script or content value changed. The Director's existing final-Phase completion path now receives the real `storm_guardian` kind. The sprint's no-new-tests rule applies; `lane.ps1 land` is the gate. Numeric tuning remains D-06 pass 3.
 
 `storm_guardian.tscn` gained only its root script and exports.
 

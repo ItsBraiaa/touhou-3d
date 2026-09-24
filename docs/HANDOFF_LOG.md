@@ -1,5 +1,12 @@
 # Handoff Log
 
+## 2026-09-24 — Astra (sol) — Storm Guardian (F12-07 part 2) [shared]
+State: CODE_READY
+Files: `scenes/enemies/storm_guardian.tscn`; `scenes/stages/stage_02.tscn`; F12-07 ticket; ROADMAP, GUIDE, bosses and run-flow contracts, validation note.
+
+S2-07 now selects the real three-Phase Storm Guardian definition and prefab through StageDirector. Its BossController uses VisualRoot, HitVolume, Emitters/Main and VisualRoot/Model/AnimationPlayer, with Flying_Idle, Punch, Yes and Death. It keeps the three authored Attack names and the 1,000 score from part 1. Final defeat follows the existing Stage 2 clear and Campaign final-victory path. D-06 pass 3 owns numeric tuning. No new tests under the sprint rule.
+
+
 ## 2026-09-24 — Astra (sol) — Tempest Sentinel (F12-06 part 2) [shared]
 State: CODE_READY
 Files: `scenes/enemies/tempest_sentinel.tscn`; `scenes/stages/stage_02.tscn`; `scripts/ui/hud.gd`; F12-06 ticket; ROADMAP, GUIDE, bosses contract and validation note.

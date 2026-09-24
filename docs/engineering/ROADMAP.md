@@ -84,7 +84,7 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | | | | 04 stage-02-content-draft | content | yes | oc-b | done (2026-09-23: dev draft of `content/stages/stage_02/` landed, validates and matches the scene; Astra tunes values in D-06) |
 | | | | 05 stage-02-director-integration | adapter | no | sol | done (2026-09-24: Stage 2 Director, Seals, Guards, Gates and checkpoint fallback; both route orders and retries observed) |
 | | | | 06 tempest-sentinel-miniboss | integration | no | sol (part 1: oc-a) | done (2026-09-24: two-Phase boss in S2-04; HUD uses D-07 full-width two-bar layout) |
-| | | | 07 storm-guardian | integration | no | sol (part 1: oc-a) | todo |
+| | | | 07 storm-guardian | integration | no | sol (part 1: oc-a) | done (2026-09-24: three-Phase Storm Guardian replaces the S2-07 stand-in and reaches the existing final-victory path) |
 | F13 | Audio | `audio` | 00 plan | docs | no | — | done (cut, then reinstated by the sprint plan, 2026-09-23) |
 | | | | 01 audio-limiter-core | core | yes | oc-a | done |
 | | | | 02 audio-controller-adapter | adapter | no | oc-a | done (no new tests, by the sprint rule; headless Dummy-driver check recorded in audio.md) |

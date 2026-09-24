@@ -125,6 +125,6 @@ No test is added (the sprint's no-new-tests rule). Every row was checked by the 
 ## Open issues
 
 - **Power Progress is not carried into Campaign Stage 2** (F11-02, Claude's reading above). Tell Claude if it should be; it needs an entry-progress value in `RunState`.
-- **The Campaign's final victory through play** was reached by clearing Stage 2 through its Director's `stage_cleared` (F11-02). A clear flown through Stage 2's Encounters waits for F12-06 and F12-07.
+- **The Campaign's final victory through play:** F12-06 and F12-07 replaced both Stage 2 boss stand-ins. S2-07's final-Phase defeat now feeds the Director's `stage_cleared` route used by F11-02. A full manual Campaign flight remains a delivery verification step.
 - **Results over Defeat.** A Defeat raised in the same physics step as the last kill is replaced by Results: the stage was cleared. The player's defeated `CombatState` stays frozen under Results. Continuar (F11-02) starts a new `CombatState` anyway.
 - **`menus-session.md` "Params"** still calls Defeat's `checkpoint` param an id; it is the Checkpoint's `display_name` (the doc comment in `menu_controller.gd` is fixed).

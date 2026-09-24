@@ -153,6 +153,10 @@ The health values are part 1's proposal for the ticket's target of about 25, 25 
 
 S2-04 uses `scenes/enemies/tempest_sentinel.tscn` with the standard BossController references and Flying_Idle, Punch, Yes, Death clips. `stage_02.tscn` maps kind `tempest_sentinel` to that scene and `content/bosses/tempest_sentinel.tres` through `boss_definitions`. The final Phase reports one defeat to the existing Director boss branch, which awards 500, drops S2-04's Shield reward and opens its Gate. `Hud.show_boss(..., 2)` places the two visible bars at the offsets authored in `hud.tscn`; a later three-Phase boss restores their original positions. The attack names and numeric content remain D-06 tuning proposals.
 
+## Storm Guardian (F12-07)
+
+S2-07 maps kind `storm_guardian` to the D-04 prefab and `content/bosses/storm_guardian.tres`. The prefab exposes the standard BossController references and Flying_Idle, Punch, Yes, Death clips. Its three Phases announce Espiral da Tempestade, Círculos do Trovão and Olho da Tormenta; the existing Director boss branch awards 1,000 on the final defeat and completes Stage 2, reaching the Session's final-victory Results path in Campaign mode. Numeric values remain for D-06 pass 3.
+
 ## Dependencies
 
 `PatternDefinition` and `PatternEmitter` (F5-04); `ProjectileSpawn` (F5-01). The Attempt's `RandomNumberGenerator` comes from the Director through `BossController.spawn_setup`. The controller needs the `ProjectileSystem` (F6-02), `EnemyActor.threat_side` (F9-02), and is found by `Targeting` (F1-04) through `targetable` and its `HitVolume`.
