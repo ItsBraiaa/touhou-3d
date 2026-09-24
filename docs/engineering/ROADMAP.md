@@ -197,6 +197,8 @@ Stage 1 night and both-stage boundary rails: .scratch/stage-night-rails/issues/0
 
 Stage 2 art revision: `.scratch/stage-02-area/issues/02-mountain-art-pass.md` — **done** (textures, terrain, vegetation and ambient visual motion; gameplay pending).
 
+Stage 2 water flow correction: `.scratch/stage-02-area/issues/03-water-flow-direction.md` — **done** (stream and waterfall animation reversed toward the bottom of the route).
+
 Stage 2 scene ticket: `.scratch/stage-02-area/issues/01-mountain-route.md` — **done** (static scene only).
 
 2026-09-21: Four Stage 1 visual variants are ready in `scenes/enemies/visuals/`; see [ENEMY_VISUAL_HANDOFF.md](../ENEMY_VISUAL_HANDOFF.md). These are visual components for F9, not complete enemy adapters/prefabs. No health changes; animation references and proposed wave assignment are documented.
