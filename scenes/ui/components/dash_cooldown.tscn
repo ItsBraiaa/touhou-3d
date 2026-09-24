@@ -1,0 +1,50 @@
+[gd_scene format=3]
+
+[ext_resource type="Theme" path="res://assets/ui/menu_theme.tres" id="1_theme"]
+
+[sub_resource type="StyleBoxFlat" id="Track"]
+bg_color = Color(0.045, 0.11, 0.16, 0.9)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="Fill"]
+bg_color = Color(0.33, 0.86, 0.91, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[node name="DashCooldown" type="Control"]
+custom_minimum_size = Vector2(248, 47)
+offset_right = 248.0
+offset_bottom = 47.0
+theme = ExtResource("1_theme")
+mouse_filter = 2
+
+[node name="Label" type="Label" parent="."]
+offset_right = 248.0
+offset_bottom = 24.0
+mouse_filter = 2
+text = "IMPULSO  ·  PRONTO"
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.74, 0.96, 0.96, 1)
+
+[node name="Progress" type="ProgressBar" parent="."]
+offset_top = 29.0
+offset_right = 248.0
+offset_bottom = 40.0
+mouse_filter = 2
+theme_override_styles/background = SubResource("Track")
+theme_override_styles/fill = SubResource("Fill")
+value = 100.0
+show_percentage = false
+
+[node name="ReadyAccent" type="ColorRect" parent="."]
+offset_left = 235.0
+offset_top = 2.0
+offset_right = 248.0
+offset_bottom = 15.0
+mouse_filter = 2
+color = Color(0.52, 0.97, 1, 1)

@@ -1,5 +1,19 @@
 # Handoff Log
 
+## 2026-09-24 — Astra (sol) — F16-01 controls layout, glyphs and dash visuals [shared]
+State: DELIVERED; landing gate pending.
+Files: `scenes/ui/controls.tscn`, `scenes/ui/components/binding_row.tscn`, `scenes/ui/components/dash_cooldown.tscn`, `scenes/player/visuals/dash_visual.tscn`, `assets/ui/controls/glyphs/*.png` and import sidecars, `docs/ASSET_CREDITS.md`, F16-01 section of `docs/validation/controls-expansion.md`, ticket Outcome and ROADMAP row. No scripts, InputMap, camera or dash rules changed.
+Node inventory: `Layout/ControlsPanel/Tabs/{KeyboardMouse,Gamepad,Camera}`; `Layout/ControlsPanel/{DeviceFamily,BindingScroll/Rows,ActionHelp,CameraSettings/{Mode,MouseSensitivity,OrbitSensitivity,MouseInvert,OrbitInvert,Deadzone}}`; `Layout/{RestoreTabButton,ApplyButton,BackButton,NavigationHint}`; `Overlays/{CaptureDialog,ConflictDialog,DirtyDialog,ConfirmBindingsDialog}` (each has `Title`, `Message`, `Buttons`). Components: `BindingRow/{ActionLabel,PrimaryButton,SecondaryButton,ResetButton}`; `DashCooldown/{Label,Progress,ReadyAccent}`; `DashVisual/{TrailLeft,TrailRight,ProtectionAccent}`.
+Screenshots: `docs/validation/controls-expansion/controls-1280x720.png`, `controls-1600x900.png`, `controls-1920x1080.png`. Godot 4.7.2 OpenGL Compatibility rendered each viewport. Text, columns, scroll area and fixed footer were visually inspected; physical controller input and runtime remapping remain for F16-03/F16-07.
+Gate follow-up: the existing MenuController expects Controls to focus BackButton on entry. BackButton remains first in scene tree order to preserve both menu contract assertions; F16-03 takes over the tabs-first focus loop.
+Action required by Claude: F16-03 replaces the six `Preview*` rows in `BindingScroll/Rows` when populating the catalog and preserves the node paths above. F16-05 part 2 instances the two reusable dash components and drives their visibility/value. `DashVisual` is cosmetic, script-free and has no collision. All 36 glyph IDs from F16-08 have PNG files, with text labels for fallback.
+
+## 2026-09-24 — Astra (water-flow) — Stage 2 downhill water
+State: DELIVERED
+Files: `assets/environment/stage_02/water.gdshader`; `.scratch/stage-02-area/issues/03-water-flow-direction.md`; `docs/engineering/ROADMAP.md`.
+Change: Reversed the two time-driven UV terms in Stage 2's shared water shader. All six streams and four waterfalls now animate in the opposite direction, toward the lower route, while the geometry and wave motion are unchanged.
+Verification: `tools/lane.ps1 land` is the sprint gate; no new tests.
+Action required by Claude: none.
 ## 2026-09-24 — OpenCode (oc-a) — F16-08: binding labels and prompt family
 State: DELIVERED
 Files: `scripts/ui/binding_labels.gd` (new, with its `.uid`); `scripts/ui/input_device_state.gd` (additions only); `.scratch/controls-expansion/issues/08-binding-labels-and-prompt-family.md`; `docs/engineering/settings.md` (its F16-08 section); `docs/validation/controls-expansion.md` (its F16-08 section); `docs/engineering/ROADMAP.md` (the F16-08 row).
