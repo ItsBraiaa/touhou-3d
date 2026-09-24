@@ -873,3 +873,9 @@ Action required by Astra: read `docs/engineering/ROADMAP.md`, especially "Reques
 Files: `content/bosses/tempest_sentinel.tres`, `content/patterns/sentinel_aimed_burst.tres`, `content/patterns/sentinel_rotating_fan.tres`.
 
 Change: Added the dev Tempest Sentinel BossDefinition with two proposed attacks and two health phases. Phase 1 uses alternating charged aimed bursts; Phase 2 uses rotating fans with alternating player-height tracking and fixed altitude shifts. All three resources carry `metadata/dev = true`. Proposed values and attack names remain for Astra's D-06 review. Part 1 only; scene integration remains with sol.
+
+## 2026-09-23 — OpenCode (oc-a) — F12-07 part 1
+
+Files: `content/bosses/storm_guardian.tres`, `content/patterns/storm_spiral.tres`, `content/patterns/storm_thunder_rings.tres`, `content/patterns/storm_aimed_burst.tres`.
+
+Change: Added the dev Storm Guardian BossDefinition with the three Stage 2 final-boss attack names and phase content: a height-drifting spiral, alternating high/low thunder rings, and alternating aimed bursts and spirals. All four resources carry `metadata/dev = true`. Proposed values remain for Astra's D-06 review. Part 1 only; scene integration remains with sol.
