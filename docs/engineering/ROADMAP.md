@@ -83,8 +83,8 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | | | | 03 lantern-guardian-in-s1-07 | integration | no | trunk (part 1: oc-a) | done (2026-09-24: the Lantern Guardian fights in S1-07 through `boss_definitions`, with the HUD panel and cues, +1000 and one stage clear from its final Phase; D-03's prefab attached; verified in the running game, no new tests per the sprint rule; Phase health about 2.7× the pacing target, noted for D-07 Part C) |
 | | | | 04 stage-02-content-draft | content | yes | oc-b | done (2026-09-23: dev draft of `content/stages/stage_02/` landed, validates and matches the scene; Astra tunes values in D-06) |
 | | | | 05 stage-02-director-integration | adapter | no | sol | done (2026-09-24: Stage 2 Director, Seals, Guards, Gates and checkpoint fallback; both route orders and retries observed) |
-| | | | 06 tempest-sentinel-miniboss | integration | no | sol (part 1: oc-a) | todo |
-| | | | 07 storm-guardian | integration | no | sol (part 1: oc-a) | todo |
+| | | | 06 tempest-sentinel-miniboss | integration | no | sol (part 1: oc-a) | done (2026-09-24: two-Phase boss in S2-04; HUD uses D-07 full-width two-bar layout) |
+| | | | 07 storm-guardian | integration | no | sol (part 1: oc-a) | done (2026-09-24: three-Phase Storm Guardian replaces the S2-07 stand-in and reaches the existing final-victory path) |
 | F13 | Audio | `audio` | 00 plan | docs | no | — | done (cut, then reinstated by the sprint plan, 2026-09-23) |
 | | | | 01 audio-limiter-core | core | yes | oc-a | done |
 | | | | 02 audio-controller-adapter | adapter | no | oc-a | done (no new tests, by the sprint rule; headless Dummy-driver check recorded in audio.md) |
@@ -98,7 +98,7 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | | | | 04 stage-2-boss-scenes | design | — | sol | done (2026-09-23: Tempest Sentinel and Storm Guardian prefabs, clips and Stage 2 renders verified) |
 | | | | 05 stage-1-tuning-and-pacing | design | — | sol | done (2026-09-23: content values, names, clip candidates and provisional 221 s estimate) |
 | | | | 06 stage-2-content-review | design | — | sol | todo (passes 1–2 landed: values/rewards and explicit Seal health 10; pass 3 boss tuning pending) |
-| | | | 07 shrine-lighting-and-boss-rulings | design | — | sol | doing (Part B rulings delivered; Parts A and C await F12-03) |
+| | | | 07 shrine-lighting-and-boss-rulings | design | — | sol | done (2026-09-24: 2.4 s shrine clip, five rulings, Lantern Guardian health 550/550/775; trunk export swap pending) |
 | | | | 08 enemy-visuals-duplicate-parts | design | — | oc-a | done (2026-09-24: Part 1 confirmed duplicate glTF and embedded model parts in all four visuals; Part 2 removed the instance links, post-fix counts and validator clean) |
 
 Order rationale: Player before Menus (highest UX risk and GUIDE Section 13's assignment). Audio buses are created in F0-03 so F3 can bind Options to them. Enemies (F9) come before the Stage Director (F10) so the Director is integrated against real Waves. The sprint's lane queues, checkpoints and kickoff prompts are in [SPRINT.md](SPRINT.md).
@@ -156,7 +156,7 @@ Dependencies Claude has on scene and content work. These are needs by Feature, n
 
 2026-09-23: D-03 Lantern Guardian prefab is SCENE_READY at `scenes/enemies/lantern_guardian.tscn`; tree, clip names, hit sphere and emitter are in [ENEMY_VISUAL_HANDOFF.md](../ENEMY_VISUAL_HANDOFF.md). Trunk F12-03 owns the script attachment and scene export wiring.
 
-2026-09-23: D-07 Part B rulings are in [PLANEJAMENTO.md](../PLANEJAMENTO.md) and the handoff log. The two-Phase HUD bar offsets are authored in `hud.tscn`; trunk's `Hud` follow-up must apply them.
+2026-09-24: D-07 is complete. The five Part B rulings are in [PLANEJAMENTO.md](../PLANEJAMENTO.md); F12-06 applied the two-Phase HUD offsets. Part A authored `Environment/ShrineLighting` and the `corrupted_to_calm` clip in Stage 1; trunk F14-01 sets the Stage exports. Part C tuned Lantern Guardian health to 550/550/775 and reviewed its patterns. Captures and reset checks are in [stage-01-shrine.md](../validation/stage-01-shrine.md).
 
 Stage 1 night and both-stage boundary rails: .scratch/stage-night-rails/issues/01-night-forest-and-boundary-rails.md — **done** (night palette, warm lanterns, low gate veil, textured forest detail, visible rails along existing flight walls).
 

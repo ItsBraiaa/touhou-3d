@@ -71,6 +71,7 @@ var _target_marker: Control
 var _boss_status: CanvasItem
 var _boss_name: Label
 var _phase_bars: Array[ProgressBar] = []
+var _authored_phase_offsets: Array[Vector2] = []
 var _attack_name: Label
 ## Left, then right, as the `side` of [method show_threat] picks them.
 var _threats: Array[CanvasItem] = []
@@ -90,7 +91,10 @@ func _ready() -> void:
 	_boss_status = _require(BOSS_STATUS_PATH) as CanvasItem
 	_boss_name = _require(BOSS_NAME_PATH) as Label
 	for path: NodePath in PHASE_BAR_PATHS:
-		_phase_bars.append(_require(path) as ProgressBar)
+		var bar: ProgressBar = _require(path) as ProgressBar
+		_phase_bars.append(bar)
+		if bar != null:
+			_authored_phase_offsets.append(Vector2(bar.offset_left, bar.offset_right))
 	_attack_name = _require(ATTACK_NAME_PATH) as Label
 	_threats.append(_require(THREAT_LEFT_PATH) as CanvasItem)
 	_threats.append(_require(THREAT_RIGHT_PATH) as CanvasItem)
@@ -184,6 +188,12 @@ func show_boss(display_name: String, phase_count: int) -> void:
 	for index: int in _phase_bars.size():
 		_reset_phase_bar(index)
 		_phase_bars[index].visible = index < _phase_count
+		if index < 2 and _phase_count == 2:
+			_phase_bars[index].offset_left = float(_phase_bars[index].get_meta(&"two_phase_offset_left"))
+			_phase_bars[index].offset_right = float(_phase_bars[index].get_meta(&"two_phase_offset_right"))
+		else:
+			_phase_bars[index].offset_left = _authored_phase_offsets[index].x
+			_phase_bars[index].offset_right = _authored_phase_offsets[index].y
 	_boss_status.show()
 
 

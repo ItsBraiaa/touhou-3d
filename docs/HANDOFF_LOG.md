@@ -15,6 +15,34 @@ No defect was found, so no code changed; `run_state.gd` and `game_session.gd` ar
 Why: the academic duration check needs proof that Pause, menus and failed attempts never reach the displayed time, plus a protocol for the measured clears.
 Action required by Astra: none now. After the human pass, `clear-time.md` steps 2 and 3 give Stage 1's played clear times against the 240 s target, for `content/stages/stage_01/*.tres` pacing.
 Action required by the human pass: steps 2 to 4 of `clear-time.md` (Stage 1 efficient and Campaign clears, a Retry run with a stopwatch), on a physical device. Step 5, the Stage 2 five-minute clear, waits for F12-07. F14-02's acceptance record can cite this page.
+## 2026-09-24 — Astra (sol) — Shrine lighting and boss rulings (D-07 Parts A and C) [shared]
+State: SCENE_READY
+Files: `scenes/stages/stage_01.tscn`; `tools/validate_stage_01.gd`; `content/bosses/lantern_guardian.tres`; three `content/patterns/lantern_*.tres`; `docs/validation/stage-01-shrine.md` and its two captures; `docs/validation/stage-01-pacing.md`; ROADMAP; D-07 ticket.
+
+Trunk F14-01: set Stage `defeat_presentation = NodePath("Environment/ShrineLighting")` and `defeat_animation = &"corrupted_to_calm"`. The clip lasts 2.4 s, does not loop or autoplay, and its player runs under paused Results. F11-01's owner decides whether Results' overlay shows enough of the calm shrine or needs a short delay. First and final keys match corrupted and calm light; a new instance starts corrupted. The windowed and headless Stage validator passed with zero failures. S1-07 health 1500/1500/2100 → 550/550/775, for approximately 25/25/35 s at the measured 22.1 Power-3 DPS; transitions stay 0/0.75/0.75 s. All three pattern numbers are retained after review of high/low rings and player-height aimed bursts. Four content resources gained `metadata/reviewed = true`; `metadata/dev` remains. Estimated S1-07 is about 87 s, not a measured clear.
+
+| Ruling | Decision | Follow-up |
+| --- | --- | --- |
+| 1 Transition damage | Refused for at most 0.75 s; no Phase skip. | Applied to D-07 and D-06 values; no code change. |
+| 2 HUD dimming | Spent alpha 0.25, completed Phase alpha 0.30. | None. |
+| 3 Two-Phase bars | Full-width 16–307 and 313–604. | Applied in F12-06 `Hud.show_boss`; none pending. |
+| 4 Ship yaw | Visual stays fixed relative to camera yaw, with cosmetic banking. | None. |
+| 5 Graze while invulnerable | Contact strictly spends that Projectile's Graze chance. | None. |
+
+
+## 2026-09-24 — Astra (sol) — Storm Guardian (F12-07 part 2) [shared]
+State: CODE_READY
+Files: `scenes/enemies/storm_guardian.tscn`; `scenes/stages/stage_02.tscn`; F12-07 ticket; ROADMAP, GUIDE, bosses and run-flow contracts, validation note.
+
+S2-07 now selects the real three-Phase Storm Guardian definition and prefab through StageDirector. Its BossController uses VisualRoot, HitVolume, Emitters/Main and VisualRoot/Model/AnimationPlayer, with Flying_Idle, Punch, Yes and Death. It keeps the three authored Attack names and the 1,000 score from part 1. Final defeat follows the existing Stage 2 clear and Campaign final-victory path. D-06 pass 3 owns numeric tuning. No new tests under the sprint rule.
+
+
+## 2026-09-24 — Astra (sol) — Tempest Sentinel (F12-06 part 2) [shared]
+State: CODE_READY
+Files: `scenes/enemies/tempest_sentinel.tscn`; `scenes/stages/stage_02.tscn`; `scripts/ui/hud.gd`; F12-06 ticket; ROADMAP, GUIDE, bosses contract and validation note.
+
+The S2-04 stand-in now uses the two-Phase Tempest Sentinel definition and its authored boss prefab. BossController references VisualRoot, HitVolume, Emitters/Main and the model AnimationPlayer; clips are Flying_Idle, Punch, Yes and Death. HUD shows the two authored bars at 16–307 and 313–604, restoring the original three-bar positions on the next three-Phase boss. Content and Attack names remain dev proposals for D-06 pass 3. No new tests under the sprint rule.
+
 
 ## 2026-09-24 — OpenCode (oc-a) — D-08 enemy visual duplicate parts [shared]
 State: dev
