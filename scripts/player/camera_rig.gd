@@ -1,8 +1,9 @@
 class_name CameraRig
 extends Node3D
 ## Adapter for the third-person camera: follows the ship from behind with a level
-## horizon, orbits with the `camera_*` actions, frames the ship together with a Target
-## Lock, and shortens against scenery.
+## horizon, orbits with the `camera_*` actions and, in mouse mode, with the captured mouse,
+## frames the ship together with a Target Lock, recenters on request, and shortens against
+## scenery.
 ##
 ## The rig is `top_level`, so the body's own transform never reaches the camera: every
 ## physics tick it places itself at the follow target's position with a basis that is a
@@ -14,9 +15,19 @@ extends Node3D
 ## input by it, and anything that turns this node — a test, a future respawn — turns the
 ## ship's sense of forward with it. The pitch is private, because nothing outside reads it.
 ##
+## Every aim source — the lock framing, a recenter, the `camera_*` actions and the mouse —
+## is folded into that one yaw and pitch in [method _advance_aim], once per physics tick,
+## and the camera transform is written in one place. There is no tween and no second writer.
+##
 ## There is no Rules Core: every rule here is a question about the scene (where the ship
 ## is, where the target is, what the ray hit), which ADR-0001 keeps out of a core.
 
+
+## Camera input mode of the keyboard-and-mouse player: the `camera_*` actions only, which
+## is the behaviour before F16 and the default.
+const MODE_KEYS := &"keys"
+## Camera input mode that adds mouse look while [method set_mouse_capture_active] is on.
+const MODE_MOUSE := &"mouse"
 
 @export_group("Scene references")
 ## The camera this rig places. Required; its `current` flag is left as authored.
@@ -38,10 +49,38 @@ extends Node3D
 @export_group("Orbit")
 ## Turn rate of the `camera_*` actions at full deflection, in degrees per second.
 @export var orbit_speed_degrees: float = 120.0
-## Player's camera sensitivity factor (PLANEJAMENTO Section 7). Scales the turn rate.
+## Player's camera sensitivity factor (PLANEJAMENTO Section 7). Scales the turn rate of the
+## `camera_*` actions, keys and right stick alike; the mouse has [member mouse_sensitivity].
 @export var sensitivity: float = 1.0
-## When true, `camera_up` looks down instead of up (PLANEJAMENTO Section 7).
+## When true, `camera_up` looks down instead of up (PLANEJAMENTO Section 7). The mouse has
+## its own [member mouse_invert_vertical].
 @export var invert_vertical: bool = false
+## Radial deadzone of the `camera_*` actions, from 0 to 1. A deflection inside it does not
+## orbit and the rest is rescaled to start from zero, so it filters right-stick drift; a key
+## is always a full deflection. 0.2 is the actions' own deadzone, so the default orbits
+## exactly as before F16.
+@export var stick_deadzone: float = 0.2
+
+@export_group("Mouse look")
+## [constant MODE_KEYS] or [constant MODE_MOUSE]. The `camera_*` actions orbit in either
+## mode; mouse mode adds the mouse on top of them.
+@export var camera_input_mode: StringName = MODE_KEYS
+## Mouse look turn, in degrees per screen pixel of motion. Not a rate: the pixels are
+## already the motion of the tick, so nothing multiplies them by the frame time.
+@export var mouse_sensitivity: float = 0.12
+## When true, moving the mouse up looks down. Independent of [member invert_vertical].
+@export var mouse_invert_vertical: bool = false
+## Largest mouse motion in one physics tick, in screen pixels, that counts as jitter rather
+## than deliberate look. Jitter still turns the camera, but it neither holds the lock
+## framing off nor interrupts a recenter, and a recenter drops it. Claude's proposal.
+@export var mouse_jitter_pixels: float = 1.0
+## Seconds the lock framing stays off after the last deliberate mouse motion, before it
+## fades back in at [member lock_blend_speed].
+@export var mouse_look_hold_seconds: float = 0.25
+
+@export_group("Recenter")
+## Duration of a recenter, in seconds, eased in and out. 0 recenters on the next tick.
+@export var recenter_seconds: float = 0.25
 
 @export_group("Damping")
 ## Rate the camera position eases toward its place behind the ship, in reciprocal
@@ -77,6 +116,18 @@ var _desired_camera_position: Vector3 = Vector3.ZERO
 ## Farthest the camera may sit from the pivot, from the last obstruction ray. [constant INF]
 ## while the line is clear.
 var _allowed_distance: float = INF
+## Whether the owner has the pointer captured for gameplay; see [method set_mouse_capture_active].
+var _mouse_capture_active: bool = false
+## Mouse motion in screen pixels collected since the last physics tick, which spends it.
+var _pending_look: Vector2 = Vector2.ZERO
+## Seconds left before the lock framing may fade back in after deliberate mouse look.
+var _look_hold_left: float = 0.0
+## How much of the lock framing mouse look holds off: 1 while the mouse aims, fading to 0.
+var _look_override: float = 0.0
+## Whether a recenter is in progress; see [method request_recenter].
+var _recentering: bool = false
+## Seconds since the recenter in progress started or last restarted.
+var _recenter_elapsed: float = 0.0
 
 
 func _ready() -> void:
@@ -116,6 +167,20 @@ func _process(delta: float) -> void:
 	_apply_camera_transform()
 
 
+## Collects mouse look for the next physics tick, only while mouse mode is on and the owner
+## has the pointer captured. [method _input] rather than unhandled input, so no Control under
+## the hidden cursor can take the motion first: the capture gate decides, not the GUI. The
+## event is never handled here, because [Interface]'s device tracking reads the same motion.
+## A paused tree does not call this, so nothing collects under Pause either.
+func _input(event: InputEvent) -> void:
+	var motion := event as InputEventMouseMotion
+	if motion == null or not _mouse_look_active():
+		return
+	# `screen_relative`, not `relative`: `relative` is scaled by the canvas_items stretch, so
+	# the same hand movement would turn the camera less in a larger window.
+	_pending_look += motion.screen_relative
+
+
 ## The yaw the camera faces, in radians around world Y. It is this node's own
 ## `global_rotation.y`: [PlayerController] rotates its horizontal input by it, so turning
 ## the rig turns where "forward" flies.
@@ -126,8 +191,10 @@ func get_yaw() -> float:
 ## Frames [param target] together with the ship: the yaw eases toward the direction from
 ## the ship to it and the pitch toward their midpoint, fading in over
 ## [member lock_blend_speed]. Orbit input still moves the camera while locked, so the
-## player can look around and the framing eases back when the input stops. A target that
-## is freed is dropped as if it had been cleared. Passing null clears the lock.
+## player can look around and the framing eases back when the input stops; deliberate mouse
+## look holds the framing off instead, and it fades back in [member mouse_look_hold_seconds]
+## after the mouse stops. Neither releases the lock. A target that is freed is dropped as if
+## it had been cleared. Passing null clears the lock.
 func set_lock_target(target: Node3D) -> void:
 	_lock_target = target
 
@@ -145,6 +212,54 @@ func apply_settings(p_sensitivity: float, p_invert_vertical: bool) -> void:
 	invert_vertical = p_invert_vertical
 
 
+## Applies the F16 camera-input settings: [param p_mode] is [constant MODE_KEYS] or
+## [constant MODE_MOUSE], and anything else reads as keys; [param p_mouse_sensitivity] is
+## degrees per screen pixel; [param p_mouse_invert] inverts the mouse's vertical axis only;
+## [param p_deadzone] is the radial deadzone of the `camera_*` actions. F16-06 owns reading
+## them from [Settings]; like [method apply_settings] this only stores them. It also drops
+## the mouse motion not yet applied, so a mode change never replays it.
+func apply_control_settings(
+		p_mode: StringName, p_mouse_sensitivity: float, p_mouse_invert: bool, p_deadzone: float) -> void:
+	camera_input_mode = MODE_MOUSE if p_mode == MODE_MOUSE else MODE_KEYS
+	mouse_sensitivity = p_mouse_sensitivity
+	mouse_invert_vertical = p_mouse_invert
+	stick_deadzone = p_deadzone
+	clear_pending_look()
+
+
+## Opens or closes the gate on mouse look. The owner that captures and releases the pointer
+## calls it (F16-06: Session and Interface); the rig never changes `Input.mouse_mode` and
+## cannot tell by itself whether gameplay is active. Motion is collected only while this is
+## on and the mode is [constant MODE_MOUSE]. Every call drops the motion not yet applied, so
+## neither a capture nor a release replays it.
+func set_mouse_capture_active(active: bool) -> void:
+	_mouse_capture_active = active
+	clear_pending_look()
+
+
+## Drops the mouse motion collected since the last physics tick, for the transitions the
+## capture gate does not cover: a focus change, a Resume, the warp that capturing the pointer
+## can report as one large motion.
+func clear_pending_look() -> void:
+	_pending_look = Vector2.ZERO
+
+
+## Turns the camera back over [member recenter_seconds], eased and along the shorter way
+## round. Without a lock it faces the ship's authored forward (its own -Z, not the last
+## movement direction) at [member default_pitch_degrees] and the normal follow offset; with
+## one it returns to the normal ship-and-target framing and keeps the lock. Camera input
+## interrupts it. A request during a recenter restarts it from the current pose; nothing
+## queues. The pitch limits and the obstruction ray apply throughout. F16-06 calls this on
+## the `camera_recenter` action, which the rig does not read.
+func request_recenter() -> void:
+	_recentering = true
+	_recenter_elapsed = 0.0
+	# A recenter is a return to the framing, so it ends a mouse-look hold instead of
+	# waiting it out, and the framing is live again the tick the recenter ends.
+	_look_hold_left = 0.0
+	_look_override = 0.0
+
+
 ## Moves the lock blend one tick toward 1 while a live target is set and toward 0
 ## otherwise, so lock and release both fade instead of snapping.
 func _advance_lock_blend(delta: float) -> void:
@@ -155,24 +270,100 @@ func _advance_lock_blend(delta: float) -> void:
 
 
 ## Advances the aim one tick and returns the new yaw; the pitch is stored, since only the
-## yaw is public. The lock framing pulls first, scaled by the blend, and the orbit input
-## is added on top: in follow mode it is the whole of the movement, and while locked it
-## pushes against the pull, which is what lets the player look around without breaking the
-## lock.
+## yaw is public. This is the one place any source turns the camera.
+##
+## A recenter in progress is the whole of the tick, unless camera input interrupts it.
+## Otherwise the lock framing pulls first, scaled by the blend and held off by mouse look,
+## and the input is added on top: in follow mode it is the whole of the movement, and while
+## locked the `camera_*` actions push against the pull, which is what lets the player look
+## around without breaking the lock. The actions turn at a rate, times the tick; the mouse
+## turns by the pixels it moved, once, whatever the tick or frame rate.
 func _advance_aim(delta: float, pivot: Vector3) -> float:
 	var yaw := global_rotation.y
+	var orbit := Input.get_vector(
+			&"camera_left", &"camera_right", &"camera_up", &"camera_down", stick_deadzone)
+	var mouse := _pending_look
+	_pending_look = Vector2.ZERO
+	var mouse_deliberate := mouse.length() > mouse_jitter_pixels
+	_advance_look_override(delta, mouse_deliberate)
+	if _recentering:
+		if orbit.is_zero_approx() and not mouse_deliberate:
+			return _advance_recenter(delta, pivot, yaw)
+		_recentering = false
 	if _lock_blend > 0.0 and _lock_target != null:
-		var pull := (1.0 - exp(-rotation_damping * delta)) * _lock_blend
+		var pull := (1.0 - exp(-rotation_damping * delta)) * _lock_blend * (1.0 - _look_override)
 		var target_position := _lock_target.global_position
 		yaw = lerp_angle(yaw, _framing_yaw(pivot, target_position), pull)
 		_pitch = lerpf(_pitch, _framing_pitch(pivot, target_position), pull)
-	var look := Input.get_vector(&"camera_left", &"camera_right", &"camera_up", &"camera_down")
 	var rate := deg_to_rad(orbit_speed_degrees) * sensitivity * delta
 	# The actions name where the view turns, so `camera_up` raises it: the camera orbits
 	# below the ship and looks up at it, unless the player inverted the axis.
-	var vertical := look.y if invert_vertical else -look.y
-	_pitch = _clamped_pitch(_pitch + vertical * rate)
-	return yaw - look.x * rate
+	var vertical := orbit.y if invert_vertical else -orbit.y
+	# Screen y grows downward, so moving the mouse up is a negative y that raises the view,
+	# and moving it right turns the view right, which is a negative rotation around world Y.
+	var mouse_turn := mouse * deg_to_rad(mouse_sensitivity)
+	var mouse_vertical := mouse_turn.y if mouse_invert_vertical else -mouse_turn.y
+	_pitch = _clamped_pitch(_pitch + vertical * rate + mouse_vertical)
+	return yaw - orbit.x * rate - mouse_turn.x
+
+
+## Holds the lock framing off while the mouse aims deliberately, for
+## [member mouse_look_hold_seconds] after the last such motion, then fades it back in at
+## [member lock_blend_speed], the same fade a fresh lock takes, so the return is eased and
+## not a snap. Runs in follow mode too, so a lock taken mid-look does not yank the view.
+func _advance_look_override(delta: float, mouse_deliberate: bool) -> void:
+	if mouse_deliberate:
+		_look_hold_left = mouse_look_hold_seconds
+		_look_override = 1.0
+		return
+	_look_hold_left = maxf(_look_hold_left - delta, 0.0)
+	if _look_hold_left <= 0.0:
+		_look_override = move_toward(_look_override, 0.0, lock_blend_speed * delta)
+
+
+## Moves the aim one step of the recenter and returns the new yaw. Each step covers the
+## share of what is left that the eased curve gives this tick, measured from wherever the
+## camera is now: a goal that moves, such as a locked target, is still met exactly when the
+## time runs out, and a repeated request simply starts the curve again from the current
+## pose. [method @GlobalScope.lerp_angle] takes the shorter way round from either side of
+## ±PI. Both ends of the pitch are inside the limits, so every step between them is too.
+func _advance_recenter(delta: float, pivot: Vector3, yaw: float) -> float:
+	var goal := _recenter_goal(pivot)
+	var before := _recenter_curve(_recenter_elapsed)
+	_recenter_elapsed += delta
+	var after := _recenter_curve(_recenter_elapsed)
+	var weight := 1.0
+	if after < 1.0:
+		weight = (after - before) / (1.0 - before)
+	else:
+		_recentering = false
+	_pitch = lerpf(_pitch, goal.y, weight)
+	return lerp_angle(yaw, goal.x, weight)
+
+
+## Share of a recenter covered after [param elapsed] seconds, eased in and out: 0 at the
+## start and exactly 1 from [member recenter_seconds] on.
+func _recenter_curve(elapsed: float) -> float:
+	if recenter_seconds <= 0.0:
+		return 1.0
+	return smoothstep(0.0, 1.0, elapsed / recenter_seconds)
+
+
+## Where a recenter ends, as (yaw, pitch) in radians. With a live lock it is the normal
+## ship-and-target framing. Without one it is the ship's own -Z flattened onto the
+## horizontal plane, at the default pitch: the authored forward and not the last movement
+## direction, because the ship model does not turn with the camera and its nose is the
+## heading the player can see.
+func _recenter_goal(pivot: Vector3) -> Vector2:
+	if _lock_target != null:
+		var target_position := _lock_target.global_position
+		return Vector2(_framing_yaw(pivot, target_position), _framing_pitch(pivot, target_position))
+	var ahead := pivot - _follow_target.global_basis.z
+	return Vector2(_framing_yaw(pivot, ahead), _clamped_pitch(deg_to_rad(default_pitch_degrees)))
+
+
+func _mouse_look_active() -> bool:
+	return _mouse_capture_active and camera_input_mode == MODE_MOUSE
 
 
 ## Yaw that looks from the ship along the direction to the target, keeping the camera

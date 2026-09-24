@@ -1,6 +1,6 @@
 # F16-04 mouse-camera-and-recenter
 
-Status: todo
+Status: done
 Type: adapter
 Owner: Claude
 Lane: path
@@ -32,10 +32,10 @@ Also update this ticket's Outcome, only its own docs/engineering/ROADMAP.md row,
 
 ## Work
 
-- [ ] Keep apply_settings compatibility; add the spec's request_recenter and apply_control_settings plus set_mouse_capture_active and clear_pending_look lifecycle methods.
-- [ ] Accumulate only active captured mouse motion, apply once without frame-delta scaling, and preserve rate-based keyboard/stick input and zero roll.
-- [ ] Implement locked manual-look override with 0.25 s idle return; preserve Target Lock.
-- [ ] Implement shortest-yaw 0.25 s free/locked recenter; manual look interrupts, repeated requests never queue, obstruction wins.
+- [x] Keep apply_settings compatibility; add the spec's request_recenter and apply_control_settings plus set_mouse_capture_active and clear_pending_look lifecycle methods.
+- [x] Accumulate only active captured mouse motion, apply once without frame-delta scaling, and preserve rate-based keyboard/stick input and zero roll.
+- [x] Implement locked manual-look override with 0.25 s idle return; preserve Target Lock.
+- [x] Implement shortest-yaw 0.25 s free/locked recenter; manual look interrupts, repeated requests never queue, obstruction wins.
 
 ## Manual acceptance / existing gate
 
@@ -48,4 +48,22 @@ Write no new tests or disposable test drivers. Run the existing tools/lane.ps1 l
 
 ## Outcome
 
-Not started. Can overlap F16-03 and F16-05 because it edits no Interface, Settings, Session, PlayerController or player_ship.tscn.
+Done 2026-09-24 in lane path. Only `scripts/player/camera_rig.gd` changed; no Interface, Settings, Session, PlayerController or player_ship.tscn edits.
+
+- **API.** `apply_control_settings(p_mode, p_mouse_sensitivity, p_mouse_invert, p_deadzone)`, `set_mouse_capture_active(active)`, `clear_pending_look()` and `request_recenter()`, plus the constants `MODE_KEYS` and `MODE_MOUSE`. `apply_settings` is unchanged and now covers the `camera_*` actions only.
+- **New exports.** They use the spec defaults:
+  - `stick_deadzone` 0.2;
+  - `camera_input_mode` keys;
+  - `mouse_sensitivity` 0.12 degrees per pixel;
+  - `mouse_invert_vertical` false;
+  - `mouse_look_hold_seconds` 0.25;
+  - `recenter_seconds` 0.25;
+  - `mouse_jitter_pixels` 1.0, Claude's proposal.
+- **Mouse.** Motion is collected in `_input` from `screen_relative`, which the window stretch does not scale. It is spent once per physics tick as pixels × degrees, with no delta.
+- **Locked look.** Deliberate mouse motion turns the lock pull off. After 0.25 s idle the pull fades back in at `lock_blend_speed`. The lock is kept.
+- **Recenter.** It lasts 0.25 s, eased with smoothstep, and takes the shortest yaw path with `lerp_angle`. It is interrupted by the actions or by deliberate mouse motion, and restarts from the current pose. The lock pull does not run during it, so there is one writer.
+- **Decision.** In mouse mode the `camera_*` actions, arrow keys included, still orbit. They share the right stick's actions, and the bindings belong to the player.
+- **Verification.** The existing suite passed (225 tests, 0 failed), and so did the strict resource check. Everything else was checked by reading: yaw wrap, pitch limits, lock preservation and obstruction. It is recorded in `docs/validation/controls-expansion.md` (F16-04).
+- **Pending F16-06, not passed:** the Session lifecycle, meaning capture, focus and Resume, settings at spawn and Retry, and the `camera_recenter` wiring.
+- **Not verified:** physical mouse and stick feel, including rotation that steps at the 60 Hz tick on high-refresh displays (F16-07).
+- **Gate:** `tools/lane.ps1 land` was not run in this stage; the orchestrator runs it.
