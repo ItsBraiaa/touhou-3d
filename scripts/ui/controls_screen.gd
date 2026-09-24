@@ -1001,6 +1001,8 @@ func _listen(event: InputEvent) -> void:
 	if binding.is_empty():
 		return
 	if InputBindings.profile_for(binding) != _tab:
+		# A refused axis is no candidate: the review must not wait for that stick to centre.
+		_candidate_axis = _NO_AXIS
 		if event.is_action_pressed(&"ui_cancel"):
 			_finish_capture("")
 		else:
@@ -1170,15 +1172,30 @@ func _open_conflict(conflicts: Array[StringName]) -> void:
 	for action: StringName in conflicts:
 		labels.append(InputBindings.get_label(action))
 	var can_swap := _try_assign(InputBindings.RESOLUTION_SWAP, false).is_empty()
-	var can_replace := _try_assign(InputBindings.RESOLUTION_REPLACE, false).is_empty()
+	var replace_errors := _try_assign(InputBindings.RESOLUTION_REPLACE, false)
+	var can_replace := replace_errors.is_empty()
 	_set_enabled(_conflict_swap, can_swap)
 	_set_enabled(_conflict_replace, can_replace)
 	var text := "%s já está em %s.\nTrocar os comandos, substituir ou cancelar?" % [MenuController.describe_binding(_candidate, _slot_family()), ", ".join(labels)]
 	if not can_replace:
-		text += "\nSubstituir deixaria uma ação obrigatória sem comando."
+		text += "\n" + _replace_refusal_text(conflicts, replace_errors)
 	_conflict_message.text = text
 	_open_modal(_Modal.CONFLICT, _conflict_dialog, _conflict_swap if can_swap else _conflict_cancel)
 	_trap_focus([_conflict_cancel, _conflict_swap, _conflict_replace])
+
+
+## The Portuguese reason Substituir is disabled for [param conflicts], from the trial's
+## [param errors]: the candidate is fixed on one of them (Numpad Enter on `ui_accept`), a
+## required action would lose its last binding, or another refusal.
+func _replace_refusal_text(conflicts: Array[StringName], errors: PackedStringArray) -> String:
+	for other: StringName in conflicts:
+		for fixed: Dictionary in InputBindings.get_fixed_bindings(_tab, other):
+			if InputBindings.same_input(fixed, _candidate):
+				return "Substituir não é possível: este comando é fixo em %s." % InputBindings.get_label(other)
+	for error: String in errors:
+		if error.contains("is required but has no binding"):
+			return "Substituir deixaria uma ação obrigatória sem comando."
+	return "Substituir não é possível para este comando."
 
 
 func _resolve_conflict(resolution: StringName) -> void:

@@ -105,12 +105,12 @@ A first boot showed that `BindingLabels`' physical-key lookup prints `ERROR: Not
 | Drift and held sticks never bind | An axis must read below 0.2 during the capture before a pull past 0.6 counts; axes off-centre at the start stay unarmed | pass (reading); feel not verified |
 | Triggers | Pull is the 0 to 1 value; a −1-at-rest backend is detected and rescaled; only +1 is proposed | pass (reading); no such backend exercised |
 | Escape, accept and cancel can be captured | While listening nothing is treated as cancel except a click on Cancelar and the other device's `ui_cancel` | pass (reading) |
-| A candidate's release never confirms it | Review buttons take input only after every key and button is released and an axis candidate is centred; the GUI activates on a fresh press/release | pass (reading) |
+| A candidate's release never confirms it | Review buttons take input only after every key and button is released and an axis candidate is centred (a refused axis of the other device is not waited for); the GUI activates on a fresh press/release | pass (reading) |
 | Chords and standalone modifiers | A modifier waits: the next key or button makes a chord (Shift+Tab); its release alone binds it (Left Shift, with location) | pass (reading) |
 | 10 s timeout returns unchanged | Deadline per capture and per review; the draft is only changed by Usar, Trocar or Substituir | pass (reading) |
 | Nothing leaks behind a dialog | `Interface._input` marks consumed events handled before the GUI, `Interface._unhandled_input` and the Session; `ui_cancel` is consumed as the dialog's cancel; `Overlays` blocks the mouse; focus is trapped among the dialog's buttons | pass (reading) |
 | Focus returns to the invoker | The first dialog of a chain remembers the focused control; closing gives it focus back, or the active tab | pass (reading) |
-| Substituir disabled when a required action would lose its last binding | Trial `assign(RESOLUTION_REPLACE)` on a copy; disabled buttons also lose focus mode | pass (reading) |
+| Substituir disabled when a required action would lose its last binding, or a fixed binding would move | Trial `assign(RESOLUTION_REPLACE)` on a copy; the message names the reason (required, fixed, or a generic refusal); disabled buttons also lose focus mode | pass (reading) |
 | Layout-space conflicts (F16-02's limit) | `pause` versus menu-only actions compared through `keyboard_get_keycode_from_physical` for character keys; Substituir only | pass (reading); non-QWERTY not exercised |
 | Draft until Aplicar; failure keeps the draft and the live map | Every edit is on the draft; `Settings.apply_input_bindings` saves before installing and changes nothing on failure; ActionHelp shows "Não foi possível salvar os controles." | pass (reading); failure path not exercised |
 | Confirmation on the new bindings; timeout, disconnect, focus loss and hiding revert | `ConfirmBindingsDialog` opens after the profiles are live; `_process`, `note_joypad_connection`, `NOTIFICATION_APPLICATION_FOCUS_OUT` and the hide handler call `revert_input_bindings` | pass (reading) |
@@ -126,7 +126,7 @@ A first boot showed that `BindingLabels`' physical-key lookup prints `ERROR: Not
 3. Capture ordinary keys, Escape, Enter, Space, Left Shift and Left Ctrl alone, Shift+Tab, Mouse 1 to 5, the wheel, D-pad, face buttons, RB/LB, both sticks in each direction and both triggers. Each shows its review, then its name or glyph in the row.
 4. Hold the opening button, hold a trigger, and rest a drifting stick while a capture opens: none of them binds. Let a capture run out: after 10 s nothing changed.
 5. Cancel a capture with Cancelar (mouse), with Escape on the Controle tab and with B on the keyboard tab; while listening, Escape on the keyboard tab is captured, not a cancel.
-6. Conflicts: K on Bomba (Trocar gives Fixar alvo the L; Substituir leaves Fixar alvo blank), Escape on Bomba and W on Recuar (Substituir disabled: Pausa and Avançar are required). Cancelar changes nothing.
+6. Conflicts: K on Bomba (Trocar gives Fixar alvo the L; Substituir leaves Fixar alvo blank), Escape on Bomba and W on Recuar (Substituir disabled: Pausa and Avançar are required), and Numpad Enter on Pausa (both disabled; the message says it is fixed on Confirmar). Cancelar changes nothing.
 7. Redefinir on a remapped row, and on a row whose default another action now holds (refused, with the holder named). Restaurar esta aba on each tab.
 8. Change Confirmar on the controller to X and press Aplicar: the confirmation runs on X; navigate to Manter controles and press X. Repeat and press nothing: after 10 s the previous controls return without a restart.
 9. During the confirmation: unplug the controller, and Alt+Tab away. Both revert.

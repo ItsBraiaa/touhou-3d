@@ -1,5 +1,16 @@
 # Handoff Log
 
+## 2026-09-24 — Claude (trunk) — F16-03: review fixes
+State: CODE_READY
+Files: `scripts/ui/controls_screen.gd`; `docs/engineering/settings.md` (only the section "F16 capture workflow and prompts (F16-03)"); `docs/validation/controls-expansion.md` (only the F16-03 section).
+Change:
+- **A refused axis no longer stalls the review.** On the keyboard tab, a pad stick pushed past 0.6 was refused with a hint but stayed the candidate axis. A key pressed next then waited in the review for that stick to centre, so a stick held or drifting at 0.2 or more ran the capture out to "O tempo acabou; nada mudou." `_listen` now clears the candidate axis when it refuses the other device's input.
+- **Substituir's refusal names its real reason.** The conflict dialog always said Substituir would leave a required action unbound. It now says so only when the trial reports that. A candidate fixed on a conflicting action (Numpad Enter on `ui_accept`, met by Pausa, for example) reads "Substituir não é possível: este comando é fixo em Confirmar.", and any other refusal reads "Substituir não é possível para este comando."
+Why: review findings on F16-03.
+Verification: no tests or drivers (F16 rule). Both fixes were verified by reading; the gate runs at land.
+Action required by trunk: none.
+Action required by Astra: review the two new Portuguese dialog lines with the rest of F16-03's copy.
+
 ## 2026-09-24 — Claude (trunk) — F16-03: rebinding workflow, conflicts, confirmation and live prompts [shared]
 State: CODE_READY
 Files: `scripts/ui/controls_screen.gd` (new) and its `.uid`; `scripts/ui/interface.gd`; `scripts/ui/menu_controller.gd`; `scripts/ui/input_device_state.gd`; `scripts/ui/options_screen.gd` (doc comments only); `scenes/ui/controls.tscn` [shared] (wiring only, below); `docs/engineering/settings.md` (only the section "F16 capture workflow and prompts (F16-03)"); `docs/validation/controls-expansion.md` (only the F16-03 section); `.scratch/controls-expansion/issues/03-rebind-workflow-and-prompts.md` (Status, Work, Outcome); `docs/engineering/ROADMAP.md` (the F16-03 row). `scenes/ui/options.tscn` is unchanged.
