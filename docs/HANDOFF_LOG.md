@@ -15,6 +15,29 @@ Action required by <other agent>: <what they must do, or "none">
 
 ---
 
+## 2026-09-23 23:27 — Claude (trunk) — F10-03: Retry from Checkpoint and Restart flow
+State: CODE_READY
+Files:
+- Edited: `scripts/session/game_session.gd` (`_spawn_player`, `_retry`, the Defeat param, `_flight_volume`), `scripts/progression/stage_director.gd` (`retry_from_checkpoint`, `get_respawn_transform`, `retry_location_name`).
+- New: `docs/validation/stage-01-retry-defeat.png`, `stage-01-retry-respawn.png`.
+- Docs: `docs/validation/stage-01-progression.md` ("Retry and Restart"), `docs/engineering/stage-director.md` ("Retry and Restart"), `docs/engineering/damage-pickups.md` (the Defeat and Retry lines), `docs/GUIDE.md` (the Section 6 `game_session.gd` and `stage_director.gd` rows, the Section 7 "Player defeated" row, a Section 8 note), the ROADMAP F10-03 row, and the ticket.
+
+No scene file changed.
+
+Change:
+- **Retry resumes in place from the latest Checkpoint.** Every runtime enemy, Pickup and hostile Projectile of the failed Attempt goes, and queued Waves are cancelled. The Snapshot restores full resources, Power, score, Graze, bombs used and Clear Time. The Gates and PortalLinks are rebuilt, and a new ship with no Target Lock appears at the Checkpoint's `Respawn`, facing -Z.
+- **Before any Checkpoint, Retry is Restart.** Restart still reloads the stage and discards every Checkpoint.
+- **Defeat names the Checkpoint:** `Último checkpoint · CP1-A`, or `Início da fase` before any.
+- **Tests.** None added (sprint rule). A verifier agent drove the game, including the windowed die-after-CP1-A → Retry pass; a reviewer agent found no defects.
+
+Why: F10-03, the last Stage 1 flow ticket before the boss (F12-03).
+Action required by Astra:
+1. Give CP1-A and CP1-B Portuguese place names in `content/stages/stage_01/cp1_*.tres` `display_name` when you like. Defeat shows them as written.
+2. **Design question (for you or Braia).** Retry removes every runtime Pickup, including rewards left uncollected before the Checkpoint (S1-02's five Power Pickups, S1-03's Shield Pickup). Their Encounters stay rewarded, so those Pickups never return. STAGE_DESIGN says to remove pickups "from the failed segment". If the earlier ones should come back, say so: the fix is small and inside the Director.
+3. The CP1-B `Respawn` (0, 37, -454) touches S1-06's ExitVolume (Z -459..-455) by 0.05 on the first frame. It is harmless, because S1-06 is complete after the restore. Moving the marker 0.1 toward +Z would give a clean spawn.
+
+Action required by trunk F11-01: `menu_controller.gd:144` calls the Defeat `checkpoint` param an id; it is the Checkpoint's `display_name`.
+
 ## 2026-09-23 23:05 — Claude (trunk) — F10-02: Gate and Checkpoint adapters on Stage 1 [shared]
 State: CODE_READY
 Files:

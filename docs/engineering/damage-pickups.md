@@ -45,9 +45,9 @@ Made once in `GameSession._ready`, beside the `RunState` ones. `_combat_state` l
 `_on_player_defeated()`, once per life (the core's guarantee):
 
 1. `_set_paused(true)`: the tree stops (the stage, enemies, Projectiles, the ship), `RunState` stops Active Time, the ship's controls go off, and `CombatState` pauses. The signal arrives inside the ProjectileSystem's physics step; pausing there is allowed, unloading is not, and nothing is unloaded.
-2. `interface.push_overlay(ScreenRouter.DEFEAT, {"checkpoint": ""})`, so `Layout/RetryLocation` reads `Início da fase`.
+2. `interface.push_overlay(ScreenRouter.DEFEAT, {"checkpoint": location})`, where `location` is `StageDirector.retry_location_name()` since F10-03: `""` before any Checkpoint, so `Layout/RetryLocation` reads `Início da fase`, or the latest Checkpoint's name.
 
-With Defeat on top, `pause` is ignored (the Session acts on it only over the HUD or Pause) and `ui_cancel` is `back_refused`. `retry` calls `_restart_stage()` until F10-03 adds Checkpoints (PLANEJAMENTO Section 6: before any intermediate Checkpoint, Retry restarts the stage): it unpauses, restarts `RunState`, calls `_combat_state.start(...)`, reloads the stage and the ship, begins an Attempt and shows the HUD. `return_to_menu` from Defeat unloads everything and shows the main menu.
+With Defeat on top, `pause` is ignored (the Session acts on it only over the HUD or Pause) and `ui_cancel` is `back_refused`. `retry` resumes from the latest Checkpoint since F10-03 ([stage-director.md](stage-director.md) "Retry and Restart"). Before any Checkpoint it calls `_restart_stage()` (PLANEJAMENTO Section 6): it unpauses, restarts `RunState`, calls `_combat_state.start(...)`, reloads the stage and the ship, begins an Attempt and shows the HUD. `return_to_menu` from Defeat unloads everything and shows the main menu.
 
 ## Bomb
 
@@ -118,7 +118,7 @@ Spawner id convention (F10-01): `&"<encounter_id>/power_<n>"` and `&"<encounter_
 - **Accept.** Sets the accepted flag, `set_deferred("monitoring", false)`, `set_physics_process(false)`, emits `accepted`, then `queue_free()`. A second attempt returns at once.
 - **Attraction.** While not accepted, takeable and within `attraction_range`, it moves toward `player.global_position` by `attraction_speed * delta` with `Vector3.move_toward`, so it never overshoots. A Power Pickup is takeable while `CombatState` is live; a Shield Pickup only while the player also has no Shield, so it never trails a shielded ship (Claude's proposal).
 - **Pause.** It belongs under `WorldRoot` or the stage's `RuntimeActors`, which are PAUSABLE, so it freezes with the tree; `CombatState` also refuses while paused or defeated. A ship still touching it when play resumes takes it on the first running tick.
-- **A replaced ship.** Each tick it checks the `player` with `is_instance_valid` and does nothing while it is gone, so a respawned ship needs a new `setup` (F10-03's concern if Pickups outlive the ship).
+- **A replaced ship.** Each tick it checks the `player` with `is_instance_valid` and does nothing while it is gone, so a respawned ship needs a new `setup` (since F10-03 a Retry removes every runtime Pickup with the ship).
 
 ### Dev prefabs
 
@@ -181,7 +181,7 @@ The sprint's no-new-tests rule (2026-09-23) replaced the ticket's fourteen scene
 - **No scene tests** (sprint rule); `validate_combat.gd` is the evidence.
 - **Pausing mid-blink.** `_process` stops while the tree is paused, so `PlayerController` shows `VisualRoot` on `NOTIFICATION_PAUSED`; the blink resumes with the tree.
 - **Every Core hit is preceded by a Graze** a few ticks earlier on a head-on path (weapon-rendering.md Open issues); a ruling for D-07 Part B or a field change, not a Session filter.
-- **Retry restarts the stage** until F10-03; the Defeat screen always names `Início da fase`.
+- **Retry** resumes from the latest Checkpoint since F10-03, and restarts the stage before any; the Defeat screen names the Checkpoint ([stage-director.md](stage-director.md) "Retry and Restart").
 - **Bomb damage never empties a boss Phase** is F12's to prove (BossMachine caps overflow); `bomb_damage` must stay below the smallest Phase health.
 - **Swap pending: D-02** (the blast visual).
 - **A target the Bomb kills stays registered for the rest of that tick**, so a player shot in the same tick can damage it again: enemy adapters (F9-02, F12-02) must ignore damage once defeated (reviewer note).
