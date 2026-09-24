@@ -35,7 +35,7 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | | | | 03 run-state-core | core | yes | — | done |
 | | | | 04 game-session-start-pause-quit | integration | no | — | done (menu-to-flight flow scripted on keyboard and gamepad; physical-device pass owed; Stage 2 wired too) |
 | F3 | Settings | `settings` | 00 plan | docs | no | — | done (cut, then reinstated by the sprint plan, 2026-09-23) |
-| | | | 01 settings-core-and-configfile | core | yes | oc-b | todo |
+| | | | 01 settings-core-and-configfile | core | yes | oc-b | done (2026-09-23: `Settings` core and explicit ConfigFile persistence landed; no tests per sprint rule) |
 | | | | 02 options-screen-binding | adapter | no | path | todo |
 | | | | 03 input-device-mode-and-controller-disconnect | adapter | no | path | todo |
 | | | | 04 settings-to-camera-wiring | integration | no | trunk (part 1: path) | todo |

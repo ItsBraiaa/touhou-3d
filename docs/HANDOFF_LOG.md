@@ -15,6 +15,13 @@ Action required by <other agent>: <what they must do, or "none">
 
 ---
 
+## 2026-09-23 22:20 — OpenCode (oc-b) — F3-01 Settings core and ConfigFile persistence
+State: CODE_READY
+Files: `scripts/settings/settings.gd`, `docs/engineering/settings.md`, `docs/engineering/README.md`, `docs/engineering/ROADMAP.md`, `.scratch/settings/issues/01-settings-core-and-configfile.md`, `docs/HANDOFF_LOG.md`
+Change: Added the Node-free `Settings` Rules Core with GUIDE Section 14 defaults, typed getters, per-field sanitising and validation, idempotent `changed` signal emission, deep `capture`/`restore`, explicit ConfigFile load/save, corrupt-file fallback and static volume helpers. The new settings module contract documents the audio/display/controls file layout and invariants. No tests were written per the sprint rule.
+Why: F3-01 supplies F3-02 with the validated settings state and persistence boundary without coupling the core to buses, windows, devices or camera behavior.
+Action required by Astra: none. For path F3-02: construct `Settings`, call `load_file()` once at startup, apply the typed getters to widgets and call `save_file()` only after explicit user changes.
+
 ## 2026-09-23 22:11 — OpenCode (oc-b) — F8-03 Snapshot and CheckpointStore
 State: CODE_READY
 Files: `scripts/progression/snapshot.gd`, `scripts/progression/checkpoint_store.gd`, `docs/engineering/progression-core.md`, `docs/engineering/README.md`, `docs/engineering/ROADMAP.md`, `.scratch/progression-core/issues/03-snapshot-capture-restore.md`, `docs/HANDOFF_LOG.md`
