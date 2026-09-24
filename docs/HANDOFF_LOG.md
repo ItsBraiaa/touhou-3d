@@ -2,9 +2,9 @@
 
 ## 2026-09-24 — OpenCode (oc-a) — F15-09 HUD edge cues
 State: DELIVERED
-Files: `scripts/ui/hud.gd`, `docs/engineering/ROADMAP.md`.
+Files: `scripts/ui/hud.gd`, `tests/scene/test_hud_contract.gd` (obsolete expectation only), `docs/engineering/ROADMAP.md`.
 Change: The locked target marker now remains visible when its projection is off-screen or behind the camera, clamped inside the screen edge and rotated toward the target. Hud builds a subtle full-screen boundary vignette in code and connects the bound ship's `edge_proximity_changed` through `Targeting`'s parent, with a short fade tween. No `hud.tscn` or Session edit.
-Verification: `tools/lane.ps1 land` and the short headless boot are the gate; no tests added (sprint rule).
+Verification: The existing HUD contract expectation for behind-camera hiding was minimally updated because F15-09 intentionally replaces it with an edge marker; no new test was added. `tools/lane.ps1 land` is the gate.
 Action required by trunk: the pre-existing behind-camera marker expectation is superseded by F15-09 behavior if an acceptance test still asserts hiding it.
 
 ## 2026-09-24 — OpenCode (oc-a) — F15-06 checkpoint glow and Gate fade
