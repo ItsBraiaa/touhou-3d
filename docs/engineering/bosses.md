@@ -149,6 +149,10 @@ The health values are part 1's proposal for the ticket's target of about 25, 25 
 - **Defeat and score.** The final Phase's depletion clears hostile fire (the controller), then the Director emits `boss_defeated(&"lantern_guardian")`, adds 1,000 to the Run (PLANEJAMENTO Section 4) and reports the defeat to the `EncounterMachine`, which completes S1-07 and so clears the stage, once. The ExitVolume never completes S1-07: its `requires_exit` is false and `ALL_REQUIRED_ENEMIES` ignores the exit.
 - **The dev stand-in is gone.** F10-01's `lantern_guardian` → dev Sentry entries in `actor_scenes` and `enemy_definitions` were removed from `stage_01.tscn`.
 
+## Tempest Sentinel (F12-06)
+
+S2-04 uses `scenes/enemies/tempest_sentinel.tscn` with the standard BossController references and Flying_Idle, Punch, Yes, Death clips. `stage_02.tscn` maps kind `tempest_sentinel` to that scene and `content/bosses/tempest_sentinel.tres` through `boss_definitions`. The final Phase reports one defeat to the existing Director boss branch, which awards 500, drops S2-04's Shield reward and opens its Gate. `Hud.show_boss(..., 2)` places the two visible bars at the offsets authored in `hud.tscn`; a later three-Phase boss restores their original positions. The attack names and numeric content remain D-06 tuning proposals.
+
 ## Dependencies
 
 `PatternDefinition` and `PatternEmitter` (F5-04); `ProjectileSpawn` (F5-01). The Attempt's `RandomNumberGenerator` comes from the Director through `BossController.spawn_setup`. The controller needs the `ProjectileSystem` (F6-02), `EnemyActor.threat_side` (F9-02), and is found by `Targeting` (F1-04) through `targetable` and its `HitVolume`.

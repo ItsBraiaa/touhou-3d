@@ -1,6 +1,6 @@
 # F12-06 Tempest Sentinel miniboss in S2-04
 
-Status: todo
+Status: done
 Type: integration
 parallel-safe: no
 Depends on: F12-05, F12-02, F12-03, D-04
@@ -109,6 +109,10 @@ This ticket writes no GDScript. The Director's boss branch and the Session's bos
 - One commit, `bosses: [shared] integrate the Tempest Sentinel in S2-04`, then the lane's land step from `docs/engineering/SPRINT.md`.
 
 ## Handoff notes for Astra
+
+## Outcome
+
+2026-09-24, Astra (sol), part 2: attached BossController to the existing Tempest Sentinel root, wired its four animation clips and hit/emitter references, and replaced only the S2-04 Sentry stand-in in Stage 2's Director exports. The two Phase HUD bars now use D-07's authored full-width offsets. Content and Attack names remain dev proposals for D-06 pass 3. No new tests were written under the sprint rule; `lane.ps1 land` is the gate.
 
 `tempest_sentinel.tscn` gained only its root script and exports. Keep its node names. Tune `tempest_sentinel.tres` and `sentinel_*.tres` (D-06) and drop `metadata/dev` once you have reviewed them. `Clarão Carregado` and `Leques do Vendaval` are proposals, because STAGE_DESIGN names no miniboss Attack: approve them, or send Claude the names you want in the handoff log.
 

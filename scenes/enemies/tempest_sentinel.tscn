@@ -2,6 +2,7 @@
 
 [ext_resource type="PackedScene" path="res://assets/models/enemies/Goleling.gltf" id="1_7adg6"]
 [ext_resource type="Texture2D" path="res://assets/models/enemies/Goleling_Atlas_Monsters.png" id="2_60yku"]
+[ext_resource type="Script" path="res://scripts/enemies/boss_controller.gd" id="3_boss_controller"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_yvh6d"]
 resource_name = "Storm body tint"
@@ -852,7 +853,16 @@ _data = {
 [sub_resource type="SphereShape3D" id="SphereShape3D_3rq2s"]
 radius = 2.5
 
-[node name="Enemy" type="Node3D" unique_id=1653328516]
+[node name="Enemy" type="Node3D" unique_id=1653328516 node_paths=PackedStringArray("visual_root", "hit_volume", "emitter", "animation_player")]
+script = ExtResource("3_boss_controller")
+visual_root = NodePath("VisualRoot")
+hit_volume = NodePath("HitVolume")
+emitter = NodePath("Emitters/Main")
+animation_player = NodePath("VisualRoot/Model/AnimationPlayer")
+idle_clip = &"Flying_Idle"
+step_clip = &"Punch"
+phase_clip = &"Yes"
+defeat_clip = &"Death"
 
 [node name="VisualRoot" type="Node3D" parent="." unique_id=1775686539]
 

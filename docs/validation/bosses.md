@@ -43,6 +43,10 @@ refusals and the Lantern Guardian content failure below.
 depleted. Hostile count 0 (the clear), the boss panel with Phase 1 empty and dimmed and
 Phases 2 and 3 full, the cue "Leque de Teste", and the readout's `boss phase 2 of 3`.
 
+## Tempest Sentinel (F12-06 part 2)
+
+The existing S2-04 marker and reward now select the real Tempest Sentinel prefab and two-Phase definition. The prefab exposes a 2.5-unit hit sphere centered at `(0, 6.9, 0)`, its emitter at `(0, 7.1, -1.7)`, and all four D-04 model clips. The HUD code applies D-07's two-bar offsets. A 300-frame headless main-scene launch exited zero, but sandboxed `user://` logging and certificate access produced environmental `ERROR:` lines; the lane landing gate is the authoritative verification. A controlled fight through both Phases is still owed to the game pass.
+
 ## Not verified here
 
 - The Session and Director wiring (F12-03), score awarding and S1-07.

@@ -1,5 +1,12 @@
 # Handoff Log
 
+## 2026-09-24 — Astra (sol) — Tempest Sentinel (F12-06 part 2) [shared]
+State: CODE_READY
+Files: `scenes/enemies/tempest_sentinel.tscn`; `scenes/stages/stage_02.tscn`; `scripts/ui/hud.gd`; F12-06 ticket; ROADMAP, GUIDE, bosses contract and validation note.
+
+The S2-04 stand-in now uses the two-Phase Tempest Sentinel definition and its authored boss prefab. BossController references VisualRoot, HitVolume, Emitters/Main and the model AnimationPlayer; clips are Flying_Idle, Punch, Yes and Death. HUD shows the two authored bars at 16–307 and 313–604, restoring the original three-bar positions on the next three-Phase boss. Content and Attack names remain dev proposals for D-06 pass 3. No new tests under the sprint rule.
+
+
 ## 2026-09-24 — OpenCode (oc-a) — D-08 enemy visual duplicate parts [shared]
 State: dev
 Files: `scenes/enemies/visuals/spirit_lume.tscn`; `spirit_twilight.tscn`; `sentry_lantern.tscn`; `sentry_seal.tscn`; `tools/build_enemy_visuals.gd`; `docs/ENEMY_VISUAL_HANDOFF.md`; `docs/validation/enemy-visuals.md`; `docs/engineering/ROADMAP.md`; D-08 ticket.

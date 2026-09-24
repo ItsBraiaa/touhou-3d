@@ -13,6 +13,8 @@
 [ext_resource type="Script" path="res://scripts/progression/checkpoint.gd" id="11_checkpoint"]
 [ext_resource type="Script" path="res://scripts/progression/seal.gd" id="12_seal"]
 [ext_resource type="Material" path="res://scenes/dev/portal_light_resolved.tres" id="13_resolved"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/tempest_sentinel.tscn" id="14_tempest"]
+[ext_resource type="Resource" path="res://content/bosses/tempest_sentinel.tres" id="15_tempest_definition"]
 
 [ext_resource type="Shader" path="res://assets/environment/stage_02/terrain.gdshader" id="terrain_shader"]
 
@@ -1055,14 +1057,16 @@ stage_definition = ExtResource("2_stage_definition")
 actor_scenes = Dictionary[StringName, PackedScene]({
 &"spirit": ExtResource("3_spirit"),
 &"sentry": ExtResource("4_sentry"),
-&"tempest_sentinel": ExtResource("4_sentry"),
+&"tempest_sentinel": ExtResource("14_tempest"),
 &"storm_guardian": ExtResource("4_sentry")
 })
 enemy_definitions = Dictionary[StringName, ExtResource("5_enemy_definition")]({
 &"spirit": ExtResource("6_spirit_definition"),
 &"sentry": ExtResource("7_sentry_definition"),
-&"tempest_sentinel": ExtResource("7_sentry_definition"),
 &"storm_guardian": ExtResource("7_sentry_definition")
+})
+boss_definitions = Dictionary[StringName, ExtResource("15_tempest_definition")]({
+&"tempest_sentinel": ExtResource("15_tempest_definition")
 })
 power_pickup_scene = ExtResource("8_power_pickup")
 shield_pickup_scene = ExtResource("9_shield_pickup")
