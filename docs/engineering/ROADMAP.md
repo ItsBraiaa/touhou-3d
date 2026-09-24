@@ -51,7 +51,7 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | F6 | Weapon and rendering | `weapon-rendering` | 00 plan | docs | no | — | done (one-pass planning) |
 | | | | 01 rendering-spike | spike | no | — | cut (folded into 02 by the sprint plan: MultiMesh by default, benchmark inside 02) |
 | | | | 02 projectile-system-adapter | adapter | no | trunk | done (2026-09-23: MultiMesh ProjectileSystem on ProjectileRoot, capacity 2048; 3000 Projectiles at 1118 FPS with other lanes running; swap pending D-02) |
-| | | | 03 weapon-model-and-player-weapon | core+adapter | no | trunk (part 1: oc-a) | todo |
+| | | | 03 weapon-model-and-player-weapon | core+adapter | no | trunk (part 1: oc-a) | done (2026-09-23: WeaponModel by oc-a, PlayerWeapon, dev Familiars and target dummies by trunk; swap pending D-02) |
 | F7 | Damage, bomb, pickups | `damage-pickups` | 00 plan | docs | no | — | done (one-pass planning) |
 | | | | 01 hit-to-combat-state-and-defeat | integration | no | trunk | done (2026-09-23: hits, Graze, Invulnerability blink and Defeat wired in GameSession; `tools/validate_combat.gd` COMBAT_OK; Retry restarts the stage until F10-03) |
 | | | | 02 bomb-clear-and-invulnerability | integration | no | trunk | todo |
@@ -78,7 +78,7 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | | | | 01 boss-machine-core | core | yes | path | done (no unit tests, by the sprint rule; transition cap 0.75 s from D-07 ruling 1) |
 | | | | 02 boss-controller-adapter | adapter | no | path | todo |
 | | | | 03 lantern-guardian-in-s1-07 | integration | no | trunk (part 1: oc-a) | todo |
-| | | | 04 stage-02-content-draft | content | yes | oc-b | todo |
+| | | | 04 stage-02-content-draft | content | yes | oc-b | done (2026-09-23: dev draft of `content/stages/stage_02/` landed, validates and matches the scene; Astra tunes values in D-06) |
 | | | | 05 stage-02-director-integration | adapter | no | sol | todo |
 | | | | 06 tempest-sentinel-miniboss | integration | no | sol | todo |
 | | | | 07 storm-guardian | integration | no | sol | todo |

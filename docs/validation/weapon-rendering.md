@@ -75,3 +75,46 @@ The folded F6-01 benchmark is in
   `reset_to`.
 - Enemy hit spheres from real actors (F9-02); the `register_target` path was exercised
   only by review and by the field's own contract.
+
+# PlayerWeapon, Familiars and target dummies — 2026-09-23 (F6-03 part 2)
+
+## Automated
+
+`tools/test.ps1`: 225 passed, 0 failed, no `SCRIPT ERROR`; no test was added or changed
+(the sprint's no-new-tests rule).
+
+## Scripted pass in the arena harness
+
+A throwaway `SceneTree` script (deleted after use) loaded `scenes/dev/arena_harness.tscn`
+with the dev spray stopped and drove the real actions (`fire`, `lock_target`,
+`next_target`, `camera_left`, the dev keys 1 to 3 and `bomb` pushed as events). It
+printed `WEAPONCHECK_OK` headless and then in a 1280 × 720 window, with no `SCRIPT ERROR`
+or `ERROR:` line.
+
+| Check | Result |
+| --- | --- |
+| Holding `fire` 30 ticks at Power Level 1 | 5 shots (0.1 s cadence); no Familiars |
+| Orbit 90° with `camera_left`, then fire | Shots travel along the view: (-0.994, -0.109, 0.001) against the view (-0.988, -0.156, 0.000), yaw 90° |
+| Lock `DummyRight` with `lock_target` and `next_target`, fire 60 ticks | 10 hits on the dummy |
+| Key 2 | Power Level 2 on the HUD, two Familiars shown |
+| Fire 30 ticks at Power Level 2, then 3 (lock released) | 9 and 13 shots, against 5 at level 1 |
+| Familiars' collision objects | 0 |
+| Fire 90 ticks at the far wall | Peak 27 player shots in flight, none ever past a wall |
+| Three `bomb` presses, each held 30 ticks | 2 Bombs spent from 2, then none: one per press |
+
+Before the Aim Assist reading in `weapon-rendering.md` ("Forward"), the locked dummy took
+0 hits: measured from the camera's own axis, the Muzzle's parallax put it 12.4° off,
+outside the 10° main cone.
+
+The reviewer then found two defects, fixed before landing: a close locked target could put the aim point behind the Muzzle and send shots steeply up (the point now stays 8 units ahead of each origin, at the target's depth along the view), and a Familiar scene with a collision object at its root passed the check. A headless rerun after the fixes gave the same numbers, `WEAPONCHECK_OK`; the screenshot comes from the run before them.
+
+![Familiars](weapon-rendering-familiars.png)
+
+`weapon-rendering-familiars.png`: Power Level 3 with both Familiars beside the ship and
+the main and Familiar shots streaming ahead; the HUD shows Power Level 3 with the full
+bar, and the readout the three dummies (`DummyRight 10`).
+
+## Not verified
+
+- Holding J, K and L on a physical keyboard, or the pad; every input was synthetic.
+- The dummies' flash, beyond the hit count.

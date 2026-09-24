@@ -22,6 +22,37 @@ Change: Added the AudioController adapter: limiter-gated SFX pool on `SFX`, cros
 Why: F13-02; the playback half of the audio feature.
 Action required by Astra: none now. After the D-01 listening pass, send Claude the event-to-file table and volume proposals; the `EVENT_RULES` intervals, caps and priorities are Claude's proposals for you to tune.
 
+## 2026-09-23 21:09 — OpenCode (oc-b) — F12-04 Stage 2 content draft (dev) [shared]
+State: dev
+Files: `content/stages/stage_02/stage_02.tres`, `s2_01.tres` … `s2_07.tres`, `cp2_a.tres`, `cp2_b.tres`, `docs/engineering/progression-core.md`, `docs/engineering/ROADMAP.md`, `.scratch/bosses/issues/04-stage-02-content-draft.md`, `docs/HANDOFF_LOG.md`
+Change: Transcribed STAGE_DESIGN's Stage 2 table into typed `.tres` Definitions that validate: seven Encounters in route order with the `next_id` chain, S2-01 with `requires_exit`, S2-03 as OBJECTIVES over `S2-03-Seal1..3` with its three ON_ENTRY guard waves, gates `Gate_S2_01` to `Gate_S2_05`, CP2-A guarding S2-04 and CP2-B guarding S2-07, 7 POWER and 2 SHIELD Pickups, and the new kinds `tempest_sentinel` and `storm_guardian`. Every file is flagged `metadata/dev = true`. The one-off headless scratch script (not committed) also cross-checked every marker, reward origin, gate and checkpoint against `scenes/stages/stage_02.tscn`, including the Seals' `seal_id` and `guard_spawn` metadata; no tests were written per the sprint rule.
+Why: F12-05 loads `stage_02.tres`; Astra tunes the values in D-06 while the approved structure stays.
+Action required by Astra: these files are yours. Free to change: the AFTER_PREVIOUS_WAVE delay (draft proposal 1.0 s) and the checkpoint `display_name`s (currently `"CP2-A"`/`"CP2-B"`). Must stay: the route order and completion conditions, the markers, 7 Power and 2 Shield Pickups, the five Gates and the resume points. Delete `metadata/dev` from a file once you have reviewed it.
+
+## 2026-09-23 21:07 — Claude (trunk) — F6-03 part 2: PlayerWeapon, Familiars, target dummies; closes F6-03 [shared]
+State: CODE_READY
+Files:
+- `scripts/combat/player_weapon.gd` (Astra's placeholder replaced by `PlayerWeapon`), `scripts/player/player_controller.gd`, `scripts/session/game_session.gd`.
+- `scenes/player/player_ship.tscn` **[shared]**: only the `PlayerShip` `weapon` reference and the `Weapon` exports `muzzle`, `familiar_anchors`, `camera_rig`, `familiar_scene`; no transform, mesh, shape, layer or monitoring change.
+- New: `scenes/dev/familiar.tscn`, `scenes/dev/target_dummy.gd` and `.tscn`, `docs/validation/weapon-rendering-familiars.png`.
+- Edited: `scenes/dev/arena_harness.gd` and `.tscn`.
+- Docs: `docs/engineering/weapon-rendering.md` ("WeaponModel", "PlayerWeapon contract", "TargetDummy"), `docs/validation/weapon-rendering.md`, `docs/GUIDE.md` (Section 5 Weapon line; Section 6 `player_weapon.gd` and `player_controller.gd` rows; Section 13 "Familiar anchors"), and the ROADMAP F6-03 row.
+
+Change:
+- **The ship shoots.** Holding `fire` spawns player Projectiles at the `WeaponModel` cadence (oc-a's part 1) from `Muzzle`, and from Power Level 2 also from both Familiar anchors, rotated by the camera yaw.
+- **Aim Assist.** Shots aim at the view's center point at the lock's depth and are bent onto the locked `HitVolume` inside each shot's cone.
+- **Familiars.** Two dev Familiars orbit the anchors from Power Level 2.
+- **Bomb button.** It is tracked from events and fed to `CombatState.update_bomb_input()`: one press spends one Bomb.
+- **Controls.** `PlayerController` gains the required `weapon` export, and `set_controls_enabled()` also turns fire off and on, so pause and Defeat stop firing.
+- **Dev harness.** Three `TargetDummy`s count hits and flash; keys 1 to 3 set the Power Level.
+- **Tests.** None were changed or added (sprint rule). A harness run gave `WEAPONCHECK_OK` headless and windowed.
+
+Why: F6-03 part 2, which closes the ticket.
+
+Action required by Astra:
+- **Tuning.** Shot values, cadences and Aim Assist cones are Inspector exports on `PlayerShip/Weapon`, Claude's proposals.
+- **Swap pending: D-02.** A final Familiar scene must have a `Node3D` root and no `CollisionObject3D` anywhere (the weapon refuses one that does).
+- **HitVolume placement.** Keep each target's `HitVolume` centered on its visible body, because Aim Assist aims at it.
 ## 2026-09-23 21:05 — Astra (sol) — Combat visuals (D-02) [shared]
 State: SCENE_READY
 Files: `scenes/combat/visuals/*`, `assets/combat/*`, `assets/ui/menu_theme.tres`, `tools/validate_combat_visuals.gd`, `docs/validation/combat-visuals.md`, `docs/validation/combat-visuals.log`, `docs/validation/combat-visuals.png`, `docs/validation/menus-options-entry.png`, D-02's ticket, and the D-02 ROADMAP row.

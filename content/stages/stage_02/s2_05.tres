@@ -1,0 +1,32 @@
+[gd_resource type="Resource" script_class="EncounterDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/definitions/reward_definition.gd" id="1_6ur60"]
+[ext_resource type="Script" path="res://scripts/definitions/encounter_definition.gd" id="2_0chj6"]
+[ext_resource type="Script" path="res://scripts/definitions/wave_definition.gd" id="3_d20f2"]
+
+[sub_resource type="Resource" id="Resource_sos12"]
+script = ExtResource("1_6ur60")
+count = 2
+origin_marker = NodePath("RewardOrigin")
+
+[sub_resource type="Resource" id="Resource_e0foj"]
+script = ExtResource("3_d20f2")
+spawn_markers = Array[NodePath]([NodePath("Spawns/Wave1_Spirit1"), NodePath("Spawns/Wave1_Spirit2"), NodePath("Spawns/Wave1_Sentry1")])
+enemy_kinds = Array[StringName]([&"spirit", &"spirit", &"sentry"])
+
+[sub_resource type="Resource" id="Resource_pn1fd"]
+script = ExtResource("3_d20f2")
+spawn_markers = Array[NodePath]([NodePath("Spawns/Wave2_Spirit1"), NodePath("Spawns/Wave2_Spirit2"), NodePath("Spawns/Wave2_Sentry1")])
+enemy_kinds = Array[StringName]([&"spirit", &"spirit", &"sentry"])
+activation = 1
+delay = 1.0
+
+[resource]
+script = ExtResource("2_0chj6")
+id = &"S2-05"
+next_id = &"S2-06"
+completion = 1
+waves = Array[ExtResource("3_d20f2")]([SubResource("Resource_e0foj"), SubResource("Resource_pn1fd")])
+rewards = Array[ExtResource("1_6ur60")]([SubResource("Resource_sos12")])
+gate_id = &"Gate_S2_05"
+metadata/dev = true

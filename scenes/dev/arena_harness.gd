@@ -9,8 +9,10 @@ extends Node3D
 ## `next_target`, and the ship hands the result to its [CameraRig] (F1-04). The combat HUD
 ## shows a harness-owned [CombatState] and marks the locked target (F4-02). A
 ## [ProjectileSystem] of its own carries the rings a [DevSpray] fires, and the readout
-## counts them, with the hits and Grazes on the ship (F6-02). Dev only: it
-## is never loaded by `scenes/main.tscn` and holds no gameplay rule.
+## counts them, with the hits and Grazes on the ship (F6-02). The ship's [PlayerWeapon]
+## fires at three [TargetDummy]s, and the dev keys 1, 2 and 3 restart the [CombatState] at
+## that Power Level (F6-03). Dev only: it is never loaded by `scenes/main.tscn` and holds
+## no gameplay rule.
 
 
 ## Metadata keys Astra authors on `FlightBounds` (GUIDE Section 13).
@@ -25,6 +27,8 @@ const MAX_CORNER_META := &"max_corner"
 @export var hud: Hud
 ## The harness's own ProjectileSystem, set up with the arena's Flight Volume.
 @export var projectile_system: ProjectileSystem
+## Holds the [TargetDummy] instances, set up with [member projectile_system].
+@export var dummy_root: Node3D
 
 var _player: PlayerController
 var _rig: CameraRig
@@ -51,10 +55,25 @@ func _ready() -> void:
 	projectile_system.grazed.connect(_on_grazed)
 	_combat_state.start(CombatState.MIN_POWER_LEVEL)
 	hud.bind(_combat_state, _player.targeting, _rig.camera)
+	_player.weapon.setup(_combat_state, projectile_system, _player.targeting)
+	for dummy: TargetDummy in _dummies():
+		dummy.setup(projectile_system)
+
+
+## Dev keys 1, 2 and 3 restart the combat state at that Power Level, standing in for the
+## Pickups of F7-03.
+func _unhandled_input(event: InputEvent) -> void:
+	var key := event as InputEventKey
+	if key == null or not key.pressed or key.echo:
+		return
+	var level := key.keycode - KEY_0
+	if level >= CombatState.MIN_POWER_LEVEL and level <= CombatState.MAX_POWER_LEVEL:
+		_combat_state.start(level)
+		get_viewport().set_input_as_handled()
 
 
 func _process(_delta: float) -> void:
-	readout.text = "\n".join(PackedStringArray([_flight_line(), _camera_line(), _lock_line(), _projectile_line()]))
+	readout.text = "\n".join(PackedStringArray([_flight_line(), _camera_line(), _lock_line(), _projectile_line(), _weapon_line()]))
 
 
 ## Finds the nodes this harness drives, reporting what is missing instead of failing on a
@@ -69,6 +88,8 @@ func _resolve_scene() -> bool:
 		missing.append("hud")
 	if projectile_system == null:
 		missing.append("projectile_system")
+	if dummy_root == null:
+		missing.append("dummy_root")
 	for field: String in missing:
 		push_error("%s: required export '%s' is not set" % [get_path(), field])
 	if not missing.is_empty():
@@ -138,6 +159,24 @@ func _projectile_line() -> String:
 		projectile_system.count(ProjectileSpawn.Faction.PLAYER),
 		_hits, _grazes, projectile_system.get_field().get_refused_count(),
 	]
+
+
+## Power Level, Bombs left and the hits each dummy has taken.
+func _weapon_line() -> String:
+	var counts: PackedStringArray = []
+	for dummy: TargetDummy in _dummies():
+		counts.append("%s %d" % [dummy.name, dummy.hit_count])
+	return "power %d bombs %d (1/2/3 set power, J fires, L bombs)\ndummy hits %s" % [
+		_combat_state.get_power_level(), _combat_state.get_bombs(), " ".join(counts),
+	]
+
+
+func _dummies() -> Array[TargetDummy]:
+	var found: Array[TargetDummy] = []
+	for child: Node in dummy_root.get_children():
+		if child is TargetDummy:
+			found.append(child as TargetDummy)
+	return found
 
 
 func _on_edge_proximity_changed(value: float) -> void:
