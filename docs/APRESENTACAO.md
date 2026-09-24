@@ -6,7 +6,7 @@
 
 > **Ideia central:** explicar primeiro o jogo 2D que inspirou o projeto e suas regras. Depois mostrar o que foi preservado, o que mudou ao levar a ação para 3D e como o jogo foi produzido. O projeto cria mundo, fases e chefes próprios; não reproduz uma fase oficial de Touhou.
 
-## Slide 1 — O projeto (0:20)
+## Slide 1 — O projeto (0:15)
 
 **Na tela**
 
@@ -18,7 +18,7 @@
 
 **Visual** — Captura própria da nave diante da Floresta das Lanternas; inserir nomes e curso reais. Material já registrado: [entrada da floresta](validation/stage-01-entrance.png) e [nave em voo](validation/player-flight-bank.png).
 
-## Slide 2 — O jogo original e o gênero (0:55)
+## Slide 2 — O jogo original e o gênero (0:40)
 
 **Na tela**
 
@@ -32,7 +32,7 @@
 
 **Base:** [página oficial do jogo, ZUN](https://www16.big.or.jp/~zun/html/th10top.html); [manual oficial: regras básicas](https://www16.big.or.jp/~zun/html/th10man/html/rule.html); [página do jogo na Steam](https://store.steampowered.com/app/1100140/).
 
-## Slide 3 — Como funciona o original (0:55)
+## Slide 3 — Como funciona o original (0:45)
 
 **Na tela**
 
@@ -48,7 +48,7 @@
 
 **Base:** [manual oficial: controles](https://www16.big.or.jp/~zun/html/th10man/html/controll.html), [ataque](https://www16.big.or.jp/~zun/html/th10man/html/rule2.html) e [itens](https://www16.big.or.jp/~zun/html/th10man/html/rule3.html).
 
-## Slide 4 — A pergunta de design: como levar isso para 3D? (0:55)
+## Slide 4 — A pergunta de design: como levar isso para 3D? (0:40)
 
 **Na tela**
 
@@ -65,7 +65,7 @@
 
 **Base interna:** [planejamento, conceito e câmera](PLANEJAMENTO.md), [design de fases](STAGE_DESIGN.md), [validação dos padrões](validation/stage-02-pacing.md).
 
-## Slide 5 — O nosso jogo: proposta e campanha (0:55)
+## Slide 5 — O nosso jogo: proposta e campanha (0:40)
 
 **Na tela**
 
@@ -80,7 +80,7 @@
 
 **Base interna:** [planejamento das fases](PLANEJAMENTO.md), [progressão da Fase 2](validation/stage-02-progression.md).
 
-## Slide 6 — Mecânicas que o jogador usa (1:05)
+## Slide 6 — Mecânicas que o jogador usa (0:55)
 
 **Na tela**
 
@@ -96,7 +96,7 @@
 
 **Base interna:** [regras de combate](PLANEJAMENTO.md), [validação de combate](validation/combat.md), [HUD](validation/combat-hud.md).
 
-## Slide 7 — Como desenhamos as fases (0:55)
+## Slide 7 — Como desenhamos as fases (0:40)
 
 **Na tela**
 
@@ -110,23 +110,56 @@ Portais abrem após objetivos; checkpoints preservam o progresso do trecho.
 
 **Base interna:** [especificação de progressão](STAGE_DESIGN.md), [validação da Fase 1](validation/stage-01-progression.md), [validação da Fase 2](validation/stage-02-progression.md).
 
-## Slide 8 — Como produzimos o jogo (1:10)
+## Slide 8 — Aplicação das aulas: espaço 3D e câmera (1:15)
+
+**Na tela**
+
+| Conceito visto em aula | Como aparece no jogo |
+| --- | --- |
+| `Node3D` e cenas | Nave, câmera, inimigos e cenário organizados em hierarquias reutilizáveis |
+| Eixos X, Y e Z | Movimento lateral, subida/descida e avanço/recuo |
+| `Camera3D` em perspectiva | Câmera atrás e acima da nave, com rotação e enquadramento do alvo |
+| Física 3D | `CharacterBody3D` na nave; colisões e volumes de encontro |
+
+**Fala** — “Nas aulas vimos que `Node3D` posiciona objetos nos três eixos. Aplicamos isso à nave e às duas fases: subir e descer mudam a rota de fuga, não são apenas efeito visual. A câmera é uma `Camera3D` em terceira pessoa, filha de um suporte que segue a nave. Definimos campo de visão de 68 graus e limites de renderização, e programamos rotação, acompanhamento e enquadramento quando há um alvo travado. A nave usa `CharacterBody3D` para se mover e colidir com o cenário; áreas separadas representam o núcleo atingível e a zona de graze.”
+
+**Visual** — Captura do editor mostrando `PlayerShip > CameraRig > Camera3D` e [captura com alvo travado](validation/player-flight-camera-lock.png). Sobrepor os eixos X/Y/Z na cena.
+
+**Aulas relacionadas:** `dev3d-aula-2.pdf` p. 4–7, 13–18; `dev3d-aula-3.pdf` p. 3–7, 14–17; `dev3d-aula-4.pdf` p. 3–10. **Aplicação conferida em:** [cena da nave](../scenes/player/player_ship.tscn), [módulo de câmera](engineering/player-flight.md), [verificação do voo](validation/player-flight.md).
+
+## Slide 9 — Aplicação das aulas: ambiente, modelos e animação (1:05)
+
+**Na tela**
+
+| Conceito visto em aula | Aplicação no jogo |
+| --- | --- |
+| `WorldEnvironment` e luzes | Céu, luz ambiente, névoa e brilho; luar/lanternas na floresta e luz da tempestade na montanha |
+| Modelos e materiais | Nave `.glb`; chefes `.gltf`; terreno `.obj`; materiais e shaders para água, vegetação e portais |
+| `AnimationPlayer` e esqueleto | Chefes animados; luz do santuário e atmosfera mudam após a vitória |
+
+**Fala** — “A aula de ambiente aparece diretamente nas fases. Cada uma tem um `WorldEnvironment` com céu, luz ambiente, névoa e glow. Na floresta usamos uma `DirectionalLight3D` como luar e `OmniLight3D` nas lanternas; na montanha há luz direcional para a tempestade. Os modelos foram importados em formatos vistos na disciplina e combinados com geometria e materiais nossos. Os chefes têm animações no esqueleto, executadas por `AnimationPlayer`. Também animamos propriedades da cena: depois da derrota do chefe da floresta, o santuário passa do azul escuro para uma luz quente; na montanha a tempestade se acalma.”
+
+**Visual** — [santuário antes](validation/stage-01-shrine-corrupted.png) e [depois](validation/stage-01-shrine-calm.png), com uma captura da [montanha](validation/stage-02-basin-player.png). Uma captura do editor pode destacar `WorldEnvironment`, `Moonlight` e `ShrineLighting`.
+
+**Aulas relacionadas:** `dev3d-aula-4.pdf` p. 11–18; `dev3d-aula-5.pdf` p. 3–9, 21–24; `dev3d-aula-6.pdf` p. 10–18; `dev3d-aula-7.pdf` p. 3–7, 13, 16–21; `dev3d-aula-8.pdf` p. 3–9. **Aplicação conferida em:** [luz do santuário](validation/stage-01-shrine.md), [ambiente da montanha](validation/stage-02.md), [modelos e licenças](ASSET_CREDITS.md), [chefes](validation/bosses.md).
+
+## Slide 10 — Como produzimos o jogo (0:50)
 
 **Na tela**
 
 1. **Pesquisa e escopo:** requisitos da atividade, referências e duas fases jogáveis.
 2. **Protótipos e design:** nave, câmera, arenas, inimigos, chefes e interface.
 3. **Implementação:** regras de combate, projéteis, progressão e salvamento temporário nos checkpoints.
-4. **Integração e ajuste:** cenas, modelos, efeitos, áudio, padrões e dificuldade.
+4. **Integração e ajuste:** cenas, modelos, efeitos, interface `Control`, sons via `AudioStreamPlayer`, padrões e dificuldade.
 5. **Validação e entrega:** execução completa das fases, exportação e pacote.
 
-**Fala** — “Começamos pelos requisitos e pelo desenho das duas fases. Construímos a nave, os cenários e os marcadores de encontros no Godot; a programação conectou voo, tiros, inimigos, checkpoints e menus. Um desafio foi mostrar muitos projéteis sem perder desempenho: usamos um campo de projéteis e renderização por MultiMesh. Outro foi tornar a altura importante, então distribuímos inimigos e ataques em níveis diferentes e ajustamos a câmera e a mira. Por fim, revisamos efeitos, dificuldade, progressão e créditos dos recursos antes de exportar.”
+**Fala** — “Depois de definir os requisitos, montamos as cenas e conectamos as regras de voo, combate e progressão. Para mostrar muitos tiros, usamos um campo de projéteis e `MultiMesh`. Os menus e o HUD usam componentes `Control`, e os eventos do jogo acionam efeitos sonoros por `AudioStreamPlayer`. Testamos o fluxo das fases, ajustamos chefes e conferimos os créditos dos recursos antes de exportar.”
 
 **Visual** — Linha do tempo com uma captura de protótipo/arena, uma do editor Godot e uma do build. **Não atribuir todo o trabalho a Bryan** antes de preencher a participação real de cada integrante.
 
-**Base interna:** [roadmap](engineering/ROADMAP.md), [convenções e arquitetura](engineering/CONVENTIONS.md), [campo de projéteis](engineering/projectile-field.md), [renderização](engineering/weapon-rendering.md), [créditos dos recursos](ASSET_CREDITS.md), [exportação](validation/export.md).
+**Aulas relacionadas:** `dev3d-aula-2.pdf` p. 18–20 (sinais, interface e áudio). **Base interna:** [roadmap](engineering/ROADMAP.md), [convenções e arquitetura](engineering/CONVENTIONS.md), [campo de projéteis](engineering/projectile-field.md), [renderização](engineering/weapon-rendering.md), [áudio](engineering/audio.md), [créditos dos recursos](ASSET_CREDITS.md), [exportação](validation/export.md).
 
-## Slide 9 — Resultado e evidências (0:45)
+## Slide 11 — Resultado e evidências (0:35)
 
 **Na tela**
 
@@ -141,7 +174,7 @@ Portais abrem após objetivos; checkpoints preservam o progresso do trecho.
 
 **Base interna:** [aceitação](validation/acceptance.md), [tempo de fase](validation/clear-time.md), [exportação e desempenho](validation/export.md).
 
-## Slide 10 — Demonstração guiada (1:35)
+## Slide 12 — Demonstração guiada (1:25)
 
 **Na tela**
 
@@ -158,7 +191,7 @@ Portais abrem após objetivos; checkpoints preservam o progresso do trecho.
 
 **Plano de reserva** — Levar um vídeo próprio gravado do build. Se a demonstração ao vivo demorar, reproduzir o vídeo e manter a mesma explicação.
 
-## Slide 11 — Encerramento (0:25)
+## Slide 13 — Encerramento (0:15)
 
 **Na tela**
 
@@ -173,9 +206,11 @@ Padrões legíveis, liberdade de movimento e campanha original.
 - [ ] Capturar imagens **do jogo rodando**: Floresta, Montanha, chefe, HUD e Resultados. Colocar “Touhou 10: Mountain of Faith — ZUN / Team Shanghai Alice” junto à imagem do original.
 - [ ] Fazer uma partida eficiente, sem morte, da Fase 2 e registrar o **Tempo** da tela de resultados. Só afirmar “cumpre 5 minutos” se essa partida chegar a **5:00 ou mais** de tempo ativo. [Protocolo de medição](validation/clear-time.md).
 - [ ] Testar o build no computador da apresentação, o controle/teclado reais e os efeitos sonoros. [Pendências registradas](validation/acceptance.md).
-- [ ] Gravar o vídeo reserva e cronometrar a fala. O roteiro soma **9:55**; reservar cinco segundos para troca de slides.
+- [ ] Gravar o vídeo reserva e cronometrar a fala. O roteiro soma **10:00**, incluindo a demonstração; ensaiar as trocas de slide dentro do tempo indicado.
 
 ## Fontes principais
 
 **Jogo original:** [site oficial de *Mountain of Faith*](https://www16.big.or.jp/~zun/html/th10top.html), [manual oficial — regras](https://www16.big.or.jp/~zun/html/th10man/html/rule.html), [controles](https://www16.big.or.jp/~zun/html/th10man/html/controll.html), [ataque](https://www16.big.or.jp/~zun/html/th10man/html/rule2.html), [itens](https://www16.big.or.jp/~zun/html/th10man/html/rule3.html).  
 **Nosso projeto:** [planejamento](PLANEJAMENTO.md), [design de fases](STAGE_DESIGN.md), [roadmap](engineering/ROADMAP.md), [aceitação](validation/acceptance.md), [créditos de recursos](ASSET_CREDITS.md).
+
+**Material da disciplina consultado:** `C:\Users\Braia\Documents\Class\dev3d-aula-1.pdf` a `dev3d-aula-8.pdf` e `Projeto de jogo1.pdf`. As páginas relevantes para cada aplicação estão indicadas nos Slides 8–10. O projeto não usa todos os recursos citados nas aulas; o roteiro inclui apenas os que foram encontrados nas cenas e scripts.
