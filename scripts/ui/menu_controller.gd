@@ -104,6 +104,8 @@ const RESULTS_CAMPAIGN_STAGE := &"campaign_stage_1"
 const RESULTS_DIRECT_STAGE := &"direct_stage"
 ## Results `mode` param: the Campaign's last stage cleared; neither Continue nor Replay.
 const RESULTS_FINAL_VICTORY := &"final_victory"
+const KEYBOARD_NAVIGATION_HINT := "↑ ↓  Navegar     Enter  Confirmar"
+const GAMEPAD_NAVIGATION_HINT := "Analógico  Navegar     A  Confirmar     B  Voltar"
 
 var _screen: StringName = &""
 ## The registry buttons found in the scene, by path, in table order.
@@ -135,12 +137,15 @@ func _ready() -> void:
 	_footer = get_node_or_null(FOOTER_PATH) as Control
 
 
-## Shows the keyboard hint when [param shown], hides it otherwise. [Interface] calls it on
-## every menu from its one [InputDeviceState] (F3-03), so the menus never disagree. Does
-## nothing on Pause, Defeat and Results, which are authored without a footer.
+## Selects keyboard or gamepad hint text from [param shown]. [Interface] calls it on every
+## menu from its one [InputDeviceState] (F3-03), so the menus never disagree. Does nothing
+## on Pause, Defeat and Results, which are authored without a footer.
 func set_keyboard_prompts(shown: bool) -> void:
 	if _footer != null:
-		_footer.visible = shown
+		var footer_label := _footer as Label
+		if footer_label != null:
+			footer_label.text = KEYBOARD_NAVIGATION_HINT if shown else GAMEPAD_NAVIGATION_HINT
+		_footer.visible = true
 
 
 ## The [ScreenRouter] id of this screen, from the root node name, or an empty

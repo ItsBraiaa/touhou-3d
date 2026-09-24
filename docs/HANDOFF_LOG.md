@@ -1,5 +1,12 @@
 # Handoff Log
 
+## 2026-09-24 — OpenCode (oc-b) — F15-07: ship and menu cues
+State: DELIVERED
+Files: `scripts/player/player_controller.gd`; `scripts/ui/menu_controller.gd`; `docs/engineering/ROADMAP.md`.
+Change: The ship's Core now duplicates its authored material at runtime, pulses gently while idle, and raises its emission while Focus is active via `focus_changed`. Existing menu device updates now keep footers visible and switch them between keyboard and explicit gamepad text (`Analógico`, `A`, `B`), without glyph art. No tests added (sprint rule).
+Verification: `tools/lane.ps1 land` and its existing suite/headless boot gate passed; a short headless run completed without script or error output.
+Action required by trunk: none.
+
 ## 2026-09-24 — Astra (sol) — F15-05 UI truth [shared]
 State: DELIVERED
 Files: `scenes/ui/controls.tscn`, `scenes/ui/results.tscn`, `docs/engineering/ROADMAP.md`.

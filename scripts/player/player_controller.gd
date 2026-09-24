@@ -37,6 +37,12 @@ signal focus_changed(active: bool)
 ## and half hidden. The Core, under `DamageCore`, never blinks. Claude's proposal; Astra
 ## tunes it.
 @export var invulnerability_flicker_hz: float = 12.0
+## Strength of the idle Core pulse, as a fraction of the idle emission energy.
+@export var core_idle_pulse_strength: float = 0.12
+## Pulses per second of the Core while it is idle.
+@export var core_idle_pulse_hz: float = 1.2
+## Emission energy multiplier while Focus is active.
+@export var core_focus_energy_multiplier: float = 3.0
 
 @export_group("Scene references")
 ## Node the bank is applied to. It holds the ship model and cosmetic effects only:
@@ -65,6 +71,11 @@ var _focus_active: bool = false
 var _invulnerable_visual: bool = false
 ## Seconds since the blink started, which place it in its cycle.
 var _flicker_time: float = 0.0
+var _core_visual: MeshInstance3D
+var _core_material: StandardMaterial3D
+var _core_idle_energy: float = 1.0
+var _core_time: float = 0.0
+var _core_focus_active: bool = false
 
 
 func _ready() -> void:
@@ -74,6 +85,8 @@ func _ready() -> void:
 	if not _validate_exports():
 		process_mode = Node.PROCESS_MODE_DISABLED
 		return
+	_setup_core_feedback()
+	focus_changed.connect(_on_focus_changed)
 	# The camera frames whatever the targeting locks, null included, which clears it. Made
 	# here rather than in setup(), because an owner calls setup() again every time the
 	# Flight Volume changes and _ready runs once.
@@ -109,6 +122,7 @@ func _process(delta: float) -> void:
 	if _invulnerable_visual:
 		_flicker_time += delta
 		visual_root.visible = fmod(_flicker_time * invulnerability_flicker_hz, 1.0) < 0.5
+	_update_core_feedback(delta)
 
 
 ## Sets the Flight Volume the ship is kept inside, as a position and a size. An owner
@@ -166,6 +180,36 @@ func _set_focus_active(active: bool) -> void:
 		return
 	_focus_active = active
 	focus_changed.emit(active)
+
+
+func _setup_core_feedback() -> void:
+	_core_visual = damage_core.get_node_or_null(^"CoreVisual") as MeshInstance3D
+	if _core_visual == null:
+		push_error("%s: DamageCore has no MeshInstance3D child named 'CoreVisual'" % get_path())
+		return
+	var authored_material := _core_visual.get_active_material(0) as StandardMaterial3D
+	if authored_material == null:
+		push_error("%s: CoreVisual surface 0 has no StandardMaterial3D" % get_path())
+		return
+	_core_material = authored_material.duplicate() as StandardMaterial3D
+	_core_visual.set_surface_override_material(0, _core_material)
+	_core_material.emission_enabled = true
+	_core_material.emission = _core_material.albedo_color
+	_core_idle_energy = maxf(_core_material.emission_energy_multiplier, 1.0)
+	_core_material.emission_energy_multiplier = _core_idle_energy
+
+
+func _update_core_feedback(delta: float) -> void:
+	if _core_material == null:
+		return
+	_core_time += delta
+	var pulse := 1.0 + maxf(core_idle_pulse_strength, 0.0) * sin(_core_time * TAU * core_idle_pulse_hz)
+	var focus_energy := _core_idle_energy * maxf(core_focus_energy_multiplier, 1.0)
+	_core_material.emission_energy_multiplier = focus_energy if _core_focus_active else _core_idle_energy * pulse
+
+
+func _on_focus_changed(active: bool) -> void:
+	_core_focus_active = active
 
 
 func _on_model_edge_proximity_changed(value: float) -> void:
