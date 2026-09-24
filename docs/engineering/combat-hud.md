@@ -38,7 +38,7 @@ Each value signal fires only when its value actually changes, with the new value
 | `shield_changed` | `shielded: bool` | The Shield broke on a hit, or came back through a Shield Pickup, `refill`, `start` or `restore`. |
 | `bombs_changed` | `bombs: int` | A Bomb went off, or `refill`, `start` or `restore` changed the count. |
 | `power_changed` | `level: int, progress: int` | A Power Pickup below Power Level 3 was collected, or `start` or `restore` changed either value. |
-| `invulnerability_changed` | `invulnerable: bool` | true when an accepted non-defeating hit or a Bomb starts the window while not already invulnerable; false when `tick` runs it out, or `start` or `restore` clears it. |
+| `invulnerability_changed` | `invulnerable: bool` | true when an accepted non-defeating hit, a Bomb or `grant_invulnerability` starts the window while not already invulnerable; false when `tick` runs it out, or `start` or `restore` clears it. Never on an extension, and never at a dash's end. |
 | `bomb_activated` | | A Bomb went off. F7 clears Projectiles; the Session calls `RunState.note_bomb_used()`. |
 | `score_awarded` | `points: int` | A Power Pickup was collected at Power Level 3 (`EXCESS_PICKUP_SCORE`). The Session forwards it to `RunState.add_score()`. |
 | `defeated` | | Health reached 0. Exactly once per life; `start` or `restore` begins a new one. |
@@ -74,7 +74,8 @@ The adapter passes the bomb button state once per physics tick to `update_bomb_i
 | --- | --- | --- |
 | `start(power_level: int, power_progress := 0)` | Session: Start, Direct Stage, Restart, Campaign transition | Asserts `power_level` in 1..3, `power_progress` in 0..4 and 0 at level 3. Health 100, Shield on, 2 Bombs, the given level and progress; clears Invulnerability and defeat, unpauses, marks the button as held. Emits what changed. Direct Stage 2 calls `start(2)`; the level comes from `RunState.starting_power_level()`. |
 | `take_hit(damage := HIT_DAMAGE) -> HitOutcome` | F7 combat adapter, from the Projectile Field's Core hits | See "Hit outcomes". |
-| `tick(delta: float)` | F7 combat adapter `_physics_process` | While live and invulnerable, counts the window down; at 0 or below it becomes exactly 0 and `invulnerability_changed(false)` fires. |
+| `tick(delta: float)` | F7 combat adapter `_physics_process` | While live and invulnerable, counts the window down; at `TIME_EPSILON` (1e-6 s) or below it becomes exactly 0 and `invulnerability_changed(false)` fires. Since F16-05 the epsilon replaces "0 or below", so a window of whole ticks ends on its last tick instead of a rounding residue later. |
+| `grant_invulnerability(seconds: float)` | Session: a Checkpoint Retry (F15-12, 2.0 s) and every `dash_started` (F16-05, 0.15 s) | Asserts `seconds > 0`. When live: the window becomes `max(remaining, seconds)`. Ignored while paused or defeated. |
 | `update_bomb_input(held: bool) -> bool` | F7 combat adapter, once per physics tick | See "Bomb input". True when this call set off a Bomb. |
 | `collect_power_pickup() -> bool` | F7-03 pickup adapter | See "Power". False unless live; true otherwise. |
 | `collect_shield_pickup() -> bool` | F7-03 pickup adapter | False unless live, and false while the Shield is on (the Pickup stays in the world). Otherwise Shield on, `shield_changed(true)`, true. |
@@ -166,7 +167,39 @@ Presentation calls for the boss adapter (F12-02, wired by F12-03) and the Stage 
 
 `Interface.get_hud()` now returns `Hud`, and `Interface` refuses a `hud_scene` whose root is not a `Hud` with `push_error`, disabling itself as it does for an unset `hud_scene`.
 
-## Dependencies
+## F16 dash protection and the Impulso indicator (F16-05)
+
+The dash itself is in [player-flight.md "F16 lateral dash"](player-flight.md#f16-lateral-dash-f16-05). The tick-ordering proof, with file and line references, is in the [F16-05 validation record](../validation/controls-expansion.md#lateral-dash-f16-05-rescue).
+
+### Protection
+
+- **One authority.** A dash's protection is ordinary `CombatState` Invulnerability, with no second damage or Graze path.
+  - `GameSession._spawn_player` connects each new ship's `dash_started`, once and without deferral, to `_on_dash_started`, which calls `grant_invulnerability(duration)`.
+  - The connection is freed with the ship, so a Retry or Restart ship has exactly one.
+  - The existing `invulnerability_changed → _on_invulnerability_changed` then mirrors the window to `ProjectileSystem.set_player_invulnerable` and to the ship's blink.
+- **Longer windows win.** `max(remaining, 0.15)`: a dash inside a Bomb (2.0 s), hit (1.0 s) or Retry (2.0 s) window emits nothing and shortens nothing. A Bomb set off during a dash extends to 2.0 s without a second `true`. The dash's end never calls the core, so there is never an early `false`.
+- **Protected ticks.** Protected means no Core hit, so no Health or Shield is lost, and no Graze.
+  - The field already implements both. `invulnerable` passes a Core contact through, and any contact spends the Projectile's one Graze without an award (projectile-field.md, strict reading).
+  - F16-05 changed no field rule.
+- **First and last tick.** The grant happens inside the ship's physics step, after `Main` has ticked the core and before `ProjectileRoot` sweeps, so the activation tick is protected. The core first counts the grant down on the next tick. At 60 Hz a 0.15 s dash therefore protects the activation tick and the next eight: nine ticks, exactly 0.15 s. The tick that starts at activation + 0.15 s is vulnerable.
+- **The epsilon fix.** Before F16-05 the float residue of `0.15 - 9 × (1/60)`, 2e-17 s, kept a tenth tick protected. `CombatState.TIME_EPSILON` (1e-6 s) ends a window at that residue.
+  - The same fix makes a Bomb's or a Retry's 2.0 s window exactly 120 ticks at 60 Hz instead of 121. The 1.0 s hit window was already exact.
+  - `DashModel` uses the same epsilon, so the burst and its protection end on the same tick.
+- **Pause and beats.** A paused tree freezes the ship, and `set_paused(true)` freezes the core. A beat pauses the core and cancels the dash. The protection a cancelled dash granted stays in the core, which is paused under the beat. A stage clear is followed by Results, then a new stage and `start`. A defeat cannot happen while protected, and it leads to Retry or Restart, which call `restore` or `start` and end any window.
+
+### Impulso indicator (`Hud`)
+
+- **Scene.** `hud.tscn` instances Astra's `scenes/ui/components/dash_cooldown.tscn` as `DashCooldown`. It is anchored bottom-left at offsets (32, -191)–(280, -144), 12 px above `PlayerStatus` and aligned with its left edge. At 1280×720 that is y 529–576, clear of the threats (y 344–376), the boss panel and the attack cue at the top.
+- **Load-bearing paths.** The paths are `DashCooldown`, `DashCooldown/Label`, `DashCooldown/Progress` and `DashCooldown/ReadyAccent` (`DASH_*_PATH`), required like the Section 15 paths. Every earlier path is unchanged.
+- **Binding.** `bind` connects the ship's `dash_cooldown_changed` and `controls_enabled_changed` beside `edge_proximity_changed`, whenever `targeting`'s parent is a `PlayerController`. It then renders from `get_dash_cooldown_left()`, `dash_cooldown` and `are_controls_enabled()`. `unbind` disconnects them and shows the indicator unavailable.
+
+| State | When | `Label.text` | `Progress` | `ReadyAccent` | Modulate |
+| --- | --- | --- | --- | --- | --- |
+| Ready | Controls on, cooldown 0 | `IMPULSO  ·  PRONTO` | full | shown | `lit_modulate` |
+| Cooling down | Controls on, cooldown > 0 | `IMPULSO  ·  0,6 s`: the seconds left rounded up to a tenth, decimal comma, never `0,0` | `1 - remaining / total` of `max_value`, empty at activation, full at 0 | hidden | `lit_modulate` |
+| Unavailable | Controls off (Pause, beats, Defeat, Results) or unbound | `IMPULSO` | held where it froze | hidden | `dim_modulate` |
+
+Only the first state shows `PRONTO` or the accent, so neither a cooldown nor a frozen ship can read as ready. The HUD still calls no `CombatState` method except the getters.
 
 `CombatState` imports nothing and holds no Node. `Hud` depends on `CombatState` (signals and getters) and `Targeting` (`target_changed`, `get_current_target`, `HIT_VOLUME_PATH`), and is bound by `GameSession`.
 

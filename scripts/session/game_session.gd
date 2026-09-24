@@ -10,7 +10,7 @@ extends Node
 ## Core hits and Grazes into [CombatState] and [RunState] changes, mirrors Invulnerability
 ## to the field and the ship, forwards excess-Power score, and freezes the Attempt under
 ## Defeat when the player is defeated. It also answers a Bomb with its clear, its damage
-## and its visual.
+## and its visual, and a dash with its Invulnerability (F16-05).
 ##
 ## A stage whose root is a [StageDirector] is checked before it loads, set up with the
 ## Run, the [CombatState], the field and the ship, started at every Attempt, and its clear
@@ -145,7 +145,9 @@ func _ready() -> void:
 ## `Main` processes while the tree is paused, so the tree has to be checked here: Active
 ## Time and the Invulnerability window only run while gameplay does (CONVENTIONS "Time and
 ## randomness"). `Main` ticks before `ProjectileRoot`, so a window that ends this tick is
-## already off in the field's sweep.
+## already off in the field's sweep. It ticks before the ship too (same priority, earlier in
+## the tree), so a dash granted in the ship's step is first counted down on the next tick:
+## a 0.15 s dash protects its activation tick and the next eight at 60 Hz (F16-05).
 func _physics_process(delta: float) -> void:
 	if not get_tree().paused:
 		_run_state.tick_active(delta)
@@ -441,6 +443,9 @@ func _spawn_player(ship: PlayerController, at: Transform3D) -> void:
 	_player.weapon.setup(_combat_state, projectile_system, _player.targeting)
 	# Freed with the ship, so a Retry's new ship has exactly one.
 	_player.weapon.shots_fired.connect(_on_shots_fired)
+	# Freed with the ship too. Not deferred: the grant has to reach the field inside the
+	# ship's physics step, before the ProjectileSystem sweeps that tick (F16-05).
+	_player.dash_started.connect(_on_dash_started)
 
 
 ## Listens to the player's settings once for the Session's life, so a Restart or a Retry
@@ -653,6 +658,16 @@ func _on_invulnerability_changed(invulnerable: bool) -> void:
 	projectile_system.set_player_invulnerable(invulnerable)
 	if _player != null:
 		_player.set_invulnerable_visual(invulnerable)
+
+
+## A dash started inside the ship's physics step (priority 0, after this node's own tick
+## of the same step). The grant, and through [signal CombatState.invulnerability_changed]
+## the field's pass-through, are in place before the [ProjectileSystem] sweeps that step at
+## [constant ProjectileSystem.TICK_PRIORITY], so the activation tick is protected. The core
+## keeps a longer Bomb, hit or Retry window, and the dash's end never touches it. Ignored
+## while the core is not live (F16-05).
+func _on_dash_started(_direction: int, duration: float) -> void:
+	_combat_state.grant_invulnerability(duration)
 
 
 ## A Bomb went off, its edge and its 2 s of Invulnerability already the core's. Clears

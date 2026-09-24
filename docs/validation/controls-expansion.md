@@ -124,7 +124,86 @@ The yaw value may leave [-π, π] inside a tick. It is written as `Basis(Vector3
 
 ## Lateral dash (F16-05, rescue)
 
-Pending.
+- **Date and scope:** 2026-09-24, lane rescue, parts 1 and 2 together.
+- **Devices:** none. No keyboard, pad or display was exercised by hand.
+- **Method:** code reading plus the existing gate on Windows 11 with the Godot 4.7.2 console binary, headless.
+  - `tools/test.ps1`: 225 passed, 0 failed, with no script, parse or compile error.
+  - `check_resources.gd --strict-validate`: 85 resources and 85 scripts, none failed.
+  - The 300-frame boot of `main.tscn` printed no ERROR or WARNING.
+  - No test or driver was written (sprint rule). Line numbers below are for the F16-05 commit.
+
+### Physics order inside one tick
+
+Godot runs `_physics_process` by `process_physics_priority`, lowest first, then by tree order. `Main` (`scenes/main.tscn:39`, ALWAYS) is the parent of `WorldRoot` (`:55`, PAUSABLE) and `ProjectileRoot` (`:58`, PAUSABLE). The stage is added to `WorldRoot` before the ship (`game_session.gd:409`, `:438`).
+
+| # | Node, priority | What it does this tick |
+| --- | --- | --- |
+| 1 | `Main`, 0 | `GameSession._physics_process` (`game_session.gd:151`) calls `_combat_state.tick(delta)` (`:154`, body `combat_state.gd:154–158`). This counts down a window granted on an earlier tick. |
+| 2 | The stage's actors, 0 | Enemies move and register their hit spheres. |
+| 3 | `WorldRoot/PlayerShip`, 0 | `PlayerController._physics_process` (`player_controller.gd:159`). `_advance_dash` (`:162`) ends a window that ran out. `_try_start_dash` (`:167`) emits `dash_started` (`:308`) **before** `_move_dash` (`:169`) moves the ship. The emission runs the chain below synchronously. |
+| 4 | `PlayerShip/Targeting`, `PlayerShip/CameraRig`, 0 | Children after their parent: the lock, then the rig follows the ship where the dash left it. |
+| 5 | `PlayerShip/Weapon`, 50 (`player_weapon.gd:35`, `:116`) | Fire, then the Bomb edge (`:153`). A Bomb in the same tick raises the window to `max(0.15, 2.0)` and emits nothing new. |
+| 6 | `ProjectileRoot`, 100 (`projectile_system.gd:29`, `:82`) | `_physics_process` (`:100`) passes `_player_invulnerable` to `_field.set_player` (`:103`) and ticks the field (`:110`). The field copies the flag at the start of its pass (`projectile_field.gd:222`). A Core contact while invulnerable reports nothing (`:241`), and any contact spends the Graze without an award (`:246–249`). |
+
+**The chain from step 3.**
+
+1. `dash_started` is connected once per ship, without deferral (`game_session.gd:448`), to `_on_dash_started` (`:669–670`).
+2. That calls `CombatState.grant_invulnerability(0.15)` (`combat_state.gd:187–191`), which sets `max(remaining, 0.15)`.
+3. `_set_invulnerability` (`:348–352`) emits `invulnerability_changed(true)`, only on the transition.
+4. That reaches `GameSession._on_invulnerability_changed`, connected once in `_ready` (`game_session.gd:133`, handler `:657–658`).
+5. The handler calls `ProjectileSystem.set_player_invulnerable(true)` and the ship's `set_invulnerable_visual(true)`.
+
+All of it returns before step 3 moves the ship, so it is in place long before step 6.
+
+**No fix to the order was needed.** Neither `projectile_system.gd` nor the priorities changed. **One fix to the arithmetic was needed**; see "Last tick".
+
+### First and last protected tick
+
+- **First tick.** Call the activation tick N. Step 1 of N ran before the grant, so it does not count the new window down. Step 6 of N sweeps with `invulnerable = true`. **The activation tick is protected.**
+- **Last tick.** From tick N+1, step 1 subtracts δ = 1/60 once per tick. After the tick N+k decrement the window holds 0.15 − kδ, and the tick is protected while that value is above `TIME_EPSILON` (1e-6 s).
+  - k = 8 leaves 0.01667: tick N+8 is protected.
+  - k = 9 leaves 2.08e-17. That residue is the error of subtracting 1/60 nine times from 0.15. It is below the epsilon, so it becomes 0, and `invulnerability_changed(false)` fires in step 1 of N+9.
+  - Tick N+9 starts at activation + 9δ = activation + 0.15 s, and it is **vulnerable**.
+  - Protected ticks: **N through N+8, nine ticks, exactly 0.15 s**.
+- **Why the epsilon was needed.** Before this ticket, `tick` stopped only at `<= 0`. The 2.08e-17 residue kept tick N+9 protected, a tenth tick and one extra frame, and N+10 was the first vulnerable tick. The residue was measured with the same double arithmetic: 0.15 needs 10 decrements to reach 0.
+- **The fix.** `CombatState.TIME_EPSILON` (1e-6 s) is applied in `tick` (`combat_state.gd:154–158`). It is far below a tick at any rate (1/240 s = 4.2e-3). As a side effect, a Bomb's and a Retry's 2.0 s windows now last exactly 120 ticks instead of 121. The hit window, 1.0 s = 60 ticks, was already exact.
+- **Other rates.** A tick is protected when its start lies within [activation, activation + 0.15). At 144 Hz that is ticks N through N+21. N+21 starts at +0.1458 s; N+22 starts at +0.1528 s and is vulnerable.
+- **The burst ends on the same tick.** `DashModel` counts down with the same epsilon (`dash_model.gd:103–105`). It starts at 0.15 in step 3 of N, after that tick's own `_advance_dash`, and loses δ in step 3 of every later tick. So it becomes inactive in step 3 of N+9, the same tick the core's window ends.
+  - The ship moves in ticks N through N+8: nine steps of 20 × δ = 1/3 unit, 3.0 units in total.
+  - The last step is clamped to `min(delta, active time left)` (`player_controller.gd:321`).
+  - `DashVisual` requires both the active burst and the mirrored Invulnerability (`:374–381`). Both clear inside tick N+9's physics steps, before a frame is drawn.
+- **Longer protection.** A Bomb or hit window that outlasts the dash stays: the grant uses `max`, and `_end_dash` (`:352`) never calls the core. There is no early `false`, and no second `true` when a grant falls inside a running window.
+
+### Other rules checked by reading
+
+| Check | Reading | Result |
+| --- | --- | --- |
+| One press, one dash; holding never repeats | `is_action_just_pressed` in `_try_start_dash` (`player_controller.gd:296–299`) | pass (reading) |
+| Both directions do nothing and cost nothing | `DashModel.resolve_direction` returns 0 when both are down, pressed together or one pressed while the other is held. `try_start(0)` returns before touching the cooldown (`dash_model.gd:47`) | pass (reading) |
+| Cooldown presses are dropped, not buffered | `try_start` refuses while `_cooldown_left > 0`, and the press is spent that tick. The 0.8 s run from activation: at 60 Hz, 48 decrements, so a press on tick N+48 is accepted | pass (reading) |
+| No vertical part, no diagonal stacking, no Focus scaling | The burst assigns `velocity = direction * distance / duration`, with the direction flattened (`:304–306`, `:320`). It replaces `compute_velocity` for the tick | pass (reading) |
+| Stops at scenery and closed Gates without sliding or tunnelling | `move_and_collide` sweep. Any contact normal facing the travel cancels the rest of the travel (`:322–331`, `:336–340`). A Flight Volume face does the same through the clamp (`:175–178`) | pass (reading); no scenery was flown |
+| No health, Shield or Graze loss while protected | Field rules at `projectile_field.gd:241` and `:246–249`, unchanged. The Session's `take_hit` rejects while invulnerable (`combat_state.gd:134`) | pass (reading) |
+| Pause freezes progress, protection and cooldown | The ship and `ProjectileRoot` are PAUSABLE and the core is paused (`game_session.gd:341–346`). `set_controls_enabled(false)` keeps the dash when `can_process()` is false (`player_controller.gd:227–229`) | pass (reading) |
+| Beats, defeat, Retry, Restart and unload leave nothing behind | A beat cancels the dash (`game_session.gd:362`, `player_controller.gd:229`). Every Attempt spawns a new ship with a ready `DashModel`, and its `dash_started` connection is freed with the old ship. `start` and `restore` end the core's window | pass (reading) |
+| Dash state is not in a Snapshot | Nothing in `CombatState.capture`, `RunState` or the Director reads the ship's dash | pass (reading) |
+| HUD never looks ready while unavailable or cooling | `Hud._render_dash`: `PRONTO` and `ReadyAccent` only with the controls on and 0 left | pass (reading) |
+| Existing HUD paths | All GUIDE Section 15 and F4-03 paths unchanged. `test_hud_contract.gd` passes | pass (existing gate) |
+
+### Manual checks owed
+
+None of these was run: no one pressed a key or watched a frame.
+
+- **Travel and duration.** Fly the arena or Stage 1, dash left and right from rest and at full speed, forward and diagonal, with the camera turned. Expect 3.0 units along the camera's horizontal left or right, no climb, in 0.15 s. Hold Focus and expect the same distance.
+- **Obstruction.** Dash into a wall, a tree trunk, a closed Gate and each Flight Volume face, straight and at a glancing angle. Expect the ship to stop at contact with no slide and no pass-through. Dash along the floor while resting on it: it must not stop. If it does, Jolt is reporting the side-on floor contact as facing the travel, and `DASH_GLANCE_TOLERANCE` needs another look.
+- **Protection.**
+  - Cross a hostile pattern with and without the Shield: no Health or Shield loss and no Graze during the burst.
+  - Graze normally right after it.
+  - Dash inside a Bomb and inside the post-hit window: the blink continues after the trail disappears, and there is no flash of vulnerability.
+- **Input.** Hold Q or E, spam them, and press Q+E together, on the keyboard and on the D-pad. Expect one dash per press, nothing for Q+E, and no queued dash when the cooldown ends. The HUD reads `IMPULSO · 0,8 s` down to `PRONTO`.
+- **Pause.** Pause mid-burst and mid-cooldown, open Options, then resume. The burst, protection and cooldown continue from where they stopped, and the indicator is dimmed while paused.
+- **Lifecycle.** Take the defeating hit during a dash's cooldown, then Retry and Restart. Also clear a stage mid-cooldown and Continue. Each new Attempt must start `PRONTO` with no trail, no accent and no extra protection, and the Retry ship keeps only its own 2 s window.
+- **Look (F16-07).** The trail beside the engines and the accent around the ship, and whether the trail should sit on the dash's side or opposite it. It blinks with the ship's flicker. The Core stays readable. There is no camera roll, shake or flash. The indicator sits above the player panel at 1280×720, 1600×900 and 1920×1080.
 
 ## Integrated walkthrough (F16-06, trunk)
 

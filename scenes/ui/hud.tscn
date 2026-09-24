@@ -7,6 +7,7 @@
 [ext_resource type="Texture2D" path="res://assets/ui/power.svg" id="5_power"]
 [ext_resource type="Texture2D" path="res://assets/ui/target.svg" id="6_target"]
 [ext_resource type="Texture2D" path="res://assets/ui/threat.svg" id="7_threat"]
+[ext_resource type="PackedScene" path="res://scenes/ui/components/dash_cooldown.tscn" id="8_dash_cooldown"]
 
 [sub_resource type="StyleBoxFlat" id="Panel"]
 bg_color = Color(0.02, 0.05, 0.075, 0.85)
@@ -119,6 +120,15 @@ theme_override_styles/background = SubResource("Track")
 theme_override_styles/fill = SubResource("HealthFill")
 max_value = 5.0
 show_percentage = false
+
+[node name="DashCooldown" parent="." instance=ExtResource("8_dash_cooldown")]
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 32.0
+offset_top = -191.0
+offset_right = 280.0
+offset_bottom = -144.0
+grow_vertical = 0
 
 [node name="BossStatus" type="Control" parent="."]
 visible = false
