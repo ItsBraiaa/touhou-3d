@@ -31,3 +31,7 @@ Claude's engineering documentation for this Godot 4.7.2 project: how the GDScrip
 ## Module docs
 
 Each module gets its own `docs/engineering/<module>.md`, written from TEMPLATE.md when the module reaches CODE_READY, and it is the contract Astra wires against. Add one line for it to the table above as it lands. Rules Cores are code-only and are documented here, not in GUIDE.md.
+
+## Planned controls expansion
+
+[F16 implementation plan](controls-expansion-plan.md) — read when implementing configurable keyboard/mouse or Xbox/PlayStation controls, mouse camera, recenter or invulnerable lateral dash. Links the design specification, Astra scene contract, Claude kickoff and seven implementation tickets. This is a plan, not a runtime module completion claim.
