@@ -151,6 +151,8 @@ Dependencies Claude has on scene and content work. These are needs by Feature, n
 
 2026-09-23: D-07 Part B rulings are in [PLANEJAMENTO.md](../PLANEJAMENTO.md) and the handoff log. The two-Phase HUD bar offsets are authored in `hud.tscn`; trunk's `Hud` follow-up must apply them.
 
+Stage 1 night and both-stage boundary rails: .scratch/stage-night-rails/issues/01-night-forest-and-boundary-rails.md — **done** (night palette, warm lanterns, low gate veil, textured forest detail, visible rails along existing flight walls).
+
 Stage 2 art revision: `.scratch/stage-02-area/issues/02-mountain-art-pass.md` — **done** (textures, terrain, vegetation and ambient visual motion; gameplay pending).
 
 Stage 2 scene ticket: `.scratch/stage-02-area/issues/01-mountain-route.md` — **done** (static scene only).

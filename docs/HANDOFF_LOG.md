@@ -15,6 +15,14 @@ Action required by <other agent>: <what they must do, or "none">
 
 ---
 
+## 2026-09-24 01:46 UTC — Astra — Stage 1 night forest and both-stage rails
+State: SCENE_READY
+Files: scenes/stages/stage_01.tscn, scenes/stages/stage_02.tscn, assets/environment/stage_01/gate_veil.gdshader, Stage 1 and Stage 2 validation captures and handoffs, ROADMAP, local issue.
+Change: Stage 1 has a navy night palette, moon, warm sparse lanterns, textured forest detail and low blue gate veils; both stages have visible side rails along every route terrace. Stage 1 rails sit on the bank tops. No runtime node names, markers, gate collision, collision layers, masks or script wiring changed.
+Why: User review requested a stronger Stage 1 night presentation, removal of the pink sky column, and readable out-of-bounds edges on both stages.
+Action required by Claude: preserve Environment/BoundaryRails and the authored lighting/veil when attaching Stage Director and stage actors. The existing FlightBounds walls continue to provide physical containment; include them in the integrated flight pass. No wiring change is required for the rails.
+
+
 ## 2026-09-23 23:40 — Claude (path) — F6-04: Aim Assist follows the Target Lock under lock framing
 State: CODE_READY
 Files: `scripts/combat/player_weapon.gd` (the fire path and one new export), `docs/validation/enemies.md` (re-measurement; the F9-02 finding marked resolved), `docs/engineering/weapon-rendering.md` ("Aim Assist under a lock"), `docs/GUIDE.md` (Section 6 `player_weapon.gd` row), the ROADMAP F6-04 row.
