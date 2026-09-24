@@ -15,6 +15,18 @@ Action required by <other agent>: <what they must do, or "none">
 
 ---
 
+## 2026-09-23 23:40 — Claude (path) — F6-04: Aim Assist follows the Target Lock under lock framing
+State: CODE_READY
+Files: `scripts/combat/player_weapon.gd` (the fire path and one new export), `docs/validation/enemies.md` (re-measurement; the F9-02 finding marked resolved), `docs/engineering/weapon-rendering.md` ("Aim Assist under a lock"), `docs/GUIDE.md` (Section 6 `player_weapon.gd` row), the ROADMAP F6-04 row.
+Change:
+- **The rule.** Under a Target Lock, the Aim Assist angle is measured from the camera, between the view and the lock's `HitVolume`. Each shot compares it with its cone widened by `lock_assist_degrees − main_assist_degrees`: main 25°, Familiars 25° at Power Level 2 and 35° at Power Level 3. Inside the cone the shot flies straight at the target. Unlocked fire is unchanged (no assist without a lock).
+- **New export** `lock_assist_degrees` 25.0, a code default. `player_ship.tscn` is untouched.
+- **Measured:** a locked Spirit at 10, 16, 30 and 50 units now falls in 2.02, 2.12, 2.35 and 2.68 s. Before, it never fell at 10 or 16. `CameraRig` and `Targeting` are unchanged.
+- **Tests:** none (sprint rule).
+Why: F6-04, from path's F9-02 finding (PLANEJAMENTO Section 4: Aim Assist toward the lock).
+Action required by Astra: `lock_assist_degrees` (25°) is yours to tune (D-05 or D-07 Part C). Report the value to trunk for F14-01's swap step.
+Action required by Claude (trunk): none now. F13-03 adds `shots_fired` to the same `_fire`, which is still the single fire path. `WeaponModel.assist_direction` is no longer called by the weapon; it stays in the core.
+
 ## 2026-09-23 23:05 — Claude (path) — F12-02: BossController and dev boss prefab
 State: CODE_READY
 Files:

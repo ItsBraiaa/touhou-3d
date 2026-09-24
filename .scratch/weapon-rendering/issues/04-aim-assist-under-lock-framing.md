@@ -1,6 +1,6 @@
 # F6-04 Aim Assist under lock framing
 
-Status: todo
+Status: done
 Type: adapter
 parallel-safe: no
 Depends on: F6-03, F9-02
@@ -72,3 +72,14 @@ If `lock_assist_degrees` is added, it is yours to tune (D-05 or D-07 Part C): re
 ```
 Read CLAUDE.md, docs/engineering/SPRINT.md and .scratch/weapon-rendering/issues/04-aim-assist-under-lock-framing.md, then implement that ticket solo in lane path with no tests. Verify it by re-running the arena measurement windowed. Finish with its Definition of Done, commit, and run tools/lane.ps1 land.
 ```
+
+## Outcome (2026-09-23)
+
+Delivered solo in lane path with **design 1**: under a Target Lock, `PlayerWeapon._fire` measures the lock's angle from the camera (view direction against the direction to the lock's `HitVolume`) once per tick. Each shot compares it with its own cone widened by `lock_assist_degrees − main_assist_degrees`; inside it, the shot flies from its origin straight at the target, otherwise along forward as before. New export `lock_assist_degrees` = 25.0 (a code default; `player_ship.tscn` untouched). **No tests** (sprint rule); the land gate and the windowed measurement are the checks.
+
+- **Why design 1 and not design 2:** PLANEJAMENTO asks for Aim Assist on "visible targets near the screen center", and `CameraRig` lets the player orbit the view away from a lock. Design 2 would make the lock auto-aim even then.
+- **Familiars:** their level cones widen by the same 15°, to 25° at Power Level 2 and 35° at Power Level 3, so they keep their stronger tracking under a lock.
+- **Unlocked fire:** unchanged, and there is still no assist without a lock (the ticket's "10° cone around the view center" never existed for unlocked shots: the assist target was always the lock).
+- **Measured, windowed** (`docs/validation/enemies.md`): locked Spirit at 10 / 16 / 30 / 50 units, defeated in 2.02 / 2.12 / 2.35 / 2.68 s, where 10 and 16 units never fell before. Power Level 3: 0.93 to 1.58 s. Unlocked: 0 hits at every distance, as before.
+- **Left in place:** `WeaponModel.assist_direction` is no longer called by the weapon; `weapon_model.gd` was not edited (its signature did not need to change). A later cleanup can remove it with the core's owner.
+- `CameraRig` and `Targeting` untouched.
