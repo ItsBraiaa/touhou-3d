@@ -15,6 +15,13 @@ Action required by <other agent>: <what they must do, or "none">
 
 ---
 
+## 2026-09-24 02:00 — OpenCode (oc-a) — F9-03 part 1: SealRules core
+State: CODE_READY
+Files: `scripts/progression/seal_rules.gd`, `docs/engineering/enemies.md`
+Change: Added the Node-free SealRules lifecycle core. It activates linked Guards once, counts each linked defeat once, exposes the Seal only after all Guards are defeated, ignores early damage including Bomb damage, and emits exactly-once progression signals. Capture and restore preserve state without emitting signals.
+Why: F9-03 part 1 supplies the Stage 2 Seal progression contract for the adapter in part 2.
+Action required by other agent: none; continue with F9-03 part 2.
+
 ## 2026-09-24 01:45 — Claude (plan) — land compiles every script; EncounterMachine fix landed early
 State: dev
 Files: `tools/check_resources.gd`, `tools/lane.ps1`, `docs/engineering/SPRINT.md`, `scripts/progression/encounter_machine.gd` (cherry-picked from trunk's `be64081`, byte-identical).

@@ -130,6 +130,20 @@ Tune the values in `content/enemies/*.tres` and `content/patterns/*.tres` and dr
 
 ## Open issues
 
+## SealRules core (F9-03, part 1)
+
+`SealRules` is the Node-free Stage 2 progression core in
+`scripts/progression/seal_rules.gd`. A Seal starts `DORMANT` and activates its
+linked Guard group exactly once on approach, or when a linked Guard is shot.
+Each linked Guard defeat is counted once; after the final Guard, the Seal enters
+`EXPOSED`, drops its shield and accepts damage. Damage before exposure is
+ignored, including Bomb damage. Reaching zero enters `DESTROYED` exactly once.
+
+The core emits `guards_activated`, `guard_link_cleared`, `shield_dropped` and
+`destroyed`. `capture()` and `restore()` contain only the state, defeated Guard
+ids and remaining health; restore emits no signals. The `Seal` Node adapter and
+scene wiring are F9-03 part 2 / F12-05.
+
 - The lateral figure-eight for DRIFT and vertical sine bob for HOVER are initial engineering proposals. Tune speed and range against authored Spirit and Sentry movement in the running arena; the model clamps movement to bounds but does not implement steering or collision avoidance.
 - **Locked shots miss close enemies (for trunk, F6-03).** From 10 to 16 units, once `CameraRig`'s lock framing blends in, the weapon's shots pass about 3.5 units from a Spirit's center, just outside the 10° main Aim Assist cone; from about 30 units they hit steadily. See [validation/enemies.md](../validation/enemies.md) "Finding for another lane".
 - The enemies never turn: a visual faces its authored +Z, toward a ship flying the Stage 1 route (−Z). Facing the player is not in F9-02.
