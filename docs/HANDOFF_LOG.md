@@ -27,6 +27,12 @@ Change:
 Why: trunk's F12-03 part 2 was blocked on this file, and a hand-written `.tres` can break the same way again.
 
 Action required by Astra: when you hand-write or tune a `.tres` with sub-resources, declare each one after the ones it references. `land` now refuses the file otherwise.
+## 2026-09-23 22:27 — OpenCode (oc-b) — F14-02 part 1 package script
+State: CODE_READY
+Files: `tools/package.ps1`, `docs/HANDOFF_LOG.md`
+Change: Added the PowerShell 5.1-compatible package script for the first split part. It refuses a missing export with exit 2 and a dirty tree with exit 3, stages tracked project files while excluding agent directories, copies both exported executables, writes the Portuguese LEIA-ME, creates the dated zip, and includes extracted-copy import, test and executable boot verification plus `-SkipVerify`.
+Why: F14-02 part 1 prepares the delivery tooling before trunk's F14-01 export is available; the final acceptance record and package run remain part 2.
+Action required by trunk: none. For the next oc-b session (F14-02 part 2): sync after F14-01, run the script without `-SkipVerify`, record the package evidence and acceptance matrix, then close the ticket.
 
 ## 2026-09-23 22:20 — OpenCode (oc-b) — F3-01 Settings core and ConfigFile persistence
 State: CODE_READY
