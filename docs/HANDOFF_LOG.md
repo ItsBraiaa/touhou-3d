@@ -4,7 +4,7 @@
 State: DELIVERED
 Files: `scripts/player/player_controller.gd`; `scripts/ui/menu_controller.gd`; `docs/engineering/ROADMAP.md`.
 Change: The ship's Core now duplicates its authored material at runtime, pulses gently while idle, and raises its emission while Focus is active via `focus_changed`. Existing menu device updates now keep footers visible and switch them between keyboard and explicit gamepad text (`Analógico`, `A`, `B`), without glyph art. No tests added (sprint rule).
-Verification: `tools/lane.ps1 land` and its existing suite/headless boot gate passed; a short headless run completed without script or error output.
+Verification: A short headless run completed without script or error output. The existing menu contract assertion was minimally updated because F15-07 intentionally changes gamepad prompts from hidden to visible text; no new test was added. `tools/lane.ps1 land` is the remaining gate.
 Action required by trunk: none.
 ## 2026-09-24 — Astra (sol) — F15-04 storm resolution [shared]
 State: DELIVERED
