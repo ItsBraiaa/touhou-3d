@@ -39,6 +39,14 @@ The test arena's geometry and materials are authored primitives. No monster mode
 
 - `assets/ui/shield.svg`, `bomb.svg`, `power.svg`, `target.svg`, and `threat.svg`: original vector icons authored for this project.
 
+## Combat materials
+
+- `assets/combat/player_shot.tres`, `hostile_shot.tres`, `bomb_ring.tres`, `power_gold.tres`, and `shield_blue.tres`: original Godot materials authored for the D-02 projectile, Bomb and Pickup visuals. No external material or texture was used.
+
+## Stage 1 gate veil
+
+- `assets/environment/stage_01/gate_veil.gdshader`: original shader authored for the Stage 1 gate veil. No external shader or texture was used.
+
 ## Sound effects
 
 Creator: Kenney. The 17 selected Ogg Vorbis files under `assets/audio/sfx/` are unchanged byte-for-byte; there are no trims or conversions. Each selected pack is CC0 and its supplied license is preserved:
