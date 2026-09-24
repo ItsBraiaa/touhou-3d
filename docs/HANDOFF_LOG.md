@@ -1,5 +1,20 @@
 # Handoff Log
 
+## 2026-09-24 13:45 — Claude (trunk) — F15-10: defeat beat before the Defeat overlay
+State: INTEGRATED_VERIFIED
+Files: `scripts/session/game_session.gd` (`DEFEAT_BEAT_SECONDS`, `_on_player_defeated`, new `_show_defeat`, the `_on_stage_completed` doc); `docs/engineering/ROADMAP.md` (the F15-10 row; the F15-01 row moved beside the other lanes' F15 rows, in their format).
+Change:
+- **Defeat beat.** The defeating hit plays `player_defeated` and starts a 1.0 s beat through F15-01's `_begin_beat`. The tree keeps running, and the ship's controls, the CombatState and Active Time are frozen. Hostile fire is cleared (safe inside the field's step, which reports its events after its sweep), and Pause is refused. Then the tree pauses under the Defeat overlay, as before.
+- **A clear during the beat.** A stage clear during the beat starts the victory beat, which cancels the defeat beat's finish, so Results follows and never Defeat. Before, a Defeat raised in the step of the last kill already gave way to Results.
+Verification: a headless `main.tscn` driver (throwaway, not in the repo).
+- Defeat showed 1.02 s after the hit. The tree was never paused and the controls were never on before it, and Clear Time did not move.
+- Pause pressed in the beat was refused.
+- Retry returned to the HUD with the tree running and the controls on.
+- A clear 10 ticks into the beat showed Results after the 2.5 s victory beat, and Defeat never appeared.
+- The F15-01 S1-07 scenario passed again on the same build, with path's F15-02 merged.
+No tests (sprint rule).
+Action required by Astra: none. 1.0 s is Claude's proposal; tune `DEFEAT_BEAT_SECONDS`.
+
 ## 2026-09-24 13:45 — Claude (trunk) — F15-01: victory beat, and a silent Bomb clear
 State: INTEGRATED_VERIFIED
 Files: `scripts/session/game_session.gd` (`VICTORY_BEAT_SECONDS`, `_begin_beat`, `_cancel_beat`, `_show_results`, `_in_beat`, `_beat_serial`, `_bomb_clearing`); `tests/scene/test_game_session_flow.gd` (`test_a_completed_stage_shows_results` now waits out the beat before its three unchanged asserts: the sprint rule's minimal adjustment of a test the ticket broke on purpose); `docs/engineering/audio.md` (Open issues); `docs/engineering/ROADMAP.md` (the F15-01 row).

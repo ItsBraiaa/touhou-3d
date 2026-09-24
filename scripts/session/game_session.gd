@@ -26,6 +26,7 @@ extends Node
 ## enters the next Campaign stage and Jogar novamente replays a Direct Stage (F11-02).
 ## Since F15-01 a clear first holds a victory beat, the tree running under a frozen ship,
 ## so the boss's Death clip and the stage's defeat presentation are seen before Results.
+## Since F15-10 a defeat holds a shorter one the same way before the Defeat overlay.
 ##
 ## The game is heard through [member audio] (F13-03): each catalogue producer is connected
 ## once, where the Session owns its lifetime (itself in `_ready`, the Director in
@@ -55,6 +56,10 @@ const QUIT_SILENCE_SECONDS := 0.1
 ## so the boss's Death clip and the stage's defeat presentation play (F15-01). Claude's
 ## proposal: the Stage 1 shrine calm clip `corrupted_to_calm` is 2.4 s.
 const VICTORY_BEAT_SECONDS := 2.5
+## Seconds of the defeat beat between the defeating hit and the Defeat overlay, with the
+## tree running and the ship frozen (F15-10). Claude's proposal: long enough to register
+## the hit, short enough not to feel like lag.
+const DEFEAT_BEAT_SECONDS := 1.0
 ## Menu actions that only open a full screen, which Back returns from.
 const SCREEN_BY_ACTION: Dictionary[StringName, StringName] = {
 	&"open_stage_select": ScreenRouter.STAGE_SELECT,
@@ -681,13 +686,22 @@ func _on_score_awarded(points: int) -> void:
 	_run_state.add_score(points)
 
 
-## Freezes the Attempt under Defeat: the tree, Active Time, the controls and the
-## [CombatState] stop, and nothing is unloaded, because this arrives inside the
-## ProjectileSystem's physics step. Once per life is the core's guarantee. Retry and
-## Return to Menu leave from the overlay.
+## The player was defeated: holds the defeat beat of [constant DEFEAT_BEAT_SECONDS], with
+## the tree running and the ship, the [CombatState] and Active Time frozen, then shows
+## [method _show_defeat] (F15-10). Nothing is unloaded, because this arrives inside the
+## ProjectileSystem's physics step; the beat's clear of hostile fire is safe there, since
+## the field reports its events after its sweep. Once per life is the core's guarantee. A
+## stage clear during the beat replaces it with the victory beat, as a Defeat raised in
+## the physics step of the last kill always gave way to Results.
 func _on_player_defeated() -> void:
-	_set_paused(true)
 	audio.play_event(&"player_defeated")
+	_begin_beat(DEFEAT_BEAT_SECONDS, _show_defeat)
+
+
+## Freezes the Attempt under Defeat: the tree, Active Time, the controls and the
+## [CombatState] stop. Retry and Return to Menu leave from the overlay.
+func _show_defeat() -> void:
+	_set_paused(true)
 	# The Defeat screen shows "Último checkpoint · <name>", or "Início da fase" for "".
 	var location := _director.retry_location_name() if _director != null else ""
 	interface.push_overlay(ScreenRouter.DEFEAT, {"checkpoint": location})
@@ -697,8 +711,9 @@ func _on_player_defeated() -> void:
 ## physics flush (F11-01). Clear Time froze at the kill, because the Run is past
 ## `IN_STAGE`. Holds the victory beat of [constant VICTORY_BEAT_SECONDS] first, so the
 ## boss's Death clip and the stage's defeat presentation are seen, then shows
-## [method _show_results] (F15-01). When the tree is already paused, by a Defeat raised in
-## the physics step of the last kill, Results replaces that Defeat at once, with no beat.
+## [method _show_results] (F15-01); a defeat beat in progress is superseded (F15-10). When
+## the tree is already paused, Results replaces whatever overlay paused it at once, with
+## no beat.
 func _on_stage_completed(result: Dictionary) -> void:
 	if get_tree().paused:
 		_show_results(result)
