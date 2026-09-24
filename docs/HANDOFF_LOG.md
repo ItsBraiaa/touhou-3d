@@ -15,6 +15,13 @@ Action required by <other agent>: <what they must do, or "none">
 
 ---
 
+## 2026-09-23 21:17 — OpenCode (oc-a) — F13-02 AudioController adapter
+State: CODE_READY
+Files: `scripts/audio/audio_controller.gd`, `docs/engineering/audio.md`, `docs/GUIDE.md` (Section 6 `audio_controller.gd` row), `docs/engineering/ROADMAP.md`, `.scratch/audio/issues/02-audio-controller-adapter.md`
+Change: Added the AudioController adapter: limiter-gated SFX pool on `SFX`, crossfading music pair on `Music`, coalesced UI sounds from the Viewport and `Interface.action_requested` (accept outranks focus, one per frame), loud `_ready` validation, bad mapping entries reported and ignored. Not attached to any scene; F13-03 attaches it to `Main/Audio` and fills `event_streams` from D-01's files. No tests by the sprint rule; verified headless with a throwaway `tools/zz_audio_check.gd` (three events granted and logged, in-interval repeat refused, `missing_events` exact; deleted after the run). Headless audio runs on the Dummy driver, recorded in audio.md.
+Why: F13-02; the playback half of the audio feature.
+Action required by Astra: none now. After the D-01 listening pass, send Claude the event-to-file table and volume proposals; the `EVENT_RULES` intervals, caps and priorities are Claude's proposals for you to tune.
+
 ## 2026-09-23 21:05 — Astra (sol) — Combat visuals (D-02) [shared]
 State: SCENE_READY
 Files: `scenes/combat/visuals/*`, `assets/combat/*`, `assets/ui/menu_theme.tres`, `tools/validate_combat_visuals.gd`, `docs/validation/combat-visuals.md`, `docs/validation/combat-visuals.log`, `docs/validation/combat-visuals.png`, `docs/validation/menus-options-entry.png`, D-02's ticket, and the D-02 ROADMAP row.

@@ -84,7 +84,7 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | | | | 07 storm-guardian | integration | no | sol | todo |
 | F13 | Audio | `audio` | 00 plan | docs | no | — | done (cut, then reinstated by the sprint plan, 2026-09-23) |
 | | | | 01 audio-limiter-core | core | yes | oc-a | done |
-| | | | 02 audio-controller-adapter | adapter | no | oc-a | todo |
+| | | | 02 audio-controller-adapter | adapter | no | oc-a | done (no new tests, by the sprint rule; headless Dummy-driver check recorded in audio.md) |
 | | | | 03 audio-event-wiring | integration | no | trunk | todo |
 | F14 | Delivery | `delivery` | 00 plan | docs | no | — | done (one-pass planning) |
 | | | | 01 export-and-run-outside-editor | integration | no | trunk | todo (blocks itself until the user installs the Godot 4.7.2 export templates) |
