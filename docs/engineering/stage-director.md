@@ -1,17 +1,17 @@
 # Stage Director
 
-Feature F10: the Adapter that plays a stage's authored route. Started with ticket F10-01 on 2026-09-23 (CODE_READY); Gates, Checkpoints and PortalLinks are CODE_READY since F10-02 (sections "Gate", "Checkpoint" and "Progress application"). Retry and Restart are CODE_READY since F10-03 ("Retry and Restart"). The boss branch follows in F12-03 and Stage 2 in F12-05; each appends its own section.
+Feature F10: the Adapter that plays a stage's authored route. Started with ticket F10-01 on 2026-09-23 (CODE_READY); Gates, Checkpoints and PortalLinks are CODE_READY since F10-02 (sections "Gate", "Checkpoint" and "Progress application"). Retry and Restart are CODE_READY since F10-03 ("Retry and Restart"), and the boss branch since F12-03 ("Boss branch (F12-03)"). Stage 2 has its own section since F12-05 ("Stage 2 (F12-05)").
 
 ## Purpose
 
 `StageDirector` sits on a stage's `Stage` root and plays its `StageDefinition` through an `EncounterMachine` (F8-02). It arms each Encounter's EntryVolume and ExitVolume and reports the ship's traversal, spawns every requested Wave and every reward Pickup under `RuntimeActors`, scores each enemy defeat once and reports it to the machine, relays off-screen threats to the HUD and stage clear to the Session, and exposes the active Encounter's bounds. Enemies report outcomes; the machine decides progression (ENGINEERING_BRIEF 4.G).
 
-It does not own any progression rule (the machine's), enemy behavior (F9's `EnemyActor`), Pickup acceptance (F7-03's `Pickup`), the score or the Run (`RunState`), the refill, commit and Snapshot (`CheckpointStore`, F8-03), the ship and the field on Retry (the Session's), the boss (F12-03), or any authored node: it adds only to `RuntimeActors`, and changes only the volumes' and Checkpoints' `monitoring`, the Gates' barrier collision and `ClosedVisual`, and the PortalLinks' visibility.
+It does not own any progression rule (the machine's), enemy behavior (F9's `EnemyActor`), Pickup acceptance (F7-03's `Pickup`), the score or the Run (`RunState`), the refill, commit and Snapshot (`CheckpointStore`, F8-03), the ship and the field on Retry (the Session's), a boss's fight (`BossController` and `BossMachine`, F12-02), or any authored node: it adds only to `RuntimeActors`, and changes only the volumes' and Checkpoints' `monitoring`, the Gates' barrier collision and `ClosedVisual`, and the PortalLinks' visibility.
 
 ## Files
 
 - `scripts/progression/stage_director.gd` (`StageDirector`, Adapter on `Stage` in `scenes/stages/stage_01.tscn`).
-- `scripts/session/game_session.gd`: `_director`, the pre-check, `setup`, `start_attempt`, `_attempt_seed`, `_on_stage_cleared`, `_on_threat_reported`, `THREAT_CUE_SECONDS`.
+- `scripts/session/game_session.gd`: `_director`, the pre-check, `setup`, `start_attempt`, `_attempt_seed`, `_on_stage_cleared`, `_on_threat_reported`, `THREAT_CUE_SECONDS`; since F12-03 `_connect_boss_panel`, its four `_on_boss_*` handlers and `ATTACK_CUE_SECONDS`.
 - `scripts/progression/gate.gd` (`Gate`, on `Gates/Gate_S1_02..05`) and `scripts/progression/checkpoint.gd` (`Checkpoint`, on `Checkpoints/CP1-A` and `CP1-B`), since F10-02.
 - `scenes/stages/stage_01.tscn` [shared]: the scripts on `Stage`, the four Gates and the two Checkpoints, and their exports, nothing else.
 - No test file: the sprint's no-new-tests rule (2026-09-23). Verification is in [validation/stage-director.md](../validation/stage-director.md).
@@ -23,8 +23,9 @@ It does not own any progression rule (the machine's), enemy behavior (F9's `Enem
 | Export | Type | Stage 1 value | Meaning |
 | --- | --- | --- | --- |
 | `stage_definition` | `StageDefinition` | `content/stages/stage_01/stage_01.tres` | The route. Required; it must validate. |
-| `actor_scenes` | `Dictionary[StringName, PackedScene]` | `spirit` → `scenes/dev/spirit.tscn`; `sentry` and `lantern_guardian` → `scenes/dev/sentry.tscn` | The actor of every Wave kind; each root an `EnemyActor`. `lantern_guardian` is the dev Sentry until F12-03. |
-| `enemy_definitions` | `Dictionary[StringName, EnemyDefinition]` | `spirit` → `content/enemies/spirit.tres`; `sentry` and `lantern_guardian` → `content/enemies/sentry.tres` | The definition of every Wave kind. |
+| `actor_scenes` | `Dictionary[StringName, PackedScene]` | `spirit` → `scenes/dev/spirit.tscn`; `sentry` → `scenes/dev/sentry.tscn`; `lantern_guardian` → `scenes/enemies/lantern_guardian.tscn` (since F12-03) | The actor of every Wave kind; each root an `EnemyActor`, or a `BossController` for a kind in `boss_definitions`. |
+| `enemy_definitions` | `Dictionary[StringName, EnemyDefinition]` | `spirit` → `content/enemies/spirit.tres`; `sentry` → `content/enemies/sentry.tres` | The definition of every Wave kind that is not a boss. F10-01's `lantern_guardian` → Sentry stand-in is gone since F12-03. |
+| `boss_definitions` | `Dictionary[StringName, BossDefinition]` | `lantern_guardian` → `content/bosses/lantern_guardian.tres` | The definition of every boss Wave kind, keyed by its `BossDefinition.kind` (F12-03). A kind is in this dictionary or in `enemy_definitions`, never both. |
 | `power_pickup_scene` | `PackedScene` | `scenes/dev/power_pickup.tscn` | A `Pickup` of kind POWER. Required. |
 | `shield_pickup_scene` | `PackedScene` | `scenes/dev/shield_pickup.tscn` | A `Pickup` of kind SHIELD. Required. |
 | `reward_spread` | `float` | 1.5 | Radius of the horizontal circle a reward of more than one Pickup is laid out on. Claude's proposal. |
@@ -43,7 +44,7 @@ It does not own any progression rule (the machine's), enemy behavior (F9's `Enem
 
 | Method | Called by | Effect |
 | --- | --- | --- |
-| `check_setup() -> PackedStringArray` | Session `_load_stage`, before the stage enters the tree | Every problem, each naming the stage id and the path: an unset required export, `stage_definition.validate()`, a missing `Encounters/<id>` or its `EntryVolume`/`ExitVolume` `Area3D`, a volume with no `CollisionShape3D` child holding a `BoxShape3D` (the Encounter bounds come from them), a Wave marker that is not a `Node3D` under its Encounter, a Wave kind with no `actor_scenes` or `enemy_definitions` entry, an `enemy_definitions` entry whose `validate()` fails, a reward `origin_marker` that is not a `Node3D`, and a missing `RuntimeActors`. Relative paths only. Empty when the stage can play. An enemy refuses an invalid definition, and a Wave that never spawns never completes, so bad content refuses the stage instead of freezing it (reviewer finding). |
+| `check_setup() -> PackedStringArray` | Session `_load_stage`, before the stage enters the tree | Every problem, each naming the stage id and the path: an unset required export, `stage_definition.validate()`, a missing `Encounters/<id>` or its `EntryVolume`/`ExitVolume` `Area3D`, a volume with no `CollisionShape3D` child holding a `BoxShape3D` (the Encounter bounds come from them), a Wave marker that is not a `Node3D` under its Encounter, a Wave kind with no `actor_scenes` or `enemy_definitions` entry, an `enemy_definitions` entry whose `validate()` fails, a reward `origin_marker` that is not a `Node3D`, and a missing `RuntimeActors`; since F12-03 also the boss rules of "Boss branch (F12-03)". Relative paths only. Empty when the stage can play. An enemy refuses an invalid definition, and a Wave that never spawns never completes, so bad content refuses the stage instead of freezing it (reviewer finding). |
 | `setup(run_state, combat_state, projectile_system, player)` | Session, once, after the ship and its bindings | Creates the machine, `setup(stage_definition)`, connects `wave_requested`, `rewards_requested`, `encounter_completed` and `stage_cleared` once; sets `monitoring = true` on every EntryVolume and ExitVolume and connects `body_entered` with `CONNECT_DEFERRED`, bound to the Encounter id. Since F10-02 it also connects `gate_opened`, creates the Director's `CheckpointStore`, arms every Checkpoint and connects its `entered` deferred, and ends with `_apply_progress()`. A second call is reported and changes nothing. |
 | `start_attempt(attempt_seed: int)` | Session, after every `begin_attempt()` | A new `RandomNumberGenerator` seeded with `attempt_seed`, injected into every enemy of the Attempt; then `notify_entered(first Encounter)`, because `PlayerStart` (Z 20) already lies inside S1-01's EntryVolume. |
 | `get_active_encounter_bounds() -> AABB` | Enemies at spawn; F12 boss containment | The world-space merge of the active Encounter's EntryVolume and ExitVolume boxes: X -45..45, Y 0..75 and the Encounter's Z range on Stage 1. `AABB()` when none is active. |
@@ -53,7 +54,7 @@ It does not own any progression rule (the machine's), enemy behavior (F9's `Enem
 
 - **Volumes.** An EntryVolume reports `notify_entered(id)` and an ExitVolume `notify_exited(id)`, only for `is_instance_valid(body) and body == player`. The machine refuses anything out of order, so flying over a trigger does nothing, and re-entering a completed Encounter spawns nothing. The connections are deferred because entry spawns `Area3D` actors and Pickups, which must not happen inside the physics flush that reports the body.
 - **Overlapping volumes.** S1-01's ExitVolume (Z -59..-55) and S1-02's EntryVolume (Z -62..-58) overlap, and a volume the ship is already inside reports no new `body_entered`. So after every `encounter_completed` the Director checks, deferred, whether the ship already overlaps the next Encounter's EntryVolume, and if so reports it.
-- **Waves.** For each marker i of the requested Wave: `kind := wave.enemy_kind_at(i)`, `id := EncounterMachine.enemy_id(encounter_id, marker)`; the kind's actor is instanced under `RuntimeActors` at the marker's global transform, then `spawn_setup(enemy_definitions[kind], id, encounter_id, rng, projectile_system, player, get_active_encounter_bounds())`; its `defeated` goes to the Director and its `threat_reported` is re-emitted. A scene whose root is not an `EnemyActor` is reported and skipped.
+- **Waves.** For each marker i of the requested Wave: `kind := wave.enemy_kind_at(i)`, `id := EncounterMachine.enemy_id(encounter_id, marker)`; the kind's actor is instanced under `RuntimeActors` at the marker's global transform, then `spawn_setup(enemy_definitions[kind], id, encounter_id, rng, projectile_system, player, get_active_encounter_bounds())`; its `defeated` goes to the Director and its `threat_reported` is re-emitted. A scene whose root is not an `EnemyActor` is reported and skipped. A kind in `boss_definitions` takes the boss branch instead ("Boss branch (F12-03)").
 - **Defeats.** The first `defeated(enemy_id, encounter_id)` of a spawned enemy adds its definition's `score` (100 for the dev Spirit and Sentry, PLANEJAMENTO Section 4) to `RunState` and reports `notify_enemy_defeated`. A repeat scores nothing. The actor frees itself.
 - **Rewards.** On `rewards_requested(id)`, each `RewardDefinition` spawns `count` Pickups at its `origin_marker` under `RuntimeActors`, on a horizontal circle of `reward_spread` when `count` is more than 1 (a single one sits on the marker). Ids are `&"<encounter_id>/power_<n>"` and `&"<encounter_id>/shield_<n>"`, n from 1 per kind. Each gets `setup(id, combat_state, player)` and its `accepted` re-emits as `pickup_accepted`. S1-02 and S1-05 drop five Power Pickups at `RewardOrigin`, S1-03 one Shield Pickup at `ShieldPickup`, on completion.
 - **Ticking.** `_physics_process` calls `machine.tick(delta)`. The Director is under `WorldRoot` (PAUSABLE), so it stops while paused.
@@ -127,6 +128,57 @@ There is no `restart_from_entry()`, and `CheckpointStore.restart_into` is not us
 - `_unload_stage()` sets `_director = null`.
 - A stage whose root is not a `StageDirector` (Stage 2 until F12-05) loads and flies as a static stage.
 
+## Boss branch (F12-03)
+
+A Wave kind found in `boss_definitions` is a boss: its actor is a `BossController` ([bosses.md](bosses.md)) and its defeat completes its Encounter like an enemy's. Stage 1's only boss kind is `lantern_guardian`, S1-07's single Wave.
+
+### Exports
+
+`boss_definitions` is in the Exports table above. Besides it:
+
+| Export | Type | Stage 1 value | Meaning |
+| --- | --- | --- | --- |
+| `defeat_presentation` | `AnimationPlayer` | unset | Optional: the stage's player for a boss defeat, such as the shrine lighting from corrupted to calm. Set with `defeat_animation` or not at all; D-07 authors it and F14-01 sets both. |
+| `defeat_animation` | `StringName` | `&""` | The clip of `defeat_presentation` played on `boss_defeated`. |
+
+### Signals
+
+| Signal | Payload | Emitted when |
+| --- | --- | --- |
+| `boss_started` | `display_name: String, phase_count: int` | The boss's `boss_started`, inside its `spawn_setup`. The Session calls `Hud.show_boss`. |
+| `boss_phase_changed` | `phase_index: int, attack_display_name: String` | The boss's `phase_changed`: Phase 0 right after `boss_started`, then each later Phase on depletion. The Session calls `Hud.show_attack_cue(name, ATTACK_CUE_SECONDS)`. |
+| `boss_health_changed` | `phase_index: int, ratio: float` | The boss's `phase_health_changed`, every accepted hit. The Session calls `Hud.set_phase_health`. |
+| `boss_defeated` | `boss_id: StringName` | The boss's `defeated`, once per spawned boss. `boss_id` is the `BossDefinition.kind` (`&"lantern_guardian"`), the key the shrine presentation and audio react to. The Session calls `Hud.hide_boss`. |
+
+The boss's `threat_reported` joins the Director's existing `threat_reported`, so the HUD threat cue works for it unchanged.
+
+### Setup check
+
+`check_setup()` adds, through `_check_bosses()`:
+
+- A Wave kind in `boss_definitions` needs an `actor_scenes` entry, as any kind, and a non-empty `boss_definitions` value; it needs no `enemy_definitions` entry.
+- A kind in both `enemy_definitions` and `boss_definitions` is refused.
+- Every `BossDefinition` must pass `validate()` (its messages are prefixed with the stage id and `boss_definitions '<kind>'`), and its `kind` must equal its key, since `boss_defeated` reports it.
+- `defeat_presentation` and `defeat_animation` are both set or both empty, and the clip must be one of the player's animations.
+
+### Spawn
+
+`_on_wave_requested` hands a boss kind's marker to `_spawn_boss(kind, encounter_id, marker_path, bounds)`: it instances `actor_scenes[kind]` (a root that is not a `BossController` is reported with `push_error` and skipped), adds it under `RuntimeActors` at the marker's global transform, connects `boss_started`, `phase_changed`, `phase_health_changed`, `threat_reported` and `defeated`, and only then calls `spawn_setup(boss_definitions[kind], enemy_id, encounter_id, rng, projectile_system, player, get_active_encounter_bounds())`, because `spawn_setup` already emits `boss_started` and Phase 0. A refused boss is freed with its connections. A started boss is live: `_live_enemies[enemy_id]` holds its `get_score()` (1,000 for the Lantern Guardian).
+
+### Defeat order
+
+On the boss's `defeated(enemy_id, encounter_id)`, only while the boss is live, `_on_boss_defeated`:
+
+1. emits `boss_defeated(boss_id)`, so the HUD panel hides and the presentation starts before the stage clear;
+2. plays `defeat_animation` on `defeat_presentation` when set;
+3. runs `_on_enemy_defeated`, the enemies' once-only path: the score reaches the Run, and `notify_enemy_defeated` completes the `ALL_REQUIRED_ENEMIES` Encounter and, for S1-07, clears the stage (the Session's connection is deferred).
+
+The hostile clear comes before all of this, from the controller. The ExitVolume never completes S1-07: `requires_exit` is false there, and the machine ignores an exit for `ALL_REQUIRED_ENEMIES` Encounters.
+
+### Retry and Restart
+
+`retry_from_checkpoint` already frees every `RuntimeActors` child and clears `_live_enemies`, so a boss mid-fight is removed, its connections die with it, and the Director keeps no reference to it. The Session then calls `Hud.hide_boss()` explicitly on Retry and on Restart; binding the new ship also clears the panel, but the contract does not rely on that. Entering S1-07 again spawns a new boss from Phase 0.
+
 ## Dependencies
 
 - `EncounterMachine`, `StageDefinition` and the Definitions (F8-01, F8-02); Stage 1 content (F8-04).
@@ -160,7 +212,7 @@ The sprint's no-new-tests rule (2026-09-23) replaced the ticket's fifteen scene 
 - `stage_director.gd` is on Stage 1's `Stage` with the exports above; nothing else in `stage_01.tscn` changed, and `monitoring` stays false in the file.
 - Keep the Encounter, Wave marker, `EntryVolume`, `ExitVolume`, `RewardOrigin`, `ShieldPickup` and `RuntimeActors` names: they are load-bearing. `check_setup()` names any that go missing, and the Session then refuses the stage with that message.
 - `get_active_encounter_bounds()` is the value for boss-arena retreat containment (STAGE_01_HANDOFF).
-- `lantern_guardian` points at the dev Sentry until F12-03.
+- `lantern_guardian` is the Lantern Guardian since F12-03: `actor_scenes` → `scenes/enemies/lantern_guardian.tscn`, `boss_definitions` → `content/bosses/lantern_guardian.tres`. For the shrine lighting, author an `AnimationPlayer` in the stage with a corrupted-to-calm clip and tell Claude its path and clip name; Claude sets `defeat_presentation` and `defeat_animation`.
 - Since F10-02 `gate.gd` is on `Gates/Gate_S1_02..05` and `checkpoint.gd` on `Checkpoints/CP1-A` and `CP1-B`, with their exports. Keep `BarrierBody/Collision`, `ClosedVisual`, `Respawn` and `Environment/PortalLinks/GuardLink1..3`: the Director resolves them, and `check_setup()` names any that go missing.
 - For a Checkpoint glow, react to `StageDirector.checkpoint_activated(checkpoint_id)`, for example with an `AnimationPlayer` on the arch. Tell Claude the node, and Claude connects it once.
 
@@ -169,6 +221,7 @@ The sprint's no-new-tests rule (2026-09-23) replaced the ticket's fifteen scene 
 - **Respawn Invulnerability** is not specified and none is added: a Retry puts the ship at the Respawn with nothing incoming.
 - **No Checkpoint glow or sound yet:** Astra connects presentation to `checkpoint_activated` through Claude.
 - **No scene tests** (sprint rule).
+- **The defeat presentation is one stage-wide player** (F12-03): every boss defeat plays the same `defeat_animation`, not keyed by `boss_id`, and Retry never resets it. Fine for Stage 1, whose only boss ends the stage; a mid-stage boss (Stage 2's Tempest Sentinel, F12-06) that is defeated before a Retry to an earlier Checkpoint would keep its "resolved" presentation. F12-06 or F12-07 keys or resets it if Stage 2 uses it.
 - **`tools/validate_stage_01.gd` (Astra's) now fails** its "static stage has no runtime script" check, by design: Stage 1 has its Director. Its owner updates the check; `tools/build_stage_01.py` must never be rerun over the wiring.
 - **Exit-time leaks from the enemy visuals** (`spirit_lume.tscn`, `sentry_lantern.tscn` duplicate their glTF children): Astra's, recorded in validation/stage-director.md.
 - **EncounterMachine compile fix.** F10-01 found that `encounter_machine.gd` never compiled (two parameters named `enemy_id` shadowed its static `enemy_id()`); commit `be64081` renamed them, with no behavior change.

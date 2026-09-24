@@ -5,6 +5,8 @@ const LANTERN_SCENE: String = "res://scenes/enemies/lantern_guardian.tscn"
 const TEMPEST_SCENE: String = "res://scenes/enemies/tempest_sentinel.tscn"
 const STORM_SCENE: String = "res://scenes/enemies/storm_guardian.tscn"
 const LANTERN_CLIPS: Array[StringName] = [&"Flying_Idle", &"Punch", &"Yes", &"Death"]
+## The only root script the Lantern prefab may carry, attached by F12-03.
+const BOSS_CONTROLLER_SCRIPT: String = "res://scripts/enemies/boss_controller.gd"
 
 var _failures: PackedStringArray = []
 
@@ -43,7 +45,9 @@ func _run() -> void:
 	_finish()
 
 func _check_lantern(enemy: Node3D) -> void:
-	if enemy.name != &"Enemy" or enemy.transform != Transform3D.IDENTITY or enemy.get_script() != null:
+	var root_script: Script = enemy.get_script() as Script
+	var script_ok: bool = root_script == null or root_script.resource_path == BOSS_CONTROLLER_SCRIPT
+	if enemy.name != &"Enemy" or enemy.transform != Transform3D.IDENTITY or not script_ok:
 		_failures.append("Lantern root name, identity or script is wrong")
 	var visual: Node3D = enemy.get_node_or_null("VisualRoot") as Node3D
 	var model: Node3D = enemy.get_node_or_null("VisualRoot/Model") as Node3D

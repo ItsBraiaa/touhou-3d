@@ -2,6 +2,7 @@
 
 [ext_resource type="PackedScene" path="res://assets/models/bosses/Ghost.gltf" id="1_vr08o"]
 [ext_resource type="Texture2D" path="res://assets/models/bosses/Ghost_Atlas_Monsters.png" id="2_3h85i"]
+[ext_resource type="Script" path="res://scripts/enemies/boss_controller.gd" id="3_boss_controller"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_qflx0"]
 resource_name = "Atlas"
@@ -1949,7 +1950,16 @@ _data = {
 [sub_resource type="SphereShape3D" id="SphereShape3D_fmn1c"]
 radius = 3.0
 
-[node name="Enemy" type="Node3D" unique_id=66369328]
+[node name="Enemy" type="Node3D" unique_id=66369328 node_paths=PackedStringArray("visual_root", "hit_volume", "emitter", "animation_player")]
+script = ExtResource("3_boss_controller")
+visual_root = NodePath("VisualRoot")
+hit_volume = NodePath("HitVolume")
+emitter = NodePath("Emitters/Main")
+animation_player = NodePath("VisualRoot/Model/AnimationPlayer")
+idle_clip = &"Flying_Idle"
+step_clip = &"Punch"
+phase_clip = &"Yes"
+defeat_clip = &"Death"
 
 [node name="VisualRoot" type="Node3D" parent="." unique_id=1384821073]
 

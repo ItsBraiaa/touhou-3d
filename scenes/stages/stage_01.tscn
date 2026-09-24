@@ -14,6 +14,9 @@
 [ext_resource type="PackedScene" path="res://scenes/dev/shield_pickup.tscn" id="9_shield_pickup"]
 [ext_resource type="Script" path="res://scripts/progression/gate.gd" id="10_gate"]
 [ext_resource type="Script" path="res://scripts/progression/checkpoint.gd" id="11_checkpoint"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/lantern_guardian.tscn" id="12_lantern_guardian"]
+[ext_resource type="Script" path="res://scripts/definitions/boss_definition.gd" id="13_boss_definition"]
+[ext_resource type="Resource" path="res://content/bosses/lantern_guardian.tres" id="14_lantern_guardian_definition"]
 
 [sub_resource type="FastNoiseLite" id="ForestNoise"]
 seed = 71
@@ -759,14 +762,16 @@ material = SubResource("Bark")
 script = ExtResource("1_director")
 stage_definition = ExtResource("2_stage_definition")
 actor_scenes = Dictionary[StringName, PackedScene]({
-&"lantern_guardian": ExtResource("4_sentry"),
+&"lantern_guardian": ExtResource("12_lantern_guardian"),
 &"sentry": ExtResource("4_sentry"),
 &"spirit": ExtResource("3_spirit")
 })
 enemy_definitions = Dictionary[StringName, ExtResource("5_enemy_definition")]({
-&"lantern_guardian": ExtResource("7_sentry_definition"),
 &"sentry": ExtResource("7_sentry_definition"),
 &"spirit": ExtResource("6_spirit_definition")
+})
+boss_definitions = Dictionary[StringName, ExtResource("13_boss_definition")]({
+&"lantern_guardian": ExtResource("14_lantern_guardian_definition")
 })
 power_pickup_scene = ExtResource("8_power_pickup")
 shield_pickup_scene = ExtResource("9_shield_pickup")

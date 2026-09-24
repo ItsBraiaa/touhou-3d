@@ -16,7 +16,9 @@ extends Node
 ## Run, the [CombatState], the field and the ship, started at every Attempt, and its clear
 ## completes the stage; its off-screen threats reach the HUD (F10-01). Defeat's Retry
 ## resumes in place from the latest Checkpoint with a new ship at its `Respawn`, or
-## restarts the stage before any (F10-03).
+## restarts the stage before any (F10-03). The Director's boss fight drives the HUD boss
+## panel: name and Phase bars, each Attack's cue and the Phase health, hidden again on the
+## boss's defeat, on Retry and on Restart (F12-03).
 ##
 ## Nothing here decides gameplay: movement, targeting, progression and the Run's
 ## accounting belong to their cores. Results arrive with F11.
@@ -31,6 +33,10 @@ const FLIGHT_LIMITS_PATH := ^"FlightBounds/Limits"
 const GRAZE_SCORE := 10
 ## Seconds the HUD shows an off-screen threat cue for one report. Claude's proposal.
 const THREAT_CUE_SECONDS := 1.0
+## Seconds the HUD shows a boss Attack's name when its Phase begins. Claude's proposal:
+## long enough to still show at each Lantern Guardian Phase's first shot (2.0 s after
+## Phase 1 begins, 2.75 s after Phase 2).
+const ATTACK_CUE_SECONDS := 3.0
 ## Menu actions that only open a full screen, which Back returns from.
 const SCREEN_BY_ACTION: Dictionary[StringName, StringName] = {
 	&"open_stage_select": ScreenRouter.STAGE_SELECT,
@@ -180,6 +186,10 @@ func _restart_stage() -> void:
 	_run_state.restart_stage()
 	_combat_state.start(_run_state.starting_power_level())
 	_load_stage(stage)
+	# A boss fight never survives a Restart. Binding the new ship clears the panel too; this
+	# says so without relying on it. Before the Attempt starts, because a boss Wave in the
+	# first Encounter would show its panel inside start_attempt.
+	interface.get_hud().hide_boss()
 	_run_state.begin_attempt()
 	if _director != null:
 		_director.start_attempt(_attempt_seed(_run_state.get_attempt_index()))
@@ -263,6 +273,7 @@ func _load_stage(stage_id: StringName) -> bool:
 		# unloads it.
 		_director.stage_cleared.connect(_on_stage_cleared, CONNECT_DEFERRED)
 		_director.threat_reported.connect(_on_threat_reported)
+		_connect_boss_panel()
 	return true
 
 
@@ -303,6 +314,8 @@ func _retry() -> void:
 	_director.retry_from_checkpoint(_player, _attempt_seed(_run_state.get_attempt_index() + 1))
 	# After the restore, which puts back the committed statistics (F8-03).
 	_run_state.begin_attempt()
+	# The Director removed any boss mid-fight; as on Restart, its panel goes explicitly.
+	interface.get_hud().hide_boss()
 	interface.show_home(ScreenRouter.HUD)
 
 
@@ -348,6 +361,32 @@ func _on_stage_cleared() -> void:
 
 func _on_threat_reported(side: int) -> void:
 	interface.get_hud().show_threat(side, THREAT_CUE_SECONDS)
+
+
+## The Director's boss signals reach the HUD boss panel (F12-03). Once per stage load:
+## every load builds a new Director, so a Restart cannot double them. The handlers read
+## the HUD when they run.
+func _connect_boss_panel() -> void:
+	_director.boss_started.connect(_on_boss_started)
+	_director.boss_phase_changed.connect(_on_boss_phase_changed)
+	_director.boss_health_changed.connect(_on_boss_health_changed)
+	_director.boss_defeated.connect(_on_boss_defeated)
+
+
+func _on_boss_started(display_name: String, phase_count: int) -> void:
+	interface.get_hud().show_boss(display_name, phase_count)
+
+
+func _on_boss_phase_changed(_phase_index: int, attack_display_name: String) -> void:
+	interface.get_hud().show_attack_cue(attack_display_name, ATTACK_CUE_SECONDS)
+
+
+func _on_boss_health_changed(phase_index: int, ratio: float) -> void:
+	interface.get_hud().set_phase_health(phase_index, ratio)
+
+
+func _on_boss_defeated(_boss_id: StringName) -> void:
+	interface.get_hud().hide_boss()
 
 
 ## A hostile Projectile met the Core. The field reports at most one per tick, and treats

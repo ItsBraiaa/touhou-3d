@@ -15,6 +15,25 @@ Action required by <other agent>: <what they must do, or "none">
 
 ---
 
+## 2026-09-24 10:30 — Claude (trunk) — F12-03 part 2: the Lantern Guardian fights in S1-07 [shared]
+State: INTEGRATED_VERIFIED
+Files:
+- Edited: `scripts/progression/stage_director.gd` (`boss_definitions`, `defeat_presentation`, `defeat_animation`, the four `boss_*` signals, `_check_bosses`, `_spawn_boss`, `_on_boss_defeated`), `scripts/session/game_session.gd` (`ATTACK_CUE_SECONDS`, `_connect_boss_panel` and four `_on_boss_*` handlers, `hide_boss()` on Retry and Restart).
+- **[shared] `scenes/stages/stage_01.tscn`:** the Stage node's StageDirector exports only, plus three ext_resources. The `lantern_guardian` Sentry stand-in is gone from `enemy_definitions`; `actor_scenes[&"lantern_guardian"]` → `scenes/enemies/lantern_guardian.tscn`; new `boss_definitions[&"lantern_guardian"]` → `content/bosses/lantern_guardian.tres`. `defeat_presentation` and `defeat_animation` stay unset. No geometry, marker or lighting change.
+- **[shared] `scenes/enemies/lantern_guardian.tscn`:** `scripts/enemies/boss_controller.gd` attached to the `Enemy` root, with `node_paths` and `visual_root` → `VisualRoot`, `hit_volume` → `HitVolume`, `emitter` → `Emitters/Main`, `animation_player` → `VisualRoot/Model/AnimationPlayer`, and the clips `Flying_Idle`, `Punch`, `Yes`, `Death`. Nothing else changed.
+- **[shared] `tools/validate_boss_scenes.gd`** (D-03's QA tool): `_check_lantern` now accepts `boss_controller.gd` on the Lantern root and still refuses any other script (`BOSS_SCENES_QA failures=0`). `_check_stage2` is unchanged, so F12-06 and F12-07 need the same one-line change when they attach the Stage 2 roots.
+- New: `docs/validation/bosses-lantern-guardian.png`. Docs: `docs/validation/bosses.md` (the F12-03 section), `docs/engineering/bosses.md` ("Lantern Guardian (F12-03)"), `docs/engineering/stage-director.md` ("Boss branch (F12-03)", Exports rows, an Open issue), `docs/GUIDE.md` (Section 6 rows `game_session.gd`, `stage_director.gd`, `boss_controller.gd`; Section 10 "Lantern Guardian"), the ROADMAP F12-03 row and the ticket.
+
+Change:
+- **S1-07 has its boss.** Entering it behind CP1-B spawns the Guardião das Lanternas at `Wave1_Boss1` (0, 43, -520). The HUD shows its name, three Phase bars and each Attack's name for 3.0 s: Ritual das Lanternas, Fios de Luz, Dança do Crepúsculo. Each Phase's depletion clears hostile fire. The final Phase's defeat emits `boss_defeated(&"lantern_guardian")`, adds 1,000 and completes S1-07 exactly once; the ExitVolume changes nothing. Retry or Restart during the fight removes the boss and hides the panel.
+- **Tests.** None added (sprint rule). A verifier drove the real game headless and windowed; a reviewer found no blocker, and its four minor points are fixed.
+
+Why: F12-03 part 2 closes the ticket; Stage 1 now ends with its real boss.
+Action required by Astra:
+1. **Boss health is about 2.7× the pacing target.** Measured with the real weapon: 22.1 damage/s at Power Level 3 (17.1 at Power Level 2). Part 1's Phases of 1500 / 1500 / 2100 therefore last about 68 / 68 / 95 s, against STAGE_DESIGN's ~25 / 25 / 35 s; about 550 / 550 / 775 would fit (then about 32 / 32 / 45 s at Power Level 2). Values are yours: `content/bosses/lantern_guardian.tres` (D-07 Part C). Your 221 s Stage 1 estimate assumed an 85 s boss.
+2. **Shrine lighting (D-07 Part A).** Author the corrupted-to-calm `AnimationPlayer` in `stage_01.tscn` with `process_mode = ALWAYS` (sprint note 4), and send its path and clip name; F14-01's swap step sets `defeat_presentation` and `defeat_animation`.
+3. Boss-arena retreat containment is still open.
+
 ## 2026-09-23 23:36 — Claude (path) — F14-01 pre-flight: dev-01 exported and run outside the repository
 State: docs
 Files: `docs/HANDOFF_LOG.md` only (this entry). No code, scene, preset, ticket or ROADMAP edit; F14-01 stays `todo` for trunk.
@@ -899,13 +918,13 @@ Change: Recorded the accepted vocabulary, the four architectural decisions, the 
 Why: Result of the planning grill with the user; establishes how Claude writes and verifies GDScript for this project.
 Action required by Astra: read `docs/engineering/ROADMAP.md`, especially "Requests to Astra". From ticket F0-03 onward Claude owns `project.godot`, `export_presets.cfg`, `default_bus_layout.tres`, and `scenes/main.tscn`; the `tools/build_*.py` generators must not be rerun over integrated scenes without reconciling first. Astra's `.scratch/stage-01-area/` and `docs/STAGE_01_HANDOFF.md` were read and are reflected in the roadmap.
 
-## 2026-09-23 � OpenCode (oc-a) � F12-06 part 1
+## 2026-09-23 � OpenCode (oc-a) � F12-06 part 1
 
 Files: `content/bosses/tempest_sentinel.tres`, `content/patterns/sentinel_aimed_burst.tres`, `content/patterns/sentinel_rotating_fan.tres`.
 
 Change: Added the dev Tempest Sentinel BossDefinition with two proposed attacks and two health phases. Phase 1 uses alternating charged aimed bursts; Phase 2 uses rotating fans with alternating player-height tracking and fixed altitude shifts. All three resources carry `metadata/dev = true`. Proposed values and attack names remain for Astra's D-06 review. Part 1 only; scene integration remains with sol.
 
-## 2026-09-23 � OpenCode (oc-a) � F12-07 part 1
+## 2026-09-23 � OpenCode (oc-a) � F12-07 part 1
 
 Files: `content/bosses/storm_guardian.tres`, `content/patterns/storm_spiral.tres`, `content/patterns/storm_thunder_rings.tres`, `content/patterns/storm_aimed_burst.tres`.
 

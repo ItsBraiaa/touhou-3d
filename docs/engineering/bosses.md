@@ -1,6 +1,6 @@
 # Bosses
 
-Feature F12: Bosses and Stage 2. Started with ticket F12-01 on 2026-09-23. The boss Definitions, the `BossMachine` Rules Core (F12-01) and the `BossController` adapter with its dev boss (F12-02) are CODE_READY. The Lantern Guardian in S1-07 (F12-03) and the Stage 2 bosses (F12-05 to F12-07) are not integrated yet.
+Feature F12: Bosses and Stage 2. Started with ticket F12-01 on 2026-09-23. The boss Definitions, the `BossMachine` Rules Core (F12-01) and the `BossController` adapter with its dev boss (F12-02) are CODE_READY, and since F12-03 the Lantern Guardian fights in S1-07 (section "Lantern Guardian (F12-03)"). The Stage 2 bosses (F12-05 to F12-07) are not integrated yet.
 
 ## Purpose
 
@@ -14,6 +14,7 @@ It does not own any Node, boss movement (the controller hovers the boss), animat
 - `scripts/enemies/boss_machine.gd` (Rules Core, `class_name BossMachine extends RefCounted`).
 - `scripts/enemies/boss_controller.gd` (Adapter, `class_name BossController extends Node3D`, F12-02), on the `Enemy` root of a boss prefab.
 - `scenes/dev/dev_boss.tscn` and `scenes/dev/dev_boss_definition.tres` (the dev boss, `"Guardião (dev)"`, three Phases, its patterns inline; `metadata/dev = true`).
+- `scenes/enemies/lantern_guardian.tscn` (D-03, Astra's) [shared], `content/bosses/lantern_guardian.tres` and `content/patterns/lantern_*.tres` (F12-03).
 - No test files: the sprint's no-new-tests rule (2026-09-23) voids the tickets' test lists. F12-02's scripted runs are in [validation/bosses.md](../validation/bosses.md).
 
 ## Definitions
@@ -80,7 +81,7 @@ Each has `validate() -> PackedStringArray`. `BossDefinition.validate()` reports 
 
 ## BossController contract (F12-02)
 
-`scripts/enemies/boss_controller.gd` (Adapter, `class_name BossController extends Node3D`), on the `Enemy` root of `scenes/dev/dev_boss.tscn` now, and of `scenes/enemies/lantern_guardian.tscn` (F12-03), `tempest_sentinel.tscn` (F12-06) and `storm_guardian.tscn` (F12-07) once attached.
+`scripts/enemies/boss_controller.gd` (Adapter, `class_name BossController extends Node3D`), on the `Enemy` root of `scenes/dev/dev_boss.tscn` and, since F12-03, of `scenes/enemies/lantern_guardian.tscn`; `tempest_sentinel.tscn` (F12-06) and `storm_guardian.tscn` (F12-07) once attached.
 
 ### Exports
 
@@ -128,6 +129,26 @@ Priority 0, before `PlayerWeapon` (50) and the `ProjectileSystem` (100): read th
 - `phase_changed` → `phase_clip` for an index above 0, then re-emitted; `phase_health_changed` re-emitted unchanged.
 - `defeated` → leave `targetable`, stop physics (no more registration), emit `defeated` once, then `queue_free()` at once, or after `defeat_clip` through a Tween of the boss (so the wait stands still while the tree is paused).
 
+## Lantern Guardian (F12-03)
+
+Stage 1's final boss, the Guardião das Lanternas, in S1-07.
+
+- **Prefab.** `scenes/enemies/lantern_guardian.tscn` is D-03's scene with `boss_controller.gd` attached to its `Enemy` root [shared]: `visual_root` → `VisualRoot`, `hit_volume` → `HitVolume` (radius 3.0 at (0, 4.3, 0)), `emitter` → `Emitters/Main`, `animation_player` → `VisualRoot/Model/AnimationPlayer`, and D-03's clips `idle_clip` `Flying_Idle`, `step_clip` `Punch`, `phase_clip` `Yes`, `defeat_clip` `Death`. Nothing else in the scene changed. `tools/validate_boss_scenes.gd` now accepts `boss_controller.gd` on the Lantern root and still fails any other script; its Stage 2 check still expects no root script until F12-06 and F12-07 attach theirs.
+- **Content** (F12-03 part 1, every file `metadata/dev = true`; Astra tunes): `content/bosses/lantern_guardian.tres`, kind `lantern_guardian`, `display_name` `"Guardião das Lanternas"`, `score` 1000, `entry_seconds` 1.0, its Phases, Attacks and steps as sub-resources; the patterns `content/patterns/lantern_ring.tres`, `lantern_aimed_burst.tres` and `lantern_paired_fan.tres`.
+
+| Phase | Attack | Health | Shape |
+| --- | --- | --- | --- |
+| 1 | `"Ritual das Lanternas"` | 1500 | High ring, sparse aimed burst, low ring with the gap rotated, sparse aimed burst |
+| 2 | `"Fios de Luz"` | 1500 | Charged aimed bursts alternating with paired fans at the player's height |
+| 3 | `"Dança do Crepúsculo"` | 2100 | Rings and aimed bursts, then a reposition window |
+
+The health values are part 1's proposal for the ticket's target of about 25, 25 and 35 s of Power Level 3 fire; part 1 recorded no measured durations beside them.
+
+- **Where it spawns.** S1-07's only Wave (`content/stages/stage_01/s1_07.tres`, `ALL_REQUIRED_ENEMIES`, behind CP1-B) names kind `lantern_guardian` at `Spawns/Wave1_Boss1`, (0, 43, -520). The Stage Director finds the kind in `boss_definitions`, instances `actor_scenes[&"lantern_guardian"]` there and calls `spawn_setup` with the Definition, enemy id `S1-07/Wave1_Boss1` and the active Encounter's bounds ([stage-director.md](stage-director.md) "Boss branch (F12-03)").
+- **HUD.** The Director re-emits the fight; the Session shows the boss panel with three bars, each Attack's name for `ATTACK_CUE_SECONDS` (3.0 s, Claude's proposal) and each hit's Phase ratio, and hides the panel on defeat, Retry and Restart.
+- **Defeat and score.** The final Phase's depletion clears hostile fire (the controller), then the Director emits `boss_defeated(&"lantern_guardian")`, adds 1,000 to the Run (PLANEJAMENTO Section 4) and reports the defeat to the `EncounterMachine`, which completes S1-07 and so clears the stage, once. The ExitVolume never completes S1-07: its `requires_exit` is false and `ALL_REQUIRED_ENEMIES` ignores the exit.
+- **The dev stand-in is gone.** F10-01's `lantern_guardian` → dev Sentry entries in `actor_scenes` and `enemy_definitions` were removed from `stage_01.tscn`.
+
 ## Dependencies
 
 `PatternDefinition` and `PatternEmitter` (F5-04); `ProjectileSpawn` (F5-01). The Attempt's `RandomNumberGenerator` comes from the Director through `BossController.spawn_setup`. The controller needs the `ProjectileSystem` (F6-02), `EnemyActor.threat_side` (F9-02), and is found by `Targeting` (F1-04) through `targetable` and its `HitVolume`.
@@ -149,8 +170,9 @@ Priority 0, before `PlayerWeapon` (50) and the `ProjectileSystem` (100): read th
 
 ## Open issues
 
-- **First run: F12-02's harness.** The dev boss ran its three Phases there (see [validation/bosses.md](../validation/bosses.md)); F12-03's S1-07 is the first real fight.
-- **`content/bosses/lantern_guardian.tres` does not load** (F12-03 part 1): a forward `SubResource("Attack_Ritual")` at line 14. Reported for trunk's F12-03 part 2; not fixed here (`content/` is outside F12-02).
+- **First run: F12-02's harness.** The dev boss ran its three Phases there (see [validation/bosses.md](../validation/bosses.md)); since F12-03 the Lantern Guardian in S1-07 is the first real fight.
+- **Shrine lighting.** `StageDirector.defeat_presentation` and `defeat_animation` are empty on Stage 1 until Astra authors the corrupted-to-calm `AnimationPlayer` (D-07, set through F14-01). Results (F11) pauses the tree right after `boss_defeated`, so that player needs `process_mode = ALWAYS` (the ticket's sprint note 4).
+- **Retreat containment** for the boss arena is still an open request; the boss only hovers inside the Encounter bounds.
 - **Locked shots and the lock framing.** From about 45 units the dev boss took most locked shots; closer targets are F6-04's.
 - **Entry reading.** `entry_seconds` is a window before step 0's own Anticipation, so the first shot comes at `entry_seconds + anticipation_seconds`. If D-06 or D-07 Part C wants the entry to be the first Anticipation instead, `start` begins step 0 directly.
 - **`follow_player_height` ignores `height_offset`.** The ticket says "or the player's sampled Y"; an offset relative to the player can be added if D-07 Part C asks for it.

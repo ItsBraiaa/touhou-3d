@@ -14,8 +14,12 @@ extends Node3D
 ## Encounter completes, activates each [Checkpoint] once through its own
 ## [CheckpointStore] (clearing hostile fire first), hides a PortalLink when its guard dies,
 ## and sets every Gate and link from the machine's state (`_apply_progress`). Since F10-03
-## Defeat's Retry restores in place ([method retry_from_checkpoint]). The Director sits
-## under `WorldRoot`, which is PAUSABLE, so it stops while paused.
+## Defeat's Retry restores in place ([method retry_from_checkpoint]). Since F12-03 a Wave
+## kind found in [member boss_definitions] spawns a [BossController] instead, whose fight
+## is re-emitted as the `boss_*` signals for the HUD; its one defeat emits
+## [signal boss_defeated], plays the optional defeat presentation, then scores and reaches
+## the machine like an enemy's. The Director sits under `WorldRoot`, which is PAUSABLE, so
+## it stops while paused.
 
 
 ## The last Encounter of the stage completed. The Session connects it deferred.
@@ -28,6 +32,24 @@ signal pickup_accepted(pickup_id: StringName, kind: Pickup.Kind, score_awarded: 
 ## The Checkpoint [param checkpoint_id] activated for the first time: resources refilled,
 ## the Attempt committed and a Snapshot recorded. For presentation, such as an arch glow.
 signal checkpoint_activated(checkpoint_id: StringName)
+## A boss's fight began: [param display_name] (Portuguese, from its [BossDefinition]) with
+## [param phase_count] Phases. Re-emitted from [signal BossController.boss_started], before
+## Phase 0's [signal boss_phase_changed]. For [method Hud.show_boss].
+signal boss_started(display_name: String, phase_count: int)
+## Boss Phase [param phase_index] began with the Attack [param attack_display_name]
+## (Portuguese): Phase 0 right after [signal boss_started], each later one when the
+## previous is depleted. Re-emitted from [signal BossController.phase_changed]. For
+## [method Hud.show_attack_cue].
+signal boss_phase_changed(phase_index: int, attack_display_name: String)
+## Boss Phase [param phase_index] now holds [param ratio] of its health, 0.0 to 1.0.
+## Re-emitted from [signal BossController.phase_health_changed]. For
+## [method Hud.set_phase_health].
+signal boss_health_changed(phase_index: int, ratio: float)
+## A boss's last Phase was depleted: once per spawned boss, before its score and its report
+## to the machine, so it always comes before [signal stage_cleared]. [param boss_id] is its
+## [member BossDefinition.kind], the Wave kind (`&"lantern_guardian"`), the key the stage
+## presentation and audio react to. For [method Hud.hide_boss].
+signal boss_defeated(boss_id: StringName)
 
 ## Holds one child per Encounter, named by its id (`docs/STAGE_01_HANDOFF.md`).
 const ENCOUNTERS_PATH := ^"Encounters"
@@ -43,10 +65,20 @@ const EXIT_VOLUME_NAME := ^"ExitVolume"
 
 ## The authored route. Required, and it must validate.
 @export var stage_definition: StageDefinition
-## The actor scene of every Wave kind the route names; each root is an [EnemyActor].
+## The actor scene of every Wave kind the route names; each root is an [EnemyActor], or a
+## [BossController] for a kind in [member boss_definitions].
 @export var actor_scenes: Dictionary[StringName, PackedScene] = {}
-## The [EnemyDefinition] of every Wave kind the route names.
+## The [EnemyDefinition] of every Wave kind the route names that is not a boss.
 @export var enemy_definitions: Dictionary[StringName, EnemyDefinition] = {}
+## The [BossDefinition] of every Wave kind that is a boss, keyed by its
+## [member BossDefinition.kind]. A kind is an enemy or a boss, never both (F12-03).
+@export var boss_definitions: Dictionary[StringName, BossDefinition] = {}
+## Optional: the stage's [AnimationPlayer] that presents a boss defeat, such as the shrine
+## lighting turning from corrupted to calm. Set together with [member defeat_animation],
+## or neither; empty until Astra authors it (F12-03, F14-01).
+@export var defeat_presentation: AnimationPlayer
+## The clip of [member defeat_presentation] played on [signal boss_defeated].
+@export var defeat_animation: StringName
 ## A [Pickup] scene of kind POWER. Required.
 @export var power_pickup_scene: PackedScene
 ## A [Pickup] scene of kind SHIELD. Required.
@@ -71,8 +103,9 @@ var _player: Node3D
 ## One per Attempt, seeded by the Session and injected into every enemy.
 var _rng := RandomNumberGenerator.new()
 var _runtime_actors: Node3D
-## The score of each enemy spawned and not yet reported defeated, by enemy id: the first
-## report scores and erases it, so a repeat scores nothing.
+## The score of each enemy or boss spawned and not yet reported defeated, by enemy id: the
+## first report scores and erases it, so a repeat scores nothing. A boss's is its
+## [method BossController.get_score], read once it started.
 var _live_enemies: Dictionary[StringName, int] = {}
 
 
@@ -115,6 +148,7 @@ func check_setup() -> PackedStringArray:
 		if definition != null:
 			for message: String in definition.validate():
 				errors.append("stage '%s': enemy_definitions '%s': %s" % [stage_id, kind, message])
+	errors.append_array(_check_bosses())
 	return errors
 
 
@@ -244,7 +278,10 @@ func _check_encounter(encounter: EncounterDefinition) -> PackedStringArray:
 			var kind := wave.enemy_kind_at(index)
 			if actor_scenes.get(kind) == null:
 				errors.append("stage '%s': Wave kind '%s' at '%s/%s' has no 'actor_scenes' entry" % [stage_id, kind, path, marker])
-			if enemy_definitions.get(kind) == null:
+			if boss_definitions.has(kind):
+				if boss_definitions[kind] == null:
+					errors.append("stage '%s': Wave kind '%s' at '%s/%s' has an empty 'boss_definitions' entry" % [stage_id, kind, path, marker])
+			elif enemy_definitions.get(kind) == null:
 				errors.append("stage '%s': Wave kind '%s' at '%s/%s' has no 'enemy_definitions' entry" % [stage_id, kind, path, marker])
 	for reward: RewardDefinition in encounter.rewards:
 		if not root.get_node_or_null(reward.origin_marker) is Node3D:
@@ -267,7 +304,8 @@ func _on_exit_body_entered(body: Node3D, encounter_id: StringName) -> void:
 		_machine.notify_exited(encounter_id)
 
 
-## Spawns one enemy per marker of the Wave, at the marker's transform.
+## Spawns one enemy, or one boss ([method _spawn_boss]), per marker of the Wave, at the
+## marker's transform.
 func _on_wave_requested(encounter_id: StringName, wave_index: int) -> void:
 	var wave: WaveDefinition = stage_definition.find_encounter(encounter_id).waves[wave_index]
 	var root := _encounter_root(encounter_id)
@@ -275,6 +313,9 @@ func _on_wave_requested(encounter_id: StringName, wave_index: int) -> void:
 	for index: int in wave.spawn_markers.size():
 		var marker_path := wave.spawn_markers[index]
 		var kind := wave.enemy_kind_at(index)
+		if boss_definitions.has(kind):
+			_spawn_boss(kind, encounter_id, marker_path, bounds)
+			continue
 		var definition := enemy_definitions[kind]
 		var enemy_id := EncounterMachine.enemy_id(encounter_id, marker_path)
 		var node := actor_scenes[kind].instantiate()
@@ -338,6 +379,46 @@ func _spawn_pickup(scene: PackedScene, pickup_id: StringName, at: Vector3) -> vo
 	pickup.accepted.connect(pickup_accepted.emit)
 
 
+## Spawns the boss of Wave kind [param kind] at [param marker_path] under `RuntimeActors`
+## and re-emits its fight as this Director's `boss_*` signals. Its signals are connected
+## before [method BossController.spawn_setup], which already emits
+## [signal BossController.boss_started] and Phase 0; a refused boss is freed with its
+## connections. A scene whose root is not a [BossController] is reported and skipped.
+func _spawn_boss(kind: StringName, encounter_id: StringName, marker_path: NodePath, bounds: AABB) -> void:
+	var definition := boss_definitions[kind]
+	var enemy_id := EncounterMachine.enemy_id(encounter_id, marker_path)
+	var node := actor_scenes[kind].instantiate()
+	var boss := node as BossController
+	if boss == null:
+		push_error("%s: 'actor_scenes' entry '%s' does not have a BossController root; %s is not spawned" % [get_path(), kind, enemy_id])
+		node.free()
+		return
+	_runtime_actors.add_child(boss)
+	boss.global_transform = (_encounter_root(encounter_id).get_node(marker_path) as Node3D).global_transform
+	boss.boss_started.connect(boss_started.emit)
+	boss.phase_changed.connect(boss_phase_changed.emit)
+	boss.phase_health_changed.connect(boss_health_changed.emit)
+	boss.threat_reported.connect(threat_reported.emit)
+	boss.defeated.connect(_on_boss_defeated.bind(definition.kind))
+	if not boss.spawn_setup(definition, enemy_id, encounter_id, _rng, _projectile_system, _player, bounds):
+		boss.queue_free()  # It reported why; a refused boss is the caller's to free.
+		return
+	_live_enemies[enemy_id] = boss.get_score()
+
+
+## A boss's defeat, once per spawned boss: [signal boss_defeated], then the defeat
+## presentation, then the score and the machine's report through
+## [method _on_enemy_defeated], so its Encounter completes from this defeat alone. A boss
+## a Retry removed is no longer live and does nothing.
+func _on_boss_defeated(enemy_id: StringName, encounter_id: StringName, boss_id: StringName) -> void:
+	if not _live_enemies.has(enemy_id):
+		return
+	boss_defeated.emit(boss_id)
+	if defeat_presentation != null:
+		defeat_presentation.play(defeat_animation)
+	_on_enemy_defeated(enemy_id, encounter_id)
+
+
 ## An Encounter's ExitVolume and the next EntryVolume can overlap, and a volume the ship
 ## is already inside reports no new `body_entered`: after a completion, the next
 ## Encounter is begun at once when the ship is already in its EntryVolume. Deferred, so
@@ -390,6 +471,32 @@ func _check_gates_checkpoints_and_links() -> PackedStringArray:
 			errors.append("stage '%s': guard link key '%s' names no Wave enemy" % [stage_id, enemy_id])
 		if not get_node_or_null(guard_links[enemy_id]) is Node3D:
 			errors.append("stage '%s': guard link of '%s' at '%s' is not a Node3D" % [stage_id, enemy_id, guard_links[enemy_id]])
+	return errors
+
+
+## A boss kind must not also be an enemy kind, and its [BossDefinition] must validate and
+## carry that kind, which [signal boss_defeated] reports: a boss refuses an invalid
+## definition, and a Wave that never spawns never completes. The defeat presentation is
+## both exports or neither, with a clip its player has.
+func _check_bosses() -> PackedStringArray:
+	var errors: PackedStringArray = []
+	var stage_id := _stage_id()
+	for kind: StringName in boss_definitions:
+		if enemy_definitions.has(kind):
+			errors.append("stage '%s': kind '%s' is in both 'enemy_definitions' and 'boss_definitions'" % [stage_id, kind])
+		var definition := boss_definitions[kind]
+		if definition == null:
+			continue  # A Wave of this kind reports the empty entry.
+		for message: String in definition.validate():
+			errors.append("stage '%s': boss_definitions '%s': %s" % [stage_id, kind, message])
+		if definition.kind != kind:
+			errors.append("stage '%s': boss_definitions '%s' holds the BossDefinition of kind '%s'" % [stage_id, kind, definition.kind])
+	if defeat_presentation != null and defeat_animation == &"":
+		errors.append("stage '%s': 'defeat_presentation' is set but 'defeat_animation' is not" % stage_id)
+	elif defeat_presentation == null and defeat_animation != &"":
+		errors.append("stage '%s': 'defeat_animation' '%s' is set but 'defeat_presentation' is not" % [stage_id, defeat_animation])
+	elif defeat_presentation != null and not defeat_presentation.has_animation(defeat_animation):
+		errors.append("stage '%s': 'defeat_animation' '%s' is not an animation of '%s'" % [stage_id, defeat_animation, get_path_to(defeat_presentation)])
 	return errors
 
 

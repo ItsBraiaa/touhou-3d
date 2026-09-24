@@ -78,7 +78,7 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | F12 | Bosses and Stage 2 | `bosses` | 00 plan | docs | no | — | done (one-pass planning; Stage 2 reinstated by the sprint plan) |
 | | | | 01 boss-machine-core | core | yes | path | done (no unit tests, by the sprint rule; transition cap 0.75 s from D-07 ruling 1) |
 | | | | 02 boss-controller-adapter | adapter | no | path | done (2026-09-23: `BossController` and the dev boss run three Phases, clears and the HUD panel in the arena harness; no new tests, by the sprint rule; `lantern_guardian.tres` load failure reported for F12-03) |
-| | | | 03 lantern-guardian-in-s1-07 | integration | no | trunk (part 1: oc-a) | todo |
+| | | | 03 lantern-guardian-in-s1-07 | integration | no | trunk (part 1: oc-a) | done (2026-09-24: the Lantern Guardian fights in S1-07 through `boss_definitions`, with the HUD panel and cues, +1000 and one stage clear from its final Phase; D-03's prefab attached; verified in the running game, no new tests per the sprint rule; Phase health about 2.7× the pacing target, noted for D-07 Part C) |
 | | | | 04 stage-02-content-draft | content | yes | oc-b | done (2026-09-23: dev draft of `content/stages/stage_02/` landed, validates and matches the scene; Astra tunes values in D-06) |
 | | | | 05 stage-02-director-integration | adapter | no | sol | todo |
 | | | | 06 tempest-sentinel-miniboss | integration | no | sol (part 1: oc-a) | todo |
