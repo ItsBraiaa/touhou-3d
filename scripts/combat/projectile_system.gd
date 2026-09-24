@@ -19,6 +19,10 @@ signal player_hit(projectile_id: int, damage: int)
 ## A hostile Projectile passed through the Graze Volume without touching the Core, for
 ## the first time in its life, while the player was not invulnerable.
 signal grazed(projectile_id: int)
+## A player Projectile hit the target [param target_id] for [param damage], right beside
+## the call to the `on_damage` it registered this tick. A Bomb's radius damage is not a
+## hit. For audio (F13-03).
+signal target_hit(target_id: int, damage: int)
 
 ## Higher than every actor's default 0, so enemies register their hit spheres and the
 ## ship moves before this tick reads them.
@@ -296,6 +300,7 @@ func _on_field_enemy_hit(target_id: int, _projectile_id: int, damage: int) -> vo
 	var on_damage: Callable = _tick_callbacks.get(target_id, Callable())
 	if on_damage.is_valid():
 		on_damage.call(damage)
+		target_hit.emit(target_id, damage)
 
 
 ## Reports every unset export with this node's path (CONVENTIONS "Setup errors are loud").

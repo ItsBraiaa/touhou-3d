@@ -50,6 +50,9 @@ signal boss_health_changed(phase_index: int, ratio: float)
 ## [member BossDefinition.kind], the Wave kind (`&"lantern_guardian"`), the key the stage
 ## presentation and audio react to. For [method Hud.hide_boss].
 signal boss_defeated(boss_id: StringName)
+## The enemy or boss [param enemy_id] of Encounter [param encounter_id] was defeated: once
+## per spawned actor, on its first report, after it scored. For audio (F13-03).
+signal enemy_defeated(enemy_id: StringName, encounter_id: StringName)
 
 ## Holds one child per Encounter, named by its id (`docs/STAGE_01_HANDOFF.md`).
 const ENCOUNTERS_PATH := ^"Encounters"
@@ -356,6 +359,7 @@ func _on_enemy_defeated(enemy_id: StringName, encounter_id: StringName) -> void:
 	_live_enemies.erase(enemy_id)
 	_hide_guard_link(enemy_id)
 	_run_state.add_score(score)
+	enemy_defeated.emit(enemy_id, encounter_id)
 	_machine.notify_enemy_defeated(enemy_id, encounter_id)
 	_report_guard_defeat(enemy_id)
 

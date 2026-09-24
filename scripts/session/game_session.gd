@@ -24,6 +24,11 @@ extends Node
 ## accounting belong to their cores. A stage clear freezes the stage under Results, and
 ## the last stage of the order ends the Run with its victory (F11-01); Results' Continuar
 ## enters the next Campaign stage and Jogar novamente replays a Direct Stage (F11-02).
+##
+## The game is heard through [member audio] (F13-03): each catalogue producer is connected
+## once, where the Session owns its lifetime (itself in `_ready`, the Director in
+## `_load_stage`, the ship in `_spawn_player`), every unload and every Retry silences the
+## sound effects in flight, and the music follows the menu, the route and the boss.
 
 
 ## Marker every stage root has, where the player enters (GUIDE Section 5 "Stages").
@@ -56,8 +61,10 @@ const SCREEN_BY_ACTION: Dictionary[StringName, StringName] = {
 @export var projectile_system: ProjectileSystem
 ## Holds menus and the HUD. Processes while the tree is paused.
 @export var interface: Interface
-## Root of the audio controller. Processes while the tree is paused.
-@export var audio: Node
+## The [AudioController] on `Main/Audio`. Processes while the tree is paused. Every
+## catalogue producer is connected to it once, where the Session owns that producer's
+## lifetime (F13-03).
+@export var audio: AudioController
 
 @export_group("Stages")
 ## The ship, `scenes/player/player_ship.tscn`. Its root must be a [PlayerController].
@@ -98,6 +105,7 @@ func _ready() -> void:
 	interface.action_requested.connect(_on_action_requested)
 	_connect_camera_settings()
 	interface.show_home(ScreenRouter.MAIN_MENU)
+	_connect_audio()
 
 
 ## `Main` processes while the tree is paused, so the tree has to be checked here: Active
@@ -252,6 +260,7 @@ func _return_to_menu() -> void:
 	_unload_stage()
 	_run_state.end_run(false)
 	interface.show_home(ScreenRouter.MAIN_MENU)
+	audio.play_music(&"menu")
 
 
 func _pause() -> void:
@@ -324,6 +333,8 @@ func _load_stage(stage_id: StringName) -> bool:
 		_director.stage_cleared.connect(_on_stage_cleared, CONNECT_DEFERRED)
 		_director.threat_reported.connect(_on_threat_reported)
 		_connect_boss_panel()
+		_connect_director_audio()
+	audio.play_music(_stage_track(stage_id, "route"))
 	return true
 
 
@@ -346,6 +357,8 @@ func _spawn_player(ship: PlayerController, at: Transform3D) -> void:
 	interface.get_hud().bind(_combat_state, _player.targeting, _player.camera_rig.camera)
 	projectile_system.setup(_flight_volume, _player)
 	_player.weapon.setup(_combat_state, projectile_system, _player.targeting)
+	# Freed with the ship, so a Retry's new ship has exactly one.
+	_player.weapon.shots_fired.connect(_on_shots_fired)
 
 
 ## Listens to the player's settings once for the Session's life, so a Restart or a Retry
@@ -386,6 +399,8 @@ func _retry() -> void:
 		return
 	_set_paused(false)
 	projectile_system.clear_all()
+	audio.stop_all()
+	audio.play_music(_stage_track(_run_state.stage_result()["stage"], "route"))
 	_spawn_player(player_scene.instantiate() as PlayerController, _director.get_respawn_transform())
 	_director.retry_from_checkpoint(_player, _attempt_seed(_run_state.get_attempt_index() + 1))
 	# After the restore, which puts back the committed statistics (F8-03).
@@ -395,10 +410,11 @@ func _retry() -> void:
 	interface.show_home(ScreenRouter.HUD)
 
 
-## Takes the stage and the ship out of the tree at once, so a stage loaded in the same
-## frame never shares it with them, frees them at the end of the frame, and removes every
-## Projectile.
+## Silences every sound effect in flight, takes the stage and the ship out of the tree at
+## once, so a stage loaded in the same frame never shares it with them, frees them at the
+## end of the frame, and removes every Projectile.
 func _unload_stage() -> void:
+	audio.stop_all()
 	interface.get_hud().unbind()
 	for child: Node in world_root.get_children():
 		world_root.remove_child(child)
@@ -437,6 +453,7 @@ func _on_stage_cleared() -> void:
 
 func _on_threat_reported(side: int) -> void:
 	interface.get_hud().show_threat(side, THREAT_CUE_SECONDS)
+	audio.play_event(&"threat_warning")
 
 
 ## The Director's boss signals reach the HUD boss panel (F12-03). Once per stage load:
@@ -451,10 +468,12 @@ func _connect_boss_panel() -> void:
 
 func _on_boss_started(display_name: String, phase_count: int) -> void:
 	interface.get_hud().show_boss(display_name, phase_count)
+	audio.play_music(_stage_track(_run_state.stage_result()["stage"], "boss"))
 
 
 func _on_boss_phase_changed(_phase_index: int, attack_display_name: String) -> void:
 	interface.get_hud().show_attack_cue(attack_display_name, ATTACK_CUE_SECONDS)
+	audio.play_event(&"boss_phase_changed")
 
 
 func _on_boss_health_changed(phase_index: int, ratio: float) -> void:
@@ -463,19 +482,71 @@ func _on_boss_health_changed(phase_index: int, ratio: float) -> void:
 
 func _on_boss_defeated(_boss_id: StringName) -> void:
 	interface.get_hud().hide_boss()
+	audio.play_event(&"boss_defeated")
+	audio.play_music(_stage_track(_run_state.stage_result()["stage"], "route"))
+
+
+## The Session-lifetime audio producers, once (F13-03): the menu sounds from the Viewport
+## and [member interface], and the field's hits on enemies; then the menu music. After the
+## main menu is shown, so its first focus makes no sound. Every other producer the
+## Session already handles plays its event from that handler.
+func _connect_audio() -> void:
+	audio.setup(interface)
+	projectile_system.target_hit.connect(_on_target_hit)
+	audio.play_music(&"menu")
+
+
+## The Director's audio producers, once per stage load, beside its other connections: the
+## Director is freed on unload, and its connections with it.
+func _connect_director_audio() -> void:
+	_director.pickup_accepted.connect(_on_pickup_accepted)
+	_director.enemy_defeated.connect(_on_enemy_defeated)
+	_director.checkpoint_activated.connect(_on_checkpoint_activated)
+
+
+## The music track id of [param stage_id]'s [param part], `"route"` or `"boss"`
+## ([constant AudioController.MUSIC_TRACK_IDS]).
+func _stage_track(stage_id: StringName, part: String) -> StringName:
+	return StringName("%s_%s" % [stage_id, part])
+
+
+func _on_target_hit(_target_id: int, _damage: int) -> void:
+	audio.play_event(&"enemy_hit")
+
+
+func _on_shots_fired(_count: int) -> void:
+	audio.play_event(&"player_shot")
+
+
+func _on_pickup_accepted(_pickup_id: StringName, kind: Pickup.Kind, _score_awarded: int) -> void:
+	audio.play_event(&"pickup_shield" if kind == Pickup.Kind.SHIELD else &"pickup_power")
+
+
+func _on_enemy_defeated(_enemy_id: StringName, _encounter_id: StringName) -> void:
+	audio.play_event(&"enemy_defeated")
+
+
+func _on_checkpoint_activated(_checkpoint_id: StringName) -> void:
+	audio.play_event(&"checkpoint_activated")
 
 
 ## A hostile Projectile met the Core. The field reports at most one per tick, and treats
 ## the rest of that tick as Invulnerable itself; the core rejects any hit it receives
-## while Invulnerable.
+## while Invulnerable. Its outcome picks the sound; a defeating hit plays only
+## `player_defeated`, from [method _on_player_defeated].
 func _on_player_hit(_projectile_id: int, damage: int) -> void:
-	_combat_state.take_hit(damage)
+	match _combat_state.take_hit(damage):
+		CombatState.HitOutcome.ABSORBED:
+			audio.play_event(&"shield_broken")
+		CombatState.HitOutcome.DAMAGED:
+			audio.play_event(&"player_hit")
 
 
 ## The field awards no Graze during Invulnerability, so nothing is filtered here.
 func _on_grazed(_projectile_id: int) -> void:
 	_run_state.add_graze(1)
 	_run_state.add_score(GRAZE_SCORE)
+	audio.play_event(&"graze")
 
 
 func _on_invulnerability_changed(invulnerable: bool) -> void:
@@ -496,6 +567,7 @@ func _on_bomb_activated() -> void:
 	var center := _player.damage_core.global_position
 	projectile_system.clear_hostile_in_radius(center, weapon.bomb_radius)
 	_run_state.note_bomb_used()
+	audio.play_event(&"bomb_used")
 	_show_bomb_blast(weapon, center)
 	projectile_system.damage_targets_in_radius(center, weapon.bomb_radius, weapon.bomb_damage)
 
@@ -525,6 +597,7 @@ func _on_score_awarded(points: int) -> void:
 ## Return to Menu leave from the overlay.
 func _on_player_defeated() -> void:
 	_set_paused(true)
+	audio.play_event(&"player_defeated")
 	# The Defeat screen shows "Último checkpoint · <name>", or "Início da fase" for "".
 	var location := _director.retry_location_name() if _director != null else ""
 	interface.push_overlay(ScreenRouter.DEFEAT, {"checkpoint": location})
@@ -538,6 +611,7 @@ func _on_player_defeated() -> void:
 ## Run is past `IN_STAGE`.
 func _on_stage_completed(result: Dictionary) -> void:
 	_set_paused(true)
+	audio.play_event(&"stage_cleared")
 	# Results replaces any overlay: a Defeat raised in the physics step of the last kill.
 	if interface.current_screen() != ScreenRouter.HUD:
 		interface.show_home(ScreenRouter.HUD)

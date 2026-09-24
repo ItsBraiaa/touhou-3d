@@ -88,7 +88,7 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | F13 | Audio | `audio` | 00 plan | docs | no | — | done (cut, then reinstated by the sprint plan, 2026-09-23) |
 | | | | 01 audio-limiter-core | core | yes | oc-a | done |
 | | | | 02 audio-controller-adapter | adapter | no | oc-a | done (no new tests, by the sprint rule; headless Dummy-driver check recorded in audio.md) |
-| | | | 03 audio-event-wiring | integration | no | path | todo |
+| | | | 03 audio-event-wiring | integration | no | path | done (2026-09-24: `AudioController` on `Main/Audio` with D-01's 17 effects and volumes, no music; every producer connected once where the Session owns it, `stop_all()` on unload and Retry; driven from the menu through Retry, two Restarts, the Lantern Guardian and Return to Menu, headless and windowed; no new tests per the sprint rule; listening pass owed) |
 | F14 | Delivery | `delivery` | 00 plan | docs | no | — | done (one-pass planning) |
 | | | | 01 export-and-run-outside-editor | integration | no | trunk | todo (blocks itself until the user installs the Godot 4.7.2 export templates) |
 | | | | 02 package-and-acceptance-record | tooling | no | oc-b | todo |
@@ -139,7 +139,7 @@ Dependencies Claude has on scene and content work. These are needs by Feature, n
 | F9 | **D-04 (Sentinel), D-05 (tuning).** Spirit, Sentry, and Tempest Sentinel prefabs matching GUIDE Section 5 (`Enemy` root, `VisualRoot`, `HitVolume`, `Emitters`, `AnimationPlayer`). Claude ships `scenes/dev/` placeholders with the same tree until then, using your `scenes/enemies/visuals/` scenes as `VisualRoot`. Tune the dev enemy and pattern `.tres` files and the `HitVolume` radii, and choose an Anticipation clip. |
 | F10 | Boss-arena retreat containment and any extra boundary presentation, using the Director's active-Encounter bounds (see `docs/STAGE_01_HANDOFF.md`). A checkpoint glow that reacts to `checkpoint_activated`. Keep the load-bearing names in `stage_01.tscn`: encounter roots and markers, `BarrierBody/Collision`, `ClosedVisual`, `Respawn`, and `Environment/PortalLinks/GuardLink1..3`. |
 | F12 | **D-03, D-04, D-06, D-07.** `scenes/enemies/lantern_guardian.tscn` with the GUIDE Section 5 tree and the actual clip names for idle, step cue and defeat; the shrine-lighting `AnimationPlayer` clip (corrupted to calm) in Stage 1, with its path and clip name sent to Claude; tuning of `lantern_guardian.tres` and its patterns. Confirm or reject F12-01's reading that a boss takes no damage during a Phase transition (PLANEJAMENTO forbids "artificial invulnerability timers"). Stage 2 (reinstated): Storm Guardian and Tempest Sentinel scenes (D-04), the Stage 2 content review (D-06), and a resolved portal-light material plus the storm-resolution clip in `stage_02.tscn`, which no D ticket covers yet. |
-| F13 | **D-01.** Reinstated. The event-to-sound selection from the Kenney packs, and a music decision that respects the fan-content guidelines. |
+| F13 | **D-01** delivered; since F13-03 its 17 effects play in the game from `Main/Audio` (`event_streams`, `event_volume_db` in `scenes/main.tscn`), and no music ships. Open: the listening pass (human pass, F14-02). To retune a sound's interval, voices, priority or volume, or swap a file, send Claude a new catalogue row; `checkpoint_activated` now also plays a sound (the arch glow is still yours). |
 | F14 | Nothing new; credits and licenses must already cover every integrated asset. F14-02 lists any gaps it finds. |
 
 ## Received from Astra

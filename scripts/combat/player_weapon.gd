@@ -15,6 +15,10 @@ extends Node
 ## [member bomb_radius], [member bomb_damage] and [member bomb_visual_scene] (F7-02).
 
 
+## [param count] shots entered the field this physics tick; at most once per tick, and
+## never for a tick whose every spawn the field refused. For audio (F13-03).
+signal shots_fired(count: int)
+
 ## Radius of a Familiar's small visual orbit around its anchor, in world units. The shot
 ## leaves from the anchor, not the orbiting visual, so it stays deterministic.
 const FAMILIAR_ORBIT_RADIUS := 0.3
@@ -188,7 +192,8 @@ func set_fire_enabled(enabled: bool) -> void:
 		_bomb_held = false
 
 
-## The single fire path: every shot of this tick becomes one player Projectile.
+## The single fire path: every shot of this tick becomes one player Projectile, and
+## [signal shots_fired] reports how many the field took.
 ##
 ## "Forward" is toward the point the view's center ray reaches at the locked target's
 ## depth along the view, or at the shot's range with no lock, rather than the camera's
@@ -212,6 +217,7 @@ func _fire(shots: Array[WeaponModel.Shot]) -> void:
 	var depth := (target - eye).dot(view) if aiming else shot_speed * shot_lifetime
 	var lock_degrees := rad_to_deg(view.angle_to(target - eye)) if aiming else INF
 	var lock_widening := lock_assist_degrees - main_assist_degrees
+	var spawned := 0
 	for shot: WeaponModel.Shot in shots:
 		var offset := muzzle.position
 		var damage := shot_damage
@@ -229,7 +235,10 @@ func _fire(shots: Array[WeaponModel.Shot]) -> void:
 		_request.lifetime = shot_lifetime
 		_request.radius = shot_radius
 		_request.damage = damage
-		_projectile_system.spawn(_request)
+		if _projectile_system.spawn(_request) != ProjectileField.NO_PROJECTILE:
+			spawned += 1
+	if spawned > 0:
+		shots_fired.emit(spawned)
 
 
 ## Anchor [param index] (0 left, 1 right) in ship coordinates, before the yaw.
