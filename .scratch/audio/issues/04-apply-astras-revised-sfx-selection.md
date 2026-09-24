@@ -1,6 +1,6 @@
 # F13-04 Apply Astra's revised SFX selection
 
-Status: todo
+Status: done
 Type: integration
 parallel-safe: no
 Depends on: F13-03
@@ -76,3 +76,14 @@ Your revised selection is now the shipped mix. The listening pass on headphones 
 ```
 Read CLAUDE.md, docs/engineering/SPRINT.md and .scratch/audio/issues/04-apply-astras-revised-sfx-selection.md, then implement that ticket solo in lane path with no tests. Verify it by re-running the headless audio driver. Finish with its Definition of Done, commit, and run tools/lane.ps1 land.
 ```
+
+## Outcome
+
+Done 2026-09-24 by lane path, solo.
+
+- The five new files are byte-for-byte copies of their `sound_effects/` originals (checked with `cmp`), imported with `loop=false`. The four unused runtime copies and their `.import` files are deleted. `phaserUp2.ogg` stays for `pickup_shield`.
+- `Main/Audio`: the five `event_streams` entries now use the new files. `boss_phase_changed` has its own ext_resource (`phaserUp7.ogg`) instead of sharing `pickup_shield`'s. All 17 `event_volume_db` values come from `gain_db`, and `max_voices = 8`. No other node changed.
+- `EVENT_RULES` takes each event's interval and voices from `selection.json`, so every event has one voice. Priorities are unchanged, because the selection gives none.
+- `tools/validate_audio_selection.gd` (D-01's offline check) pointed at the four deleted files, so it now names the new ones: `failures=0`. `docs/ASSET_CREDITS.md` counted 16 files, and now counts 17 and links the new mapping table. The GUIDE Section 6 audio row names the new selection and the cap of 8.
+- The optional boss fix is not built. Stopping `enemy_defeated` under `boss_defeated` needs a flag shared by two Session handlers in `game_session.gd`, which is not one small change and is outside this ticket's files. It is logged in audio.md "Open issues", beside Astra's other coalescing rules.
+- Verification: F13-03's driver, adapted and run headless on `main.tscn`, passed 64 checks with no `SCRIPT ERROR`, `ERROR:` or `WARNING:`. See `docs/validation/audio.md` "Astra's revised selection". `tools/lane.ps1 land` is the gate. No tests, by the sprint rule.

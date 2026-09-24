@@ -26,26 +26,27 @@ const EVENTS: Array[StringName] = [
 ]
 
 ## The limiter rule per catalogue event, as `x` = minimum interval in seconds,
-## `y` = voices of this event, `z` = priority where higher wins (spec "Event
-## catalogue"; Claude's proposals, Astra tunes them after the D-01 listening pass).
+## `y` = voices of this event, `z` = priority where higher wins. Intervals and
+## voices are Astra's revised selection (`sound_effects/selection.json`, F13-04);
+## priorities are the spec's "Event catalogue" proposals.
 const EVENT_RULES := {
-	&"ui_focus": Vector3(0.05, 1, 3),
-	&"ui_accept": Vector3(0.05, 1, 3),
-	&"player_shot": Vector3(0.08, 2, 0),
-	&"enemy_hit": Vector3(0.05, 3, 0),
-	&"graze": Vector3(0.06, 2, 1),
-	&"shield_broken": Vector3(0.1, 1, 3),
-	&"player_hit": Vector3(0.1, 1, 3),
-	&"bomb_used": Vector3(0.1, 1, 3),
-	&"player_defeated": Vector3(0.0, 1, 4),
-	&"pickup_power": Vector3(0.04, 2, 1),
-	&"pickup_shield": Vector3(0.0, 1, 2),
-	&"enemy_defeated": Vector3(0.05, 3, 1),
-	&"checkpoint_activated": Vector3(0.0, 1, 2),
-	&"threat_warning": Vector3(0.5, 1, 2),
-	&"boss_phase_changed": Vector3(0.0, 1, 3),
-	&"boss_defeated": Vector3(0.0, 1, 4),
-	&"stage_cleared": Vector3(0.0, 1, 4),
+	&"ui_focus": Vector3(0.12, 1, 3),
+	&"ui_accept": Vector3(0.15, 1, 3),
+	&"player_shot": Vector3(0.25, 1, 0),
+	&"enemy_hit": Vector3(0.2, 1, 0),
+	&"graze": Vector3(0.3, 1, 1),
+	&"shield_broken": Vector3(0.3, 1, 3),
+	&"player_hit": Vector3(0.3, 1, 3),
+	&"bomb_used": Vector3(0.5, 1, 3),
+	&"player_defeated": Vector3(2.5, 1, 4),
+	&"pickup_power": Vector3(0.5, 1, 1),
+	&"pickup_shield": Vector3(0.6, 1, 2),
+	&"enemy_defeated": Vector3(0.25, 1, 1),
+	&"checkpoint_activated": Vector3(1.0, 1, 2),
+	&"threat_warning": Vector3(1.5, 1, 2),
+	&"boss_phase_changed": Vector3(1.0, 1, 3),
+	&"boss_defeated": Vector3(2.0, 1, 4),
+	&"stage_cleared": Vector3(2.0, 1, 4),
 }
 
 ## The music track ids PLANEJAMENTO allows (spec "Cross-feature contracts"). Route

@@ -42,18 +42,18 @@ Voice ids start at 1, increase monotonically and are not reset by `clear()`. A f
 | --- | --- | --- | --- |
 | `event_streams` | `Dictionary[StringName, AudioStream]` | empty | Catalogue id to stream. Every effect must be non-looping: the limiter counts a voice for the stream's length. Keys outside `EVENTS` and null streams are reported and ignored. |
 | `event_volume_db` | `Dictionary[StringName, float]` | empty | Per-event volume in dB; missing events play at 0. |
-| `max_voices` | `int` | 12 | Global SFX voice cap; also the pool size. Below 1 disables the controller. |
+| `max_voices` | `int` | 12 | Global SFX voice cap; also the pool size. Below 1 disables the controller. `Main/Audio` sets 8 (F13-04, Astra's cap). |
 | `sfx_bus` | `StringName` | `&"SFX"` | Bus of every SFX pool player. A name missing from `AudioServer` disables the controller. |
 | `music_tracks` | `Dictionary[StringName, AudioStream]` | empty | Track id to stream. While empty, every music call is a silent no-op (the game ships without music unless D-01 finds a permitted track). |
 | `music_bus` | `StringName` | `&"Music"` | Bus of both music players; validated like `sfx_bus`. |
 | `music_crossfade_seconds` | `float` | 1.0 | Crossfade duration; 0 switches at once. |
 
-All numbers are Claude's proposals.
+The defaults are Claude's proposals; `Main/Audio`'s values are Astra's revised selection (see "Mapping").
 
 ### Constants
 
 - `EVENTS: Array[StringName]` — the 17 catalogue ids of the audio spec.
-- `EVENT_RULES` — per id, the limiter rule as `Vector3(min_interval, max_voices, priority)` from the spec's catalogue table (Claude's proposals; Astra tunes after the D-01 listening pass).
+- `EVENT_RULES` — per id, the limiter rule as `Vector3(min_interval, max_voices, priority)`. Intervals and voices are Astra's revised selection (`sound_effects/selection.json`, F13-04); priorities are the spec's catalogue proposals.
 - `MUSIC_TRACK_IDS: Array[StringName]` — `menu`, `stage_01_route`, `stage_01_boss`, `stage_02_route`, `stage_02_boss`. Route and boss ids may share one stream.
 - `MIN_VOICE_SECONDS := 0.1` — the duration used when a stream reports no length.
 - `FADE_FLOOR_DB := -60.0` — where music fades start and end; effectively silent.
@@ -86,7 +86,31 @@ All numbers are Claude's proposals.
 
 ## Wiring
 
-F13-03 attaches `AudioController` to `Main/Audio` (still `process_mode = ALWAYS`) in `scenes/main.tscn`, with `event_streams` for all 17 ids and `event_volume_db` copied from D-01's table in [validation/audio-selection.md](../validation/audio-selection.md). `music_tracks` stays empty: D-01 cleared no track, so every music call below is a silent no-op until one is added. `GameSession.audio` is typed `AudioController`.
+F13-03 attaches `AudioController` to `Main/Audio` (still `process_mode = ALWAYS`) in `scenes/main.tscn`, with `event_streams` for all 17 ids. F13-04 replaced D-01's first pass with Astra's revised selection ([sound_effects/README.md](../../sound_effects/README.md), "Recommended mapping"). `music_tracks` stays empty: D-01 cleared no track, so every music call below is a silent no-op until one is added. `GameSession.audio` is typed `AudioController`.
+
+### Mapping (F13-04)
+
+Files are under `assets/audio/sfx/`, copied byte for byte from `sound_effects/`, all non-looping. File and gain live in `Main/Audio` (`event_streams`, `event_volume_db`); interval, voices and priority in `EVENT_RULES`. The global cap is 8 (`Main/Audio.max_voices`).
+
+| Event | File | Gain dB | Min interval s | Voices | Priority |
+| --- | --- | ---: | ---: | ---: | ---: |
+| `ui_focus` | `interface/select_002.ogg` | -18 | 0.12 | 1 | 3 |
+| `ui_accept` | `interface/confirmation_001.ogg` | -12 | 0.15 | 1 | 3 |
+| `player_shot` | `scifi/laserSmall_000.ogg` | -20 | 0.25 | 1 | 0 |
+| `enemy_hit` | `impact/impactGeneric_light_000.ogg` | -20 | 0.20 | 1 | 0 |
+| `graze` | `interface/drop_001.ogg` | -26 | 0.30 | 1 | 1 |
+| `shield_broken` | `scifi/forceField_000.ogg` | -10 | 0.30 | 1 | 3 |
+| `player_hit` | `impact/impactSoft_heavy_000.ogg` | -7 | 0.30 | 1 | 3 |
+| `bomb_used` | `scifi/explosionCrunch_000.ogg` | -9 | 0.50 | 1 | 3 |
+| `player_defeated` | `scifi/lowFrequency_explosion_000.ogg` | -10 | 2.50 | 1 | 4 |
+| `pickup_power` | `interface/drop_002.ogg` | -20 | 0.50 | 1 | 1 |
+| `pickup_shield` | `digital/phaserUp2.ogg` | -12 | 0.60 | 1 | 2 |
+| `enemy_defeated` | `impact/impactGeneric_light_003.ogg` | -16 | 0.25 | 1 | 1 |
+| `checkpoint_activated` | `digital/phaseJump3.ogg` | -10 | 1.00 | 1 | 2 |
+| `threat_warning` | `digital/twoTone2.ogg` | -8 | 1.50 | 1 | 2 |
+| `boss_phase_changed` | `digital/phaserUp7.ogg` | -10 | 1.00 | 1 | 3 |
+| `boss_defeated` | `impact/impactBell_heavy_000.ogg` | -8 | 2.00 | 1 | 4 |
+| `stage_cleared` | `digital/threeTone1.ogg` | -10 | 2.00 | 1 | 4 |
 
 ### Producers (each connected once)
 
@@ -139,12 +163,13 @@ The limiter uses only `RefCounted`, typed data and its own `tick(delta)` clock. 
 
 ## Setup for Astra
 
-No scene attachment is required from Astra: `Main/Audio` is in Claude's `main.tscn` and F13-03 attaches the controller and sets `event_streams` from D-01's imported files (`assets/audio/sfx/<pack>/<file>`) plus any volume proposals. Every sound effect must be non-looping — the limiter counts a voice for the stream's length. After the D-01 listening pass, tell Claude which events feel too dense or too sparse: the intervals, caps and priorities in `EVENT_RULES` are proposals.
+No scene attachment is required from Astra: `Main/Audio` is in Claude's `main.tscn`, and F13-04 set it from your revised selection (the "Mapping" table). Every sound effect must be non-looping — the limiter counts a voice for the stream's length. After the listening pass, send Claude a changed row: a file or gain is a one-line change in `Main/Audio`, an interval or voice count one in `EVENT_RULES`.
 
 ## Open issues
 
-- Rule values and event volumes are provisional proposals until the D-01 listening pass, owed by the human pass (F14-02).
+- The listening pass on Astra's revised selection is owed by the human pass (F14-02).
 - Music ships silent: D-01 found no permitted track, so `music_tracks` is empty and every music call is a no-op by design. A cleared track only needs a `music_tracks` entry in `main.tscn`.
-- Bursts are capped by design (ENGINEERING_BRIEF 4.E): a Wave killed in one tick or five Power Pickups magnetized together play two or three sounds, not one per emission (see [validation/audio.md](../validation/audio.md)).
-- A boss's defeat plays `enemy_defeated` beside `boss_defeated` (the Director reports it like any enemy); the bell masks the light impact.
+- Bursts are capped by design (ENGINEERING_BRIEF 4.E): a Wave killed in one tick or five Power Pickups magnetized together play one or two sounds, not one per emission (see [validation/audio.md](../validation/audio.md)).
+- A boss's defeat plays `enemy_defeated` beside `boss_defeated` (the Director reports it like any enemy), against Astra's "Trigger each ending once". Suppressing it needs a flag across two Session handlers, so F13-04 logged it instead of building it. The bell masks the light impact.
+- Astra's producer-coalescing rules are not built: a warning only for a new threat, no ordinary death sounds during a Bomb clear, and `stage_cleared` delayed until the boss bell ends (both start in the same frame today).
 - No pitch variation, no 3D audio, no distinct Back sound (ticket out of scope).

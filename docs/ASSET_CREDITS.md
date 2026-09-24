@@ -41,7 +41,7 @@ The test arena's geometry and materials are authored primitives. No monster mode
 
 ## Sound effects
 
-Creator: Kenney. The 16 selected Ogg Vorbis files under `assets/audio/sfx/` are unchanged byte-for-byte; there are no trims or conversions. Each selected pack is CC0 and its supplied license is preserved:
+Creator: Kenney. The 17 selected Ogg Vorbis files under `assets/audio/sfx/` are unchanged byte-for-byte; there are no trims or conversions. Each selected pack is CC0 and its supplied license is preserved:
 
 | Pack | Source | Runtime folder | Supplied license |
 | --- | --- | --- | --- |
@@ -50,7 +50,7 @@ Creator: Kenney. The 16 selected Ogg Vorbis files under `assets/audio/sfx/` are 
 | Sci-fi Sounds | https://kenney.nl/assets/sci-fi-sounds | `assets/audio/sfx/scifi/` | `assets/licenses/kenney-sci-fi-sounds.txt` |
 | Impact Sounds | https://kenney.nl/assets/impact-sounds | `assets/audio/sfx/impact/` | `assets/licenses/kenney-impact-sounds.txt` |
 
-The [event-to-file table](validation/audio-selection.md) records every selected filename and its use.
+The [event-to-file table](engineering/audio.md#mapping-f13-04) records every shipped filename and its use: Astra's revised selection (`sound_effects/README.md`, applied by F13-04). D-01's first pass is in [validation/audio-selection.md](validation/audio-selection.md).
 
 ## Music
 

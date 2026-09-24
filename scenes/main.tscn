@@ -1,4 +1,4 @@
-[gd_scene load_steps=35 format=3]
+[gd_scene load_steps=36 format=3]
 
 [ext_resource type="Script" path="res://scripts/session/game_session.gd" id="1_session"]
 [ext_resource type="Script" path="res://scripts/ui/interface.gd" id="2_interface"]
@@ -18,22 +18,23 @@
 [ext_resource type="SphereMesh" path="res://scenes/dev/projectile_player_mesh.tres" id="16_player_bullet"]
 [ext_resource type="SphereMesh" path="res://scenes/dev/projectile_hostile_mesh.tres" id="17_hostile_bullet"]
 [ext_resource type="Script" path="res://scripts/audio/audio_controller.gd" id="18_audio_controller"]
-[ext_resource type="AudioStream" path="res://assets/audio/sfx/interface/tick_001.ogg" id="19_ui_focus"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/interface/select_002.ogg" id="19_ui_focus"]
 [ext_resource type="AudioStream" path="res://assets/audio/sfx/interface/confirmation_001.ogg" id="20_ui_accept"]
 [ext_resource type="AudioStream" path="res://assets/audio/sfx/scifi/laserSmall_000.ogg" id="21_player_shot"]
 [ext_resource type="AudioStream" path="res://assets/audio/sfx/impact/impactGeneric_light_000.ogg" id="22_enemy_hit"]
-[ext_resource type="AudioStream" path="res://assets/audio/sfx/interface/pluck_001.ogg" id="23_graze"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/interface/drop_001.ogg" id="23_graze"]
 [ext_resource type="AudioStream" path="res://assets/audio/sfx/scifi/forceField_000.ogg" id="24_shield_broken"]
 [ext_resource type="AudioStream" path="res://assets/audio/sfx/impact/impactSoft_heavy_000.ogg" id="25_player_hit"]
 [ext_resource type="AudioStream" path="res://assets/audio/sfx/scifi/explosionCrunch_000.ogg" id="26_bomb_used"]
 [ext_resource type="AudioStream" path="res://assets/audio/sfx/scifi/lowFrequency_explosion_000.ogg" id="27_player_defeated"]
-[ext_resource type="AudioStream" path="res://assets/audio/sfx/digital/phaseJump2.ogg" id="28_pickup_power"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/interface/drop_002.ogg" id="28_pickup_power"]
 [ext_resource type="AudioStream" path="res://assets/audio/sfx/digital/phaserUp2.ogg" id="29_phaser_up"]
 [ext_resource type="AudioStream" path="res://assets/audio/sfx/impact/impactGeneric_light_003.ogg" id="30_enemy_defeated"]
 [ext_resource type="AudioStream" path="res://assets/audio/sfx/digital/phaseJump3.ogg" id="31_checkpoint"]
-[ext_resource type="AudioStream" path="res://assets/audio/sfx/digital/lowThreeTone.ogg" id="32_threat_warning"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/digital/twoTone2.ogg" id="32_threat_warning"]
 [ext_resource type="AudioStream" path="res://assets/audio/sfx/impact/impactBell_heavy_000.ogg" id="33_boss_defeated"]
 [ext_resource type="AudioStream" path="res://assets/audio/sfx/digital/threeTone1.ogg" id="34_stage_cleared"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/digital/phaserUp7.ogg" id="35_boss_phase_changed"]
 
 [node name="Main" type="Node" node_paths=PackedStringArray("world_root", "projectile_system", "interface", "audio")]
 process_mode = 3
@@ -84,26 +85,27 @@ event_streams = Dictionary[StringName, AudioStream]({
 &"enemy_defeated": ExtResource("30_enemy_defeated"),
 &"checkpoint_activated": ExtResource("31_checkpoint"),
 &"threat_warning": ExtResource("32_threat_warning"),
-&"boss_phase_changed": ExtResource("29_phaser_up"),
+&"boss_phase_changed": ExtResource("35_boss_phase_changed"),
 &"boss_defeated": ExtResource("33_boss_defeated"),
 &"stage_cleared": ExtResource("34_stage_cleared")
 })
 event_volume_db = Dictionary[StringName, float]({
-&"ui_focus": -12.0,
-&"ui_accept": -5.0,
-&"player_shot": -18.0,
-&"enemy_hit": -16.0,
-&"graze": -22.0,
-&"shield_broken": -4.0,
-&"player_hit": -3.0,
-&"bomb_used": -1.0,
-&"player_defeated": -2.0,
-&"pickup_power": -9.0,
-&"pickup_shield": -6.0,
-&"enemy_defeated": -13.0,
-&"checkpoint_activated": -4.0,
-&"threat_warning": 1.0,
-&"boss_phase_changed": -3.0,
-&"boss_defeated": 0.0,
-&"stage_cleared": -2.0
+&"ui_focus": -18.0,
+&"ui_accept": -12.0,
+&"player_shot": -20.0,
+&"enemy_hit": -20.0,
+&"graze": -26.0,
+&"shield_broken": -10.0,
+&"player_hit": -7.0,
+&"bomb_used": -9.0,
+&"player_defeated": -10.0,
+&"pickup_power": -20.0,
+&"pickup_shield": -12.0,
+&"enemy_defeated": -16.0,
+&"checkpoint_activated": -10.0,
+&"threat_warning": -8.0,
+&"boss_phase_changed": -10.0,
+&"boss_defeated": -8.0,
+&"stage_cleared": -10.0
 })
+max_voices = 8

@@ -2,21 +2,21 @@ extends SceneTree
 ## Offline check of the 17 selected, non-looping SFX streams.
 
 const EVENT_FILES: Dictionary = {
-	&"ui_focus": "res://assets/audio/sfx/interface/tick_001.ogg",
+	&"ui_focus": "res://assets/audio/sfx/interface/select_002.ogg",
 	&"ui_accept": "res://assets/audio/sfx/interface/confirmation_001.ogg",
 	&"player_shot": "res://assets/audio/sfx/scifi/laserSmall_000.ogg",
 	&"enemy_hit": "res://assets/audio/sfx/impact/impactGeneric_light_000.ogg",
-	&"graze": "res://assets/audio/sfx/interface/pluck_001.ogg",
+	&"graze": "res://assets/audio/sfx/interface/drop_001.ogg",
 	&"shield_broken": "res://assets/audio/sfx/scifi/forceField_000.ogg",
 	&"player_hit": "res://assets/audio/sfx/impact/impactSoft_heavy_000.ogg",
 	&"bomb_used": "res://assets/audio/sfx/scifi/explosionCrunch_000.ogg",
 	&"player_defeated": "res://assets/audio/sfx/scifi/lowFrequency_explosion_000.ogg",
-	&"pickup_power": "res://assets/audio/sfx/digital/phaseJump2.ogg",
+	&"pickup_power": "res://assets/audio/sfx/interface/drop_002.ogg",
 	&"pickup_shield": "res://assets/audio/sfx/digital/phaserUp2.ogg",
 	&"enemy_defeated": "res://assets/audio/sfx/impact/impactGeneric_light_003.ogg",
 	&"checkpoint_activated": "res://assets/audio/sfx/digital/phaseJump3.ogg",
-	&"threat_warning": "res://assets/audio/sfx/digital/lowThreeTone.ogg",
-	&"boss_phase_changed": "res://assets/audio/sfx/digital/phaserUp2.ogg",
+	&"threat_warning": "res://assets/audio/sfx/digital/twoTone2.ogg",
+	&"boss_phase_changed": "res://assets/audio/sfx/digital/phaserUp7.ogg",
 	&"boss_defeated": "res://assets/audio/sfx/impact/impactBell_heavy_000.ogg",
 	&"stage_cleared": "res://assets/audio/sfx/digital/threeTone1.ogg",
 }
