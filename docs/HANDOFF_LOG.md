@@ -1,5 +1,17 @@
 # Handoff Log
 
+## 2026-09-24 — Claude lane oc-b (DeepSeek V4.1 Flash) — F16-10: the spec's API list now matches the shipped code [shared]
+State: CODE_READY
+Files: `.scratch/controls-expansion/spec.md` [shared] (only the API block, its heading line and the paragraph after it); `.scratch/controls-expansion/issues/10-spec-api-list-matches-shipped-code.md` (Status, Outcome); `docs/engineering/ROADMAP.md` (the F16-10 row).
+Change:
+- The block "Proposed APIs for the implementation tickets" is now "Shipped APIs (F16-02 to F16-08, checked against the code 2026-09-24)". Every F16 public method, signal and constant of the classes it names is listed; corrected signatures carry a short `# was: ...` note, and the members the proposal was missing carry `# was: not listed`.
+- **Added, from the code.** `InputBindings.default_profiles`, `profile_for`, `check_profile_data`, `normalize_profile`, the four `*_binding` constructors and the constants; `InputBindingAdapter.apply_defaults` and `find_default_drift`; the five `ControlsScreen` members; the whole `BindingLabels` and the F16-08 `InputDeviceState` additions; `CameraRig.set_mouse_capture_active`/`clear_pending_look`; and the F16-05 `DashModel` (`is_enabled`, `is_active`, `get_direction`, `resolve_direction`, `TIME_EPSILON`) and `PlayerController` (`controls_enabled_changed`, `are_controls_enabled`, `get_dash_cooldown_left`, `has_dash`) members.
+- **Corrections.** `InputBindings.assign`'s default is `RESOLUTION_NONE`; `CameraRig.apply_control_settings`'s parameters are `p_mode/p_mouse_sensitivity/p_mouse_invert/p_deadzone`; `get_default_bindings`/`get_fixed_bindings` are fully typed.
+- **The paragraph after the block.** Only its last sentence changed, to "This list was reconciled with the code by F16-10."
+Why: that block is where the next reader looks, and the F16-05 additions were missing from it (a follow-up F16-05 and F16-06 both recorded).
+Verification: docs only; no code, scene or test changed, and no test or driver script was written. Each changed line was read back against the named file and function (the ticket Outcome lists them with line numbers) and cross-checked with the F16 sections of settings.md, player-flight.md and combat-hud.md. `tools/lane.ps1 land` is the gate.
+Action required by Astra: none. F16-10 edits only the spec's API block, its heading and the paragraph after it; your product rules and the layout contract are as written.
+
 ## 2026-09-24 — Claude (plan) — F16-09 and F16-10: two small OpenCode follow-ups from the F16 reviews
 State: PLANNED
 Files: `.scratch/controls-expansion/issues/09-targeting-ignores-the-resume-press.md` (new), `.scratch/controls-expansion/issues/10-spec-api-list-matches-shipped-code.md` (new), `docs/engineering/ROADMAP.md` (two F16 rows).
