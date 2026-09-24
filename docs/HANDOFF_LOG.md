@@ -15,6 +15,21 @@ Action required by <other agent>: <what they must do, or "none">
 
 ---
 
+## 2026-09-24 09:40 â€” Claude (path) â€” F3-04 part 2: camera settings reach every ship; F3-04 done
+State: CODE_READY
+Files: `scripts/session/game_session.gd` (trunk's file, by the 2026-09-24 exception in the path queue), `docs/engineering/settings.md`, `docs/validation/settings.md`, `docs/GUIDE.md` (the `game_session.gd` and `camera_rig.gd` rows), `docs/engineering/ROADMAP.md` (F3-04 row), `.scratch/settings/issues/04-settings-to-camera-wiring.md`.
+
+Change:
+- **Part 2 (it closes F3-04).** The Session applies the camera sensitivity and invert vertical through `CameraRig.apply_settings()` at every spawn, right after `setup`, and on every change of either value, even from Options over Pause.
+- **Four additions, each in its own function.** `_connect_camera_settings()` (one call in `_ready`, one `Settings.changed` connection for the Session's life), `_apply_camera_settings()`, one call in `_spawn_player`, and `_on_setting_changed()`. Nothing else in `game_session.gd` changed.
+- **Verified** headless by a throwaway script (the ticket's six cases, 16 checks), and by one short windowed run: 2.0 swings the view up, 0.2 barely moves it, and invert swings it down. Recorded in `docs/validation/settings.md` "Camera wiring". No new tests (the sprint rule), so `tests/scene/test_settings_camera_wiring.gd` was not created. No existing test changed.
+
+Why: F3-04 part 2, moved from trunk to path on 2026-09-24.
+
+Action required by trunk: when you land after this, keep the one-line `_connect_camera_settings()` call in `_ready`, the `_apply_camera_settings()` call after `_player.setup(_flight_volume)` in `_spawn_player`, and the three new functions after `_spawn_player`.
+Action required by Astra: `CameraRig.sensitivity` and `invert_vertical` in `player_ship.tscn` are now overwritten by the player's settings at every spawn. Tune the orbit rate with `orbit_speed_degrees` instead.
+Owed to a person: the physical keyboard and DualSense pass over Options and the camera orbit, and a real controller unplug in flight.
+
 ## 2026-09-23 23:36 â€” Claude (path) â€” F14-01 pre-flight: dev-01 exported and run outside the repository
 State: docs
 Files: `docs/HANDOFF_LOG.md` only (this entry). No code, scene, preset, ticket or ROADMAP edit; F14-01 stays `todo` for trunk.
@@ -899,13 +914,13 @@ Change: Recorded the accepted vocabulary, the four architectural decisions, the 
 Why: Result of the planning grill with the user; establishes how Claude writes and verifies GDScript for this project.
 Action required by Astra: read `docs/engineering/ROADMAP.md`, especially "Requests to Astra". From ticket F0-03 onward Claude owns `project.godot`, `export_presets.cfg`, `default_bus_layout.tres`, and `scenes/main.tscn`; the `tools/build_*.py` generators must not be rerun over integrated scenes without reconciling first. Astra's `.scratch/stage-01-area/` and `docs/STAGE_01_HANDOFF.md` were read and are reflected in the roadmap.
 
-## 2026-09-23 — OpenCode (oc-a) — F12-06 part 1
+## 2026-09-23 ï¿½ OpenCode (oc-a) ï¿½ F12-06 part 1
 
 Files: `content/bosses/tempest_sentinel.tres`, `content/patterns/sentinel_aimed_burst.tres`, `content/patterns/sentinel_rotating_fan.tres`.
 
 Change: Added the dev Tempest Sentinel BossDefinition with two proposed attacks and two health phases. Phase 1 uses alternating charged aimed bursts; Phase 2 uses rotating fans with alternating player-height tracking and fixed altitude shifts. All three resources carry `metadata/dev = true`. Proposed values and attack names remain for Astra's D-06 review. Part 1 only; scene integration remains with sol.
 
-## 2026-09-23 — OpenCode (oc-a) — F12-07 part 1
+## 2026-09-23 ï¿½ OpenCode (oc-a) ï¿½ F12-07 part 1
 
 Files: `content/bosses/storm_guardian.tres`, `content/patterns/storm_spiral.tres`, `content/patterns/storm_thunder_rings.tres`, `content/patterns/storm_aimed_burst.tres`.
 

@@ -1,10 +1,10 @@
 # F3-04 Settings to camera wiring
 
-Status: todo
+Status: done
 Type: integration
 parallel-safe: no
 Depends on: F10-03, F3-02
-Lane: trunk (part 1: path)
+Lane: path (part 1 and part 2; part 2 moved from trunk on 2026-09-24)
 Model: part 1 Claude Opus 5.5, solo (lane path); part 2 Claude Opus 5.5, solo
 
 > **Split (SPRINT.md):**
@@ -92,3 +92,11 @@ This ticket also runs the feature's windowed pass for F3-02 and F3-03, whose lan
 ```
 Read CLAUDE.md, docs/engineering/SPRINT.md, docs/engineering/ROADMAP.md and .scratch/settings/issues/04-settings-to-camera-wiring.md, then implement that ticket and verify it with /run. Finish with its Definition of Done and commit.
 ```
+
+## Outcome (2026-09-24)
+
+Both parts delivered solo in lane path: part 1 (`30affad`, the windowed F3 pass) and part 2, which moved here from trunk on 2026-09-24 and closes the ticket. Part 2 added the four Session members the ticket lists to `scripts/session/game_session.gd`, and nothing else there: `_connect_camera_settings()` (one call in `_ready`, so the `_ready` addition is a single line), `_apply_camera_settings()`, one call in `_spawn_player` after `setup`, and `_on_setting_changed()`. The contract is in `docs/engineering/settings.md` "Camera wiring".
+
+- **No new tests** (sprint rule): `tests/scene/test_settings_camera_wiring.gd` was not created. A throwaway headless script ran the ticket's six named cases instead (16 checks, all passed): the saved file reaches a new ship, main-menu Options reach the first ship, Options from Pause update the live rig while paused and after Resume, Restart and Retry from CP1-A (a Snapshot injected into the Director's store) keep the current values, Master volume leaves the rig alone, and three Restarts keep one `changed` connection. It measured the orbit too: 0.4189 rad at 2.0, 0.0419 at 0.2 and −0.4189 at 2.0 inverted over six ticks of `camera_up`. A short windowed run showed the same. Recorded in `docs/validation/settings.md` "Camera wiring".
+- **Owed to a person:** the physical keyboard and DualSense pass, including the orbit at a saved sensitivity, and a real controller unplug in flight.
+- **Shared-file note:** `game_session.gd` is a trunk file, edited here by the 2026-09-24 exception in the path queue. Every addition is in its own function with a one-line call site; the second lander merges both.
