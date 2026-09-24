@@ -74,7 +74,7 @@ These are the defaults. You can change every binding in **Opções → Ver coman
 
 **Development:** Braia. The code, scenes and art were produced with AI agents: Claude Code (Anthropic) for the code, OpenAI Codex (as the designer "Astra") for game design, scenes and art, and OpenCode for smaller tasks.
 
-**Inspiration:** [Touhou Project](https://www16.big.or.jp/~zun/) by ZUN (Team Shanghai Alice). This is an unofficial fan-inspired project, not affiliated with Team Shanghai Alice. It includes no Touhou characters, art or music.
+**Inspiration:** [Touhou Project](https://www16.big.or.jp/~zun/) by ZUN (Team Shanghai Alice). This is an unofficial fan-inspired project, not affiliated with Team Shanghai Alice. It includes no Touhou characters or art; the music is ZUN's (see Music below).
 
 **Engine:** [Godot Engine](https://godotengine.org/) 4.7.2, MIT license. The interface uses Godot's built-in font.
 
@@ -84,7 +84,7 @@ These are the defaults. You can change every binding in **Opções → Ver coman
 
 **Sound effects:** Kenney, [Interface Sounds](https://kenney.nl/assets/interface-sounds), [Digital Audio](https://kenney.nl/assets/digital-audio), [Sci-fi Sounds](https://kenney.nl/assets/sci-fi-sounds) and [Impact Sounds](https://kenney.nl/assets/impact-sounds), CC0.
 
-**Music:** none. The game ships without music.
+**Music:** ZUN, from *Touhou 10: Mountain of Faith*: Sealed Gods (menu); The Gensokyo the Gods Loved and Faith Is for the Transient People (Stage 1 route and boss); Fall of Fall ~ Autumnal Waterfall and The Venerable Ancient Battlefield ~ Suwa Foughten Field (Stage 2 route and boss).
 
 **Original work:** the stage environments (terrain, water, vegetation, shrines and gates), the shaders, the menu illustrations, the HUD icons, the controller glyphs and the combat effects were made for this project.
 
