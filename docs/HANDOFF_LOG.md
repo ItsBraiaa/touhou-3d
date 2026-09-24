@@ -1,5 +1,16 @@
 # Handoff Log
 
+## 2026-09-24 — Claude (path) — Audio endings: boss and stage endings each play once, in order
+State: INTEGRATED_VERIFIED
+Files: `scripts/audio/audio_controller.gd` (`play_event_after`, `silence`, `stop_all` drops the waiting event); `scripts/session/game_session.gd` (`_boss_defeat_heard`, `_quit`, `_notification`, `QUIT_SILENCE_SECONDS`, `auto_accept_quit` off); `docs/engineering/audio.md`, `menus-session.md` (the `quit` row), `project.md` (open issue closed), `ROADMAP.md` (F13 row 05); `docs/validation/audio.md`.
+Change:
+- **Each ending once.** A boss's defeat plays only `boss_defeated`. The Director's `enemy_defeated` for the same kill, which follows in the same call, plays nothing.
+- **In order.** `stage_cleared` starts when the bell's voice expires: 1,476 ms after it on S1-07; the bell is 1,480 ms. It used to start in the same frame. Leaving Results before then drops it.
+- **Silent quit.** Sair, the window's close button and Alt+F4 now stop every sound and the music, then quit 0.1 s later. Headless, quitting with four sounds playing printed `ERROR: 8 resources still in use at exit` before the fix. After it, both paths printed nothing.
+Verification: a headless S1-07 clear driver, a headless quit driver and F13-04's 64-check audio driver (all throwaway, not in the repo) passed. Record: `docs/validation/audio.md`. No tests (sprint rule).
+Action required by Astra: none; no file of yours changed. The listening pass (F14-02) can drop the two known overlaps from its list.
+Action required by trunk: none. The `game_session.gd` additions are private functions and one flag.
+
 ## 2026-09-24 — OpenCode (oc-b) — F14-02 part 2: the package, credits and acceptance record
 State: DELIVERED
 Files: `tools/package.ps1` (the archive root fixed); `docs/validation/acceptance.md` (all 32 checks filled); `docs/validation/export.md` (new "Package" section); `docs/engineering/ROADMAP.md` (the F14-02 row and one "Requests to Astra" row); `docs/engineering/project.md` ("Export" now points at the package script); F14-02 ticket (`Status: done`).

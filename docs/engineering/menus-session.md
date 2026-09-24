@@ -269,7 +269,7 @@ A missing required export is reported with `Main`'s path and the node stops proc
 | `resume` | Pause's Continuar, `ui_cancel` on Pause | Resume (below). |
 | `restart_stage` | Pause | Unpause, `run_state.restart_stage()`, reload the stage and a new ship, `begin_attempt()`, HUD. |
 | `return_to_menu` | Pause (Defeat and Results in F11) | Unpause, unload, `run_state.end_run(false)`, `show_home(MAIN_MENU)`. |
-| `quit` | main menu | `get_tree().quit()`. |
+| `quit` | main menu | `_quit()`: `audio.silence()`, then `get_tree().quit()` after `QUIT_SILENCE_SECONDS` (0.1 s), so no stream is still playing at exit. The window's close button and Alt+F4 take the same path (`auto_accept_quit` is off once the Session is set up). |
 | `back_refused` | main menu, Defeat, Results | Nothing. |
 | anything else (`retry`, `continue_campaign`, `replay_stage`) | Defeat, Results | A warning naming the action; F11 implements them. `restore_defaults` no longer arrives: `Interface` resolves it (F3-02). |
 

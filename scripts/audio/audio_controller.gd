@@ -95,6 +95,9 @@ var _valid_event_streams: Dictionary[StringName, AudioStream] = {}
 var _valid_music_tracks: Dictionary[StringName, AudioStream] = {}
 var _queued_focus: bool = false
 var _queued_accept: bool = false
+## The event [method play_event_after] holds, or `&""`, and the event it waits out.
+var _waiting_event: StringName = &""
+var _waiting_after: StringName = &""
 var _interface_setup: bool = false
 var _disabled: bool = false
 
@@ -131,12 +134,17 @@ func _ready() -> void:
 		_music_players.append(music_player)
 
 
-## Ticks the limiter and plays the coalesced UI sound of this frame. Runs while the
-## tree is paused once attached to `Main/Audio` (ALWAYS): audio is presentation, and
-## menu sounds work on Pause.
+## Ticks the limiter, plays the waiting event once its voice-to-wait-out expired, and
+## plays the coalesced UI sound of this frame. Runs while the tree is paused once
+## attached to `Main/Audio` (ALWAYS): audio is presentation, and menu sounds work on
+## Pause.
 func _process(delta: float) -> void:
 	if _limiter != null:
 		_limiter.tick(delta)
+		if not _waiting_event.is_empty() and _limiter.active_count(_waiting_after) == 0:
+			var event: StringName = _waiting_event
+			_waiting_event = &""
+			play_event(event)
 	if _queued_accept:
 		_queued_accept = false
 		_queued_focus = false
@@ -192,16 +200,54 @@ func play_event(event: StringName) -> bool:
 	return true
 
 
-## Stops every sound-effect voice and clears the limiter's voices and intervals
-## (the core half of a stage unload). Music is left alone: it changes through
-## [method play_music] and [method stop_music].
+## Plays [param event] once no voice of [param after] is active: at once when none is,
+## else from [method _process] on the frame the limiter expires the last one, so the
+## two follow each other instead of overlapping. One event waits at a time; a later
+## call replaces it, and [method stop_all] drops it. Both ids must be catalogue events.
+func play_event_after(event: StringName, after: StringName) -> void:
+	if _disabled:
+		return
+	if not EVENTS.has(event) or not EVENTS.has(after):
+		push_error(
+			"%s: play_event_after got '%s' after '%s'; both must be catalogue events"
+			% [get_path(), event, after]
+		)
+		return
+	if _limiter.active_count(after) == 0:
+		play_event(event)
+		return
+	_waiting_event = event
+	_waiting_after = after
+
+
+## Stops every sound-effect voice, drops the event [method play_event_after] holds and
+## clears the limiter's voices and intervals (the core half of a stage unload). Music is
+## left alone: it changes through [method play_music] and [method stop_music].
 func stop_all() -> void:
 	if _disabled or _limiter == null:
 		return
 	for index: int in _sfx_players.size():
 		_sfx_players[index].stop()
 		_player_voice_ids[index] = AudioLimiter.REFUSED
+	_waiting_event = &""
 	_limiter.clear()
+
+
+## Stops every sound effect and the music at once, drops every queued and waiting
+## sound, and disables the controller for good: the Session's last call before it
+## quits. A stream still playing when the engine exits is never released, and Godot
+## reports it as "resources still in use at exit".
+func silence() -> void:
+	stop_all()
+	_queued_accept = false
+	_queued_focus = false
+	if _music_tween != null and _music_tween.is_valid():
+		_music_tween.kill()
+	for player: AudioStreamPlayer in _music_players:
+		player.stop()
+	_current_music_player = null
+	_current_music_id = &""
+	_disable()
 
 
 ## Starts [param track], crossfading with the track in play over

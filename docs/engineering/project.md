@@ -97,7 +97,6 @@ F14-01, 2026-09-24. Evidence, FPS readings and the presentation-computer protoco
 
 ## Open issues
 
-- On the build before F13-04, quitting with Sair while the `ui_accept` sound still played printed `ERROR: 2 resources still in use at exit` (two `AudioStreamPlaybackOggVorbis` of `confirmation_001.ogg`), in the console exe only. It did not recur after F13-04's limiter retune. It is not export-only; if it returns, stop the audio before `quit()` in the Session.
 - The pack also carries `tests/`, `tools/` and `docs/validation/` files (`export_filter="all_resources"`). Nothing breaks. `exclude_filter="tests/*, tools/*, docs/*"` would drop them, but `scenes/dev/` must stay.
 - `audio/buses/default_bus_layout` is written explicitly although it equals Godot's default; the editor drops the line on its next save of `project.godot`. Harmless either way.
 - Only the Windows preset exists, as the ticket asked; no Linux preset.

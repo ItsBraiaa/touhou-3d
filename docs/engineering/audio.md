@@ -70,7 +70,9 @@ The defaults are Claude's proposals; `Main/Audio`'s values are Astra's revised s
 | --- | --- | --- |
 | `setup(interface)` | F13-03, once | Connects `gui_focus_changed` (queues `ui_focus`) and `interface.action_requested` (queues `ui_accept` for every action except `back_refused`). A second call, a null interface, or a call outside the tree is a `push_error` and nothing else. |
 | `play_event(event) -> bool` | F13-03 producer handlers | Requests a voice from the limiter for `max(stream.get_length(), MIN_VOICE_SECONDS)`; on a grant plays it on a free pool player at `event_volume_db`, emits `event_played`, returns true. An id outside `EVENTS` is a `push_error` and false; a catalogue id with no stream returns false silently. |
-| `stop_all()` | F13-03 on stage unload and Retry | Stops every SFX player and calls `limiter.clear()`. Music is left alone. |
+| `play_event_after(event, after)` | the Session's stage clear | Plays `event` at once when no voice of `after` is active, else from `_process` on the frame the limiter expires the last one. One event waits at a time (a later call replaces it). An id outside `EVENTS` is a `push_error`. |
+| `stop_all()` | F13-03 on stage unload and Retry | Stops every SFX player, drops the waiting event and calls `limiter.clear()`. Music is left alone. |
+| `silence()` | the Session's `_quit()` | Stops every SFX player and the music at once, drops the queued UI sounds and the waiting event, and disables the controller for good. |
 | `play_music(track)` | F13-03 / F11 session points | Crossfades to the mapped track on the idle music player over `music_crossfade_seconds` using a `create_tween()` Tween (runs while paused). A stream already playing continues, even under another id; an unmapped id stops the music. |
 | `stop_music()` | ditto | Fades the music out and stops it; `get_current_music()` is `&""` at once. |
 | `get_current_music() -> StringName` | tests, session | The track in play, or `&""`. |
@@ -80,7 +82,7 @@ The defaults are Claude's proposals; `Main/Audio`'s values are Astra's revised s
 ### Behaviour notes
 
 - `_ready` validates loudly (node path plus field): `max_voices < 1` or an unknown bus name disables processing, and a disabled controller's `play_event`/`play_music` do nothing. Bad `event_streams`/`music_tracks` entries are reported and ignored; the rest still work. It then builds the limiter with one rule per catalogue id, connects `voice_stolen` once, and creates `max_voices` SFX players and two music players in code.
-- `_process(delta)` ticks the limiter, then plays the queued UI sound: at most one per frame, accept outranking focus, so a button that opens a screen plays its accept sound and not the new screen's focus sound too — and the sound survives the `stop_all()` the same action caused, because input handling runs before `_process`.
+- `_process(delta)` ticks the limiter, plays the waiting `play_event_after` event once its `after` voices expired, then plays the queued UI sound: at most one per frame, accept outranking focus, so a button that opens a screen plays its accept sound and not the new screen's focus sound too — and the sound survives the `stop_all()` the same action caused, because input handling runs before `_process`.
 - A granted voice takes a pool player whose limiter voice is no longer active; the pool equals the global cap, so one always exists (asserted). `voice_stolen` stops the stolen voice's player.
 - **Headless audio runs on the Dummy driver.** Verified on 2026-09-23 with a throwaway `tools/zz_audio_check.gd` (deleted after the run, per the ticket): three mapped events were granted, each emitted `event_played`, a repeat inside its interval was refused, and `missing_events()` listed exactly the unmapped ids. Never assert on `finished` or the playback position in headless runs.
 
@@ -122,7 +124,7 @@ Files are under `assets/audio/sfx/`, copied byte for byte from `sound_effects/`,
 | `graze` | `ProjectileSystem.grazed` | the existing `_on_grazed` | Session |
 | `bomb_used` | `CombatState.bomb_activated` | the existing `_on_bomb_activated`, before the radius damage | Session |
 | `player_defeated` | `CombatState.defeated` | the existing `_on_player_defeated` | Session |
-| `stage_cleared` | `RunState.stage_completed` | the existing `_on_stage_completed` | Session |
+| `stage_cleared` | `RunState.stage_completed` | the existing `_on_stage_completed`, as `play_event_after(&"stage_cleared", &"boss_defeated")`: after the boss bell, not over it | Session |
 | `pickup_power`, `pickup_shield` | `StageDirector.pickup_accepted`, by `Pickup.Kind` | `_load_stage` → `_connect_director_audio()` → `_on_pickup_accepted` | Director |
 | `enemy_defeated` | `StageDirector.enemy_defeated(enemy_id, encounter_id)` (new) | same → `_on_enemy_defeated` | Director |
 | `checkpoint_activated` | `StageDirector.checkpoint_activated` | same → `_on_checkpoint_activated` | Director |
@@ -134,7 +136,7 @@ Session-lifetime producers are connected once in `_ready` and never again. The D
 
 ### The three producer signals
 
-- `StageDirector.enemy_defeated(enemy_id, encounter_id)`: emitted in `_on_enemy_defeated` on the first report of a live actor, after its score and before the machine hears it. A boss's defeat reaches `_on_enemy_defeated` too, so it plays `boss_defeated` and then `enemy_defeated`.
+- `StageDirector.enemy_defeated(enemy_id, encounter_id)`: emitted in `_on_enemy_defeated` on the first report of a live actor, after its score and before the machine hears it. A boss's defeat reaches `_on_enemy_defeated` too, right after `boss_defeated` and in the same call, so the Session's `_on_boss_defeated` sets `_boss_defeat_heard` and its `_on_enemy_defeated` consumes it and plays nothing: a boss's defeat plays only `boss_defeated` (Astra's "Trigger each ending once").
 - `PlayerWeapon.shots_fired(count)`: emitted at the end of `_fire`, at most once per physics tick, with the number of shots the field accepted; a tick whose every spawn was refused emits nothing.
 - `ProjectileSystem.target_hit(target_id, damage)`: emitted in `_on_field_enemy_hit` right after the registered `on_damage` call, only when that callable is valid. A Bomb's `damage_targets_in_radius` is not a hit and emits nothing. Stage 2's Seals register through `register_target` too, so a shot on a Seal plays `enemy_hit`.
 
@@ -143,6 +145,8 @@ Session-lifetime producers are connected once in `_ready` and never again. The D
 - `_unload_stage` starts with `audio.stop_all()`. That covers Restart, Return to Menu, Continuar and Jogar novamente.
 - `_retry()` from a Checkpoint calls `audio.stop_all()` right after `projectile_system.clear_all()`, then `play_music(<stage>_route)`. A Retry before any Checkpoint is a Restart.
 - A successful `_load_stage` ends with `play_music(<stage>_route)`; `_return_to_menu` ends with `play_music(&"menu")`; `_ready` starts `menu`. `boss_started` plays `<stage>_boss`, and `boss_defeated` returns to `<stage>_route`. Track ids are `"%s_%s" % [stage_id, part]` (`_stage_track`).
+- A stage clear plays `stage_cleared` once the `boss_defeated` bell's voice expires (1.48 s on both stages), not in the same frame; a stage cleared with no bell playing sounds at once. Leaving Results before then drops it (`stop_all()`).
+- Sair, the window's close button and Alt+F4 go through the Session's `_quit()`: `audio.silence()`, then `quit()` 0.1 s later (`QUIT_SILENCE_SECONDS`), so the AudioServer has released every stopped playback. A stream still playing at `quit()` printed `resources still in use at exit`.
 - Pause changes nothing: sound effects finish and the music continues.
 - The accept sound of the button that caused a stop still plays: the controller plays queued UI sounds in its `_process`, after the input that ran `stop_all()`.
 - An overlay raised by gameplay (Defeat, Results) takes focus, so it plays `ui_focus`; that is F13-02's UI source, not a gameplay event.
@@ -170,6 +174,5 @@ No scene attachment is required from Astra: `Main/Audio` is in Claude's `main.ts
 - The listening pass on Astra's revised selection is owed by the human pass (F14-02).
 - Music ships silent: D-01 found no permitted track, so `music_tracks` is empty and every music call is a no-op by design. A cleared track only needs a `music_tracks` entry in `main.tscn`.
 - Bursts are capped by design (ENGINEERING_BRIEF 4.E): a Wave killed in one tick or five Power Pickups magnetized together play one or two sounds, not one per emission (see [validation/audio.md](../validation/audio.md)).
-- A boss's defeat plays `enemy_defeated` beside `boss_defeated` (the Director reports it like any enemy), against Astra's "Trigger each ending once". Suppressing it needs a flag across two Session handlers, so F13-04 logged it instead of building it. The bell masks the light impact.
-- Astra's producer-coalescing rules are not built: a warning only for a new threat, no ordinary death sounds during a Bomb clear, and `stage_cleared` delayed until the boss bell ends (both start in the same frame today).
+- Two of Astra's producer-coalescing rules are not built: a warning only for a new threat, and no ordinary death sounds during a Bomb clear. (Each ending once and `stage_cleared` after the bell are built; see "Transitions".)
 - No pitch variation, no 3D audio, no distinct Back sound (ticket out of scope).

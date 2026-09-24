@@ -5,6 +5,20 @@ Engine: Godot 4.7.2.stable.official.ed1daf0bf, Windows 11. Contract in
 is Astra's revised one, [sound_effects/README.md](../../sound_effects/README.md) (F13-04);
 D-01's first pass is in [audio-selection.md](audio-selection.md).
 
+# Endings each once, in order, and a silent quit — 2026-09-24 (path)
+
+Two throwaway `SceneTree` drivers (not in the repo), headless on the Dummy audio driver, no
+`SCRIPT ERROR`, `ERROR:` or `WARNING:` line.
+
+| # | Check | Measured |
+| --- | --- | --- |
+| 1 | Direct Stage 1 cleared through S1-07 | `boss_defeated` 1, `stage_cleared` 1, Results on top. The boss's kill tick played `boss_defeated` and Results' `ui_focus`, no `enemy_defeated` |
+| 2 | `stage_cleared` after the bell | Started 1,476 ms (88 physics ticks) after `boss_defeated`; the bell is 1,480 ms. The limiter's clock is `_process` delta, so a voice started mid-frame expires up to one frame early |
+| 3 | Ordinary kills still heard | 18 `enemy_defeated` emissions gave 4 sounds (the limiter's 0.25 s interval) |
+| 4 | Waiting event and `stop_all()` | A `stage_cleared` waiting on a bell was not played 2 s after `stop_all()`; with no bell it played at once |
+| 5 | Quit while sounds play | Before the fix, Sair with `boss_defeated`, `stage_cleared` and `player_defeated` playing (and Sair's queued `ui_accept`) printed `ERROR: 8 resources still in use at exit` and `16 ObjectDB instances were leaked` (four `AudioStreamPlaybackOggVorbis` and their streams). After it: nothing, for Sair and for a `NOTIFICATION_WM_CLOSE_REQUEST`, and 0 voices right after the press |
+| 6 | F13-04's 64-check driver, rerun | 64 passed; its full-route wait lengthened from 5 to 100 ticks for the delayed `stage_cleared`. The route now hears 6 `enemy_defeated`, not 7 |
+
 # Astra's revised selection — 2026-09-24 (F13-04)
 
 ## What changed

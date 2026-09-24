@@ -44,6 +44,10 @@ const THREAT_CUE_SECONDS := 1.0
 ## long enough to still show at each Lantern Guardian Phase's first shot (2.0 s after
 ## Phase 1 begins, 2.75 s after Phase 2).
 const ATTACK_CUE_SECONDS := 3.0
+## Seconds between silencing the audio and quitting, so the AudioServer's mix thread
+## releases every stopped playback first. Claude's proposal: several mix buffers, and
+## too short to notice.
+const QUIT_SILENCE_SECONDS := 0.1
 ## Menu actions that only open a full screen, which Back returns from.
 const SCREEN_BY_ACTION: Dictionary[StringName, StringName] = {
 	&"open_stage_select": ScreenRouter.STAGE_SELECT,
@@ -86,6 +90,10 @@ var _player: PlayerController
 var _director: StageDirector
 ## The loaded stage's Flight Volume, kept for every ship spawned into it (F10-03).
 var _flight_volume := AABB()
+## Set by [method _on_boss_defeated]: the Director reports the same defeat through its
+## `enemy_defeated` right after, in the same call, and that report plays no sound of its
+## own (Astra's "Trigger each ending once").
+var _boss_defeat_heard: bool = false
 
 
 func _ready() -> void:
@@ -103,6 +111,8 @@ func _ready() -> void:
 	_combat_state.defeated.connect(_on_player_defeated)
 	_combat_state.bomb_activated.connect(_on_bomb_activated)
 	interface.action_requested.connect(_on_action_requested)
+	# The window's close button and Alt+F4 quit through _quit() too, silenced first.
+	get_tree().auto_accept_quit = false
 	_connect_camera_settings()
 	interface.show_home(ScreenRouter.MAIN_MENU)
 	_connect_audio()
@@ -133,6 +143,22 @@ func _unhandled_input(event: InputEvent) -> void:
 	else:
 		return
 	get_viewport().set_input_as_handled()
+
+
+func _notification(what: int) -> void:
+	# Only once _ready took the close request over: a Session with missing exports leaves
+	# Godot's own quit alone.
+	if what == NOTIFICATION_WM_CLOSE_REQUEST and not get_tree().auto_accept_quit:
+		_quit()
+
+
+## Sair, the window's close button and Alt+F4: silences every sound, then quits once the
+## AudioServer has let go of the stopped playbacks. A stream still playing at `quit()` is
+## never released ("resources still in use at exit").
+func _quit() -> void:
+	audio.silence()
+	await get_tree().create_timer(QUIT_SILENCE_SECONDS).timeout
+	get_tree().quit()
 
 
 ## The Run's state, for tests and dev tools to read. The Session drives it; nothing else
@@ -169,7 +195,7 @@ func _on_action_requested(action: StringName, payload: Dictionary) -> void:
 		&"return_to_menu":
 			_return_to_menu()
 		&"quit":
-			get_tree().quit()
+			_quit()
 		&"back_refused":
 			pass  # The main menu, Defeat and Results stay where they are.
 		_:
@@ -483,6 +509,7 @@ func _on_boss_health_changed(phase_index: int, ratio: float) -> void:
 func _on_boss_defeated(_boss_id: StringName) -> void:
 	interface.get_hud().hide_boss()
 	audio.play_event(&"boss_defeated")
+	_boss_defeat_heard = true
 	audio.play_music(_stage_track(_run_state.stage_result()["stage"], "route"))
 
 
@@ -522,7 +549,12 @@ func _on_pickup_accepted(_pickup_id: StringName, kind: Pickup.Kind, _score_award
 	audio.play_event(&"pickup_shield" if kind == Pickup.Kind.SHIELD else &"pickup_power")
 
 
+## A boss's defeat reaches here right after [method _on_boss_defeated], which already
+## played its ending.
 func _on_enemy_defeated(_enemy_id: StringName, _encounter_id: StringName) -> void:
+	if _boss_defeat_heard:
+		_boss_defeat_heard = false
+		return
 	audio.play_event(&"enemy_defeated")
 
 
@@ -611,7 +643,8 @@ func _on_player_defeated() -> void:
 ## Run is past `IN_STAGE`.
 func _on_stage_completed(result: Dictionary) -> void:
 	_set_paused(true)
-	audio.play_event(&"stage_cleared")
+	# After the boss bell of the same kill, not over it.
+	audio.play_event_after(&"stage_cleared", &"boss_defeated")
 	# Results replaces any overlay: a Defeat raised in the physics step of the last kill.
 	if interface.current_screen() != ScreenRouter.HUD:
 		interface.show_home(ScreenRouter.HUD)
