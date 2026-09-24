@@ -196,7 +196,7 @@ offset_top = 341.0
 offset_right = 890.0
 offset_bottom = 371.0
 mouse_filter = 2
-text = "Setas / mouse"
+text = "Setas"
 theme_override_font_sizes/font_size = 19
 
 

@@ -1,5 +1,11 @@
 # Handoff Log
 
+## 2026-09-24 — Astra (sol) — F15-05 UI truth [shared]
+State: DELIVERED
+Files: `scenes/ui/controls.tscn`, `scenes/ui/results.tscn`, `docs/engineering/ROADMAP.md`.
+Change: The camera binding now says "Setas". Results places Menu principal and Créditos in the first two button slots, so final victory shows no empty slot when Continue and Replay are hidden. Continue or Replay remains available in the third slot in other modes. No tests added (sprint rule).
+Action required by Claude: none.
+
 ## 2026-09-24 — Claude (path) — Audio endings: boss and stage endings each play once, in order
 State: INTEGRATED_VERIFIED
 Files: `scripts/audio/audio_controller.gd` (`play_event_after`, `silence`, `stop_all` drops the waiting event); `scripts/session/game_session.gd` (`_boss_defeat_heard`, `_quit`, `_notification`, `QUIT_SILENCE_SECONDS`, `auto_accept_quit` off); `docs/engineering/audio.md`, `menus-session.md` (the `quit` row), `project.md` (open issue closed), `ROADMAP.md` (F13 row 05); `docs/validation/audio.md`.
