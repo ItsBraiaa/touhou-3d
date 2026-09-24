@@ -55,3 +55,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 11, -10)
 
 [node name="DummyFar" parent="Dummies" instance=ExtResource("8_dummy")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 14, -34)
+
+[node name="EnemySpawns" type="Node3D" parent="."]
+
+[node name="Spirit" type="Marker3D" parent="EnemySpawns"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 9, -12)
+
+[node name="Sentry" type="Marker3D" parent="EnemySpawns"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 10, -16)

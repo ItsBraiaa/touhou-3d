@@ -15,6 +15,24 @@ Action required by <other agent>: <what they must do, or "none">
 
 ---
 
+## 2026-09-23 22:15 — Claude (path) — F9-02: EnemyActor and dev Spirit and Sentry prefabs [shared]
+State: CODE_READY
+Files:
+- New: `scripts/enemies/enemy_actor.gd`, `scenes/dev/spirit.tscn`, `scenes/dev/sentry.tscn`, `docs/validation/enemies.md`, `docs/validation/enemies-arena.png`.
+- New, Astra's values **[shared]**: `content/enemies/spirit.tres`, `content/enemies/sentry.tres`, `content/patterns/spirit_aimed_burst.tres`, `content/patterns/sentry_fan.tres` (all `metadata/dev = true`).
+- Edited: `scenes/dev/arena_harness.gd` and `.tscn` (an `EnemySpawns` node with `Spirit` and `Sentry` markers; additions in their own functions).
+- Docs: `docs/engineering/enemies.md` (EnemyActor contract, Setup for Astra), `docs/GUIDE.md` (Section 6 `enemy_actor.gd`, Section 7 "Enemy defeated", Section 10 "Common enemies and miniboss"), the ROADMAP F9-02 row.
+
+Change:
+- **`EnemyActor`** on the `Enemy` root: `spawn_setup(definition, enemy_id, encounter_id, rng, projectile_system, player, bounds)` after `add_child` under `RuntimeActors` (the Director's call in F10-01), then each physics tick at priority 0 it ticks the `EnemyModel`, spawns its hostile shots and registers its `HitVolume` sphere; `targetable`; a dev scale pulse over each Anticipation; `threat_reported(side)` when an attack starts off-screen; `defeated(enemy_id, encounter_id)` once, then `queue_free()`.
+- **Dev prefabs** instance your `spirit_lume` and `sentry_lantern` as `VisualRoot`. The `HitVolume` sits at the root origin, where your visuals are centered (radius 1.0 and 0.9).
+- **Arena harness:** a Spirit and a Sentry spawn in front of the ship with a seeded RNG; R respawns them; the readout shows their health, the defeats and the last off-screen side.
+- **Tests:** none added or changed (sprint rule). Scripted runs in `docs/validation/enemies.md`.
+
+Why: F9-02; the Director (F10-01) spawns through this API, and D-05 tunes these files.
+Action required by Astra: D-05 may now tune `content/enemies/*.tres`, `content/patterns/*.tres` and the `HitVolume` radii (move the `HitVolume` node itself to re-center: its position is the aim point). Your final `scenes/enemies/spirit.tscn` and `sentry.tscn` can copy the dev tree one to one (enemies.md "Setup for Astra").
+Action required by Claude (trunk): locked shots miss enemies 10 to 16 units away once the camera's lock framing blends in, by about 3.5 units, just outside the 10° main Aim Assist cone; from 30 units they hit. `PlayerWeapon` forward/cone against `CameraRig` lock framing (F6-03); see `docs/validation/enemies.md` "Finding for another lane". F10-01 can call `spawn_setup` as documented; score comes from `definition.score` on `defeated`.
+
 ## 2026-09-23 21:35 — Astra (sol) — Stage 2 content review (D-06 pass 1) [shared]
 State: SCENE_READY
 Files: `content/stages/stage_02/*.tres`, `docs/validation/stage-02-pacing.md`, `docs/engineering/ROADMAP.md`, `docs/HANDOFF_LOG.md`, and D-06's ticket.
