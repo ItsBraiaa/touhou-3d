@@ -115,7 +115,8 @@ Run top to bottom. When the next ticket's dependencies are not done, take the fi
 | 12 | F11-02 campaign-continuation-and-direct-stage | solo | F11-01 |
 | 13 | ~~F13-03~~: moved to path on delivery day | — | — |
 | 14 | ~~F3-04 part 2~~: moved to path on delivery day | — | — |
-| 15 | F14-01 export-and-run-outside-editor, starting with the swap step | solo | F11-03, F12-03 |
+| 14b | F11-03 active-and-clear-time-verification, as the manual protocol and `docs/validation/clear-time.md` only (no tests; moved from path) | solo | F11-02 |
+| 15 | F14-01 export-and-run-outside-editor, starting with the swap step. **Start rule:** begin once F12-07, F13-03, F10-05 and D-07 have landed, so the build ships them, or at the user's cutoff time, whichever comes first. What has not landed by then ships as it is on `dev-01`. | solo | F11-03, F12-03 |
 
 Slip rule: if F11-02 has not landed by T0 + 19.5 h, run F14-01 straight after F11-03 (before F13-03 and F3-04), and F14-02 re-exports at the end.
 
@@ -138,7 +139,7 @@ Slip rule: if F11-02 has not landed by T0 + 19.5 h, run F14-01 straight after F1
 | 9a | F3-04 part 2: the Session additions (moved from trunk); closes the ticket | solo | F10-03, F3-02, F3-04 part 1 |
 | 9b | F13-03 audio-event-wiring (moved from trunk) | 2 agents | F13-02, F12-03, F7-03, D-01 |
 | 9c | F10-05 retry-restores-checkpoint-pickups (Astra's Retry rule) | solo | F10-03, F12-03 |
-| 10 | F11-03 active-and-clear-time-verification, as the manual protocol and `docs/validation/clear-time.md` only (no tests). It never edits `game_session.gd`; a Session defect goes to trunk as a blocker. | solo | F11-02 |
+| 10 | ~~F11-03~~: moved to trunk on delivery day (trunk is idle before F14-01) | — | — |
 
 Expected gaps (stop the session): about T0 + 4.0 to 5.9 h, T0 + 10.7 to 12.4 h, and T0 + 13.2 to 19.5 h.
 

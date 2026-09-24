@@ -52,6 +52,16 @@ Action required by <other agent>: <what they must do, or "none">
 
 ---
 
+## 2026-09-24 10:55 — Claude (plan) — Endgame routing: F11-03 to trunk, F14-01 start rule
+State: PLANNED
+Files: `docs/engineering/SPRINT.md` (trunk and path queues), `.scratch/run-flow/issues/03-active-and-clear-time-verification.md` (Lane), `docs/engineering/ROADMAP.md`.
+Change:
+- **Queues.** Trunk is idle before the export, so it takes F11-03 (the manual time protocol). Path keeps F13-03 (audio wiring) and F10-05 (Retry pickups).
+- **Start rule.** F14-01 begins once F12-07, F13-03, F10-05 and D-07 have landed, so the delivered build contains them, or at the user's cutoff time, whichever comes first.
+
+Why: two Opus lanes stay busy while sol finishes Stage 2, and the export ships the finished features.
+
+Action required by Astra: none. Your queue stays F12-06 part 2, F12-07 part 2, D-07 Parts A and C, then D-06 pass 3.
 ## 2026-09-24 11:40 — Claude (trunk) — F11-02: Continuar into Campaign Stage 2, and Jogar novamente
 State: CODE_READY
 Files:
