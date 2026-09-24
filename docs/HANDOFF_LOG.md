@@ -1,5 +1,14 @@
 # Handoff Log
 
+## 2026-09-24 — Astra (sol) — Stage 2 content review (D-06 pass 2) [shared]
+State: SCENE_READY
+Files: scenes/stages/stage_02.tscn; docs/validation/stage-02-pacing.md; docs/engineering/ROADMAP.md; D-06 ticket.
+
+Seal1, Seal2 and Seal3 health: inherited default 10 → explicit authored 10. No behavior or other scene value changed; F12-05's game walkthrough already exercised that health. Estimated exposed destruction is 0.74 s efficient / 0.93 s normal at Power 2, keeping it a brief confirmation after the Guards. Rewards remain seven Power and two Shield; five early Power pickups can reach Power 3 before the miniboss.
+
+Updated the conditional estimates for D-05's shared Spirit 30/Sentry 45 health: about 336 s efficient and 414 s normal, neither measured. Boss budgets are provisional until pass 3. No content bug or Stage-2-only request found. F12-05 passed land (main-scene boot clean; 80 resources and 81 scripts, zero failed/invalid); D-06 pass 2 uses the same sprint gate and writes no tests. Ticket stays todo for pass 3.
+
+
 ## 2026-09-24 — Astra (sol) — Stage 2 Director integration (F12-05) [shared]
 State: CODE_READY
 Files: scenes/stages/stage_02.tscn; scenes/dev/portal_light_resolved.tres; scripts/progression/stage_director.gd; scripts/progression/gate.gd; scripts/enemies/enemy_actor.gd; tests/scene/test_stage_02_contract.gd; module docs, GUIDE, validation, ROADMAP and ticket.

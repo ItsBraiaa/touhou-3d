@@ -7434,6 +7434,7 @@ position = Vector3(0, 96, -737)
 [node name="Seal1" type="Node3D" parent="Encounters/S2-03/Seals" node_paths=PackedStringArray("shield_visual", "core_visual", "hit_volume", "approach_volume", "guard_links")]
 script = ExtResource("12_seal")
 seal_id = &"S2-03-Seal1"
+health = 10
 shield_visual = NodePath("ShieldVisual")
 core_visual = NodePath("Core")
 hit_volume = NodePath("HitVolume")
@@ -7511,6 +7512,7 @@ rotation_degrees = Vector3(90, 0, 0)
 [node name="Seal2" type="Node3D" parent="Encounters/S2-03/Seals" node_paths=PackedStringArray("shield_visual", "core_visual", "hit_volume", "approach_volume", "guard_links")]
 script = ExtResource("12_seal")
 seal_id = &"S2-03-Seal2"
+health = 10
 shield_visual = NodePath("ShieldVisual")
 core_visual = NodePath("Core")
 hit_volume = NodePath("HitVolume")
@@ -7588,6 +7590,7 @@ rotation_degrees = Vector3(90, 0, 0)
 [node name="Seal3" type="Node3D" parent="Encounters/S2-03/Seals" node_paths=PackedStringArray("shield_visual", "core_visual", "hit_volume", "approach_volume", "guard_links")]
 script = ExtResource("12_seal")
 seal_id = &"S2-03-Seal3"
+health = 10
 shield_visual = NodePath("ShieldVisual")
 core_visual = NodePath("Core")
 hit_volume = NodePath("HitVolume")

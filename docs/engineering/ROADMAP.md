@@ -97,7 +97,7 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | | | | 03 lantern-guardian-scene | design | — | sol | done (2026-09-23: Ghost prefab, clips and dusk render verified) |
 | | | | 04 stage-2-boss-scenes | design | — | sol | done (2026-09-23: Tempest Sentinel and Storm Guardian prefabs, clips and Stage 2 renders verified) |
 | | | | 05 stage-1-tuning-and-pacing | design | — | sol | done (2026-09-23: content values, names, clip candidates and provisional 221 s estimate) |
-| | | | 06 stage-2-content-review | design | — | sol | todo (pass 1 values/reward review and provisional pacing estimate landed; passes 2–3 pending) |
+| | | | 06 stage-2-content-review | design | — | sol | todo (passes 1–2 landed: values/rewards and explicit Seal health 10; pass 3 boss tuning pending) |
 | | | | 07 shrine-lighting-and-boss-rulings | design | — | sol | doing (Part B rulings delivered; Parts A and C await F12-03) |
 | | | | 08 enemy-visuals-duplicate-parts | design | — | oc-a | todo |
 
@@ -177,3 +177,5 @@ Stage 2 scene ticket: `.scratch/stage-02-area/issues/01-mountain-route.md` — *
 ## Decision log
 
 Architecture and style decisions are not repeated here. See `docs/adr/` and `CONVENTIONS.md`. Gameplay rules stay in `docs/PLANEJAMENTO.md` and `docs/STAGE_DESIGN.md`.
+
+2026-09-24: D-06 pass 2 explicitly authors Seal health 10 on all three Seals (unchanged from the verified default). Updated conditional Stage 2 estimates with D-05 enemy health: ~336 s efficient / ~414 s normal; boss review and measured clear remain pending.
