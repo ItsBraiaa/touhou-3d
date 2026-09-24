@@ -11,6 +11,12 @@ Change:
 Why: the user's request.
 
 Action required by Astra: PLANEJAMENTO Section 3 still says a lock lasts until "invalidated by target death/range". A death now hands the lock off. Please update that sentence in your words.
+## 2026-09-24 — Claude (readme) — repository README
+State: DELIVERED
+Files: `README.md` (new).
+Change: The repository had no README. It now has a short description of the game and its two stages, how to play the Windows build, run from source and export, the gameplay rules, the default controls (read from `project.godot` and `InputBindings`), and the credits, taken from `docs/ASSET_CREDITS.md`.
+Verification: docs only. Every control and credit line was checked against `project.godot`, `scripts/settings/input_bindings.gd`, the menu scenes and `docs/ASSET_CREDITS.md`. `tools/lane.ps1 land` is the gate.
+Action required by Astra: none. Add group member names to the Credits if the delivery needs them.
 
 ## 2026-09-24 — Astra (gate-fog) — closed gate clarity in both stages
 State: DELIVERED
