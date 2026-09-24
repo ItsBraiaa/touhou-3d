@@ -1,6 +1,6 @@
 # F8-03 Snapshot and CheckpointStore
 
-Status: todo
+Status: done
 Type: core
 parallel-safe: yes
 Depends on: F8-02, F4-01
@@ -82,6 +82,10 @@ Scene-side cleanup, respawn at `Respawn`, Checkpoint Areas, Defeat and Retry UI 
 - No Error-level warnings. `docs/engineering/progression-core.md` updated with both contracts and the Retry and Restart call sequence F10-03 follows.
 - Handoff log entry; `Status: done` with an Outcome; ROADMAP row.
 - One commit: `progression: add Snapshot and CheckpointStore`.
+
+## Outcome
+
+Implemented the full F8-03 deliverable minus the test files (sprint "No new tests"; verification is `tools/lane.ps1 land`): `scripts/progression/snapshot.gd` (`Snapshot.capture_from` keeping `duplicate(true)` copies of the three real capture shapes, `restore_into` with a fresh deep copy per core so one Snapshot restores repeatedly, the three getters, and `to_dict`/`from_dict`) and `scripts/progression/checkpoint_store.gd` (`activate` asking `notify_checkpoint_entered` first and refusing while defeated or paused, refill before commit before record so the bombs-used statistic survives, `latest`/`latest_checkpoint_id`, `retry_into` restoring the latest Snapshot without a refill, `restart_into` as the core-level Restart proof F10 never calls, `reset`). Both contracts, the invariant rows and the Retry and Restart call sequence F10-03 follows are in `docs/engineering/progression-core.md`. No capture shape had to change: CombatState, RunState and EncounterMachine were used read-only as delivered.
 
 ## Handoff notes for Astra
 
