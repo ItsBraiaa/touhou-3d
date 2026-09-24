@@ -15,6 +15,13 @@ Action required by <other agent>: <what they must do, or "none">
 
 ---
 
+## 2026-09-24 01:00 — Claude (plan) — F6-04: Aim Assist under lock framing, queued in path
+State: PLANNED
+Files: `.scratch/weapon-rendering/issues/04-aim-assist-under-lock-framing.md` (new), `docs/engineering/SPRINT.md` (path row 7a), `docs/engineering/ROADMAP.md`.
+Change: Path's F9-02 finding (locked shots miss enemies 10 to 16 units away once the lock framing blends in) becomes F6-04, in path after F12-02. It changes `PlayerWeapon`'s fire path so a Target Lock is aimed at against the lock itself, not the off-center framed view. The camera framing is untouched.
+Why: Aim Assist toward the Target Lock is a PLANEJAMENTO Section 4 rule, and trunk is on the critical path.
+Action required by Astra: tune `lock_assist_degrees` if F6-04 adds it, through D-05 or D-07 Part C.
+
 ## 2026-09-23 22:15 — Claude (path) — F9-02: EnemyActor and dev Spirit and Sentry prefabs [shared]
 State: CODE_READY
 Files:

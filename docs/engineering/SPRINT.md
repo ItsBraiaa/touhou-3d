@@ -129,6 +129,7 @@ Slip rule: if F11-02 has not landed by T0 + 19.5 h, run F14-01 straight after F1
 | 5 | F9-02 dev-prefabs-and-enemy-actor | 2 agents | F9-01, F6-02, and trunk's F6-03 part 2 (arena harness). It reads the ProjectileSystem priority that F6-02 actually landed. |
 | 6 | ~~F7-03~~: moved to trunk (6b), so it runs beside F9-02 | — | — |
 | 7 | F12-02 boss-controller-adapter | solo | F12-01, F9-02, F4-03 |
+| 7a | F6-04 aim-assist-under-lock-framing (path's F9-02 finding: locked shots miss enemies 10 to 16 units away) | solo | F6-03, F9-02 |
 | 7b | F3-02 options-screen-binding (moved from oc-b) | solo | F3-01 (oc-b), F4-02 |
 | 7c | F3-03 input-device-mode-and-controller-disconnect (moved from oc-b) | solo | F3-02 |
 | 8 | F3-04 part 1: the windowed F3 pass for F3-02 and F3-03, `docs/validation/settings.md` and screenshots | solo | F3-02, F3-03 |

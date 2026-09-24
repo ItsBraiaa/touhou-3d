@@ -52,6 +52,7 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | | | | 01 rendering-spike | spike | no | — | cut (folded into 02 by the sprint plan: MultiMesh by default, benchmark inside 02) |
 | | | | 02 projectile-system-adapter | adapter | no | trunk | done (2026-09-23: MultiMesh ProjectileSystem on ProjectileRoot, capacity 2048; 3000 Projectiles at 1118 FPS with other lanes running; swap pending D-02) |
 | | | | 03 weapon-model-and-player-weapon | core+adapter | no | trunk (part 1: oc-a) | done (2026-09-23: WeaponModel by oc-a, PlayerWeapon, dev Familiars and target dummies by trunk; swap pending D-02) |
+| | | | 04 aim-assist-under-lock-framing | adapter | no | path | todo |
 | F7 | Damage, bomb, pickups | `damage-pickups` | 00 plan | docs | no | — | done (one-pass planning) |
 | | | | 01 hit-to-combat-state-and-defeat | integration | no | trunk | done (2026-09-23: hits, Graze, Invulnerability blink and Defeat wired in GameSession; `tools/validate_combat.gd` COMBAT_OK; Retry restarts the stage until F10-03) |
 | | | | 02 bomb-clear-and-invulnerability | integration | no | trunk | done (2026-09-23: Bomb clear, radius damage, bombs used and dev blast; `validate_combat.gd` checks 14-21 COMBAT_OK; swap pending D-02) |
