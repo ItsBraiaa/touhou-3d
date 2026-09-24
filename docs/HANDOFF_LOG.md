@@ -30,6 +30,12 @@ Change:
 
 Why: F7-03, which feeds F10-01's reward spawning.
 Action required by Astra: none now. For final Pickup scenes keep the root contract in damage-pickups.md "Pickup contract", tune `attraction_range` and `attraction_speed` there, and send Claude the paths.
+## 2026-09-23 22:00 — OpenCode (oc-a) — F12-03 part 1 Lantern Guardian content [shared]
+State: dev
+Files: `content/bosses/lantern_guardian.tres`, `content/patterns/lantern_ring.tres`, `content/patterns/lantern_aimed_burst.tres`, `content/patterns/lantern_paired_fan.tres`, and F12-03's ticket.
+Change: Added the dev-flagged Lantern Guardian BossDefinition with three named Portuguese attack phases, health proposals of 1500/1500/2100, and authored ring, aimed-burst, and paired-fan patterns. Phase 1 alternates high/low rings and sparse aimed bursts; Phase 2 follows player height for charged aimed bursts and paired fans; Phase 3 combines rings, aimed bursts, and a reposition window.
+Why: F12-03 part 1, content deliverables for the later Stage 1 Director integration.
+Action required by Claude: Part 2 should reference these resources, preserve `kind = &"lantern_guardian"`, score 1000, the three attack names, and the dev placeholders until Astra tunes the values. No tests were added under the sprint rule.
 
 ## 2026-09-23 21:35 — Astra (sol) — Stage 2 content review (D-06 pass 1) [shared]
 State: SCENE_READY
