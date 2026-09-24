@@ -12,6 +12,7 @@ typed getters.
 
 - `scripts/settings/settings.gd` (`Settings` Rules Core, ADR-0001)
 - `scripts/ui/options_screen.gd` (`OptionsScreen` Adapter, F3-02), created by `scripts/ui/interface.gd`
+- `scripts/ui/input_device_state.gd` (`InputDeviceState` Rules Core, F3-03), owned by `scripts/ui/interface.gd`
 
 ## Public contract
 
@@ -152,9 +153,64 @@ A throwaway `SceneTree` script, deleted after use, checked every behavior the ti
 
 The existing suite passes (225 tests). A windowed boot of `main.tscn` (180 frames) printed no error and wrote no settings file.
 
+## Input device and disconnect (F3-03)
+
+Delivered by path on 2026-09-23. Options' `InputDevice` (Automático, Teclado, Controle) decides which prompts the menus show, and whether unplugging a controller pauses. It is a prompt preference and a disconnect rule only: it never filters input, so a wrong choice cannot lock anyone out (Claude's proposal).
+
+### `InputDeviceState` (`scripts/ui/input_device_state.gd`, Rules Core, `class_name InputDeviceState extends RefCounted`)
+
+| Member | Meaning |
+| --- | --- |
+| `signal prompts_changed(keyboard: bool)` | The prompts to show changed; emitted only on a change. |
+| `JOYPAD_AXIS_THRESHOLD` | 0.5: a stick counts as gamepad use at or past it (moved here from `MenuController`). |
+| `set_mode(mode: Settings.InputDevice)`, `get_mode()` | The preference. The last device starts as the keyboard and is kept across mode changes. |
+| `note_event(event: InputEvent)` | A key makes the keyboard the last device. A joypad button, or a stick at or past the threshold, makes the gamepad the last device and marks `event.device` connected. The mouse, any `InputEventAction` (so an injected `pause` changes nothing) and stick drift are ignored. |
+| `note_joypad(device: int, connected: bool)` | Keeps the set of connected pads. When the last one leaves, the keyboard becomes the last device. |
+| `shows_keyboard_prompts() -> bool` | Teclado: always. Controle: while no pad is connected. Automático: while the last device is the keyboard. |
+| `pauses_on_disconnect() -> bool` | Every mode but Teclado, where nobody is playing on the pad (Claude's proposal). |
+
+### Wiring in `Interface`
+
+- **At boot,** after F3-02's settings load and the Options binding:
+  - the saved mode goes into `set_mode`;
+  - each pad in `Input.get_connected_joypads()` goes into `note_joypad(id, true)`;
+  - `prompts_changed`, `Settings.changed` (the input-device key calls `set_mode`) and `Input.joy_connection_changed` are connected once;
+  - the first prompt state is pushed to every menu.
+- **`_input(event)`** calls `note_event` and never handles the event. It runs before a focused button consumes the gamepad's accept press, and it runs while paused (`Interface` always processes).
+- **`prompts_changed`** calls `MenuController.set_keyboard_prompts(keyboard)` on all eight menus. It sets `Layout/NavigationHint` on the five full screens and does nothing on the three overlays.
+- **A pad leaving.** `note_joypad(device, false)`, then, if `pauses_on_disconnect()` and the HUD is on top, `_request_pause()`: an `InputEventAction` `pause` press and release through `Input.parse_input_event`.
+  - It reaches `GameSession._unhandled_input` like Start or Escape, so the Session pauses only while a stage is in play.
+  - Over Pause, Options from Pause, Defeat, Results or the menus nothing is injected, so an unplug never resumes or starts anything.
+- **Keyboard recovery.** Pause takes focus on entry (F2-02), and the arrows, Enter and Escape work in every mode. When the last pad leaves, the prompts turn back to the keyboard's.
+
+### Verification (no tests: the sprint rule)
+
+A throwaway `SceneTree` script, deleted after use, ran headless on `main.tscn` with `settings_path` on a per-process temp file. Events went through `root.push_input`, connections through `Input.joy_connection_changed.emit`, and the mode through the Options widget.
+
+- **The core.**
+  - Automático follows the last device.
+  - Drift at 0.3 is ignored and a push at 0.8 counts.
+  - Actions and the mouse are ignored.
+  - Teclado keeps the keyboard prompts and skips the disconnect pause.
+  - Controle shows the gamepad's prompts only while a pad is connected.
+  - The last pad leaving restores the keyboard prompts.
+  - `prompts_changed` fired twice for pad, pad, key, key.
+- **The footers in the flow.**
+  - In Automático a pad button hides the footer on MainMenu, Options and StageSelect at once, and a key brings them back.
+  - Teclado keeps them after pad input.
+  - Controle hides them while a pad is known, and shows them once it leaves.
+- **Disconnects.**
+  - In the menus: nothing starts.
+  - During Direct Stage 1 with the HUD on top: the tree pauses, Pause is on top and `RunState` is paused. Down then moves Pause's focus (Continuar → Reiniciar), and Escape resumes to the HUD.
+  - On Pause, and in Options opened from Pause: nothing changes.
+  - In Teclado mode during gameplay: no pause.
+- **Regressions.** `tools/validate_menus.gd` still gives `MENUS_OK`, footer checks included, and the suite passes (225 tests). `test_menu_registry_contract.gd`'s footer case now drives `set_keyboard_prompts` directly (`test_set_keyboard_prompts_shows_and_hides_the_footer`).
+
 ## Open issues
 
-- Bus and window application are live since F3-02 ("Options binding"). The input device (F3-03) and the camera values (F3-04) are stored and saved but not applied yet.
+- Bus and window application are live since F3-02 ("Options binding"), and the input device since F3-03 ("Input device and disconnect"). The camera values (F3-04) are stored and saved but not applied yet.
+- **Owed: a physical DualSense unplug in flight** (ENGINEERING_BRIEF Section 8: a simulated gamepad event does not replace a physical controller). F3-03 was verified with synthetic events and `joy_connection_changed` emissions only. It belongs to the human pass.
+- No gamepad glyphs or gamepad hint text: Controle and Automático after pad use hide the keyboard hint (GUIDE Section 14 allows hiding).
 - **Owed: the windowed display pass** (a real resize, fullscreen, the layout intact at each resolution). F3-04 part 1's `/run` records it; F3-02 was verified headless through `display_applied`.
 - Defaults applies the display twice when both the window mode and the resolution differ (one `changed` each). This is harmless, and it keeps `changed` as the one application point.
 - Defaults remain the GUIDE-authored values until Astra tunes them.
