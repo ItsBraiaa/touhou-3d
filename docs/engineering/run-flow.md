@@ -75,9 +75,9 @@ It acts only when the Run is `STAGE_COMPLETE`, the mode is `CAMPAIGN` and the st
 2. `_set_paused(false)`.
 3. `_run_state.advance(power)` enters the next stage with that Power Level and the score carried. Clear Time, Graze and bombs used start from zero, and the Attempt index from 0.
 4. `_load_stage(<the next stage>)` loads the stage and the ship at its `PlayerStart`. If the load fails, it calls `_return_to_menu()`.
-5. `_begin_first_attempt()` runs, which does four things: `_combat_state.start(starting_power_level())` (100 % Health, one Shield, two Bombs, Power Progress 0), `begin_attempt()`, the Director's `start_attempt`, and the HUD.
+5. `_begin_first_attempt()` runs, which does four things: `_combat_state.start(starting_power_level(), starting_power_progress())` (100 % Health, one Shield, two Bombs, and the entry Power Progress), `begin_attempt()`, the Director's `start_attempt`, and the HUD.
 
-Only the Power Level carries. A Stage 1 run ending at, for example, level 2 with 3 of 5 Progress loses those 3. This is Claude's reading: `RunState` carries only the level, so a Restart of Campaign Stage 2 returns to the same entry. Carrying Progress would need an entry-progress value in `RunState`, which is the user's call (Open issues).
+Since F15-11 (the user said yes) the Power Level and the Power Progress both carry: a Stage 1 run ending at level 2 with 3 of 5 Progress enters Stage 2 at level 2 with 3 of 5. `advance(power_level, power_progress)` records both as `RunState`'s entry values (`starting_power_level()`, `starting_power_progress()`, and `entry_power_progress` in `capture()`), so a Restart of Campaign Stage 2, or a Retry before any Checkpoint, returns to them. A Direct Stage 2 still enters at level 2 with 0.
 
 ### `_replay_stage()` (Jogar novamente)
 
@@ -140,7 +140,6 @@ No test is added (the sprint's no-new-tests rule). Every row was checked by the 
 
 ## Open issues
 
-- **Power Progress is not carried into Campaign Stage 2** (F11-02, Claude's reading above). Tell Claude if it should be; it needs an entry-progress value in `RunState`.
 - **The Campaign's final victory through play:** F12-06 and F12-07 replaced both Stage 2 boss stand-ins, and S2-07's final-Phase defeat feeds the Director's `stage_cleared`. F11-03's scripted route reached `Jornada concluída` through both stages' real Encounters and bosses, by teleport and direct damage ([validation/clear-time.md](../validation/clear-time.md)). A Campaign flown by a person remains for the human pass.
-- **Results over Defeat.** A Defeat raised in the same physics step as the last kill is replaced by Results: the stage was cleared. The player's defeated `CombatState` stays frozen under Results. Continuar (F11-02) starts a new `CombatState` anyway.
+- **Results over Defeat.** A Defeat raised in the same physics step as the last kill, or during the 1 s defeat beat (F15-10), is replaced by Results after the victory beat: the stage was cleared. The player's defeated `CombatState` stays frozen under Results. Continuar (F11-02) starts a new `CombatState` anyway.
 - **`menus-session.md` "Params"** still calls Defeat's `checkpoint` param an id; it is the Checkpoint's `display_name` (the doc comment in `menu_controller.gd` is fixed).

@@ -17,6 +17,32 @@ Verification: a headless throwaway driver through `main.tscn`, run after syncing
 F15-02's driver was rerun on the same tree and passed: `retry_from_checkpoint` called while three enemies were mid-Death removed them at once. No tests (sprint rule).
 Action required by Astra: none required. `storm_guardian.tscn` gained only `ring_cue = true`. Set it on another boss to give its fixed-height rings the same cue. The cue's size, colour and growth and both turn rates are Claude's proposals; send Claude values to change them.
 Action required by trunk: none.
+## 2026-09-24 — Astra (sol) — F16 controls/camera/dash plan and Claude orchestration [shared]
+State: PLANNED
+Files: `.scratch/controls-expansion/spec.md`, `CLAUDE_KICKOFF.md`, `issues/00` through `07`; `docs/engineering/controls-expansion-plan.md`, `ROADMAP.md` (new F16 section and Received row), `README.md` (plan pointer); `docs/HANDOFF_LOG.md`.
+Change: Wrote the user's requested plan for all gameplay/menu keyboard and controller bindings, Xbox/PlayStation labels, keyboard/mouse camera selection, recenter, and short lateral dashes. The user explicitly chose invulnerability: 3 units in 0.15 s, protected for 0.15 s, shared 0.8 s cooldown from activation; no Graze, no wall phasing, preserve longer hit/Bomb protection. Spec fixes capture/neutral/conflict/rollback/persistence rules, old-settings migration, mouse focus/pause lifecycle and first/last protection-tick ordering. Astra owns the exact Controls widget layout plus reusable row/cooldown/dash visual components; Claude owns scripts, persistence, InputMap and integration. Seven implementation tickets name dependencies, file boundaries and manual acceptance. F16-01/02 and later F16-04 versus 03/05 can overlap; trunk integration is serialized. A copyable kickoff tells Claude how to schedule the lanes and request Astra's work. No runtime file or test was edited and no implementation session was launched.
+Why: The user asked for a written plan for Astra's screen/layout work and for Claude to orchestrate the complete feature, after approving dash invulnerability. Existing F3 settings work is retained; its earlier no-remapping/no-glyph/no-migration exclusions are superseded only by this planned feature. The current export/package is not represented as containing F16.
+Validation: Planning self-review covers each requested feature, named dependencies, relative links, file ownership, proposed interfaces and the no-new-tests constraint. Existing `tools/lane.ps1 land` is the landing gate; final result is reported with the session's commit. Physical keyboard/controller and gameplay acceptance belong to F16-07 and are not claimed by this document work.
+Action required by Claude: Read `docs/engineering/controls-expansion-plan.md` and `.scratch/controls-expansion/CLAUDE_KICKOFF.md`; after implementation is requested, check lane availability and run the stated ticket sequence. Do not edit Astra's component geometry while she is authoring it, and never dispatch two writers into one worktree. Do not write tests or disposable test drivers. Physical Xbox, DualShock and DualSense results must be recorded individually; unavailable devices remain not verified.
+## 2026-09-24 13:50 — Claude (trunk) — F15-11: Power Progress carries into Campaign Stage 2
+State: INTEGRATED_VERIFIED
+Files:
+- `scripts/session/run_state.gd`: `_entry_power_progress`, `advance(power_level, power_progress = 0)`, `starting_power_progress()`, and `entry_power_progress` in `capture()` and `restore()`.
+- `scripts/session/game_session.gd`: `_continue_campaign`, `_begin_first_attempt`, `_restart_stage`.
+- `scripts/progression/checkpoint_store.gd`: `restart_into`.
+- Docs: `docs/engineering/run-flow.md` (the Continuar section; the open issue is closed), `docs/GUIDE.md` (one phrase in the GameSession row), `docs/engineering/ROADMAP.md` (the F15-11 row).
+Change: the user said yes to carrying Power Progress.
+- Results' Continuar passes the Power Level and the Power Progress Stage 1 ended with to `RunState.advance`, which keeps both as Stage 2's entry values.
+- Stage 2's first Attempt, a Restart, and a Retry before any Checkpoint start `CombatState` from both.
+- A Checkpoint Snapshot keeps the entry Progress, so a Restart after a Retry still returns to it.
+- A Direct Stage 2 still enters at Power Level 2 with 0.
+Verification: a headless `main.tscn` driver (throwaway, not in the repo).
+- Stage 1 ended at 2 with 2 of 5, and Campaign Stage 2 entered at 2 with 2.
+- A Pickup took it to 2/3, and Restart returned to 2/2. A defeat, then Retry before any Checkpoint, also returned to 2/2.
+- A Direct Stage 2 entered at 2/0.
+- A Stage 1 finished at level 3 entered Stage 2 at 3/0.
+No tests (sprint rule).
+Action required by Astra: none. PLANEJAMENTO Section 6's carry line may want "and the Power Progress".
 
 ## 2026-09-24 13:45 — Claude (trunk) — F15-10: defeat beat before the Defeat overlay
 State: INTEGRATED_VERIFIED

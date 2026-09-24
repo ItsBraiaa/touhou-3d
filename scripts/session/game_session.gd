@@ -235,9 +235,10 @@ func _start_run(mode: RunState.RunMode, stage: StringName) -> void:
 
 ## Results' Continuar after Campaign Stage 1 (F11-02): enters the next stage of the order
 ## with the Power Level and the score carried, and 100 % Health, one Shield and two Bombs
-## (PLANEJAMENTO Section 6). Power Progress starts at 0: [RunState] carries only the
-## level, so a Restart there returns to the same entry. Ignored, with a warning, unless
-## a Campaign stage that is not the last has just completed.
+## (PLANEJAMENTO Section 6). Since F15-11 the Power Progress is carried too, and
+## [RunState] keeps both as the stage's entry values, so a Restart there returns to them.
+## Ignored, with a warning, unless a Campaign stage that is not the last has just
+## completed.
 func _continue_campaign() -> void:
 	# The phase first: stage_result() is only valid once a Run has started.
 	if _run_state.get_phase() != RunState.Phase.STAGE_COMPLETE \
@@ -246,8 +247,9 @@ func _continue_campaign() -> void:
 		push_warning("%s: continue_campaign outside Campaign Results with a next stage; ignored" % get_path())
 		return
 	var power := _combat_state.get_power_level()
+	var progress := _combat_state.get_power_progress()
 	_set_paused(false)
-	_run_state.advance(power)
+	_run_state.advance(power, progress)
 	if not _load_stage(_run_state.stage_result()["stage"]):
 		_return_to_menu()
 		return
@@ -271,10 +273,10 @@ func _replay_stage() -> void:
 
 
 ## The shared tail of a stage entered from its start, after the [RunState] call that
-## entered it: the combat resources at the stage's entry Power Level, the first Attempt,
-## the Director's, and the HUD.
+## entered it: the combat resources at the stage's entry Power Level and Power Progress,
+## the first Attempt, the Director's, and the HUD.
 func _begin_first_attempt() -> void:
-	_combat_state.start(_run_state.starting_power_level())
+	_combat_state.start(_run_state.starting_power_level(), _run_state.starting_power_progress())
 	_run_state.begin_attempt()
 	if _director != null:
 		_director.start_attempt(_attempt_seed(_run_state.get_attempt_index()))
@@ -290,7 +292,7 @@ func _restart_stage() -> void:
 	var stage: StringName = _run_state.stage_result()["stage"]
 	_set_paused(false)
 	_run_state.restart_stage()
-	_combat_state.start(_run_state.starting_power_level())
+	_combat_state.start(_run_state.starting_power_level(), _run_state.starting_power_progress())
 	_load_stage(stage)
 	# A boss fight never survives a Restart. Binding the new ship clears the panel too; this
 	# says so without relying on it. Before the Attempt starts, because a boss Wave in the
