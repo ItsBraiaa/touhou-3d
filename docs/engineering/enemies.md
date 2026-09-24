@@ -144,6 +144,16 @@ The core emits `guards_activated`, `guard_link_cleared`, `shield_dropped` and
 ids and remaining health; restore emits no signals. The `Seal` Node adapter and
 scene wiring are F9-03 part 2 / F12-05.
 
+### Seal adapter (F9-03, part 2)
+
+`Seal` on each `Encounters/S2-03/Seals/SealN` root resolves Guard ids from
+`guard_spawn` metadata through `EncounterMachine.enemy_id`. It enables the
+approach Area3D once setup is complete, forwards Director Guard reports to the
+core, hides defeated Guard links and the shield, and joins `targetable` only
+while exposed. Its hit sphere is registered with `ProjectileSystem` every
+physics tick while exposed. Destruction leaves the target group, stops
+registration, hides the dev core visual, and emits `seal_destroyed` once.
+
 - The lateral figure-eight for DRIFT and vertical sine bob for HOVER are initial engineering proposals. Tune speed and range against authored Spirit and Sentry movement in the running arena; the model clamps movement to bounds but does not implement steering or collision avoidance.
 - **Locked shots miss close enemies (for trunk, F6-03).** From 10 to 16 units, once `CameraRig`'s lock framing blends in, the weapon's shots pass about 3.5 units from a Spirit's center, just outside the 10° main Aim Assist cone; from about 30 units they hit steadily. See [validation/enemies.md](../validation/enemies.md) "Finding for another lane".
 - The enemies never turn: a visual faces its authored +Z, toward a ship flying the Stage 1 route (−Z). Facing the player is not in F9-02.

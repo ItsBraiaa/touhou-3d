@@ -1,6 +1,6 @@
 # F9-03 SealRules core and Seal adapter
 
-Status: todo
+Status: done
 Type: core+adapter
 parallel-safe: no
 Depends on: F9-02
@@ -77,6 +77,15 @@ Attaching `seal.gd` in `stage_02.tscn`, spawning the Guards, Guard passivity unt
 - `docs/engineering/enemies.md` Seal section; GUIDE Section 6 row `seal.gd` and Section 7 row.
 - Handoff log entry; `Status: done` with an Outcome; ROADMAP row.
 - One commit: `progression: add SealRules and Seal adapter`.
+
+## Outcome
+
+Implemented `SealRules` and the `Seal` adapter. The core enforces one-time Guard
+activation, duplicate-safe Guard defeat counting, shielded/exposed/destroyed
+state transitions, early-damage refusal, and silent capture/restore. The adapter
+resolves Guard ids from `guard_spawn` metadata, renders all state transitions,
+registers the exposed hit sphere, and emits one destruction event. No tests were
+added under the sprint rule; `tools/lane.ps1 land` passed.
 
 ## Handoff notes for Astra
 
