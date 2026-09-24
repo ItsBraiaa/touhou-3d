@@ -1,5 +1,17 @@
 # Handoff Log
 
+## 2026-09-24 — Claude (trunk) — F16-06: review fixes [shared]
+State: CODE_READY
+Files: `scripts/session/game_session.gd`; `docs/PLANEJAMENTO.md` [shared] (the Section 3 camera-input paragraph); `docs/GUIDE.md` [shared] (the `game_session.gd` row); `docs/engineering/settings.md` and `docs/engineering/player-flight.md` (only their "F16 Session integration (F16-06)" sections); `docs/validation/controls-expansion.md` (only the F16-06 section); `.scratch/controls-expansion/issues/06-session-camera-and-controls-integration.md` (Outcome).
+Change:
+- **No capture for an unfocused window.** A gamepad still drives a window without the focus, so Continuar, Tentar novamente or a Results button pressed on the pad after an Alt+Tab resumed play and captured the pointer, and Windows clipped the cursor to the background window. `_update_pointer` now also requires `_window_focused`, which the four focus notifications set. The Run itself still goes on. On the focus-in, `_on_focus_gained` runs `_update_pointer()` outside a beat, so a player already flying gets the capture back, and a paused Run, a screen on top and a beat keep the pointer free. Regaining focus still resumes nothing.
+- **PLANEJAMENTO no longer overstates the disconnect rule.** An unplug shows the pointer only when it pauses, in every input mode but Teclado. A defeat or victory beat refuses that pause and keeps the capture until Defeat or Results. settings.md's "Controller disconnect" says the same.
+- **Walkthrough.** Step 5 adds a gamepad Continuar made from another window. Step 8 adds Alt+Tab and an unplug during the defeat beat.
+Why: review findings on F16-06.
+Verification: no tests or drivers (F16 rule). Verified by reading; the gate runs at land.
+Action required by Astra (F16-07): walk the new lines of steps 5 and 8 with the rest of the walkthrough.
+Action required by trunk: none.
+
 ## 2026-09-24 — Claude (trunk) — F16-06: controls, mouse camera, recenter and dash through the Session lifecycle [shared]
 State: CODE_READY
 Files: `scripts/session/game_session.gd`; `scripts/player/player_controller.gd` (the resume guard only); `scripts/player/camera_rig.gd`, `scripts/ui/interface.gd` and `scripts/ui/controls_screen.gd` (doc comments only); `docs/GUIDE.md` [shared] (Sections 5, 6, 7 and 14, including a new "Controls screen (F16)" subsection); `docs/PLANEJAMENTO.md` [shared] (Section 3 camera input and recenter, a new Section 4 "Lateral dash (Impulso)", and Sections 7 and 8); `docs/engineering/settings.md` (Purpose, Public contract, File layout, a new "F16 Session integration (F16-06)" section and Open issues); `docs/engineering/player-flight.md` (a new "F16 Session integration (F16-06)" section); `docs/validation/controls-expansion.md` (only the F16-06 section); `.scratch/controls-expansion/issues/06-session-camera-and-controls-integration.md` (Status, Work, Outcome); `docs/engineering/ROADMAP.md` (the F16-06 row). `main.tscn`, `player_ship.tscn`, `project.godot`, `settings.gd`, `menu_controller.gd`, `input_device_state.gd` and `options_screen.gd` needed no change.

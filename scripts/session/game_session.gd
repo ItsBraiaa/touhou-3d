@@ -134,6 +134,10 @@ var _bomb_clearing: bool = false
 ## Whether this Session has the pointer captured for mouse look (F16-06); see
 ## [method _update_pointer].
 var _pointer_captured: bool = false
+## False from a window focus loss until the focus comes back (F16-06). A gamepad still
+## drives an unfocused window, so a Resume can happen while it is away, and the pointer is
+## never captured then; see [method _on_focus_gained].
+var _window_focused: bool = true
 
 
 func _ready() -> void:
@@ -213,7 +217,11 @@ func _notification(what: int) -> void:
 			if not get_tree().auto_accept_quit:
 				_quit()
 		NOTIFICATION_APPLICATION_FOCUS_OUT, NOTIFICATION_WM_WINDOW_FOCUS_OUT:
+			_window_focused = false
 			_on_focus_lost()
+		NOTIFICATION_APPLICATION_FOCUS_IN, NOTIFICATION_WM_WINDOW_FOCUS_IN:
+			_window_focused = true
+			_on_focus_gained()
 
 
 ## Sair, the window's close button and Alt+F4: silences every sound, then quits once the
@@ -538,16 +546,16 @@ func _gameplay_active() -> bool:
 	return _player != null and not get_tree().paused and interface.current_screen() == ScreenRouter.HUD
 
 
-## The pointer is captured for mouse look only while [method _gameplay_active] and the
-## camera input mode is Mouse (spec "Camera"), and shown in every other state, so the menus,
-## Pause, Defeat, Results and the Controls capture always have a free cursor. Called after
-## every transition that can change either: a pause or resume, an Attempt's HUD, an unload,
-## and a change of the mode. Never per frame, because each call drops the rig's pending
-## look.
+## The pointer is captured for mouse look only while [method _gameplay_active], the camera
+## input mode is Mouse (spec "Camera") and the window has the focus, and shown in every
+## other state, so the menus, Pause, Defeat, Results and the Controls capture always have a
+## free cursor. Called after every transition that can change any of them: a pause or
+## resume, an Attempt's HUD, an unload, a change of the mode and the focus coming back.
+## Never per frame, because each call drops the rig's pending look.
 func _update_pointer() -> void:
 	var settings := interface.get_settings()
 	var mouse_camera := settings != null and settings.get_camera_input_mode() == Settings.CAMERA_MODE_MOUSE
-	_set_pointer_captured(_gameplay_active() and mouse_camera)
+	_set_pointer_captured(_window_focused and _gameplay_active() and mouse_camera)
 
 
 ## Captures or shows the pointer and opens or closes the ship's mouse-look gate with it
@@ -577,9 +585,8 @@ func _drop_capture_warp() -> void:
 
 ## The window lost focus: a stage in play pauses, as `pause` would, and in any other state
 ## the pointer is only shown (a beat refuses Pause; a menu already shows it). Regaining focus
-## does nothing, so neither the Run nor the capture resumes on its own; Continuar does (spec
-## "Camera"). Godot's desktop backends release every held key and button with the focus, so
-## nothing stays held into that Resume.
+## resumes nothing; Continuar does (spec "Camera"). Godot's desktop backends release every
+## held key and button with the focus, so nothing stays held into that Resume.
 func _on_focus_lost() -> void:
 	if _player == null:
 		return
@@ -587,6 +594,16 @@ func _on_focus_lost() -> void:
 		_pause()
 	else:
 		_set_pointer_captured(false)
+
+
+## The window has the focus again. Nothing resumes: after a focus loss the Run is paused, or
+## was in a beat or under a screen. The pointer is captured again only when the player
+## already flies, which takes a Resume, a Retry or a Continuar made with the gamepad while
+## the window was away; that capture was held back until now. A beat keeps the free pointer
+## the loss gave it until Defeat or Results. Without a ship there is nothing to capture for.
+func _on_focus_gained() -> void:
+	if _player != null and not _in_beat:
+		_update_pointer()
 
 
 ## Defeat's Retry: resumes from the latest activated Checkpoint's Snapshot in place, with

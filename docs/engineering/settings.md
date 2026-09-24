@@ -586,22 +586,23 @@ Delivered by trunk on 2026-09-24. It joins the settings above to the Run through
 
 `GameSession` is the only writer of `Input.mouse_mode` (`ControlsScreen`, `Interface` and `CameraRig` never touch it).
 
-- **Captured** only while the player flies in Mouse mode: a ship in play, the HUD on top, the tree running, and `camera_input_mode` is `mouse` (`_gameplay_active()` and `_update_pointer()`). A beat (defeat, victory) counts as flying, because its camera still orbits.
+- **Captured** only while the player flies in Mouse mode with the window focused: a ship in play, the HUD on top, the tree running, `camera_input_mode` is `mouse`, and `_window_focused` (`_gameplay_active()` and `_update_pointer()`). A beat (defeat, victory) counts as flying, because its camera still orbits.
 - **Shown** in every other state: the menus, Options and Controls from either caller, the Controls capture dialog, Pause, Defeat, Results, a stage unload and the main menu. So the Controls screen always has a free cursor for mouse-button capture and for Cancelar.
-- **Where it is decided.** `_set_paused` (every pause, resume, Defeat, Results, Restart, Retry, Continuar and Return to Menu passes through it), `_show_hud` (the HUD of every Attempt), `_unload_stage`, `_on_setting_changed` (the mode) and `_on_focus_lost`. Never per frame, because each decision also opens or closes the rig's gate, which drops its pending look.
+- **Where it is decided.** `_set_paused` (every pause, resume, Defeat, Results, Restart, Retry, Continuar and Return to Menu passes through it), `_show_hud` (the HUD of every Attempt), `_unload_stage`, `_on_setting_changed` (the mode), `_on_focus_lost` and `_on_focus_gained`. Never per frame, because each decision also opens or closes the rig's gate, which drops its pending look.
 - `_exit_tree` shows the pointer if the Session had captured it, since the mode is process-wide.
 
 ### Focus loss
 
 - `NOTIFICATION_APPLICATION_FOCUS_OUT` or `NOTIFICATION_WM_WINDOW_FOCUS_OUT` pauses a stage in play (`_pause()`, as `pause` would, with the Pause overlay) when the HUD is on top and no beat runs. A beat, which refuses Pause, and any screen on top only show the pointer.
-- **Regaining focus does nothing.** Neither the Run nor the capture resumes on its own; Continuar does. The pointer must be shown on the loss itself, because Godot's Windows backend applies the current mode again when the window is activated, and a mode left at captured would take the pointer back.
+- **Regaining focus resumes nothing.** The Run stays paused; Continuar resumes it and captures. The pointer must be shown on the loss itself, because Godot's Windows backend applies the current mode again when the window is activated, and a mode left at captured would take the pointer back.
+- **No capture while the window is away.** A gamepad still drives an unfocused window, so Continuar, Tentar novamente or a Results button can be pressed while it is away. `_window_focused` (false from either focus-out notification to `NOTIFICATION_APPLICATION_FOCUS_IN` or `NOTIFICATION_WM_WINDOW_FOCUS_IN`) holds that capture back, because Windows would clip the cursor to a background window. The Run itself goes on. On the focus-in, `_on_focus_gained` runs `_update_pointer()` outside a beat, so a player already flying gets the capture back; a paused Run, a screen on top and a beat keep the pointer free.
 - **Held input.** Godot's desktop backends release every held key and button with the focus (`Input.release_pressed_events`), so nothing stays held into that Continuar.
 - Both engine behaviors are recalled from the engine source, not exercised here; walkthrough steps 5 and 6 check them.
 - A Controls confirmation open at the time still reverts itself (F16-03); the Session only shows the pointer there.
 
 ### Controller disconnect
 
-A pad leaving while the HUD is on top injects `pause` (F3-03, unchanged), so the pointer is shown with Pause. In Teclado mode an unplug does not pause, so a keyboard-and-mouse player keeps flying with the pointer captured. That is deliberate: nobody is playing on the pad (F3-03's rule).
+A pad leaving while the HUD is on top injects `pause` (F3-03, unchanged), so the pointer is shown with Pause. In Teclado mode an unplug does not pause, so a keyboard-and-mouse player keeps flying with the pointer captured. That is deliberate: nobody is playing on the pad (F3-03's rule). During a defeat or victory beat the injected `pause` is refused like any other, so the pointer stays captured until Defeat or Results show it, one to two and a half seconds later.
 
 ### Resume, and presses shared with menus
 
