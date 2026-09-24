@@ -58,12 +58,15 @@ Done 2026-09-24 in lane path. Only `scripts/player/camera_rig.gd` changed; no In
   - `mouse_invert_vertical` false;
   - `mouse_look_hold_seconds` 0.25;
   - `recenter_seconds` 0.25;
-  - `mouse_jitter_pixels` 1.0, Claude's proposal.
+  - `mouse_jitter_speed` 60 px/s and `recenter_grace_seconds` 0.1, Claude's proposals.
 - **Mouse.** Motion is collected in `_input` from `screen_relative`, which the window stretch does not scale. It is spent once per physics tick as pixels × degrees, with no delta.
 - **Locked look.** Deliberate mouse motion turns the lock pull off. After 0.25 s idle the pull fades back in at `lock_blend_speed`. The lock is kept.
-- **Recenter.** It lasts 0.25 s, eased with smoothstep, and takes the shortest yaw path with `lerp_angle`. It is interrupted by the actions or by deliberate mouse motion, and restarts from the current pose. The lock pull does not run during it, so there is one writer.
+- **Recenter.** It lasts 0.25 s, eased with smoothstep, and takes the shortest yaw path with `lerp_angle`. After a 0.1 s grace it is interrupted by the actions or by deliberate mouse motion, and a repeat restarts it from the current pose. The lock pull does not run during it, so there is one writer.
+- **Review fixes.**
+  - Deliberate mouse motion is now judged by speed over the real time since the previous tick, not by pixels per tick, so the jitter-or-look split no longer moves with the frame rate. `mouse_jitter_pixels` 1.0 became `mouse_jitter_speed` 60 px/s, the same split at 60 Hz.
+  - The first 0.1 s of a recenter drops camera input instead of interrupting, so the Mouse 3 click or R3 press that asked for it cannot cancel it.
 - **Decision.** In mouse mode the `camera_*` actions, arrow keys included, still orbit. They share the right stick's actions, and the bindings belong to the player.
 - **Verification.** The existing suite passed (225 tests, 0 failed), and so did the strict resource check. Everything else was checked by reading: yaw wrap, pitch limits, lock preservation and obstruction. It is recorded in `docs/validation/controls-expansion.md` (F16-04).
 - **Pending F16-06, not passed:** the Session lifecycle, meaning capture, focus and Resume, settings at spawn and Retry, and the `camera_recenter` wiring.
-- **Not verified:** physical mouse and stick feel, including rotation that steps at the 60 Hz tick on high-refresh displays (F16-07).
-- **Gate:** `tools/lane.ps1 land` was not run in this stage; the orchestrator runs it.
+- **Not verified:** physical mouse and stick feel, including rotation that steps at the 60 Hz tick on high-refresh displays, and whether the 0.1 s grace covers a real wheel click with its release (F16-07).
+- **Gate:** `tools/lane.ps1 land` runs on the review-fix commit.

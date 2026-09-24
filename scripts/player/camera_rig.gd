@@ -70,10 +70,12 @@ const MODE_MOUSE := &"mouse"
 @export var mouse_sensitivity: float = 0.12
 ## When true, moving the mouse up looks down. Independent of [member invert_vertical].
 @export var mouse_invert_vertical: bool = false
-## Largest mouse motion in one physics tick, in screen pixels, that counts as jitter rather
-## than deliberate look. Jitter still turns the camera, but it neither holds the lock
-## framing off nor interrupts a recenter, and a recenter drops it. Claude's proposal.
-@export var mouse_jitter_pixels: float = 1.0
+## Fastest mouse motion, in screen pixels per second, that counts as jitter rather than
+## deliberate look; 60 is one pixel per tick at 60 Hz. It is measured over real time, so the
+## split does not move with the frame rate. Jitter still turns the camera, but it neither
+## holds the lock framing off nor interrupts a recenter, and a recenter drops it. Claude's
+## proposal.
+@export var mouse_jitter_speed: float = 60.0
 ## Seconds the lock framing stays off after the last deliberate mouse motion, before it
 ## fades back in at [member lock_blend_speed].
 @export var mouse_look_hold_seconds: float = 0.25
@@ -81,6 +83,10 @@ const MODE_MOUSE := &"mouse"
 @export_group("Recenter")
 ## Duration of a recenter, in seconds, eased in and out. 0 recenters on the next tick.
 @export var recenter_seconds: float = 0.25
+## Seconds at the start of a recenter during which camera input is dropped instead of
+## interrupting it, so the press that asked for it cannot cancel it: a wheel click nudges the
+## mouse and a stick click tilts the stick. Claude's proposal.
+@export var recenter_grace_seconds: float = 0.1
 
 @export_group("Damping")
 ## Rate the camera position eases toward its place behind the ship, in reciprocal
@@ -120,6 +126,9 @@ var _allowed_distance: float = INF
 var _mouse_capture_active: bool = false
 ## Mouse motion in screen pixels collected since the last physics tick, which spends it.
 var _pending_look: Vector2 = Vector2.ZERO
+## Real time of the last physics tick, in microseconds: the motion a tick spends arrived
+## after it.
+var _last_aim_usec: int = 0
 ## Seconds left before the lock framing may fade back in after deliberate mouse look.
 var _look_hold_left: float = 0.0
 ## How much of the lock framing mouse look holds off: 1 while the mouse aims, fading to 0.
@@ -248,8 +257,8 @@ func clear_pending_look() -> void:
 ## round. Without a lock it faces the ship's authored forward (its own -Z, not the last
 ## movement direction) at [member default_pitch_degrees] and the normal follow offset; with
 ## one it returns to the normal ship-and-target framing and keeps the lock. Camera input
-## interrupts it. A request during a recenter restarts it from the current pose; nothing
-## queues. The pitch limits and the obstruction ray apply throughout. F16-06 calls this on
+## interrupts it once [member recenter_grace_seconds] have passed. A request during a
+## recenter restarts it from the current pose; nothing queues. The pitch limits and the obstruction ray apply throughout. F16-06 calls this on
 ## the `camera_recenter` action, which the rig does not read.
 func request_recenter() -> void:
 	_recentering = true
@@ -272,24 +281,28 @@ func _advance_lock_blend(delta: float) -> void:
 ## Advances the aim one tick and returns the new yaw; the pitch is stored, since only the
 ## yaw is public. This is the one place any source turns the camera.
 ##
-## A recenter in progress is the whole of the tick, unless camera input interrupts it.
-## Otherwise the lock framing pulls first, scaled by the blend and held off by mouse look,
-## and the input is added on top: in follow mode it is the whole of the movement, and while
-## locked the `camera_*` actions push against the pull, which is what lets the player look
-## around without breaking the lock. The actions turn at a rate, times the tick; the mouse
-## turns by the pixels it moved, once, whatever the tick or frame rate.
+## A recenter in progress is the whole of the tick, unless camera input interrupts it after
+## the grace time; until then the input is dropped. Otherwise the lock framing pulls first,
+## scaled by the blend and held off by mouse look, and the input is added on top: in follow
+## mode it is the whole of the movement, and while locked the `camera_*` actions push against
+## the pull, which is what lets the player look around without breaking the lock. The actions
+## turn at a rate, times the tick; the mouse turns by the pixels it moved, once, whatever the
+## tick or frame rate.
 func _advance_aim(delta: float, pivot: Vector3) -> float:
 	var yaw := global_rotation.y
 	var orbit := Input.get_vector(
 			&"camera_left", &"camera_right", &"camera_up", &"camera_down", stick_deadzone)
 	var mouse := _pending_look
 	_pending_look = Vector2.ZERO
-	var mouse_deliberate := mouse.length() > mouse_jitter_pixels
-	_advance_look_override(delta, mouse_deliberate)
+	var mouse_deliberate := mouse.length() > mouse_jitter_speed * _advance_look_clock()
 	if _recentering:
-		if orbit.is_zero_approx() and not mouse_deliberate:
+		var in_grace := _recenter_elapsed < recenter_grace_seconds
+		if in_grace or (orbit.is_zero_approx() and not mouse_deliberate):
 			return _advance_recenter(delta, pivot, yaw)
 		_recentering = false
+	# After the recenter check, so motion a recenter dropped never arms the look hold that
+	# [method request_recenter] cleared.
+	_advance_look_override(delta, mouse_deliberate)
 	if _lock_blend > 0.0 and _lock_target != null:
 		var pull := (1.0 - exp(-rotation_damping * delta)) * _lock_blend * (1.0 - _look_override)
 		var target_position := _lock_target.global_position
@@ -305,6 +318,20 @@ func _advance_aim(delta: float, pivot: Vector3) -> float:
 	var mouse_vertical := mouse_turn.y if mouse_invert_vertical else -mouse_turn.y
 	_pitch = _clamped_pitch(_pitch + vertical * rate + mouse_vertical)
 	return yaw - orbit.x * rate - mouse_turn.x
+
+
+## Returns the real seconds since the previous physics tick and starts the next interval.
+## That interval is what the tick's mouse motion was collected over, at any frame rate:
+## input arrives once per rendered frame, so below the tick rate the first tick of a frame
+## spends the whole frame's motion and the next one none, and above it one tick spends
+## several frames. Measuring by the tick's own delta instead would make the jitter split
+## depend on the frame rate. The clamp keeps a first tick, or the first after a pause, from
+## reading every motion as a crawl, and a zero interval from reading it all as deliberate.
+func _advance_look_clock() -> float:
+	var now_usec := Time.get_ticks_usec()
+	var elapsed := float(now_usec - _last_aim_usec) / 1000000.0
+	_last_aim_usec = now_usec
+	return clampf(elapsed, 0.001, 0.1)
 
 
 ## Holds the lock framing off while the mouse aims deliberately, for

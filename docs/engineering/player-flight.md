@@ -269,7 +269,7 @@ Implemented in `scripts/player/camera_rig.gd` (lane path, 2026-09-24). The rig o
 
 ### Exports (F16-04)
 
-None of these is authored in `player_ship.tscn`, so the defaults apply. The spec supplies the two 0.25 s values, the 0.12 sensitivity and the 0.2 deadzone. The jitter threshold is Claude's proposal for Astra's playtest.
+None of these is authored in `player_ship.tscn`, so the defaults apply. The spec supplies the two 0.25 s values, the 0.12 sensitivity and the 0.2 deadzone. The jitter speed and the recenter grace are Claude's proposals for Astra's playtest.
 
 | Export | Group | Default | Meaning |
 | --- | --- | --- | --- |
@@ -277,9 +277,10 @@ None of these is authored in `player_ship.tscn`, so the defaults apply. The spec
 | `camera_input_mode` | Mouse look | `&"keys"` | `MODE_KEYS` or `MODE_MOUSE`. |
 | `mouse_sensitivity` | Mouse look | 0.12 | Degrees per screen pixel. |
 | `mouse_invert_vertical` | Mouse look | false | When true, mouse up looks down. |
-| `mouse_jitter_pixels` | Mouse look | 1.0 | Largest motion in one physics tick that still counts as jitter. |
+| `mouse_jitter_speed` | Mouse look | 60.0 | Fastest mouse motion, in screen pixels per second of real time, that still counts as jitter. 60 is one pixel per tick at 60 Hz. |
 | `mouse_look_hold_seconds` | Mouse look | 0.25 | How long the lock framing stays off after the last deliberate mouse motion. |
 | `recenter_seconds` | Recenter | 0.25 | Length of a recenter. 0 snaps on the next tick. |
+| `recenter_grace_seconds` | Recenter | 0.1 | Start of a recenter during which camera input is dropped instead of interrupting it. |
 
 ### Rules and timing
 
@@ -290,7 +291,7 @@ None of these is authored in `player_ship.tscn`, so the defaults apply. The spec
 - **Directions.** Mouse right turns the view right, which lowers the yaw. Mouse up raises the view unless `mouse_invert_vertical` is on. Each source has its own inversion.
 - **Both modes.** The `camera_*` actions orbit in either mode, keys included. Keys and the right stick share those actions, and F16-02/03 give the bindings to the player, so the rig does not split an action by device. Mouse mode adds the mouse on top of them.
 - **Locked look.**
-  - Motion counts as deliberate when it is longer than `mouse_jitter_pixels` in one tick.
+  - Motion counts as deliberate when its speed is above `mouse_jitter_speed`. The speed is the tick's motion divided by the real time since the previous tick (`Time.get_ticks_usec`, clamped to 1–100 ms). That interval is what the motion was collected over at any frame rate; the tick's delta is not, because at 30 fps the first of two ticks spends a whole frame's motion. So the split between jitter and look does not move with the frame rate.
   - Deliberate motion turns the lock pull fully off at once and sets a 0.25 s hold.
   - When the hold runs out, the override fades back to 0 at `lock_blend_speed`, which takes 0.25 s at 4.0. The usual `rotation_damping` pull then returns the view to the ship-and-target framing.
   - The lock is never released by any of this.
@@ -306,7 +307,8 @@ None of these is authored in `player_ship.tscn`, so the defaults apply. The spec
   - Yaw moves with `lerp_angle`, which takes the shorter way round.
   - A new request resets the elapsed time: the curve starts again from the current pose, and nothing queues.
   - A request also ends any mouse-look hold, so the lock pull resumes the tick the recenter ends, from the framing it has just reached.
-- **Interruption.** Two things interrupt a recenter: a non-zero `camera_*` vector after the deadzone, or deliberate mouse motion. Motion below the jitter threshold is dropped while a recenter runs.
+- **Interruption.** Two things interrupt a recenter: a non-zero `camera_*` vector after the deadzone, or deliberate mouse motion. Motion below the jitter speed is dropped while a recenter runs.
+- **Grace.** For the first `recenter_grace_seconds` (0.1 s) of a recenter, all camera input is dropped instead of interrupting it. Without it the press that asked for the recenter could cancel it: a Mouse 3 click nudges the mouse, and an R3 click can tilt the stick past a low deadzone. A repeated request restarts the grace along with the curve. Dropped motion does not arm the mouse-look hold. A camera key held through the request takes over when the grace ends.
 - **One writer.** While a recenter runs, it replaces the lock pull for that tick. The yaw is written only through `_place_rig`, with the value `_advance_aim` returns, and the pitch only inside `_advance_aim` and `_advance_recenter`. The camera transform is written only by `_apply_camera_transform`. There are no tweens.
 - **Pitch limits and obstruction.** Both still win. Every pitch write is clamped or interpolates between two clamped values. The obstruction ray still runs every tick against the desired position computed from the new angles.
 - **Rotation rate.** The aim, mouse included, changes at the physics rate: 60 Hz by default. On a faster display the view turns in 60 Hz steps, as the stick orbit always has. F16-07 judges whether that is visible.
