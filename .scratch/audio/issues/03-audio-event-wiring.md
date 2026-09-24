@@ -1,6 +1,6 @@
 # F13-03 Audio event wiring
 
-Status: todo
+Status: done
 Type: integration
 parallel-safe: no
 Depends on: F13-02, F12-03, F7-03, D-01
@@ -109,3 +109,14 @@ Where F12-03 connected a boss signal straight to a `Hud` method, route it throug
 ```
 Read CLAUDE.md, docs/engineering/SPRINT.md, docs/engineering/ROADMAP.md and .scratch/audio/issues/03-audio-event-wiring.md, then implement that ticket and verify it with /run. Finish with its Definition of Done and commit.
 ```
+
+## Outcome
+
+Done 2026-09-24 by lane path (2-agent shape: implementer, then a read-only reviewer who reran the suite and found no defects).
+
+- `Main/Audio` carries `AudioController` with all 17 D-01 streams and volumes; `music_tracks` is empty because D-01 cleared no track, so every music call is a silent no-op. `GameSession.audio` is typed `AudioController`.
+- The wiring follows the Deliverables table. New Session functions: `_connect_audio()`, `_connect_director_audio()`, `_stage_track()`, and the five one-line handlers `_on_target_hit`, `_on_shots_fired`, `_on_pickup_accepted`, `_on_enemy_defeated`, `_on_checkpoint_activated`. The other events play from the handlers the Session already had.
+- The three producer signals are one declaration and one emit each. `StageDirector.enemy_defeated` also fires for a boss, because `_on_boss_defeated` reports through `_on_enemy_defeated`, so a boss's death plays `boss_defeated` and then `enemy_defeated`. It was kept that way so the `stage_director.gd` merge with sol stays trivial; see audio.md "Open issues".
+- No defect in `audio_limiter.gd` or `audio_controller.gd`; neither changed.
+- Tests: none, by the sprint rule, so `test_audio_wiring.gd` is not created. `tests/scene/test_main_contract.gd` needed no change. The suite shows 225 passed. A throwaway driver of `main.tscn` from the main menu passed 54 checks, headless and then windowed. That driver was not committed and is described in `docs/validation/audio.md`.
+- Owed: the human listening pass (F14-02).

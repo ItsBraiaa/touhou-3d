@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3]
+[gd_scene load_steps=35 format=3]
 
 [ext_resource type="Script" path="res://scripts/session/game_session.gd" id="1_session"]
 [ext_resource type="Script" path="res://scripts/ui/interface.gd" id="2_interface"]
@@ -17,6 +17,23 @@
 [ext_resource type="Script" path="res://scripts/combat/projectile_system.gd" id="15_projectile_system"]
 [ext_resource type="SphereMesh" path="res://scenes/dev/projectile_player_mesh.tres" id="16_player_bullet"]
 [ext_resource type="SphereMesh" path="res://scenes/dev/projectile_hostile_mesh.tres" id="17_hostile_bullet"]
+[ext_resource type="Script" path="res://scripts/audio/audio_controller.gd" id="18_audio_controller"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/interface/tick_001.ogg" id="19_ui_focus"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/interface/confirmation_001.ogg" id="20_ui_accept"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/scifi/laserSmall_000.ogg" id="21_player_shot"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/impact/impactGeneric_light_000.ogg" id="22_enemy_hit"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/interface/pluck_001.ogg" id="23_graze"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/scifi/forceField_000.ogg" id="24_shield_broken"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/impact/impactSoft_heavy_000.ogg" id="25_player_hit"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/scifi/explosionCrunch_000.ogg" id="26_bomb_used"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/scifi/lowFrequency_explosion_000.ogg" id="27_player_defeated"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/digital/phaseJump2.ogg" id="28_pickup_power"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/digital/phaserUp2.ogg" id="29_phaser_up"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/impact/impactGeneric_light_003.ogg" id="30_enemy_defeated"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/digital/phaseJump3.ogg" id="31_checkpoint"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/digital/lowThreeTone.ogg" id="32_threat_warning"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/impact/impactBell_heavy_000.ogg" id="33_boss_defeated"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/digital/threeTone1.ogg" id="34_stage_cleared"]
 
 [node name="Main" type="Node" node_paths=PackedStringArray("world_root", "projectile_system", "interface", "audio")]
 process_mode = 3
@@ -51,3 +68,42 @@ hud_scene = ExtResource("11_hud")
 
 [node name="Audio" type="Node" parent="."]
 process_mode = 3
+script = ExtResource("18_audio_controller")
+event_streams = Dictionary[StringName, AudioStream]({
+&"ui_focus": ExtResource("19_ui_focus"),
+&"ui_accept": ExtResource("20_ui_accept"),
+&"player_shot": ExtResource("21_player_shot"),
+&"enemy_hit": ExtResource("22_enemy_hit"),
+&"graze": ExtResource("23_graze"),
+&"shield_broken": ExtResource("24_shield_broken"),
+&"player_hit": ExtResource("25_player_hit"),
+&"bomb_used": ExtResource("26_bomb_used"),
+&"player_defeated": ExtResource("27_player_defeated"),
+&"pickup_power": ExtResource("28_pickup_power"),
+&"pickup_shield": ExtResource("29_phaser_up"),
+&"enemy_defeated": ExtResource("30_enemy_defeated"),
+&"checkpoint_activated": ExtResource("31_checkpoint"),
+&"threat_warning": ExtResource("32_threat_warning"),
+&"boss_phase_changed": ExtResource("29_phaser_up"),
+&"boss_defeated": ExtResource("33_boss_defeated"),
+&"stage_cleared": ExtResource("34_stage_cleared")
+})
+event_volume_db = Dictionary[StringName, float]({
+&"ui_focus": -12.0,
+&"ui_accept": -5.0,
+&"player_shot": -18.0,
+&"enemy_hit": -16.0,
+&"graze": -22.0,
+&"shield_broken": -4.0,
+&"player_hit": -3.0,
+&"bomb_used": -1.0,
+&"player_defeated": -2.0,
+&"pickup_power": -9.0,
+&"pickup_shield": -6.0,
+&"enemy_defeated": -13.0,
+&"checkpoint_activated": -4.0,
+&"threat_warning": 1.0,
+&"boss_phase_changed": -3.0,
+&"boss_defeated": 0.0,
+&"stage_cleared": -2.0
+})
