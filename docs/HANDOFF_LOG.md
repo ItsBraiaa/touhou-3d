@@ -15,6 +15,19 @@ Action required by <other agent>: <what they must do, or "none">
 
 ---
 
+## 2026-09-24 00:30 — Claude (plan) — OpenCode runs on one shared meter: power models out, F3-02 and F3-03 to path
+State: docs
+Files: `docs/engineering/SPRINT.md` ("Model budgets" rewritten, oc-a, oc-b and path queues, Escalation, Overflow, Human steps, Shared files), `.scratch/settings/issues/02-*.md` and `03-*.md` (lane path), `.scratch/enemies/issues/03-seal-and-guard-rules.md` (part 2 on Luna), `docs/engineering/ROADMAP.md`.
+Change:
+- **The user's correction.** OpenCode has one usage meter shared by every model. A power-model request costs 10 to 20 times a Luna request and about 200 times a DeepSeek V4.1 Flash one.
+- **Routing.** The remaining OpenCode tickets run on GPT 5.6 Luna, with V4.1 Flash as fallback. F9-03 part 2 moves from Qwen3.8 Max to Luna. F3-02 and F3-03 (planned on GLM-5.3) move to lane path, which has an Opus gap before its F3-04 part 1.
+- **Escalation.** A stuck ticket now goes straight to rescue (Opus), not to Kimi K3.
+- **Cost.** The rest of the OpenCode plan is about 22 % of one 5-hour window.
+
+Why: on a shared meter, a single GLM-5.3 ticket would have spent most of a window.
+
+Action required by Astra: none.
+
 ## 2026-09-23 21:54 — Claude (trunk) — F7-03: Pickup adapter and dev pickup prefabs
 State: CODE_READY
 Files:

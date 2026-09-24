@@ -5,11 +5,11 @@ Type: core+adapter
 parallel-safe: no
 Depends on: F9-02
 Lane: oc-a
-Model: part 1 GPT 5.6 Luna (fallback DeepSeek V4.1 Flash); part 2 Qwen3.8 Max (fallback Kimi K3), after its window resets
+Model: part 1 GPT 5.6 Luna (fallback DeepSeek V4.1 Flash); part 2 GPT 5.6 Luna (fallback MiMo-V2.6-Pro)
 
 > **Split (SPRINT.md):**
 > - **Part 1, lane oc-a, GPT 5.6 Luna:** the SealRules core and its six-order test. Commit with `(F9-03 part 1)`.
-> - **Part 2, lane oc-a, Qwen3.8 Max** (once that model's 5-hour window has reset): the Seal adapter and its stage_02 contract test. It closes the ticket.
+> - **Part 2, lane oc-a, GPT 5.6 Luna:** the Seal adapter. It closes the ticket. No tests (SPRINT "No new tests").
 
 ## Goal
 
