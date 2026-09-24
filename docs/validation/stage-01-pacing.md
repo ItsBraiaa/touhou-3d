@@ -33,10 +33,10 @@ Straight Z travel totals 519 units, or 43.3 s at `base_speed` 12. Combat estimat
 | S1-04 sealed portal | 35 s | 82 / 6.8 s | 3 × 45 ÷ 13.5 = 10 s; three heights and gate alignment | 29 s |
 | S1-05 shrine approach | 40 s | 82 / 6.8 s | (4 × 30 + 2 × 45) ÷ 13.5 ≈ 16 s; two cues and Wave delay | 31 s |
 | S1-06 sanctuary entrance | 10 s | 27 / 2.3 s | Safe arch alignment | 6 s |
-| S1-07 Lantern Guardian | 85 s | 97 / 8.1 s | Provisional 25/25/35 s Phases, with approach partly overlapping | 87 s |
+| S1-07 Lantern Guardian | 85 s | 97 / 8.1 s | Reviewed health 550/550/775 ÷ measured 22.1 Power-3 DPS = 24.9/24.9/35.1 s, plus 1.5 s transitions; approach partly overlaps | about 87 s |
 | **Stage 1** | **240 s** | **519 / 43.3 s** | **Conditional estimate; no Results capture** | **about 221 s** |
 
-Power 1 applies through S1-02. Taking its five Power items makes S1-03 through S1-05 Power 2; taking S1-05's five makes S1-06 and S1-07 Power 3. These are collection assumptions, not guaranteed upgrades. A normal run with less accurate fire, more maneuvering and fewer Bomb hits could take about 260–280 s. The efficient estimate is roughly 19 s under the 240 s design target, so runtime measurement and boss tuning matter.
+Power 1 applies through S1-02. Taking its five Power items makes S1-03 through S1-05 Power 2; taking S1-05's five makes S1-06 and S1-07 Power 3. These are collection assumptions, not guaranteed upgrades. A normal run with less accurate fire, more maneuvering and fewer Bomb hits could take about 260–280 s. The efficient estimate is roughly 19 s under the 240 s design target. S1-07 now uses the observed locked-shot ceiling; misses and dodges lengthen it. It remains an estimate, not a Results Clear Time. Bomb damage 20 is below the smallest Phase health 550.
 
 ## Five-minute fallback proposal — not applied
 

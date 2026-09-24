@@ -44,7 +44,7 @@ reposition_seconds = 1.0
 
 [sub_resource type="Resource" id="Phase_Ritual"]
 script = ExtResource("2_phase")
-health = 1500
+health = 550
 attack = SubResource("Attack_Ritual")
 transition_seconds = 0.0
 
@@ -84,7 +84,7 @@ reposition_seconds = 1.0
 
 [sub_resource type="Resource" id="Phase_Threads"]
 script = ExtResource("2_phase")
-health = 1500
+health = 550
 attack = SubResource("Attack_Threads")
 transition_seconds = 0.75
 
@@ -124,7 +124,7 @@ reposition_seconds = 2.0
 
 [sub_resource type="Resource" id="Phase_Dance"]
 script = ExtResource("2_phase")
-health = 2100
+health = 775
 attack = SubResource("Attack_Dance")
 transition_seconds = 0.75
 
@@ -136,3 +136,4 @@ score = 1000
 entry_seconds = 1.0
 phases = Array[ExtResource("2_phase")]([SubResource("Phase_Ritual"), SubResource("Phase_Threads"), SubResource("Phase_Dance")])
 metadata/dev = true
+metadata/reviewed = true

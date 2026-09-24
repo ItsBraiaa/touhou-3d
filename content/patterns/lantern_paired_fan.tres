@@ -16,3 +16,4 @@ damage = 10
 spread_degrees = 52.0
 rotation_step_degrees = 18.0
 metadata/dev = true
+metadata/reviewed = true

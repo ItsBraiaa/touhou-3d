@@ -40,8 +40,44 @@ func run() -> void:
 		check(shape.size.x == 90 and shape.size.y == 75, "Gate does not span allowed flight cross-section")
 	var stage_script: Script = stage.get_script() as Script
 	check(stage_script == null or stage_script.resource_path == DIRECTOR_SCRIPT_PATH, "Stage root carries a script other than the StageDirector")
+	var shrine: AnimationPlayer = stage.get_node_or_null("Environment/ShrineLighting") as AnimationPlayer
+	check(shrine != null, "Missing shrine lighting AnimationPlayer")
+	if shrine != null:
+		check(shrine.process_mode == Node.PROCESS_MODE_ALWAYS, "Shrine lighting must run under paused Results")
+		check(shrine.has_animation(&"corrupted_to_calm"), "Missing shrine lighting clip")
+		check(shrine.autoplay == &"", "Shrine lighting must not autoplay")
+		if shrine.has_animation(&"corrupted_to_calm"):
+			var clip: Animation = shrine.get_animation(&"corrupted_to_calm")
+			check(clip.loop_mode == Animation.LOOP_NONE, "Shrine lighting must not loop")
+			shrine.play(&"corrupted_to_calm")
+			shrine.seek(0.0, true)
+			var glow: OmniLight3D = stage.get_node("Environment/ShrineGlow") as OmniLight3D
+			check(glow.light_color.is_equal_approx(Color(0.27, 0.52, 0.86, 1)), "Shrine first key differs from authored light")
+			shrine.seek(clip.length, true)
+			check(glow.light_color.is_equal_approx(Color(1, 0.78, 0.42, 1)), "Shrine final key is not calm")
+			var second_scene: Node = packed.instantiate()
+			var second_glow: OmniLight3D = second_scene.get_node("Stage/Environment/ShrineGlow") as OmniLight3D
+			check(second_glow.light_color.is_equal_approx(Color(0.27, 0.52, 0.86, 1)), "New Stage instance leaked calm lighting")
+			second_scene.free()
+			shrine.stop()
 	if DisplayServer.get_name() != "headless" and failures == 0:
 		var camera: Camera3D = scene.get_node("PreviewCamera")
+		camera.position = Vector3(28, 56, -475)
+		camera.look_at(Vector3(0, 35, -529))
+		shrine.play(&"corrupted_to_calm")
+		shrine.seek(0.0, true)
+		shrine.pause()
+		for frame: int in range(10):
+			await process_frame
+		await RenderingServer.frame_post_draw
+		check(root.get_texture().get_image().save_png("res://docs/validation/stage-01-shrine-corrupted.png") == OK, "Corrupted shrine screenshot failed")
+		shrine.seek(shrine.get_animation(&"corrupted_to_calm").length, true)
+		for frame: int in range(10):
+			await process_frame
+		await RenderingServer.frame_post_draw
+		check(root.get_texture().get_image().save_png("res://docs/validation/stage-01-shrine-calm.png") == OK, "Calm shrine screenshot failed")
+		shrine.seek(0.0, true)
+		shrine.stop()
 		var views := [
 			["entrance", Vector3(0,12,29), Vector3(0,13,-70)],
 			["ascent", Vector3(-12,23,-148), Vector3(5,30,-236)],

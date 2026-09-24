@@ -16,3 +16,4 @@ damage = 10
 gap_degrees = 72.0
 rotation_step_degrees = 24.0
 metadata/dev = true
+metadata/reviewed = true

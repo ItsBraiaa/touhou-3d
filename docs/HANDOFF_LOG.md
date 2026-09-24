@@ -1,5 +1,20 @@
 # Handoff Log
 
+## 2026-09-24 — Astra (sol) — Shrine lighting and boss rulings (D-07 Parts A and C) [shared]
+State: SCENE_READY
+Files: `scenes/stages/stage_01.tscn`; `tools/validate_stage_01.gd`; `content/bosses/lantern_guardian.tres`; three `content/patterns/lantern_*.tres`; `docs/validation/stage-01-shrine.md` and its two captures; `docs/validation/stage-01-pacing.md`; ROADMAP; D-07 ticket.
+
+Trunk F14-01: set Stage `defeat_presentation = NodePath("Environment/ShrineLighting")` and `defeat_animation = &"corrupted_to_calm"`. The clip lasts 2.4 s, does not loop or autoplay, and its player runs under paused Results. F11-01's owner decides whether Results' overlay shows enough of the calm shrine or needs a short delay. First and final keys match corrupted and calm light; a new instance starts corrupted. The windowed and headless Stage validator passed with zero failures. S1-07 health 1500/1500/2100 → 550/550/775, for approximately 25/25/35 s at the measured 22.1 Power-3 DPS; transitions stay 0/0.75/0.75 s. All three pattern numbers are retained after review of high/low rings and player-height aimed bursts. Four content resources gained `metadata/reviewed = true`; `metadata/dev` remains. Estimated S1-07 is about 87 s, not a measured clear.
+
+| Ruling | Decision | Follow-up |
+| --- | --- | --- |
+| 1 Transition damage | Refused for at most 0.75 s; no Phase skip. | Applied to D-07 and D-06 values; no code change. |
+| 2 HUD dimming | Spent alpha 0.25, completed Phase alpha 0.30. | None. |
+| 3 Two-Phase bars | Full-width 16–307 and 313–604. | Applied in F12-06 `Hud.show_boss`; none pending. |
+| 4 Ship yaw | Visual stays fixed relative to camera yaw, with cosmetic banking. | None. |
+| 5 Graze while invulnerable | Contact strictly spends that Projectile's Graze chance. | None. |
+
+
 ## 2026-09-24 — Astra (sol) — Storm Guardian (F12-07 part 2) [shared]
 State: CODE_READY
 Files: `scenes/enemies/storm_guardian.tscn`; `scenes/stages/stage_02.tscn`; F12-07 ticket; ROADMAP, GUIDE, bosses and run-flow contracts, validation note.

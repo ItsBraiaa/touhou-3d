@@ -1,6 +1,6 @@
 # D-07 Shrine lighting and boss rulings
 
-Status: doing
+Status: done
 Type: design
 Owner: Astra (GPT Sol)
 Lane: sol
@@ -103,6 +103,10 @@ One entry, `— Astra (sol) — Shrine lighting and boss rulings (D-07) [shared]
 - **Part C:** old → new values, and the S1-07 time.
 
 ## Kickoff prompt
+
+## Parts A and C outcome
+
+2026-09-24, Astra (sol): authored `Environment/ShrineLighting` with the non-looping 2.4 s `corrupted_to_calm` clip and `PROCESS_MODE_ALWAYS`. It changes Moonlight from blue to warm and a shrine-local glow from cold blue at energy 0.8 to gold at 2.8. Its first keys match scene values; a fresh instance starts corrupted. The Stage root script and exports were untouched. Lantern Guardian Phase health changed 1500/1500/2100 → 550/550/775, targeting 25/25/35 s at the measured 22.1 Power-3 damage/s. Transitions remain 0/0.75/0.75 s; pattern numbers remain as drafted after the high/low and aimed coverage review. All four content files gained `metadata/reviewed = true`, retaining `metadata/dev = true`. The Bomb's default damage 20 remains below 550. The headless and windowed Stage 1 validators passed, and both shrine images were captured. Trunk's F14-01 swap step must set the two Stage exports. No new tests were written.
 
 ```
 Read AGENTS.md, docs/engineering/SPRINT.md (lane sol), docs/GUIDE.md Sections 3 and 5 and .scratch/design-sprint/issues/07-shrine-lighting-and-boss-rulings.md, then deliver it in your worktree, log it in docs/HANDOFF_LOG.md, commit, and run tools/lane.ps1 land.
