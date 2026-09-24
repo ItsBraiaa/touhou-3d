@@ -7,10 +7,11 @@ extends RefCounted
 ## Node-free (ADR-0001). The F7 combat adapter ticks it from `_physics_process`, feeds it
 ## the Bomb button through [method update_bomb_input] once per physics tick, and reports
 ## hits and collected Pickups; the Session calls [method start] at stage entry,
-## [method refill] on a Checkpoint's first activation and [method capture] and
-## [method restore] for Retry, and forwards [signal bomb_activated] and
-## [signal score_awarded] to [RunState]. The HUD observes the signals and never mutates
-## the core. Graze, score totals and the clearing of Projectiles are not held here.
+## [method refill] on a Checkpoint's first activation, [method capture] and
+## [method restore] for Retry and [method grant_invulnerability] after one (F15-12), and
+## forwards [signal bomb_activated] and [signal score_awarded] to [RunState]. The HUD
+## observes the signals and never mutates the core. Graze, score totals and the clearing
+## of Projectiles are not held here.
 ##
 ## The core is live while it is neither paused nor defeated. Every call that changes the
 ## resources is ignored unless it is live; [method start], [method restore] and
@@ -167,6 +168,16 @@ func update_bomb_input(held: bool) -> bool:
 	_set_invulnerability(maxf(_invulnerability, BOMB_INVULNERABILITY))
 	bomb_activated.emit()
 	return true
+
+
+## Grants [param seconds] of Invulnerability with no hit and no Bomb, keeping a longer
+## window that is already running. The Session calls it for the ship a Checkpoint Retry
+## respawns (F15-12). Ignored unless live, so never while paused or defeated.
+func grant_invulnerability(seconds: float) -> void:
+	assert(seconds > 0.0, "CombatState: granted Invulnerability must be positive, got %f" % seconds)
+	if not _is_live():
+		return
+	_set_invulnerability(maxf(_invulnerability, seconds))
 
 
 ## Collects a Power Pickup and returns whether it was taken, which is false only while
