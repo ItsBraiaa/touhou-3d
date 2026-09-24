@@ -1,5 +1,21 @@
 # Handoff Log
 
+## 2026-09-24 11:35 — Claude (trunk) — Active Time and Clear Time verification (F11-03)
+State: docs
+Files: `docs/validation/clear-time.md` (new); `docs/engineering/run-flow.md` ("Time accounting evidence"); `docs/engineering/ROADMAP.md` (F11-03 row); F11-03 ticket.
+Change: A scratchpad `SceneTree` driver of `main.tscn` ran headless twice (`TA_OK`, no `SCRIPT ERROR`, `ERROR:` or `WARNING:`). A tick probe running just before `Main` counted every tick in which the Session may add Active Time. Results:
+- Pause, Options from Pause, a controller-disconnect Pause, Defeat, Results, Credits, the main menu, Stage Select and Options add 0 s.
+- Retry after CP1-A drops the failed segment's time, score and Bomb.
+- Restart zeroes Clear Time, before and after a Checkpoint.
+- Three failed Attempts leave only the last one's time.
+- Campaign Stage 2 starts at 0 with the score carried.
+- A real-route uninterrupted Stage 1 clear through the Lantern Guardian shows `attempt=1`, with Clear Time exactly its 431 counted ticks.
+
+No defect was found, so no code changed; `run_state.gd` and `game_session.gd` are untouched. No new tests, by the sprint rule. `clear-time.md` also holds the manual protocol and its record.
+Why: the academic duration check needs proof that Pause, menus and failed attempts never reach the displayed time, plus a protocol for the measured clears.
+Action required by Astra: none now. After the human pass, `clear-time.md` steps 2 and 3 give Stage 1's played clear times against the 240 s target, for `content/stages/stage_01/*.tres` pacing.
+Action required by the human pass: steps 2 to 4 of `clear-time.md` (Stage 1 efficient and Campaign clears, a Retry run with a stopwatch), on a physical device. Step 5, the Stage 2 five-minute clear, waits for F12-07. F14-02's acceptance record can cite this page.
+
 ## 2026-09-24 — OpenCode (oc-a) — D-08 enemy visual duplicate parts [shared]
 State: dev
 Files: `scenes/enemies/visuals/spirit_lume.tscn`; `spirit_twilight.tscn`; `sentry_lantern.tscn`; `sentry_seal.tscn`; `tools/build_enemy_visuals.gd`; `docs/ENEMY_VISUAL_HANDOFF.md`; `docs/validation/enemy-visuals.md`; `docs/engineering/ROADMAP.md`; D-08 ticket.

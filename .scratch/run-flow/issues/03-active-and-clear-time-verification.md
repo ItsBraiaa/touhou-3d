@@ -1,6 +1,7 @@
 # F11-03 Active Time and Clear Time verification
 
-Status: todo
+Status: done
+Outcome (2026-09-24, trunk): Done, with no code change. A scratchpad driver of `main.tscn` ran headless (twice, `TA_OK`) with a tick probe running just before `Main`, and verified every rule in "Goal": Pause, Options from Pause, a controller-disconnect Pause, Defeat, Results, Credits, the main menu, Stage Select and Options add no Active Time; Retry after CP1-A drops the failed segment's time, score and Bomb; Restart zeroes Clear Time before and after a Checkpoint; three failed Attempts leave only the last one's time; Campaign Stage 2 starts at 0 with the score carried; a real-route uninterrupted Stage 1 clear through the Lantern Guardian shows `attempt=1` and Clear Time equal to its 431 counted ticks, within 0.02 s of the wall clock. `run_state.gd` had no defect, so it and its unit test are untouched. `docs/validation/clear-time.md` records the pass and the manual protocol. The Stage 1 clear times (steps 2 and 3) and a play-length Retry run (step 4) are "not measured", owed by the human pass. Stage 2 (step 5) is "pending F12-07", then F14-02's human pass. The named tests in "Deliverables" and the Definition of Done are void (SPRINT "No new tests"); `docs/engineering/run-flow.md` "Time accounting evidence" maps each invariant to its driven check instead.
 Type: test
 parallel-safe: no (drives the whole Session headless; runs after every Session edit it verifies)
 Depends on: F11-02

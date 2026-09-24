@@ -1,6 +1,6 @@
 # Run flow
 
-Feature F11: how a stage ends. Started with ticket F11-01 on 2026-09-24 (CODE_READY): a stage clear freezes the stage under Results with the real statistics, a final stage ends the Run with its one victory, and every Defeat, Results and Pause button works. F11-02 (CODE_READY the same day) added Results' Continuar and Jogar novamente ("Continuation and Direct Stage").
+Feature F11: how a stage ends. Started with ticket F11-01 on 2026-09-24 (CODE_READY): a stage clear freezes the stage under Results with the real statistics, a final stage ends the Run with its one victory, and every Defeat, Results and Pause button works. F11-02 (CODE_READY the same day) added Results' Continuar and Jogar novamente ("Continuation and Direct Stage"). F11-03 verified the Active Time and Clear Time accounting and wrote the duration protocol ("Time accounting evidence").
 
 ## Purpose
 
@@ -98,6 +98,22 @@ It acts only when the Run is `RUN_ENDED` from a `DIRECT_STAGE` clear whose stage
 ### Final victory
 
 Campaign Stage 2's clear shows the `final_victory` layout: heading `Jornada concluída`, Continue and Replay hidden, focus on Menu principal, Créditos reachable. It also emits `run_ended(true)` once. Stage 2 has had its Director since F12-05, so this is its real clear path. Its bosses (F12-06, F12-07) are still dev stand-ins or unintegrated, so the driver cleared it through `stage_cleared`.
+
+## Time accounting evidence
+
+F11-03, 2026-09-24. A scripted headless pass checked the time rules through the real Session, with no code change: `run_state.gd` and `game_session.gd` had no defect. Under the sprint's no-new-tests rule there is no `tests/scene/test_time_accounting.gd`. Each invariant maps to a driven check instead, with its numbers in [validation/clear-time.md](../validation/clear-time.md). That page also holds the manual protocol for the academic duration check.
+
+| Invariant | Source | Driven check |
+| --- | --- | --- |
+| Active Time is accumulated only while the tree is not paused | CONVENTIONS "Time and randomness" | 60 unpaused ticks add 1.0000 s. 60 ticks under Pause, under Options from Pause and under a controller-disconnect Pause add 0 |
+| Pauses, menus and failed attempts do not inflate the displayed completion time | STAGE_DESIGN "Time and score integrity" | 60 ticks each under Defeat, Results, Credits from Results, the main menu, Stage Select and Options add 0. Results' `TimeValue` is the `M:SS` of the result |
+| Failed attempts cannot inflate completed-stage duration | ENGINEERING_BRIEF 4.H | Three defeats before CP1-A, then a clear: Clear Time is the last Attempt's ticks (plus the clear's tick), `attempt=4` |
+| Retry rolls back the failed segment | STAGE_DESIGN "Time and score integrity" | After CP1-A, a failed segment's 2.42 s, its score and its Bomb are dropped by Retry, which resumes from the committed time |
+| Restart zeroes Clear Time, after a Checkpoint too | STAGE_DESIGN "Restart Stage explicitly discards checkpoint progress" | Reiniciar fase gives 0 before a Checkpoint and after CP1-A, with committed time 0 and no retry location |
+| Each Campaign stage accounts for its own Clear Time | CONTEXT "Clear Time", RunState contract | Campaign Stage 2 starts at 0 with the score carried; its Restart returns to that entry |
+| An uninterrupted clear's Clear Time equals its total Active Time | F11-03 | A real-route Stage 1 clear through the Lantern Guardian: `attempt=1`, Clear Time exactly the 431 counted ticks, and the wall clock within 0.02 s |
+
+An **uninterrupted clear** is one whose `STAGE_RESULT` line ends in `attempt=1`. Pause keeps a run uninterrupted, because it adds no Active Time. A Restart does not: its clear reports `attempt=2` even though its Clear Time counts only from the Restart. So the protocol starts every measured run from the menu.
 
 ## Dependencies
 
