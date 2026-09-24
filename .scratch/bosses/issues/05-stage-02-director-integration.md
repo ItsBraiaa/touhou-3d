@@ -1,6 +1,6 @@
 # F12-05 Stage 2 Director integration
 
-Status: todo
+Status: done
 Type: adapter
 parallel-safe: no
 Depends on: F10-03, F9-03, F12-04
@@ -119,3 +119,9 @@ The real Sentinel and Storm Guardian (F12-06, F12-07); final portal-light, shiel
 ```
 In your lane worktree, read AGENTS.md, docs/engineering/SPRINT.md (your lane section), docs/engineering/ROADMAP.md and .scratch/bosses/issues/05-stage-02-director-integration.md. Check its dependencies with tools/lane.ps1 status F10-03 F9-03 F12-04, implement it test-first, run tools/test.ps1 until green with no SCRIPT ERROR, finish its Definition of Done, commit, then run tools/lane.ps1 land.
 ```
+
+## Outcome
+
+2026-09-24, Astra (sol): attached StageDirector, all five Gates, both Checkpoints and three Seals using scripts/exports only. Added dormant Guard support, accepted-hit reporting, per-Seal rewards and portal lights, optional Gate OpenVisual, setup validation and Stage 2 checkpoint-on-entry fallback in private Director helpers. Boss kinds remain Sentry stand-ins. Health remains the Seal default for D-06 pass 2.
+
+Windowed Direct Stage 2 loaded with its entry HUD values. Two accelerated game walkthroughs cleared all seven encounters in Seal orders 1→2→3 and 3→1→2, reached both checkpoints outside their arches and observed both Retry destinations/gate sets. See docs/validation/stage-02-progression.md for evidence and the known visual-resource shutdown leaks. No new tests; only the existing spatial contract's obsolete static-root assertion changed. No scripts outside the Files boundary were changed. The read-only review reported no critical/important issues. Landing uses the sprint gate.

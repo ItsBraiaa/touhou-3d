@@ -1,5 +1,16 @@
 # Handoff Log
 
+## 2026-09-24 â€” Astra (sol) â€” Stage 2 Director integration (F12-05) [shared]
+State: CODE_READY
+Files: scenes/stages/stage_02.tscn; scenes/dev/portal_light_resolved.tres; scripts/progression/stage_director.gd; scripts/progression/gate.gd; scripts/enemies/enemy_actor.gd; tests/scene/test_stage_02_contract.gd; module docs, GUIDE, validation, ROADMAP and ticket.
+
+Stage 2 now has its Director, five Gates, CP2-A/CP2-B and three Seals. Scripts/exports only: geometry, metadata and authored monitoring preserved. Seal health remains default 10 for D-06 pass 2. Bosses remain dev Sentries for F12-06/F12-07. The green resolved portal-light material is a dev placeholder.
+
+EnemyActor adds set_engaged and damaged; dormant Guards stay targetable/damageable but hold their attack/movement clocks. Director additions use private helpers and minimal call sites: setup/validation, guard callbacks, per-Seal rewards, light restoration and checkpoint entry fallback. Stage 1 keeps arch-only checkpoints. Gate optionally shows OpenVisual while open. Preserve authored Seal children, GuardLinks metadata, portal lights, marker and checkpoint paths.
+
+No new tests. Minimally adjusted test_stage_02_spatial_contract's static-root assertion, intentionally obsolete now. Windowed menu entry and two accelerated full routes (Seal orders 123 and 312), checkpoint bypass entry and both Retry destinations were observed; details in docs/validation/stage-02-progression.md. Known enemy-visual exit leaks remain outside scope. Read-only code review found no critical/important issues. No Director merge conflict encountered during implementation; land performs the final sync and gate.
+
+
 Append-only, newest entry first. One entry per change set that another agent must know about. Both agents write here. Never rewrite or delete an earlier entry; add a new one that supersedes it.
 
 Entry format:
@@ -899,13 +910,13 @@ Change: Recorded the accepted vocabulary, the four architectural decisions, the 
 Why: Result of the planning grill with the user; establishes how Claude writes and verifies GDScript for this project.
 Action required by Astra: read `docs/engineering/ROADMAP.md`, especially "Requests to Astra". From ticket F0-03 onward Claude owns `project.godot`, `export_presets.cfg`, `default_bus_layout.tres`, and `scenes/main.tscn`; the `tools/build_*.py` generators must not be rerun over integrated scenes without reconciling first. Astra's `.scratch/stage-01-area/` and `docs/STAGE_01_HANDOFF.md` were read and are reflected in the roadmap.
 
-## 2026-09-23 — OpenCode (oc-a) — F12-06 part 1
+## 2026-09-23 ï¿½ OpenCode (oc-a) ï¿½ F12-06 part 1
 
 Files: `content/bosses/tempest_sentinel.tres`, `content/patterns/sentinel_aimed_burst.tres`, `content/patterns/sentinel_rotating_fan.tres`.
 
 Change: Added the dev Tempest Sentinel BossDefinition with two proposed attacks and two health phases. Phase 1 uses alternating charged aimed bursts; Phase 2 uses rotating fans with alternating player-height tracking and fixed altitude shifts. All three resources carry `metadata/dev = true`. Proposed values and attack names remain for Astra's D-06 review. Part 1 only; scene integration remains with sol.
 
-## 2026-09-23 — OpenCode (oc-a) — F12-07 part 1
+## 2026-09-23 ï¿½ OpenCode (oc-a) ï¿½ F12-07 part 1
 
 Files: `content/bosses/storm_guardian.tres`, `content/patterns/storm_spiral.tres`, `content/patterns/storm_thunder_rings.tres`, `content/patterns/storm_aimed_burst.tres`.
 

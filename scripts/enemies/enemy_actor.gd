@@ -19,6 +19,8 @@ extends Node3D
 signal threat_reported(side: int)
 ## The Enemy was defeated. Emitted once, just before the actor frees itself.
 signal defeated(enemy_id: StringName, encounter_id: StringName)
+## An accepted hit reached this enemy, including a lethal hit, before defeat is reported.
+signal damaged(enemy_id: StringName)
 
 
 ## The group Target Lock and Aim Assist read (`Targeting.group_name`).
@@ -45,6 +47,8 @@ var _hit_radius: float = 0.0
 var _visual_rest_scale := Vector3.ONE
 var _anticipation_seconds: float = 0.0
 var _pulse: Tween
+var _engaged: bool = true
+var _enemy_id: StringName = &""
 
 
 func _ready() -> void:
@@ -57,10 +61,11 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	if is_instance_valid(_player) and _player.is_inside_tree():
 		_player_position = _player.global_position
-	var spawns := _model.tick(delta, _player_position, emitter.global_position - global_position)
-	global_position = _model.get_position()
-	for request: ProjectileSpawn in spawns:
-		_projectile_system.spawn(request)
+	if _engaged:
+		var spawns := _model.tick(delta, _player_position, emitter.global_position - global_position)
+		global_position = _model.get_position()
+		for request: ProjectileSpawn in spawns:
+			_projectile_system.spawn(request)
 	_projectile_system.register_target(get_instance_id(), hit_volume.global_position, _hit_radius, take_damage)
 
 
@@ -84,6 +89,7 @@ func spawn_setup(
 			push_error("%s: spawn_setup refused: %s" % [get_path(), message])
 		return false
 	_projectile_system = projectile_system
+	_enemy_id = enemy_id
 	_player = player
 	_player_position = player.global_position
 	_anticipation_seconds = definition.anticipation_seconds
@@ -101,14 +107,21 @@ func spawn_setup(
 ## Bomb. Ignored before [method spawn_setup], after defeat, outside the tree (a stage
 ## being unloaded), while the tree is paused, and for a non-positive amount.
 func take_damage(damage: int) -> void:
-	if _model == null or damage <= 0 or not is_inside_tree() or not can_process():
+	if _model == null or damage <= 0 or not is_inside_tree() or not can_process() or _model.get_health() <= 0:
 		return
+	damaged.emit(_enemy_id)
 	_model.take_damage(damage)
 
 
 ## Remaining health, or 0 before [method spawn_setup].
 func get_health() -> int:
 	return 0 if _model == null else _model.get_health()
+
+
+## Dormant guards remain targetable and damageable, but their movement and attack clock
+## do not advance. Call immediately after spawn_setup, before their first physics tick.
+func set_engaged(engaged: bool) -> void:
+	_engaged = engaged
 
 
 ## -1 when [param point] is left of the camera (against its local +X) and +1 otherwise,

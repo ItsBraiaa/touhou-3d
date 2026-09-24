@@ -15,11 +15,15 @@ const CLOSED_VISUAL_PATH := ^"ClosedVisual"
 var _open: bool = false
 var _collision: CollisionShape3D
 var _closed_visual: Node3D
+var _open_visual: Node3D
 
 
 func _ready() -> void:
 	_collision = get_node_or_null(COLLISION_PATH) as CollisionShape3D
 	_closed_visual = get_node_or_null(CLOSED_VISUAL_PATH) as Node3D
+	_open_visual = get_node_or_null(^"OpenVisual") as Node3D
+	if _open_visual != null:
+		_open_visual.visible = _open
 	if _collision == null or _closed_visual == null:
 		push_error("%s: a Gate needs a CollisionShape3D at '%s' and a Node3D at '%s'" % [get_path(), COLLISION_PATH, CLOSED_VISUAL_PATH])
 
@@ -33,6 +37,8 @@ func set_open(open: bool) -> void:
 	_open = open
 	_collision.set_deferred(&"disabled", open)
 	_closed_visual.visible = not open
+	if _open_visual != null:
+		_open_visual.visible = open
 
 
 ## Whether the Gate is open.

@@ -46,7 +46,7 @@ func test_stage_02_spatial_contract() -> void:
 			assert_true(basin.has_node(link.get_meta("guard_spawn")), "Guard reference resolves relative to Encounter")
 		assert_true(stage.has_node("Gates/Gate_S2_03/PortalLights/Seal" + str(i)), "One light per seal")
 	assert_eq(stage.get_node("RuntimeActors").get_child_count(), 0, "No authored runtime actors")
-	assert_true(stage.get_script() == null, "Stage remains static")
+	assert_true(stage is StageDirector, "Stage has its Director")
 	stage.free()
 
 func _floor_at(z: float) -> float:

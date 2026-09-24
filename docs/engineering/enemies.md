@@ -159,3 +159,7 @@ registration, hides the dev core visual, and emits `seal_destroyed` once.
 - The enemies never turn: a visual faces its authored +Z, toward a ship flying the Stage 1 route (−Z). Facing the player is not in F9-02.
 - No Death or HitReact playback and no hit flash; defeat frees the actor at once.
 - The off-screen test uses the actor's origin and the frustum only: an enemy hidden behind scenery but inside the frustum reports nothing, and vertical warnings are out of scope (GUIDE Section 15).
+
+## Dormant Guards (F12-05)
+
+`EnemyActor.set_engaged(engaged: bool)` pauses only model ticking: a dormant Guard stays targetable, registers its hit sphere and accepts damage. The Director calls it immediately after spawn_setup, before the first physics tick; engagement begins its first Anticipation. `damaged(enemy_id: StringName)` is emitted for each accepted positive hit before applying it, including lethal hits, and never after defeat. The Seal's notify_guard_shot receives this signal, engaging the linked pair before defeat is reported. Ordinary enemies remain engaged by default. Gate optionally resolves an OpenVisual child and toggles it with its open state.

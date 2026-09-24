@@ -80,7 +80,7 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | | | | 02 boss-controller-adapter | adapter | no | path | done (2026-09-23: `BossController` and the dev boss run three Phases, clears and the HUD panel in the arena harness; no new tests, by the sprint rule; `lantern_guardian.tres` load failure reported for F12-03) |
 | | | | 03 lantern-guardian-in-s1-07 | integration | no | trunk (part 1: oc-a) | todo |
 | | | | 04 stage-02-content-draft | content | yes | oc-b | done (2026-09-23: dev draft of `content/stages/stage_02/` landed, validates and matches the scene; Astra tunes values in D-06) |
-| | | | 05 stage-02-director-integration | adapter | no | sol | todo |
+| | | | 05 stage-02-director-integration | adapter | no | sol | done (2026-09-24: Stage 2 Director, Seals, Guards, Gates and checkpoint fallback; both route orders and retries observed) |
 | | | | 06 tempest-sentinel-miniboss | integration | no | sol (part 1: oc-a) | todo |
 | | | | 07 storm-guardian | integration | no | sol (part 1: oc-a) | todo |
 | F13 | Audio | `audio` | 00 plan | docs | no | — | done (cut, then reinstated by the sprint plan, 2026-09-23) |
