@@ -13,7 +13,10 @@ extends Node3D
 ## fires at three [TargetDummy]s, and the dev keys 1, 2 and 3 restart the [CombatState] at
 ## that Power Level (F6-03). A row of eleven Power Pickups and one Shield Pickup is spawned
 ## on `_ready`, and the dev key H breaks the Shield so the Shield Pickup can be taken
-## (F7-03). Dev only: it is never loaded by `scenes/main.tscn` and holds no gameplay rule.
+## (F7-03). A dev Spirit and Sentry spawn at the `EnemySpawns` markers under the arena's
+## `RuntimeActors`, as the Director will spawn them, and the dev key R respawns the
+## defeated ones (F9-02). Dev only: it is never loaded by `scenes/main.tscn` and holds no
+## gameplay rule.
 
 
 ## Metadata keys Astra authors on `FlightBounds` (GUIDE Section 13).
@@ -26,6 +29,15 @@ const POWER_PICKUP_COUNT := 11
 const POWER_ROW_START := Vector3(-14.0, 6.0, 12.0)
 const POWER_ROW_STEP := Vector3(0.0, 0.0, -3.0)
 const SHIELD_PICKUP_POSITION := Vector3(14.0, 6.0, 6.0)
+## F9-02: the dev enemies, the harness's own Attempt seed and encounter id, and how long an
+## off-screen warning shows on the HUD.
+const SPIRIT_SCENE := preload("res://scenes/dev/spirit.tscn")
+const SENTRY_SCENE := preload("res://scenes/dev/sentry.tscn")
+const SPIRIT_DEFINITION: EnemyDefinition = preload("res://content/enemies/spirit.tres")
+const SENTRY_DEFINITION: EnemyDefinition = preload("res://content/enemies/sentry.tres")
+const ENEMY_SEED := 902
+const ENEMY_ENCOUNTER_ID := &"arena"
+const THREAT_SECONDS := 1.0
 
 ## The instanced `combat_arena.tscn`, holding `PlayerShip`, `FlightBounds` and `Targets`.
 @export var arena: Node3D
@@ -43,6 +55,8 @@ const SHIELD_PICKUP_POSITION := Vector3(14.0, 6.0, 6.0)
 @export var power_pickup_scene: PackedScene
 ## A [Pickup] scene of kind SHIELD (`scenes/dev/shield_pickup.tscn`).
 @export var shield_pickup_scene: PackedScene
+## Holds the `Spirit` and `Sentry` [Marker3D]s the dev enemies spawn at (F9-02).
+@export var enemy_spawns: Node3D
 
 var _player: PlayerController
 var _rig: CameraRig
@@ -54,6 +68,13 @@ var _grazes: int = 0
 var _pickups_taken: int = 0
 ## Score the [CombatState] awarded for excess Power Pickups.
 var _pickup_score: int = 0
+## F9-02: the live dev enemy of each [member enemy_spawns] marker, by marker name.
+var _enemies: Dictionary[StringName, EnemyActor] = {}
+var _enemy_rng := RandomNumberGenerator.new()
+var _enemy_bounds: AABB
+var _enemy_spawn_count: int = 0
+var _enemy_defeats: int = 0
+var _last_threat: String = "none"
 
 
 func _ready() -> void:
@@ -77,14 +98,19 @@ func _ready() -> void:
 	for dummy: TargetDummy in _dummies():
 		dummy.setup(projectile_system)
 	_spawn_pickups()
+	_start_enemies(bounds)
 
 
 ## Dev keys 1, 2 and 3 restart the combat state at that Power Level; H hits the ship once,
 ## which breaks the Shield (the harness never ticks the core, so the Invulnerability that
-## follows lasts until the next restart).
+## follows lasts until the next restart). R respawns the defeated dev enemies (F9-02).
 func _unhandled_input(event: InputEvent) -> void:
 	var key := event as InputEventKey
 	if key == null or not key.pressed or key.echo:
+		return
+	if key.keycode == KEY_R:
+		_spawn_missing_enemies()
+		get_viewport().set_input_as_handled()
 		return
 	var level := key.keycode - KEY_0
 	if level >= CombatState.MIN_POWER_LEVEL and level <= CombatState.MAX_POWER_LEVEL:
@@ -96,7 +122,9 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _process(_delta: float) -> void:
-	readout.text = "\n".join(PackedStringArray([_flight_line(), _camera_line(), _lock_line(), _projectile_line(), _weapon_line(), _pickup_line()]))
+	readout.text = "\n".join(PackedStringArray([
+		_flight_line(), _camera_line(), _lock_line(), _projectile_line(), _weapon_line(), _pickup_line(), _enemy_line(),
+	]))
 
 
 ## Finds the nodes this harness drives, reporting what is missing instead of failing on a
@@ -119,6 +147,8 @@ func _resolve_scene() -> bool:
 		missing.append("power_pickup_scene")
 	if shield_pickup_scene == null:
 		missing.append("shield_pickup_scene")
+	if enemy_spawns == null:
+		missing.append("enemy_spawns")
 	for field: String in missing:
 		push_error("%s: required export '%s' is not set" % [get_path(), field])
 	if not missing.is_empty():
@@ -255,3 +285,64 @@ func _on_pickup_accepted(_pickup_id: StringName, _kind: Pickup.Kind, _score_awar
 
 func _on_score_awarded(points: int) -> void:
 	_pickup_score += points
+
+
+## F9-02: seeds the harness's Attempt RNG and spawns both dev enemies, which need the
+## Flight Volume as their movement bounds.
+func _start_enemies(bounds: AABB) -> void:
+	if not bounds.has_volume():
+		push_warning("%s: no Flight Volume, so no dev enemies" % get_path())
+		return
+	_enemy_rng.seed = ENEMY_SEED
+	_enemy_bounds = bounds
+	_spawn_missing_enemies()
+
+
+## Spawns the Spirit and the Sentry at their markers, each only if its last one is gone.
+func _spawn_missing_enemies() -> void:
+	_spawn_enemy_if_missing(&"Spirit", SPIRIT_SCENE, SPIRIT_DEFINITION)
+	_spawn_enemy_if_missing(&"Sentry", SENTRY_SCENE, SENTRY_DEFINITION)
+
+
+## What the Director does for one spawn: instance under `RuntimeActors`, place at the
+## marker, then [method EnemyActor.spawn_setup] with a unique id.
+func _spawn_enemy_if_missing(marker_name: StringName, scene: PackedScene, definition: EnemyDefinition) -> void:
+	if _enemies.has(marker_name):
+		return
+	var marker := enemy_spawns.get_node_or_null(NodePath(marker_name)) as Marker3D
+	var actors_root := arena.get_node_or_null(^"RuntimeActors")
+	if marker == null or actors_root == null:
+		push_error("%s: needs %s/%s and %s/RuntimeActors" % [get_path(), enemy_spawns.get_path(), marker_name, arena.get_path()])
+		return
+	var actor := scene.instantiate() as EnemyActor
+	actor.name = marker_name
+	actors_root.add_child(actor)
+	actor.global_transform = marker.global_transform
+	_enemy_spawn_count += 1
+	var enemy_id := StringName("%s_%d" % [marker_name, _enemy_spawn_count])
+	if not actor.spawn_setup(definition, enemy_id, ENEMY_ENCOUNTER_ID, _enemy_rng, projectile_system, _player, _enemy_bounds):
+		actor.queue_free()
+		return
+	actor.defeated.connect(_on_enemy_defeated.bind(marker_name))
+	actor.threat_reported.connect(_on_enemy_threat_reported.bind(marker_name))
+	_enemies[marker_name] = actor
+
+
+## Each dev enemy's health, the defeats reported and the last off-screen warning.
+func _enemy_line() -> String:
+	var states: PackedStringArray = []
+	for marker_name: StringName in [&"Spirit", &"Sentry"]:
+		var state := "hp %d" % _enemies[marker_name].get_health() if _enemies.has(marker_name) else "down"
+		states.append("%s %s" % [marker_name, state])
+	return "enemies %s (R respawns)\ndefeats %d threat %s" % [" ".join(states), _enemy_defeats, _last_threat]
+
+
+## A defeated actor frees itself, so it leaves [member _enemies] now, before it is freed.
+func _on_enemy_defeated(_enemy_id: StringName, _encounter_id: StringName, marker_name: StringName) -> void:
+	_enemies.erase(marker_name)
+	_enemy_defeats += 1
+
+
+func _on_enemy_threat_reported(side: int, marker_name: StringName) -> void:
+	_last_threat = "%s %s" % [marker_name, "left" if side < 0 else "right"]
+	hud.show_threat(side, THREAT_SECONDS)

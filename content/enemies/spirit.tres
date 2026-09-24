@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="EnemyDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/definitions/enemy_definition.gd" id="1_enemy"]
+[ext_resource type="Resource" path="res://content/patterns/spirit_aimed_burst.tres" id="2_pattern"]
+
+[resource]
+script = ExtResource("1_enemy")
+kind = &"spirit"
+health = 20
+score = 100
+anticipation_seconds = 1.0
+pattern = ExtResource("2_pattern")
+attack_interval = 1.5
+movement = 0
+move_speed = 2.0
+move_range = 3.0
+metadata/dev = true
