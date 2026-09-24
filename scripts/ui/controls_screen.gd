@@ -10,7 +10,8 @@ extends Node
 ## the [InputMap] before Aplicar hands it to [method Settings.apply_input_bindings]. A change
 ## to a menu binding then waits ten seconds for Manter controles, on the new bindings, before
 ## it is kept. The Câmera tab and Ícones do controle are ordinary settings: each edit is stored
-## and saved at once, as on the Options screen.
+## and saved at once, as on the Options screen, and [GameSession] gives the camera values to
+## the ship in play at once, under Pause too (F16-06).
 ##
 ## The four dialogs are modal. [Interface] offers every input event to
 ## [method consume_modal_input] before the GUI sees it. The capture dialog consumes all of

@@ -271,7 +271,54 @@ None of these was run: no one pressed a key or watched a frame.
 
 ## Integrated walkthrough (F16-06, trunk)
 
-Pending.
+2026-09-24, Claude (trunk). Windows 11, Godot 4.7.2 console binary, headless. No physical device, and no window. The contract is in [settings.md "F16 Session integration"](../engineering/settings.md#f16-session-integration-f16-06) and [player-flight.md "F16 Session integration"](../engineering/player-flight.md#f16-session-integration-f16-06). No test or driver was written (F16 rule).
+
+**Integrated revision for F16-07.** Take the `dev-01` commit that lands this ticket's commit, "integration: controls, mouse camera, recenter and dash through the Session lifecycle (F16-06) [shared]". It was made on `lane/trunk` at base `8a4e070`, which already contains F16-01 to F16-05 and F16-08 with their review fixes. After `tools/lane.ps1 land`, `git log dev-01 --grep "(F16-06)" -1 --format=%H` names it. Walk that revision or a later one, never the packaged executable, which predates F16.
+
+**Run (existing gate pieces only).**
+
+| Check | Result |
+| --- | --- |
+| `tools/test.ps1`, the existing suite | pass: 225 passed, 0 failed, no script, parse or compile error |
+| 300-frame headless boot of `main.tscn` | pass: no ERROR or WARNING line |
+| `check_resources.gd --strict-validate` | pass: 85 resources, 86 scripts, none failed |
+
+The headless display server ignores `Input.mouse_mode` and sends no focus notifications, so the gate runs the new code paths in Teclas mode only.
+
+**Checked by reading (not executed).**
+
+| Rule | Where it holds | Result |
+| --- | --- | --- |
+| All six camera values reach every new ship before its first tick | `_spawn_player` → `_apply_camera_settings` (both rig calls), on Start, Direct Stage, Restart, Retry, Continuar and Jogar novamente | pass (reading) |
+| A change reaches the live rig, over Pause too | `Settings.changed` → `_on_setting_changed` for `CAMERA_SETTING_KEYS`, connected once in `_ready` | pass (reading) |
+| Captured only in flight in Mouse mode | `_update_pointer`: ship, HUD on top, tree running, mode `mouse` | pass (reading) |
+| Shown on every menu, Pause, Defeat, Results, unload and main menu | `_set_paused` (every pause and resume route), `_show_hud`, `_unload_stage`, `_on_setting_changed`, `_on_focus_lost`, `_exit_tree` | pass (reading) |
+| Pending look dropped on capture, release, mode change and Resume, and once more after a capture warp | `set_mouse_capture_active` with each decision, `apply_control_settings`, `_drop_capture_warp` | pass (reading); a real backend warp not exercised |
+| Focus loss pauses a stage in play; regaining it resumes nothing | `_notification` → `_on_focus_lost` → `_pause()`; no focus-in handler | pass (reading) |
+| Recenter only in flight, never under a menu or the capture | `camera_recenter` event in `_unhandled_input`, gated by `_gameplay_active`; `Interface._input` consumes every capture event first | pass (reading) |
+| The press that resumes never dashes | `PlayerController._dash_input_armed`: off at spawn and on `set_controls_enabled(true)`, on again after a tick with both dash actions released | pass (reading) |
+| Pause freezes the dash (order kept) | `_set_paused` pauses the tree before `set_controls_enabled(false)` | pass (reading) |
+| No duplicate connection after repeated Retry and Restart | No per-ship connection added; `dash_started` and `shots_fired` are freed with the ship; `Settings.changed` connected once by the Session, `Interface`, `OptionsScreen` and `ControlsScreen` each | pass (reading) |
+| Options → Controls → caller from both callers | `ScreenRouter` replace and back, with remembered focus; Pause stays on the stack under Options | pass (reading); the main-menu route also passes in the suite |
+
+**Manual walkthrough for the human pass (not verified).** Record the device and backend for each line; an unavailable device stays not verified. On Opções → Controles → Câmera, pick "Câmera: Mouse" for steps 1 to 9.
+
+1. **Capture on entry.** From the main menu, Iniciar. The pointer is hidden, and moving the mouse orbits the camera. The first frames show no jump. Up looks up unless Inverter mouse is on.
+2. **Values over Pause.** Pause, then Opções → Controles → Câmera. Change the mouse sensitivity, both inversions and the deadzone (rest a drifting stick), then Voltar, Voltar, Continuar. Each value applies at once, and orbit sensitivity and inversion still work for the keys and the stick.
+3. **Pause and Continuar.** Esc and Start show the pointer at once, free to click. Continuar by mouse click, Enter and A captures it again with no camera jump.
+4. **A free cursor in Controls.** From Pause, open Controles and click a slot. Capture Mouse 4, then click Cancelar in another capture. Voltar, Voltar: Pause has focus on Opções. Continuar.
+5. **Alt+Tab in flight.** The game is on Pause, with the pointer free. Come back by clicking the window or by Alt+Tab: it is still paused, and the pointer is not taken back. Continuar resumes and captures.
+6. **Held keys through Alt+Tab.** Hold W and J, Alt+Tab away, release them outside, come back and press Continuar. The ship neither flies nor fires by itself.
+7. **Controller disconnect.** Unplug the pad in flight, in Automático and in Controle: Pause, the pointer free, and the keyboard drives Pause. In Teclado nothing pauses and the capture stays.
+8. **Defeat.** The pointer stays captured through the 1 s defeat beat, and the mouse still orbits there. It is free on Defeat. Tentar novamente captures again, in Mouse mode, at the chosen sensitivity. Menu principal frees it.
+9. **Every Attempt route.** Clear Campaign Stage 1 and press Continuar; clear a Direct Stage and press Jogar novamente; use Pause → Reiniciar fase; Tentar novamente before and after a Checkpoint. Each shows the pointer on Results and Defeat, captures it on the new Attempt and keeps every camera value.
+10. **Teclas.** Nothing ever captures the pointer; the arrows and the right stick orbit, and the mouse leaves the camera alone. Alt+Tab still pauses.
+11. **Recenter.** Press R, Mouse 3 and RS/R3 in flight. With no lock, the camera turns the short way round to the ship's authored forward at −9° in about 0.25 s. With a lock (K / Y) it returns to the ship-and-target framing and keeps the lock. Mouse or stick input after the first 0.1 s interrupts it, and a second press restarts it. Recenter against a wall and under the shrine gate: the camera stays out of the scenery and never rolls. On Pause, Opções and Controles nothing recenters. While a capture listens, R is captured, not a recenter.
+12. **The dash through the lifecycle.** Q and E, and the D-pad, dash; the HUD shows Impulso. Pause mid-cooldown, open Opções, then Continuar: the cooldown goes on from where it stopped. Take the defeating hit during a cooldown, then Tentar novamente. Also try Reiniciar fase, Continuar into Stage 2 and Jogar novamente. Each new Attempt starts `IMPULSO  ·  PRONTO`, with no trail, no accent and no leftover protection; the Retry ship keeps only its own 2 s blink.
+13. **The resume guard.** On the Controle tab put Impulso à esquerda on B with Substituir (Bomba loses B), and Aplicar. In flight: Start, then B (Voltar) resumes, and the ship does not dash. B in flight then dashes. Afterwards, Restaurar esta aba and Aplicar.
+14. **Confirmation from Pause.** Put Confirmar on X on the Controle tab and Aplicar. Keep it with X and return to the game with the new bindings. Repeat twice more: Alt+Tab during the countdown, and unplug the pad during it. Both revert, and the pointer is free throughout.
+15. **Global Defaults from Pause.** Opções → Restaurar padrões, Voltar, Continuar. The camera mode is "Câmera: Teclas" again, so nothing captures; the bindings and the camera values are the defaults.
+16. **Repeats.** Tentar novamente five times and Reiniciar fase five times. One Q press still makes one dash, a sensitivity change still applies once, the footers are right, and the console shows no error.
 
 ## Visual and device acceptance (F16-07, sol)
 

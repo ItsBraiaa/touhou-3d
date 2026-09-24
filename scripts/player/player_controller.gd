@@ -135,6 +135,12 @@ var _dash_travelling: bool = false
 var _trail_left: Node3D
 var _trail_right: Node3D
 var _protection_accent: Node3D
+## False from the moment the ship gets its controls (it enters play, or a Resume gives them
+## back) until a tick after it with both dash actions released (F16-06). The press that
+## resumed play can share its input with a dash: a dash remapped to B resumes from Pause as
+## `ui_cancel`, on the press, and `Input.is_action_just_pressed` still reports that press on
+## the first tick the ship runs, so it must not dash.
+var _dash_input_armed: bool = false
 
 
 func _ready() -> void:
@@ -207,7 +213,9 @@ func setup(bounds: AABB) -> void:
 ## transitions. Taking the controls away while the tree is paused freezes a dash with the
 ## ship, its cooldown included, and it resumes with the controls; taking them away with
 ## the tree running (a beat, defeat, a stage clear) cancels the dash and clears its
-## cooldown. Emits [signal controls_enabled_changed] on a change.
+## cooldown. Giving them back ignores the dash actions until both are released, so the press
+## that resumed play cannot dash (F16-06). Emits [signal controls_enabled_changed] on a
+## change.
 func set_controls_enabled(enabled: bool) -> void:
 	if weapon != null:
 		weapon.set_fire_enabled(enabled)
@@ -216,6 +224,7 @@ func set_controls_enabled(enabled: bool) -> void:
 	_controls_enabled = enabled
 	controls_enabled_changed.emit(enabled)
 	if enabled:
+		_dash_input_armed = false
 		return
 	velocity = Vector3.ZERO
 	_set_focus_active(false)
@@ -295,11 +304,18 @@ func _advance_dash(delta: float) -> void:
 ## Reads this tick's dash presses and starts a burst when the core accepts one: one press
 ## makes one dash, both directions together make none, and a press during the cooldown is
 ## dropped. [signal dash_started] goes out before the ship moves, so the owner's grant is
-## in place for the rest of this physics tick.
+## in place for the rest of this physics tick. Until [member _dash_input_armed], a tick only
+## waits for both actions to be released, and reads no press: a tap shorter than a frame is
+## released already, yet still "just pressed" on that tick.
 func _try_start_dash() -> void:
+	var left_held := Input.is_action_pressed(&"dash_left")
+	var right_held := Input.is_action_pressed(&"dash_right")
+	if not _dash_input_armed:
+		_dash_input_armed = not left_held and not right_held
+		return
 	var direction := DashModel.resolve_direction(
 			Input.is_action_just_pressed(&"dash_left"), Input.is_action_just_pressed(&"dash_right"),
-			Input.is_action_pressed(&"dash_left"), Input.is_action_pressed(&"dash_right"))
+			left_held, right_held)
 	if not _dash.try_start(direction):
 		return
 	# The rig's basis is a pure yaw, so its X axis is the camera's horizontal right. It is

@@ -399,6 +399,34 @@ Authored on `PlayerShip`, group **Dash**; the values are the spec's baseline.
 - A rebinding that puts a dash on a key or button that also resumes from Pause (B / `ui_cancel`, Start / `pause`) could dash on the first unpaused tick. This is the same class of problem as the known `bomb` one (menus-session.md Open issues). F16-06 decides whether capture or resume must guard it.
 - The integrated walkthrough (Retry, Restart, Campaign Stage 2, Pause and Options over Pause) belongs to F16-06. Device feel belongs to F16-07.
 
+## F16 Session integration (F16-06)
+
+Delivered by trunk on 2026-09-24. `GameSession` now drives the rig's F16-04 API and guards the dash's input; the settings side and the pointer rules are in [settings.md "F16 Session integration"](settings.md#f16-session-integration-f16-06). Each "What F16-06 owns" item above is settled here. No export value and no scene changed: `player_ship.tscn`, `main.tscn` and `project.godot` are as F16-05 and F16-02 left them.
+
+### The rig, from the Session
+
+| Rig call | When the Session makes it |
+| --- | --- |
+| `apply_settings(camera_sensitivity, invert_vertical)` and `apply_control_settings(camera_input_mode, mouse_sensitivity, mouse_invert_vertical, camera_deadzone)` | In `_spawn_player`, right after `setup`, for every new ship (Start, Direct Stage, Restart, Retry, Continuar, Jogar novamente), and on every `Settings.changed` of one of the six values, over Pause too. So a Retry's new rig, which starts in keys mode with capture off, gets the saved mode before its first tick. |
+| `set_mouse_capture_active(active)` | With every pointer decision (`GameSession._set_pointer_captured`): true only while the player flies in Mouse mode, with the HUD on top and the tree running; false on Pause, every menu and overlay, a focus loss, an unload and a switch to Teclas. The rig collects mouse look exactly while the pointer is captured. |
+| `clear_pending_look()` | Through each gate call above, on focus changes and on Resume. Once more at the start of the first physics tick after the next input flush that follows a capture, to drop a capture warp that a backend reports as one large motion (`_drop_capture_warp`: `process_frame`, then `physics_frame`, before the rig's own tick). |
+| `request_recenter()` | On a `camera_recenter` press event (R, Mouse 3, RS / R3) in `GameSession._unhandled_input`, only while the player flies and never in a beat. A press consumed by a menu or by the Controls capture never gets there. The rig's grace, interruption and restart rules apply unchanged. |
+
+- **Lock and manual orbit** stay the rig's (F16-04): mouse look holds the lock framing off, keys and stick push against it, and a recenter keeps the lock. The Session adds no second camera writer.
+- **Several devices at once.** The mouse adds to the `camera_*` actions (keys and right stick) in Mouse mode, and every recenter input goes through the one action.
+- **In a beat** (defeat, victory) the pointer stays captured and the mouse still orbits, as the keys do; recenter and Pause are refused, as before.
+
+### The dash through the Session lifecycle
+
+- **Nothing to reapply at spawn.** Every Attempt spawns a new ship, and its `DashModel` starts ready (F16-05). The Session's only dash wiring is still the one `dash_started` connection in `_spawn_player`, freed with the ship.
+- **The order that freezes a dash is kept.** `_set_paused` sets `get_tree().paused` before `set_controls_enabled(false)`.
+- **The resume guard (new).** `PlayerController._dash_input_armed` is false from the moment the ship gets its controls, which is its spawn or a `set_controls_enabled(true)` after a pause, until a tick with both `dash_left` and `dash_right` released. That tick reads no press. So the press that resumed from Pause never dashes, even when a remap shares it with a menu action: a dash on B resumes as `ui_cancel` on the press, and `Input.is_action_just_pressed` still reports it on the first unpaused tick. Buttons (Continuar, Iniciar, Tentar novamente) act on the release, so they leave no fresh press; the guard covers every route anyway. A dash tapped within one tick of a Resume is dropped. Beats and a defeat do not re-enable the controls, so they are unaffected.
+- **Also affected, not fixed here.** `Targeting` polls `lock_target` and `next_target` the same way (`targeting.gd`, outside this ticket's files). With the defaults nothing shares them with `ui_cancel`; a remap that puts one on B would lock or switch on the first tick after Back resumes from Pause. The fix is the same guard in `Targeting`.
+
+### Open for F16-07
+
+The walkthrough in [validation/controls-expansion.md](../validation/controls-expansion.md) "Integrated walkthrough (F16-06, trunk)". It covers the capture lifecycle on a real mouse (no jump after capture, none after Continuar, a free cursor on every menu), Alt+Tab in flight and during the confirmation, recenter near scenery with and without a lock, and the dash across every Attempt route.
+
 ## Open issues
 
 ### Astra design decisions — 2026-09-22, F1-05

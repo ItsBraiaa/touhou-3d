@@ -29,6 +29,10 @@ extends CanvasLayer
 ## like the [OptionsScreen]: its open dialogs see every input event first
 ## ([method ControlsScreen.consume_modal_input]), and Back from Controls asks it first
 ## ([method ControlsScreen.request_leave]), so an unapplied draft is never lost silently.
+##
+## The mouse pointer is not this node's: [GameSession] captures it for mouse look only while
+## the player flies with the HUD on top, so every menu, Controls and its capture dialog
+## included, has a free cursor (F16-06).
 
 
 ## The Session should act on [param action]: every [signal MenuController.action_requested]

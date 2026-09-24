@@ -1,5 +1,36 @@
 # Handoff Log
 
+## 2026-09-24 — Claude (trunk) — F16-06: controls, mouse camera, recenter and dash through the Session lifecycle [shared]
+State: CODE_READY
+Files: `scripts/session/game_session.gd`; `scripts/player/player_controller.gd` (the resume guard only); `scripts/player/camera_rig.gd`, `scripts/ui/interface.gd` and `scripts/ui/controls_screen.gd` (doc comments only); `docs/GUIDE.md` [shared] (Sections 5, 6, 7 and 14, including a new "Controls screen (F16)" subsection); `docs/PLANEJAMENTO.md` [shared] (Section 3 camera input and recenter, a new Section 4 "Lateral dash (Impulso)", and Sections 7 and 8); `docs/engineering/settings.md` (Purpose, Public contract, File layout, a new "F16 Session integration (F16-06)" section and Open issues); `docs/engineering/player-flight.md` (a new "F16 Session integration (F16-06)" section); `docs/validation/controls-expansion.md` (only the F16-06 section); `.scratch/controls-expansion/issues/06-session-camera-and-controls-integration.md` (Status, Work, Outcome); `docs/engineering/ROADMAP.md` (the F16-06 row). `main.tscn`, `player_ship.tscn`, `project.godot`, `settings.gd`, `menu_controller.gd`, `input_device_state.gd` and `options_screen.gd` needed no change.
+Change:
+- **Camera values reach every ship.** `GameSession._apply_camera_settings` gives the rig all six camera values: `apply_settings` as in F3-04, plus `apply_control_settings(camera_input_mode, mouse_sensitivity, mouse_invert_vertical, camera_deadzone)`. It runs at every spawn (Start, Direct Stage, Restart, Retry, Continuar, Jogar novamente) and on `Settings.changed` of any of them, over Pause too.
+- **The pointer.** The Session is the only writer of `Input.mouse_mode`.
+  - It captures only while the player flies in Câmera: Mouse: a ship, the HUD on top, the tree running. A defeat or victory beat counts, because its camera still orbits.
+  - It shows the pointer on every menu (Controls and its capture dialog included), Pause, Defeat, Results, unload and the main menu.
+  - Each decision opens or closes the rig's mouse-look gate and drops the pending look. A capture drops it once more at the first physics tick after the next input flush, against a backend's capture warp.
+- **Focus loss** pauses a stage in play, like `pause`. In a beat or under a screen it only shows the pointer. Regaining focus resumes nothing and captures nothing; Continuar does.
+- **Controller disconnect** pauses through F3-03's injected `pause`, which shows the pointer. In Teclado mode an unplug does not pause, and a keyboard-and-mouse player keeps the capture.
+- **Recenter.** A `camera_recenter` press event (R, Mouse 3, RS/R3) calls `CameraRig.request_recenter()` only while flying, never in a beat. The Controls capture and the menus consume their events first.
+- **Resume guard (F16-05's question).** It is decided on the resume side, not in the capture rules. The ship ignores both dash actions from its spawn and from each `set_controls_enabled(true)` until a tick with both released. So a dash remapped to B no longer fires on the Back that resumes from Pause, although `is_action_just_pressed` still reports that press on the first unpaused tick. Every binding stays allowed.
+- **Checked, unchanged.** Options → Controls → caller from the main menu and from Pause, global Defaults, the confirmation rollback on Alt+Tab and on an unplug, the device prompt policy, and the connection counts after repeated Retry and Restart. No per-ship connection was added.
+- **Docs.** GUIDE and PLANEJAMENTO no longer contradict F16: the fixed footers, the static Controls screen, "full remapping is an expansion" and the sixteen actions are gone. settings.md's "eight values" wording and its stale "No gamepad glyphs" open issue are corrected.
+Why: F16-06 is the serialized convergence of F16-03, F16-04 and F16-05 through the real main menu, Pause and settings lifecycle.
+Verification: no tests or drivers (F16 rule).
+- `tools/test.ps1` passed 225, 0 failed, with no script, parse or compile error.
+- The 300-frame headless boot printed no ERROR or WARNING line.
+- `check_resources --strict-validate` failed nothing (85 resources, 86 scripts).
+- The headless display server has no mouse mode and sends no focus events, so the pointer, focus and recenter paths were checked by reading only. Two engine behaviors the design relies on are recalled from the engine source, not exercised: Windows re-applies a captured mode when the window is activated, and focus loss releases held input. Walkthrough steps 5 and 6 check both.
+- `tools/lane.ps1 land` was not run in this stage.
+Action required by Astra (F16-07):
+- **Integrated revision.** Walk the `dev-01` commit that lands this one. After the land, `git log dev-01 --grep "(F16-06)" -1 --format=%H` names it. Never walk the old packaged executable.
+- **The walkthrough.** Run the 16 steps in `docs/validation/controls-expansion.md` "Integrated walkthrough (F16-06, trunk)", with F16-03's 17 steps and F16-05's owed checks. Record the device and backend for each step; an unavailable device stays not verified.
+- **Rulings on four choices.** Is it right that the pointer stays captured, and the mouse still orbits, through the 1 s defeat beat and the 2.5 s victory beat? That the arrow keys still orbit in Câmera: Mouse? That the HUD shows no key hint beside Impulso? That a dash tapped within one tick of a Resume is dropped?
+- **Value changes.** Send camera or dash value changes to trunk with the numbers.
+Action required by trunk (follow-ups, outside this ticket's Files list):
+- **`Targeting`** polls `lock_target` and `next_target` with `is_action_just_pressed`. A remap that puts one on B locks or switches on the first tick after Back resumes from Pause. The same arm-on-release guard in `targeting.gd` fixes it.
+- **`spec.md`.** The API list still lacks F16-05's additions: `PlayerController.controls_enabled_changed`, `are_controls_enabled`, `get_dash_cooldown_left`, `has_dash`, `DashModel.is_active`, `is_enabled`, `get_direction` and `resolve_direction`, and `CombatState.TIME_EPSILON`. Add them the next time it is edited.
+
 ## 2026-09-24 — Claude (trunk) — F16-03: review fixes
 State: CODE_READY
 Files: `scripts/ui/controls_screen.gd`; `docs/engineering/settings.md` (only the section "F16 capture workflow and prompts (F16-03)"); `docs/validation/controls-expansion.md` (only the F16-03 section).

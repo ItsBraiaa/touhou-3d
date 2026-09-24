@@ -2,11 +2,13 @@
 
 ## Purpose
 
-The Settings Rules Core owns the eight GUIDE Section 14 Options values, their
-defaults, validation and ConfigFile persistence. It is Node-free and does not
-apply values to audio buses, the window, input devices or the camera; F3-02 (the
-`OptionsScreen` adapter, "Options binding" below) and later adapters consume the
-typed getters.
+The Settings Rules Core owns thirteen values and the two binding profiles, with their
+defaults, validation and ConfigFile persistence. The values are the eight GUIDE Section 14
+Options values (`KEYS`) and, since F16-02, the five camera and prompt values
+(`CONTROL_KEYS`). It is Node-free and does not apply values to audio buses, the window,
+input devices, the `InputMap` or the camera. F3-02 (the `OptionsScreen` adapter, "Options
+binding" below) and later adapters consume the typed getters: `InputBindingAdapter`
+(F16-02), `ControlsScreen` (F16-03) and `GameSession` (F3-04, F16-06).
 
 ## Files
 
@@ -27,10 +29,14 @@ typed getters.
 `WindowMode` is `WINDOWED` (0) or `FULLSCREEN` (1). `InputDevice` is
 `AUTOMATIC` (0), `KEYBOARD` (1) or `GAMEPAD` (2). `KEYS` is ordered as Master,
 Music, SFX, Window Mode, Resolution, Input Device, Camera Sensitivity and
-Invert Vertical.
+Invert Vertical: the eight values the Options screen binds. `CONTROL_KEYS` holds the
+five F16 values (Camera Input Mode, Mouse Sensitivity, Mouse Invert Vertical, Camera
+Deadzone and Controller Glyph Family), which the Controls screen binds; their ranges and
+defaults are in "F16 binding profiles and persistence" below. `BINDING_PROFILES` is the
+key of the two profiles, read through `get_input_bindings()`.
 
 `RESOLUTIONS` is `(1280, 720)`, `(1600, 900)` and `(1920, 1080)`. Volumes are
-0–100. Sensitivity is 0.2–2.0 in 0.05 steps. Defaults are 80, 65, 80,
+0–100. Sensitivity is 0.2–2.0 in 0.05 steps. The eight Options defaults are 80, 65, 80,
 Windowed, 1280×720, Automatic, 1.0 and false.
 
 ### Methods
@@ -40,17 +46,20 @@ Windowed, 1280×720, Automatic, 1.0 and false.
 | `_init(path := DEFAULT_PATH)` | Starts at defaults without I/O; the default path is `user://settings.cfg`. |
 | `get_value` / `set_value` | Read or sanitise one field. `set_value` never saves and reports unknown keys with `push_error`. |
 | Typed getters | Return each validated field in its native type. |
-| `restore_defaults()` | Restores defaults and emits only actual changes. |
-| `capture()` / `restore(data)` | Deep-copy all fields; restore sanitises known keys, defaults missing fields and ignores unknown keys, returning diagnostics. |
-| `load_file()` | Missing files use defaults silently; corrupt files use defaults, report the path/error and remain untouched; valid files are restored field by field. |
-| `save_file()` | Writes all eight fields to a fresh ConfigFile and returns its `Error`. |
+| `restore_defaults()` | Restores all thirteen values and both profiles to their defaults (Options' global Defaults) and emits only actual changes. |
+| `capture()` / `restore(data)` | Deep-copy all fields and the profiles; restore sanitises known keys, defaults missing fields and ignores unknown keys, returning diagnostics. |
+| `load_file()` | Missing files use defaults silently; corrupt files use defaults, report the path/error and remain untouched; valid files are restored field by field. A file from before F16-02 keeps its eight values and gets the rest at their defaults. |
+| `save_file()` | Writes all thirteen values and both profiles through a temporary file (the atomic save of F16-02) and returns its `Error`. |
+| F16 binding methods | `get_input_bindings()`, `apply_input_bindings(draft, needs_confirmation)`, `confirm_input_bindings()`, `revert_input_bindings()` and `is_input_bindings_pending()`: see "F16 binding profiles and persistence". |
 | `volume_db(percent)` / `is_muted(percent)` | Static helpers for F3-02 bus application. |
 
 ## File layout
 
 `[audio]` stores `master_volume`, `music_volume` and `sfx_volume`.
 `[display]` stores `window_mode` and `resolution` (`Vector2i`). `[controls]`
-stores `input_device`, `camera_sensitivity` and `invert_vertical`.
+stores `input_device`, `camera_sensitivity` and `invert_vertical` and, since F16-02, the
+five F16 values, `binding_profiles` and `controls_version` (schema under "File schema"
+below).
 
 ## Sanitising rules
 
@@ -558,12 +567,71 @@ These are ordinary settings, not part of the draft: each edit is stored (`set_va
 - The suite enters Controls through `main.tscn` (Options → Controls → Back → Back), so `setup`, the rows, the tabs, the focus links and a clean Back ran there without an error.
 - Capture, conflicts, the dialogs, the confirmation and the camera widgets were checked by reading only. The walkthrough for the human pass is in [validation/controls-expansion.md](../validation/controls-expansion.md) "Rebinding workflow and prompts".
 
+## F16 Session integration (F16-06)
+
+Delivered by trunk on 2026-09-24. It joins the settings above to the Run through `GameSession` (`scripts/session/game_session.gd`). No `Settings`, `InputBindings`, `InputBindingAdapter`, `ControlsScreen` or `Interface` behavior changed; only doc comments. The rig side is in [player-flight.md "F16 Session integration"](player-flight.md#f16-session-integration-f16-06). It supersedes the F16-03 line "The camera values reach the ship only in F16-06": they do now.
+
+### The camera values reach the ship
+
+| Session member | Effect |
+| --- | --- |
+| `CAMERA_SETTING_KEYS` | The six values the rig reads: `camera_sensitivity`, `invert_vertical`, `camera_input_mode`, `mouse_sensitivity`, `mouse_invert_vertical` and `camera_deadzone`. |
+| `_apply_camera_settings()` | `CameraRig.apply_settings(camera_sensitivity, invert_vertical)` as in F3-04, then `CameraRig.apply_control_settings(camera_input_mode, mouse_sensitivity, mouse_invert_vertical, camera_deadzone)`. Called in `_spawn_player` right after `setup`, so every ship gets all six before its first tick: Start, Direct Stage, Restart, Retry, Continuar and Jogar novamente. A new rig starts at its scene values, in Teclas mode with capture off. |
+| `_on_setting_changed(key, _value)` | For any of the six keys: `_apply_camera_settings()`. For `camera_input_mode` also `_update_pointer()`. The connection is F3-04's, made once in `_ready`, so a Restart or a Retry never doubles it. |
+
+- **While paused.** The Câmera tab, Options' two camera widgets and global Defaults all write through `Settings.set_value` or `restore_defaults`, so `changed` reaches the live rig at once, over Pause too. The rig only stores the values; they take effect on the first tick the tree runs.
+- **The glyph family and the profiles** stay `Interface`'s (F16-02, F16-03), as does the input device (F3-03).
+
+### Who owns the pointer
+
+`GameSession` is the only writer of `Input.mouse_mode` (`ControlsScreen`, `Interface` and `CameraRig` never touch it).
+
+- **Captured** only while the player flies in Mouse mode: a ship in play, the HUD on top, the tree running, and `camera_input_mode` is `mouse` (`_gameplay_active()` and `_update_pointer()`). A beat (defeat, victory) counts as flying, because its camera still orbits.
+- **Shown** in every other state: the menus, Options and Controls from either caller, the Controls capture dialog, Pause, Defeat, Results, a stage unload and the main menu. So the Controls screen always has a free cursor for mouse-button capture and for Cancelar.
+- **Where it is decided.** `_set_paused` (every pause, resume, Defeat, Results, Restart, Retry, Continuar and Return to Menu passes through it), `_show_hud` (the HUD of every Attempt), `_unload_stage`, `_on_setting_changed` (the mode) and `_on_focus_lost`. Never per frame, because each decision also opens or closes the rig's gate, which drops its pending look.
+- `_exit_tree` shows the pointer if the Session had captured it, since the mode is process-wide.
+
+### Focus loss
+
+- `NOTIFICATION_APPLICATION_FOCUS_OUT` or `NOTIFICATION_WM_WINDOW_FOCUS_OUT` pauses a stage in play (`_pause()`, as `pause` would, with the Pause overlay) when the HUD is on top and no beat runs. A beat, which refuses Pause, and any screen on top only show the pointer.
+- **Regaining focus does nothing.** Neither the Run nor the capture resumes on its own; Continuar does. The pointer must be shown on the loss itself, because Godot's Windows backend applies the current mode again when the window is activated, and a mode left at captured would take the pointer back.
+- **Held input.** Godot's desktop backends release every held key and button with the focus (`Input.release_pressed_events`), so nothing stays held into that Continuar.
+- Both engine behaviors are recalled from the engine source, not exercised here; walkthrough steps 5 and 6 check them.
+- A Controls confirmation open at the time still reverts itself (F16-03); the Session only shows the pointer there.
+
+### Controller disconnect
+
+A pad leaving while the HUD is on top injects `pause` (F3-03, unchanged), so the pointer is shown with Pause. In Teclado mode an unplug does not pause, so a keyboard-and-mouse player keeps flying with the pointer captured. That is deliberate: nobody is playing on the pad (F3-03's rule).
+
+### Resume, and presses shared with menus
+
+A dash can be bound to an input that also drives the menus, because gameplay and menu-only actions never conflict (F16-02): for example a dash on B, which is `ui_cancel`. Back on Pause acts on the press (`Interface._unhandled_input`), and `Input.is_action_just_pressed` still reports that press on the first unpaused tick (the known `bomb` problem, menus-session.md Open issues), which the dash polls. A focused button acts on the release instead (Godot's default `action_mode`), so Continuar and a menu's Iniciar or Retry never leave a fresh press behind. `pause` can never share an input with a dash (their contexts overlap).
+
+**The guard is on the resume side, not in the capture rules:** `PlayerController` ignores both dash actions from the moment it gets its controls (a new ship, or `set_controls_enabled(true)`) until a tick with both released. That tick reads no press, so even a tap shorter than a frame cannot dash. The player may still bind a dash anywhere. `camera_recenter` is read as an event, and a press a menu consumed never reaches it. `Targeting` polls `lock_target` and `next_target` the same way and is not guarded (outside this ticket; see player-flight.md "F16 Session integration").
+
+### Options → Controls → caller
+
+Checked by reading; nothing here changed. From the main menu and from Pause, Opções → Controles → Voltar → Voltar returns through `ScreenRouter` to the caller with its focus: `BindingsButton` on Opções, then `OptionsButton` on the main menu or on Pause. Pause stays under Options with the tree paused, and Start is ignored until Pause is on top again. Global Defaults (`Settings.restore_defaults`) resets the F16 values and both profiles; `Interface` reinstalls the profiles and the glyph override, the Session reapplies the camera values, and the Controls draft is taken again on the next visit. A confirmation pending on Controls reverts on Reverter, the timeout, a disconnect, a focus loss or leaving the screen (F16-03). The prompt family follows the device policy (F3-03, F16-08). No connection is made per ship except the existing `shots_fired` and `dash_started`, freed with the ship. `ControlsScreen` connects `Settings.changed` and the root's `visibility_changed` once, in `setup`, and the HUD's `bind` unbinds first, so repeated Retry and Restart never double a handler.
+
+### Deliberately not done
+
+- **No HUD key hint.** The Impulso indicator stays label-only. PLANEJAMENTO Section 7 asks for a clear HUD with little text and no combat instruction overlays, and the spec's cooldown is "one compact shared indicator". `hud.*` is not in this ticket's Files list. Any hint added later uses `MenuController.prompt_for` from `Interface._push_prompts` (F16-03's note).
+- **In Mouse mode the arrow keys still orbit.** Keys and the right stick share the `camera_*` actions (F16-04), so Mouse mode adds the mouse to them. A player who wants the arrows free unbinds them in Controles.
+
+### Verification (no tests: the F16 rule)
+
+- `tools/test.ps1` passed: 225, 0 failed, with no script, parse or compile error.
+- The 300-frame headless boot printed no ERROR or WARNING line.
+- `check_resources.gd --strict-validate`: 85 resources, 86 scripts, none failed.
+- The flows were checked by reading only. The headless display server ignores the mouse mode and sends no focus notifications, so neither was exercised. The human walkthrough is in [validation/controls-expansion.md](../validation/controls-expansion.md) "Integrated walkthrough (F16-06, trunk)".
+
 ## Open issues
 
-- Bus and window application are live since F3-02 ("Options binding"), the input device since F3-03 ("Input device and disconnect"), and the camera values since F3-04 ("Camera wiring").
+- Bus and window application are live since F3-02 ("Options binding"), the input device since F3-03 ("Input device and disconnect"), the camera values since F3-04 ("Camera wiring"), and the F16 camera values, the pointer and focus-loss pause since F16-06 ("F16 Session integration").
 - **Owed: the physical keyboard and DualSense pass** over Options and the camera orbit at a saved sensitivity, invert on and off. F3-04 drove the orbit with `Input.action_press` only.
 - **Owed: a physical DualSense unplug in flight** (ENGINEERING_BRIEF Section 8: a simulated gamepad event does not replace a physical controller). F3-03 was verified with synthetic events and `joy_connection_changed` emissions only. It belongs to the human pass.
-- No gamepad glyphs or gamepad hint text: Controle and Automático after pad use hide the keyboard hint (GUIDE Section 14 allows hiding).
+- ~~No gamepad glyphs or gamepad hint text~~: resolved by F16-03 and F16-08. Every menu footer names the live bindings in the prompt family: keyboard text, Xbox or PlayStation names. The Controle tab shows Astra's glyphs, with a text fallback. Glyphs in the footers and on the HUD are not shipped; the footers use text.
+- **Owed (F16-07): the integrated device pass** in the F16-06 walkthrough: the pointer lifecycle, focus-loss pause and the resume guard on real hardware.
 - **The windowed display pass** (a real resize, fullscreen, the layout intact at each resolution) was run by F3-04 part 1 and is recorded in [validation/settings.md](../validation/settings.md); F3-02 itself was verified headless through `display_applied`.
 - Defaults applies the display twice when both the window mode and the resolution differ (one `changed` each). This is harmless, and it keeps `changed` as the one application point.
 - Defaults remain the GUIDE-authored values until Astra tunes them.
