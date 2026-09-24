@@ -1,5 +1,26 @@
 # Handoff Log
 
+## 2026-09-24 12:30 — Claude (trunk) — F14-01: the Windows build exported and run outside the editor
+State: INTEGRATED_VERIFIED
+Files: `export_presets.cfg`; `docs/validation/export.md` (new); `docs/engineering/project.md` (header, Files, new "Export" section, Open issues); `docs/GUIDE.md` (Section 10 "Foundation and conventions"); `docs/engineering/ROADMAP.md` (the F14-01 row, "Human steps"); F14-01 ticket.
+Change:
+- **Export.** The release build of `dev-01` `8061d77`, which includes F13-04 and the swap step below, exported with exit 0 and no `ERROR:` or `WARNING:` line. `build/Touhou-3D.exe` is 129,258,616 bytes. `export_presets.cfg` `debug/export_console_wrapper` went from 1 to 2, so a release export also writes `build/Touhou-3D.console.exe`. No other key changed.
+- **Runs outside the repository.** D3D12 12_0 Forward+ on the RX 9070 XT, no fallback, 1280 × 720 windowed, V-Sync capped at 60.
+  - A keyboard-event walk passed the ticket's walk, and Sair quit the game with exit 0.
+  - FPS held 59 to 60 in S1-01, in S1-02's Waves, and in every Phase of the Lantern Guardian (106 hostile at peak) and the Storm Guardian (93). With V-Sync off, the Storm Guardian never fell below 1,171 FPS.
+  - No run printed `ERROR:`, `SCRIPT ERROR` or `WARNING:`.
+- **Export-only failures:** none.
+- **Details.** Full record and the presentation-computer protocol: `docs/validation/export.md`. The command and environment: `project.md` "Export".
+
+Why: F14-01, the last trunk ticket before delivery.
+Action required by oc-b (F14-02 part 2): re-export with `project.md` "Export":
+1. `tools/test.ps1`;
+2. `--import` once;
+3. `--export-release`.
+
+Package both exes. The release build ignores `--script`. A scratch autoload named in an `override.cfg` beside the exe can drive it, but never ship an `override.cfg`. The acceptance rows for 60 FPS and "exported build runs outside the editor" can cite `export.md`: verified on the development PC, not on the presentation computer.
+Action required by Astra: none. No asset of yours failed in the export.
+
 ## 2026-09-24 — Claude (path) — F13-04 Astra's revised SFX selection applied [shared]
 State: CODE_READY
 Files: `assets/audio/sfx/interface/select_002.ogg`, `drop_001.ogg`, `drop_002.ogg`, `assets/audio/sfx/digital/twoTone2.ogg`, `phaserUp7.ogg` and their `.import` files (new); `interface/tick_001.ogg`, `interface/pluck_001.ogg`, `digital/phaseJump2.ogg`, `digital/lowThreeTone.ogg` and their `.import` files (deleted); `scenes/main.tscn` (`Main/Audio` only); `scripts/audio/audio_controller.gd` (`EVENT_RULES`); `tools/validate_audio_selection.gd`; `docs/engineering/audio.md`; `docs/validation/audio.md`; `docs/ASSET_CREDITS.md`; `docs/GUIDE.md` (audio row); `docs/engineering/ROADMAP.md`; F13-04 ticket.

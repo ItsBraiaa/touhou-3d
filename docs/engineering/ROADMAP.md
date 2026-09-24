@@ -91,7 +91,7 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | | | | 03 audio-event-wiring | integration | no | path | done (2026-09-24: `AudioController` on `Main/Audio` with D-01's 17 effects and volumes, no music; every producer connected once where the Session owns it, `stop_all()` on unload and Retry; driven from the menu through Retry, two Restarts, the Lantern Guardian and Return to Menu, headless and windowed; no new tests per the sprint rule; listening pass owed) |
 | | | | 04 apply-astras-revised-sfx-selection | integration | no | path | done (2026-09-24: Astra's revised selection is the shipped mix: five new files, the four unused removed, all 17 gains, intervals and voices from `selection.json`, one voice per event, global cap 8; headless driver 64 checks: every event heard on its new file, held fire 3.33 starts/s, 5-Pickup clusters 1 sound each, silence after Retry, Restart and Return to Menu) |
 | F14 | Delivery | `delivery` | 00 plan | docs | no | — | done (one-pass planning) |
-| | | | 01 export-and-run-outside-editor | integration | no | trunk | in progress (2026-09-24: swap step landed: D-02 meshes, Familiar and blast, D-07 shrine exports; D-05 asked no weapon change. Export waits for F13-04, 15:30 at the latest) |
+| | | | 01 export-and-run-outside-editor | integration | no | trunk | done (2026-09-24: swap step applied D-02 meshes, Familiar and blast and D-07 shrine exports; release build of `8061d77` exported and run outside the repo: D3D12 Forward+, RX 9070 XT, no fallback, 1280 × 720, V-Sync 60; Storm Guardian and Lantern Guardian 59–60 FPS, over 1,100 uncapped; no ERROR or WARNING; `validation/export.md`. Presentation computer not verified) |
 | | | | 02 package-and-acceptance-record | tooling | no | oc-b | todo |
 | D | Design sprint (Astra) | `design-sprint` | 01 sfx-selection-and-import | design | — | sol | done (listening pass owed by the human pass) |
 | | | | 02 combat-visuals | design | — | sol | done (2026-09-23: six visuals and focused-slider fix verified) |
@@ -115,7 +115,7 @@ Other risks:
 - **Projectiles.** One physics ray per projectile per tick at 1000 to 3000 bullets. F6-02's folded benchmark measures it while other lanes run, so the numbers are pessimistic; no ticket mitigates the ray cost yet.
 - **Heavy tickets.** F6-03 is the heaviest; split the WeaponModel core out if it overruns. F10-03 is a refactor: it moves the per-ship setup from F4-02, F6-02, F6-03 and F7-02 into one `_spawn_player()`.
 - **Cross-lane edits.** Four files are edited by two lanes with no dependency between them (SPRINT.md "Shared files"); the second to land merges both.
-- **Human steps.** F14-01 is blocked until the export templates are installed, and the listening pass, the physical-device pass and the five-minute measurement need a person.
+- **Human steps.** The listening pass, the physical-device pass, the five-minute measurement and the presentation-computer run of the exported build (`validation/export.md`) need a person.
 
 ## Requests to Astra
 

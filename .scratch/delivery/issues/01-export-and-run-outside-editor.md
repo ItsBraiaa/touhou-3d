@@ -1,6 +1,26 @@
 # F14-01 Export and run outside the editor
 
-Status: todo
+Status: done
+
+Outcome (2026-09-24, trunk):
+- **Swap step.** Landed first as one `[shared]` commit (`83e5e2b`):
+  - D-07's `defeat_presentation` and `defeat_animation` on Stage 1's `Stage`;
+  - D-02's Projectile meshes on `Main/ProjectileRoot` and its Familiar on `PlayerShip/Weapon`;
+  - the dev `BombBlast`, rebuilt around D-02's `bomb_blast_visual.tscn`.
+
+  D-05 asked for no weapon or Bomb change.
+- **Export.** From `dev-01` `8061d77`, after F13-04, with `tools/test.ps1` green (225). An `--import` came first, then `--export-release "Windows Desktop" build/Touhou-3D.exe`: exit 0, no `ERROR:` or `WARNING:`. `Touhou-3D.exe` is 129,258,616 bytes and `Touhou-3D.console.exe` 91,136.
+- **Runs outside the repository.** Headless and windowed, D3D12 12_0 Forward+ on the RX 9070 XT, no fallback, 1280 × 720, V-Sync on and capped at 60.
+  - The release build ignores `--script`. A scratch autoload loaded through an `override.cfg` beside the exe drove it with key events through its own input map. That walk passed every Deliverable 4 step, and Sair quit the game with exit 0.
+  - FPS: S1-01 60; S1-02's Waves 59 to 60 (81 hostile); the Lantern Guardian 59 to 60 in all three Phases (106 hostile); the Storm Guardian 59 to 60 in all three (93 hostile). With V-Sync off the Storm Guardian never fell below 1,171.
+  - The D-07 shrine clip plays under Results.
+- **Export-only failures.** None. The one file fix: `export_presets.cfg` `debug/export_console_wrapper` 1 → 2, so the release export also writes the console exe the ticket names.
+- **Also seen.** A quit-time audio leak (`ERROR: 2 resources still in use at exit`) on a trial build before F13-04. It is not export-only and did not recur on the final build; it is an open issue in `project.md`.
+- **No tests** (sprint rule).
+- **Not verified:**
+  - a physical keyboard and gamepad on the build;
+  - a boss fight flown by a person;
+  - the presentation computer (the protocol is in `docs/validation/export.md`).
 Type: integration
 parallel-safe: no
 Depends on: F11-03, F12-03; and the Godot 4.7.2 export templates, which the user installs (see Precondition)
