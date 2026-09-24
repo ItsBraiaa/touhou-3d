@@ -1,9 +1,11 @@
 # F8-04 Stage 1 content draft (dev)
 
-Status: todo
+Status: done
 Type: content
 parallel-safe: yes
 Depends on: F8-01
+Lane: oc-b
+Model: DeepSeek V4.1 Flash (fallback GLM-5.3-Flash)
 
 ## Goal
 
@@ -80,3 +82,7 @@ These files are yours to tune (values), and `metadata/dev = true` marks them as 
 ```
 Read CLAUDE.md, docs/engineering/ROADMAP.md and .scratch/progression-core/issues/04-stage-01-content-draft.md, then implement that ticket with /mattpocock-skills:tdd. Finish with its Definition of Done and commit.
 ```
+
+## Outcome
+
+Wrote all ten `.tres` files under `content/stages/stage_01/` with a one-off headless scratch script (kept outside the project, not committed, deleted after the run): `stage_01.tres`, `s1_01.tres` … `s1_07.tres`, `cp1_a.tres`, `cp1_b.tres`, every one flagged `metadata/dev = true`. The script reloaded `stage_01.tres` from disk with the cache ignored and verified it: `validate()` empty, seven Encounters in route order with the `next_id` chain, S1-03 `requires_exit`, waves whose markers match the scene's `Spawns/` nodes exactly (18 markers: 17 common plus `Wave1_Boss1`), gates `Gate_S1_02`…`Gate_S1_05`, CP1-A after S1-04 resuming S1-05 and guarding it, CP1-B after S1-05 resuming S1-07 and guarding it, reward totals 10 POWER and 1 SHIELD. AFTER_PREVIOUS_WAVE delay drafted at 1.0 s for Astra to tune; `display_name`s are the ids. The named test file was omitted under the sprint's no-new-tests rule; verification is `tools/lane.ps1 land`.

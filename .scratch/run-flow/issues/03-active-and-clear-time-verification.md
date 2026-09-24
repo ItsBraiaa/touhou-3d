@@ -1,9 +1,20 @@
 # F11-03 Active Time and Clear Time verification
 
-Status: todo
+Status: done
+Outcome (2026-09-24, trunk): Done, with no code change. A scratchpad driver of `main.tscn` ran headless (three times, `TA_OK`; the third on the merged tree with F12-06, F12-07 and D-07) with a tick probe running just before `Main`, and verified every rule in "Goal": Pause, Options from Pause, a controller-disconnect Pause, Defeat, Results, Credits, the main menu, Stage Select and Options add no Active Time; Retry after CP1-A drops the failed segment's time, score and Bomb; Restart zeroes Clear Time before and after a Checkpoint; three failed Attempts leave only the last one's time; Campaign Stage 2 starts at 0 with the score carried; real-route uninterrupted clears show `attempt=1` and Clear Time equal to their counted ticks, within 0.02 s of the wall clock: Stage 1 through the Lantern Guardian (431 ticks) and, once F12-07 landed, Direct Stage 2 through the Tempest Sentinel and the Storm Guardian (390 ticks). A Campaign through both real routes, with a Retry after the miniboss back to CP2-A's committed time and score, reached `Jornada concluída` once. `run_state.gd` had no defect, so it and its unit test are untouched. `docs/validation/clear-time.md` records the pass and the manual protocol. The Stage 1 clear times (steps 2 and 3) and a play-length Retry run (step 4) are "not measured", owed by the human pass. Stage 2's five-minute clear (step 5) is "not measured", owed by F14-02's human pass. The named tests in "Deliverables" and the Definition of Done are void (SPRINT "No new tests"); `docs/engineering/run-flow.md` "Time accounting evidence" maps each invariant to its driven check instead.
 Type: test
 parallel-safe: no (drives the whole Session headless; runs after every Session edit it verifies)
 Depends on: F11-02
+Lane: trunk (moved from path, 2026-09-24)
+Model: Claude Opus 5.5, solo
+
+> **No new tests (SPRINT.md, the user's rule):** skip every test this ticket lists. Deliver only the manual protocol and `docs/validation/clear-time.md`: the Active Time and Clear Time checks run by hand in the game, and the uninterrupted-clear measurement for Stage 1, then Stage 2 once F12-07 has landed.
+
+> **Sprint note:** Stage 2 is reinstated, so item 5 is no longer "not verified (cut)":
+> - If F12-07 has landed, measure Stage 2 with this protocol.
+> - If it has not, record "pending F12-07" and leave the measurement to F14-02's human pass. Do not wait for F12-07.
+>
+> The four worktrees share one `user://`, so any test here that writes under `user://` uses a per-process file name.
 
 ## Goal
 

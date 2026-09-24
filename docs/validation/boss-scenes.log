@@ -1,0 +1,8 @@
+D-03 Lantern Guardian: Ghost model, eight amber lanterns, orbit animation, 3.0 hit radius at (0, 4.3, 0), scale 2.6.
+Imported clips: idle Flying_Idle (loop/autoplay), step Punch, phase Yes, defeat Death (non-looping).
+Windowed render: S1-07 dusk palette, approach camera 35 units ahead; lantern-guardian.png.
+D-04 Tempest Sentinel: Goleling model, slate storm body, three cyan/violet rings, independent storm_orbit, 2.5 hit radius at (0, 6.9, 0), scale 3.1, emitter (0, 7.1, -1.7).
+D-04 Storm Guardian: Dragon_Evolved model, lavender-blue storm body with blue/violet sigils, 5.0 hit radius at (0, 8.8, 0), scale 5.0, emitter (0, 9.5, -3.5).
+Both D-04 model players: idle Flying_Idle (loop/autoplay), step Punch, phase Yes, defeat Death (non-looping).
+Windowed Stage 2 renders: S2-04 from 38 units and S2-07 from 52 units; tempest-sentinel.png and storm-guardian.png. Both silhouettes and storm accents inspected against the palette; wings stay clear of near-player space.
+BOSS_SCENES_QA failures=0

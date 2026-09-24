@@ -1,9 +1,11 @@
 # F7-01 Hits to CombatState and defeat
 
-Status: todo
+Status: done
 Type: integration
 parallel-safe: no
 Depends on: F6-02, F4-02 (F4-01 done)
+Lane: trunk
+Model: Claude Opus 5.5, 3-agent workflow (implementer, test-writer, reviewer)
 
 ## Goal
 
@@ -115,6 +117,14 @@ The Bomb (F7-02), Pickups (F7-03), Retry from a Checkpoint and its name on Defea
 ## Handoff notes for Astra
 
 The ship's `VisualRoot` flickers at 12 Hz while Invulnerable; the rate is the export `invulnerability_flicker_hz` on `PlayerShip`. The Core stays lit. Defeat freezes the stage under the overlay.
+
+## Outcome (2026-09-23)
+
+Delivered in lane trunk as implementer, verifier and reviewer. `GameSession` makes the five connections once in `_ready`, ticks `CombatState` beside Active Time, turns Core hits into `take_hit`, Grazes into 1 Graze and `GRAZE_SCORE` 10, mirrors Invulnerability to the field and to the ship's blink, forwards excess-Power score, and freezes the Attempt under Defeat; `retry` restarts the stage (`TODO(F10-03)`). `PlayerController` blinks `VisualRoot` at `invulnerability_flicker_hz` 12 while Invulnerable, and shows it when the tree pauses.
+
+- **No new tests** (the user's sprint rule): the fourteen listed cases are the checks of the new `tools/validate_combat.gd`, written and run by the verifier in the real main scene, `COMBAT_OK` headless and windowed with `combat-hit-flicker.png` and `combat-defeat.png`. No existing test needed a change; the suite stays green at 225.
+- **Reviewer:** no defects. Its suggestions were applied (doc comments; `VisualRoot` shown on `NOTIFICATION_PAUSED`, so a ship paused mid-blink is not hidden), and a note for F9-02 is in `damage-pickups.md` Open issues: enemies should ignore damage while the tree is paused.
+- **F6-03 was not landed** when this ran (its part 1 is oc-a's), so there is no weapon wiring to keep; F6-03 part 2 adds `set_fire_enabled` to `set_controls_enabled` later.
 
 ## Kickoff prompt
 

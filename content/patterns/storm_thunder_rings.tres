@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="PatternDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/definitions/pattern_definition.gd" id="1_pattern"]
+
+[resource]
+script = ExtResource("1_pattern")
+id = &"storm_thunder_rings"
+shape = 0
+projectiles_per_volley = 12
+volley_count = 3
+volley_interval = 0.4
+speed = 8.0
+lifetime = 8.0
+projectile_radius = 0.25
+damage = 10
+gap_degrees = 72.0
+rotation_step_degrees = 12.0
+metadata/dev = true
+metadata/reviewed = true

@@ -1,9 +1,11 @@
 # F6-01 Projectile rendering spike
 
-Status: todo
+Status: cut (folded into F6-02 by the sprint plan, 2026-09-23)
 Type: spike
 parallel-safe: no (FPS must be measured with nothing else running; time-box 1 h)
 Depends on: F5-01
+
+> **Folded into F6-02 (docs/engineering/SPRINT.md, "Product decisions").** With four lanes running, no FPS measurement is ever "alone". F6-02 therefore builds MultiMesh directly (one `MultiMeshInstance3D` per faction, the standard Godot 4 answer for thousands of identical meshes). It also runs this ticket's measurement once, at 300, 1000 and 3000 Projectiles, and records it in `docs/engineering/spikes/projectile-rendering.md`. The body below is kept as the measurement brief; do not run it as a separate session.
 
 ## Goal
 

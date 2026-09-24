@@ -1,9 +1,20 @@
 # F6-02 ProjectileSystem adapter
 
-Status: todo
+Status: done
 Type: adapter
 parallel-safe: no
-Depends on: F5-03, F6-01
+Depends on: F5-03
+Lane: trunk
+Model: Claude Opus 5.5, 3-agent workflow (implementer, test-writer, reviewer)
+
+> **Sprint note (D-02):** if `scenes/combat/visuals/projectile_player_mesh.tres` and `projectile_hostile_mesh.tres` are on the integration branch, point the two mesh exports at them; otherwise ship the dev meshes and log "swap pending: D-02".
+
+> **Sprint change (2026-09-23, docs/engineering/SPRINT.md): F6-01 is folded in here.**
+> - Build one `MultiMeshInstance3D` per faction, with `capacity = 2048`.
+> - Do not build a `MeshInstance3D` pool. Wherever this ticket says "the approach F6-01 recommended" or "set from F6-01", read MultiMesh and 2048.
+> - Before the Definition of Done, run the measurement F6-01 describes (its "Goal" and measurement sections) once, windowed at 1280 × 720, with the dev spray at 300, 1000 and 3000 Projectiles. Record FPS, frame time, field tick time and ray cost in `docs/engineering/spikes/projectile-rendering.md`, noting that other lanes were running.
+> - If 3000 is under 60 FPS, record it and propose the mitigation (a lower capacity, or fewer rays per tick) in the Outcome; do not build it here.
+> - The buffer read-out stays optional, and only if the measurement shows per-instance `set_instance_transform` is the bottleneck.
 
 ## Goal
 
@@ -34,6 +45,7 @@ The Session sets it up on every stage load and clears it on unload, where it use
   - `scenes/dev/dev_spray.gd` (dev only: rings of hostile `ProjectileSpawn`s on a timer, with no pattern core)
   - `tests/scene/test_projectile_system_contract.gd`
   - `docs/engineering/weapon-rendering.md`
+  - `docs/engineering/spikes/projectile-rendering.md` (the folded F6-01 measurement)
 - **Edits:**
   - `scenes/main.tscn`: attach the script to `ProjectileRoot`, set its exports, and change the `Main` export `projectile_system = NodePath("ProjectileRoot")`.
   - `scripts/session/game_session.gd`: rename and retype `projectile_root: Node3D` to `projectile_system: ProjectileSystem` and validate it; add `projectile_system.setup(bounds, _player)` at the end of `_load_stage`; make `_unload_stage` free only `world_root`'s children and call `projectile_system.clear_all()`; update the doc comments.
@@ -146,6 +158,17 @@ Grep the output for `SCRIPT ERROR`. Scene tests need physics frames: await `phys
 - `DamageCore` and `GrazeVolume` stay `monitoring = false`. Their sphere radii are the hit and Graze sizes, so resizing them changes gameplay exactly.
 - Projectile visuals are two dev meshes in `scenes/dev/`. For final art, deliver a mesh of radius 1 with one material per faction, sized to the spike's budget. Claude swaps the two exports on `Main/ProjectileRoot`.
 - Closed Gate barriers and any solid scenery must be `StaticBody3D` on layer 1 for Projectiles to die on them. Foliage should stay off layer 1 (the F1-05 decision).
+
+## Outcome (2026-09-23)
+
+Delivered in lane trunk as implementer, verifier and reviewer (the sprint's 3-agent shape after the no-new-tests rule). `ProjectileSystem` on `Main/ProjectileRoot` with one `MultiMeshInstance3D` per faction and capacity 2048; the Session sets it up on every stage load and clears it on unload; `DevSpray` and a `ProjectileSystem` in the arena harness.
+
+- **No new tests** (the user's sprint rule). The Return to Menu case of `test_game_session_flow.gd` was adjusted to spawn a Projectile and expect `count() == 0`, since `ProjectileRoot`'s children are now the renderers. Suite green at 225.
+- **Verified by running the game** (verifier agent, headless then windowed): rings die at the arena walls, hits and Grazes count, pause freezes every Projectile, Restart and Return to Menu leave none, Stage 2 loads with the sweep on. Recorded in `docs/validation/weapon-rendering.md` with `weapon-rendering-spray.png`.
+- **Reviewer fixes** before landing: null-safe `setup` for a ship without its volumes, the refused count reset per stage (the field's `setup` re-runs), the damage callbacks swapped per tick, explicit ray flags with `hit_from_inside`, and the invulnerable flag reset on `setup`.
+- **Measurement** (`docs/engineering/spikes/projectile-rendering.md`): at 3000 Projectiles, 1118 FPS and a 3.84 ms system step (0.9 ms of rays, 1.2 ms of renderer refresh), with other lanes running. No count drops below 60 FPS; no mitigation and no buffer read-out are needed.
+- **Swap pending: D-02** (the Projectile meshes; `scenes/combat/visuals/` is not on dev-01).
+- **For F7-01 and D-07:** every Core hit is preceded by a Graze a few ticks earlier (Graze shell 0.37 thick, 0.1 of travel per tick); see `weapon-rendering.md` Open issues.
 
 ## Kickoff prompt
 

@@ -3,8 +3,8 @@ extends Control
 ## Adapter shared by the eight menu scenes of GUIDE Section 14. Knows its screen from
 ## the root node name, turns the registry's buttons into [signal action_requested],
 ## takes focus in [method enter] and hands it back in [method leave], writes the
-## runtime text a screen is opened with, and hides the keyboard footer while a gamepad
-## is in use.
+## runtime text a screen is opened with, and shows or hides the keyboard footer when
+## [Interface] says which prompts to show ([method set_keyboard_prompts], F3-03).
 ##
 ## Navigation is not decided here: [Interface] drives [method enter] and
 ## [method leave] from its [ScreenRouter], and the Session decides what an action does.
@@ -86,6 +86,14 @@ const LABEL_BY_SCREEN: Dictionary[StringName, String] = {
 	ScreenRouter.DEFEAT: "Layout/RetryLocation",
 	ScreenRouter.RESULTS: "Layout/Heading",
 }
+## Results' four statistics (GUIDE Section 14 "Runtime text and presentation"): each
+## [method enter] param, by name, and the Label it fills. Load-bearing since F11-01.
+const RESULTS_VALUE_PATHS: Dictionary[String, String] = {
+	"clear_time": "Layout/TimeValue",
+	"score": "Layout/ScoreValue",
+	"graze": "Layout/GrazeValue",
+	"bombs_used": "Layout/BombsValue",
+}
 ## The keyboard hint at the bottom of the five full screens. Pause, Defeat and Results
 ## are authored without one.
 const FOOTER_PATH := ^"Layout/NavigationHint"
@@ -96,9 +104,6 @@ const RESULTS_CAMPAIGN_STAGE := &"campaign_stage_1"
 const RESULTS_DIRECT_STAGE := &"direct_stage"
 ## Results `mode` param: the Campaign's last stage cleared; neither Continue nor Replay.
 const RESULTS_FINAL_VICTORY := &"final_victory"
-## A stick has to pass this far before it counts as gamepad use, so drift near the
-## center does not hide the keyboard hint. Godot's default for the `ui_*` actions.
-const JOYPAD_AXIS_THRESHOLD := 0.5
 
 var _screen: StringName = &""
 ## The registry buttons found in the scene, by path, in table order.
@@ -107,6 +112,8 @@ var _label: Label
 ## [member _label]'s authored text, restored when a screen is entered without the
 ## param that replaces it.
 var _authored_label_text: String = ""
+## Results' value Labels found in the scene, by param name; a missing one was reported.
+var _results_values: Dictionary[String, Label] = {}
 var _footer: Control
 
 
@@ -123,22 +130,17 @@ func _ready() -> void:
 			push_error("%s: screen %s has no Label at '%s'; its runtime text is skipped" % [get_path(), _screen, LABEL_BY_SCREEN[_screen]])
 		else:
 			_authored_label_text = _label.text
+	if _screen == ScreenRouter.RESULTS:
+		_find_results_values()
 	_footer = get_node_or_null(FOOTER_PATH) as Control
-	if _footer == null:
-		set_process_input(false)
-	else:
-		Input.joy_connection_changed.connect(_on_joy_connection_changed)
 
 
-## Tracks the last device used, for the footer. [method _input] rather than unhandled
-## input, because a focused button consumes the gamepad's accept press.
-func _input(event: InputEvent) -> void:
-	if event is InputEventJoypadButton:
-		_set_gamepad_active(true)
-	elif event is InputEventJoypadMotion and absf((event as InputEventJoypadMotion).axis_value) >= JOYPAD_AXIS_THRESHOLD:
-		_set_gamepad_active(true)
-	elif event is InputEventKey:
-		_set_gamepad_active(false)
+## Shows the keyboard hint when [param shown], hides it otherwise. [Interface] calls it on
+## every menu from its one [InputDeviceState] (F3-03), so the menus never disagree. Does
+## nothing on Pause, Defeat and Results, which are authored without a footer.
+func set_keyboard_prompts(shown: bool) -> void:
+	if _footer != null:
+		_footer.visible = shown
 
 
 ## The [ScreenRouter] id of this screen, from the root node name, or an empty
@@ -152,12 +154,13 @@ func get_screen_id() -> StringName:
 ## control at [param focus_path] (relative to this root) when it can take it, else to
 ## the first visible focusable control in tree order. Params by screen:
 ## [br]- Pause: `score` and `graze` (ints) fill `Layout/Score`; a missing one shows a dash.
-## [br]- Defeat: `checkpoint` (the latest Checkpoint's id) names the retry location;
-## absent or empty means the stage entry.
+## [br]- Defeat: `checkpoint` (the latest Checkpoint's `display_name`) names the retry
+## location; absent or empty means the stage entry.
 ## [br]- Results: `mode`, one of [constant RESULTS_CAMPAIGN_STAGE],
 ## [constant RESULTS_DIRECT_STAGE] or [constant RESULTS_FINAL_VICTORY], picks which of
 ## Continue and Replay is shown and the heading, and rebuilds the focus loop without
-## the hidden buttons.
+## the hidden buttons. `clear_time` (seconds) shows as `M:SS`, seconds floored, and
+## `score`, `graze` and `bombs_used` as integers; a missing one shows a dash.
 func enter(params: Dictionary, focus_path: NodePath) -> void:
 	show()
 	if _label != null:
@@ -168,6 +171,7 @@ func enter(params: Dictionary, focus_path: NodePath) -> void:
 			_label.text = "Início da fase" if checkpoint.is_empty() else "Último checkpoint · %s" % checkpoint
 	if _screen == ScreenRouter.RESULTS:
 		_apply_results_mode(StringName(params.get("mode", RESULTS_CAMPAIGN_STAGE)))
+		_write_results_values(params)
 	var target: Control = null
 	if not focus_path.is_empty():
 		target = get_node_or_null(focus_path) as Control
@@ -214,6 +218,32 @@ func _apply_results_mode(mode: StringName) -> void:
 	_link_focus_loop(loop)
 
 
+## Finds Results' four value Labels, reporting each missing one once, here.
+func _find_results_values() -> void:
+	for key: String in RESULTS_VALUE_PATHS:
+		var value_label := get_node_or_null(RESULTS_VALUE_PATHS[key]) as Label
+		if value_label == null:
+			push_error("%s: screen %s has no Label at '%s'; its '%s' value is skipped" % [get_path(), _screen, RESULTS_VALUE_PATHS[key], key])
+			continue
+		_results_values[key] = value_label
+
+
+func _write_results_values(params: Dictionary) -> void:
+	for key: String in _results_values:
+		var text := "—"
+		if key in params:
+			text = _format_clear_time(float(params[key])) if key == "clear_time" else str(int(params[key]))
+		_results_values[key].text = text
+
+
+## [param seconds] as `M:SS`, the seconds floored: 125.9 is `2:05`. Claude's proposal.
+## Snapped to the millisecond first, so 180 ticks of 1/60 s, which sum to 2.99999, read
+## `0:03`.
+static func _format_clear_time(seconds: float) -> String:
+	var whole := floori(snappedf(maxf(seconds, 0.0), 0.001))
+	return "%d:%02d" % [floori(whole / 60.0), whole % 60]
+
+
 func _set_button_visible(path: String, shown: bool) -> void:
 	if path in _buttons:
 		_buttons[path].visible = shown
@@ -247,17 +277,6 @@ func _first_focusable() -> Control:
 
 static func _value_or_dash(params: Dictionary, key: String) -> String:
 	return str(params[key]) if key in params else "—"
-
-
-func _set_gamepad_active(active: bool) -> void:
-	_footer.visible = not active
-
-
-## A gamepad unplugged while it was the last device used would otherwise keep the
-## keyboard hint hidden until the next key press.
-func _on_joy_connection_changed(_device: int, _connected: bool) -> void:
-	if Input.get_connected_joypads().is_empty():
-		_set_gamepad_active(false)
 
 
 func _on_button_pressed(action: StringName, payload: Dictionary) -> void:

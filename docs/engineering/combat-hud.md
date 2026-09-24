@@ -1,17 +1,20 @@
 # Combat state and HUD
 
-Feature F4: the player's combat resources and, as later tickets land, the HUD that shows them and the boss panel. Started with ticket F4-01 on 2026-09-23. `CombatState` is CODE_READY; the HUD binding and target marker (F4-02) and the boss panel and attack-cue API (F4-03) are not built yet.
+Feature F4: the player's combat resources and, as later tickets land, the HUD that shows them and the boss panel. Started with ticket F4-01 on 2026-09-23. `CombatState` is CODE_READY, and since F4-02 the `Hud` adapter shows it and marks the locked target, and the Session owns one `CombatState` for its lifetime. Since F4-03 it also carries the boss panel, attack-cue and threat API that bosses and the Stage Director call.
 
 ## Purpose
 
 `CombatState` owns the player's combat resources for one life: Health (an integer percentage, 0 to 100), the one-charge Shield, the Invulnerability window after a hit or a Bomb, the Bomb charges and the rising edge of the bomb button, Power Level 1 to 3 and Power Progress toward the next level, the score an excess Power Pickup is worth, defeat exactly once, the Checkpoint refill, and the Snapshot slice of the five lasting values. It reports every change as a signal carrying the new value.
 
-It does not own any Node, input polling, collision, timers, Graze or score totals (RunState and the Projectile Field), which Pickup was already collected (the F7-03 pickup adapter), the Bomb's clear radius or its damage to enemies (F6, F7), pausing the tree, or what the HUD draws. Nothing is wired to it yet: the F7-01 combat adapter will feed it and forward its signals, and F4-02 will render them.
+It does not own any Node, input polling, collision, timers, Graze or score totals (RunState and the Projectile Field), which Pickup was already collected (the F7-03 pickup adapter), the Bomb's clear radius or its damage to enemies (F6, F7), pausing the tree, or what the HUD draws. The Session starts and pauses it and the HUD renders it (F4-02); the F7-01 combat adapter will feed it and forward its signals.
 
 ## Files
 
 - `scripts/combat/combat_state.gd` (Rules Core, `class_name CombatState extends RefCounted`).
 - `tests/unit/combat/test_combat_state.gd` (26 tests).
+- `scripts/ui/hud.gd` (Adapter, `class_name Hud extends Control`, on the root of Astra's `scenes/ui/hud.tscn`).
+- `tests/scene/test_hud_contract.gd` (11 tests), plus four F4-02 cases in `tests/scene/test_game_session_flow.gd`.
+- `scenes/dev/hud_harness.tscn` and `.gd` (F4-03): a scripted, self-checking sequence over the boss panel, cue and threats; dev only.
 
 ## CombatState contract
 
@@ -102,11 +105,72 @@ Initial tuning from PLANEJAMENTO Section 4.
 
 `restore(data)` puts those five values back, clears defeat and Invulnerability, marks the button as held, and leaves the pause flag alone. It emits a signal for each value that changed, including `invulnerability_changed(false)` if the core was invulnerable, and keeps no reference to `data`. F8-03 places this slice beside RunState's in the `Snapshot` class.
 
+## Hud contract
+
+`Hud` (`scripts/ui/hud.gd`, F4-02) is the Adapter on the root of `scenes/ui/hud.tscn`. It renders GUIDE Section 15's player panel from a `CombatState` and keeps `TargetMarker` on the target a `Targeting` has locked. It observes and never decides: it calls no `CombatState` method except the getters (ENGINEERING_BRIEF 4.I "Key boundary"). `Interface` instances it once, under every menu; `Interface` processes while the tree is paused, so the HUD does too.
+
+### Exports
+
+| Export | Default | Meaning |
+| --- | --- | --- |
+| `lit_modulate` | `Color(1, 1, 1, 1)` | Modulate of the Shield and a Bomb icon while available. |
+| `dim_modulate` | `Color(1, 1, 1, 0.25)` | Modulate of the Shield and a Bomb icon while spent. Claude's proposal; Astra tunes it on the HUD root. |
+
+### Load-bearing paths
+
+`PlayerStatus/HealthBar`, `HealthValue`, `Shield`, `Bomb1`, `Bomb2`, `PowerValue`, `PowerProgress` and `TargetMarker`, as the `*_PATH` constants. `_ready` reports each missing one with `push_error`, naming the path, and disables the HUD's processing; `bind` then does nothing. Renaming one in the scene needs the matching code change.
+
+### Methods
+
+| Method | Called by | Effect |
+| --- | --- | --- |
+| `bind(combat_state: CombatState, targeting: Targeting, camera: Camera3D)` | Session `_load_stage`, after the ship's `setup`; the arena harness | Calls `unbind()` first, connects `health_changed`, `shield_changed`, `bombs_changed`, `power_changed` and `targeting.target_changed`, then renders the current getter values and `targeting.get_current_target()`. Binding twice never connects twice. |
+| `unbind()` | Session `_unload_stage`, before the ship is freed | Disconnects what `bind` connected (a freed `Targeting` has already dropped its connection), forgets the three references, hides `TargetMarker`. Safe while unbound. |
+
+### Rendering
+
+| Node | Shows |
+| --- | --- |
+| `HealthBar.value`, `HealthValue.text` | Health, clamped to 0..100; the label as `"%d%%"` (`"90%"`). |
+| `Shield.modulate` | `lit_modulate` while shielded, `dim_modulate` otherwise. |
+| `Bomb1.modulate`, `Bomb2.modulate` | Lit at 1 or more and at 2 Bombs respectively, dim otherwise. |
+| `PowerValue.text` | The Power Level. |
+| `PowerProgress.value` | Power Progress, 0..4 of the authored `max_value` 5; **full at Power Level 3**, where the core always holds 0 (Claude's reading of GUIDE Section 15's "handle maximum power according to design"). |
+| `TargetMarker` | In `_process`: centered on `camera.unproject_position(point)`, where the point is the locked target's `HitVolume` (as `Targeting` measures it), else the target's own position. Shown only while bound, the target is valid, and `not camera.is_position_behind(point)`. `target_changed(null)` hides it at once; a freed target hides it on the next frame. The HUD root is full-rect at the origin, so the marker's `position` is in viewport coordinates. |
+
+### Boss panel, cue and threats (F4-03)
+
+Presentation calls for the boss adapter (F12-02, wired by F12-03) and the Stage Director (F10-01, threats). The HUD only shows what it is told: the caller says what each Phase bar holds and how long a cue or a threat shows, and passes Portuguese text from the boss Definitions; the HUD adds none.
+
+| Method | Effect |
+| --- | --- |
+| `show_boss(display_name: String, phase_count: int)` | `BossStatus` visible, `BossName.text = display_name`, `Phase1`..`Phase<phase_count>` visible at 100 and lit, the others hidden at their authored positions. A `phase_count` outside `MIN_PHASES`..`MAX_PHASES` (2..3) is reported with `push_error` and clamped. Calling it again replaces the boss. |
+| `set_phase_health(phase_index: int, ratio: float)` | 0-based. `Phase<index+1>.value = clampf(ratio, 0, 1) * max_value`; at 0 the bar gets `completed_phase_modulate`, above 0 `lit_modulate`. An index outside the Phases shown (any index while no boss is shown) is reported and ignored. |
+| `show_attack_cue(text: String, seconds: float)` | `AttackName.text = text`, shown for `seconds` of unpaused time. A new cue replaces the text and restarts the timer. |
+| `hide_boss()` | Hides `BossStatus` and `AttackName`; every bar back to full and lit. |
+| `show_threat(side: int, seconds: float)` | `-1` shows `ThreatLeft`, `+1` `ThreatRight`, each on its own timer; a repeat while shown extends it to `max(remaining, seconds)`. Any other side is reported and ignored. |
+
+- **Timers.** They count down in `_process` only while `get_tree().paused` is false: the HUD processes during Pause (it lives under `Interface`), and PLANEJAMENTO Section 7 freezes combat timers there. A node counts down while it is visible, so a cue of 0 seconds hides on the next unpaused frame.
+- **Clearing.** `unbind()` (so every `bind()` and every stage unload) also calls `hide_boss()` and hides both threats: nothing is left on screen between stages.
+- **Export.** `completed_phase_modulate: Color = Color(1, 1, 1, 0.3)`, Claude's proposal for Astra to tune. `lit_modulate` also lights the Phase bars.
+- **Load-bearing paths**, added to the ones above: `BossStatus`, `BossStatus/BossName`, `BossStatus/Phase1`..`Phase3` (`PHASE_BAR_PATHS`), `AttackName`, `ThreatLeft`, `ThreatRight`.
+- **Dev harness.** `scenes/dev/hud_harness.tscn` plays the whole API in front of the static arena and checks each step (see the validation page).
+
+### Session wiring (`game_session.gd`)
+
+- One `var _combat_state := CombatState.new()` for the Session's lifetime; `get_combat_state() -> CombatState` for tests and dev tools, like `get_run_state()`.
+- `_start_run`: `_combat_state.start(_run_state.starting_power_level())` right after `RunState.start`. `_restart_stage`: the same after `RunState.restart_stage()`. A Direct Stage 2 therefore enters at Power Level 2.
+- `_set_paused(paused)` also calls `_combat_state.set_paused(paused)`.
+- `_load_stage` binds the HUD to the new ship's `targeting` and `camera_rig.camera`; `_unload_stage` unbinds it before freeing the ship.
+- No `CombatState` signal is connected by the Session yet: F7-01 connects them once in `_ready`.
+
+`Interface.get_hud()` now returns `Hud`, and `Interface` refuses a `hud_scene` whose root is not a `Hud` with `push_error`, disabling itself as it does for an unset `hud_scene`.
+
 ## Dependencies
 
-None: `CombatState` imports nothing and holds no Node.
+`CombatState` imports nothing and holds no Node. `Hud` depends on `CombatState` (signals and getters) and `Targeting` (`target_changed`, `get_current_target`, `HIT_VOLUME_PATH`), and is bound by `GameSession`.
 
-Who will connect to it: the HUD (F4-02) to the value signals, for rendering only; the Session, forwarding `score_awarded` to `RunState.add_score()` and `bomb_activated` to `RunState.note_bomb_used()`; the F7 bomb clear to `bomb_activated`. The F7-01 combat adapter will own the instance per life, tick it and feed it hits and input; the Session will call `start`, `refill`, `capture`, `restore` and `set_paused`.
+Who connects to `CombatState`: the HUD (F4-02) to the four value signals, for rendering only; and, still to come, the Session, forwarding `score_awarded` to `RunState.add_score()` and `bomb_activated` to `RunState.note_bomb_used()`; the F7 bomb clear to `bomb_activated`. The F7-01 combat adapter will own the instance per life, tick it and feed it hits and input; the Session already calls `start` and `set_paused` (F4-02) and will call `refill`, `capture` and `restore`.
 
 ## Invariants and tests
 
@@ -141,13 +205,38 @@ Who will connect to it: the HUD (F4-02) to the value signals, for rendering only
 
 Bold rows are the five ENGINEERING_BRIEF Section 4.C required invariants.
 
+| Invariant (ticket F4-02, GUIDE Section 15, ENGINEERING_BRIEF 4.I) | Test |
+| --- | --- |
+| The HUD root is a `Hud` with every Section 15 path, marker hidden | `test_hud_root_is_a_hud_with_every_section_15_path` |
+| `bind` renders the current values (Power Level 2, 100 %, Shield and Bombs lit) | `test_bind_renders_the_current_values` |
+| `bind` renders values that differ from the authored examples | `test_bind_renders_values_that_differ_from_the_authored_ones` |
+| Hits and Bombs update the panel | `test_hits_and_bombs_update_the_panel` |
+| Power Progress, and the full bar at Power Level 3 | `test_power_progress_and_the_full_bar_at_max_level` |
+| Rebinding never double-connects | `test_rebinding_never_double_connects` |
+| `unbind` disconnects and hides the marker | `test_unbind_disconnects_and_hides_the_marker` |
+| **The HUD never changes the combat state** | `test_hud_never_changes_the_combat_state` |
+| The marker centers on the projected `HitVolume` and follows it | `test_marker_centers_on_the_projected_target` |
+| The marker hides behind the camera | `test_marker_hides_behind_the_camera` |
+| The marker hides on release and when the target is freed | `test_marker_hides_on_release_and_when_the_target_is_freed` |
+| A Run starts the `CombatState` and binds the HUD (Direct Stage 2 at Power Level 2) | `test_game_session_flow.gd::test_a_run_starts_the_combat_state_and_binds_the_hud` |
+| Pause pauses the `CombatState` | `test_game_session_flow.gd::test_pause_pauses_the_combat_state` |
+| Restart rebinds the HUD to the new ship only, with the entry resources | `test_game_session_flow.gd::test_restart_rebinds_the_hud_to_the_new_ship` |
+| Return to Menu unbinds the HUD | `test_game_session_flow.gd::test_return_to_menu_unbinds_the_hud` |
+
+The marker in the running harness is recorded in [validation/combat-hud.md](../validation/combat-hud.md).
+
 ## Setup for Astra
 
 Nothing to attach: `CombatState` is a code-only core, and GUIDE Section 6 says code-only helpers such as combat state need no scene-attached script. The constants are the initial PLANEJAMENTO Section 4 values; tell Claude before changing a rule, and ask for any value to be tuned in the Inspector when the F7 combat adapter lands.
 
+`hud.tscn` needs no change for F4-02. Tune `dim_modulate` in the Inspector on the HUD root, or say if Power Level 3 should read differently than a full `PowerProgress` bar. Keep the Section 15 paths above: each one is load-bearing.
+
 ## Open issues
 
-- **Not wired yet.** No adapter or scene uses `CombatState`: the F7-01 combat adapter will own it per life, feed it hits and bomb input and forward its signals, and the Session will call `start`, `refill`, `capture`, `restore` and `set_paused`.
-- **No visible feedback in a combat scene yet.** ENGINEERING_BRIEF Section 4.C's completion evidence asks for automated tests of the invariants, which exist, plus visible feedback in a combat scene, which needs F7 and the HUD binding (F4-02).
+- **Not fed yet.** The Session owns, starts and pauses one `CombatState` and the HUD shows it (F4-02), but nothing changes it in play: the F7-01 combat adapter will feed it hits and bomb input and the Session will forward its signals and call `refill`, `capture` and `restore`.
+- **Visible feedback.** The HUD now shows the entry values in a Run and in the arena harness; hits and Bombs reach it once F7 feeds the core.
+- **F4-02 readings.** (a) At Power Level 3 `PowerProgress` shows full, since the core holds 0 there; (b) Health is clamped to 0..100 on the panel although the core never leaves that range; (c) the marker simply hides for an off-screen or behind-camera target (screen-edge warnings are F4-03's threats); (d) a locked target is kept in front of the camera by `CameraRig`'s lock framing, so orbiting does not put it behind: it is only behind while it moves there faster than the framing turns (validation page).
+- **F4-03 readings.** (a) With two Phases `Phase3` is hidden and the right third of `BossStatus` stays empty; a two-Phase layout is Astra's call (D-07 Part B). (b) A Phase raised above 0 again is lit again; the HUD infers no Phase order. (c) No test file covers the F4-03 API: the sprint's no-new-tests rule (2026-09-23) replaced the ticket's ten listed tests with the self-checking `hud_harness.tscn` run.
+- **Marker coordinates.** The marker's `position` is set in the HUD root's coordinates, equal to viewport coordinates while the HUD is full-rect at the origin of its CanvasLayer, as in `main.tscn` and the harness.
 - **F4-01 design readings beyond the source text**, each pinned by a test above: (a) the bomb button must be seen released after `new()`, `start()`, `restore()` and pausing, so B pressed on the Pause menu, where it is Back, never bombs on resume; (b) a defeating hit starts no Invulnerability; (c) hits, pickups, refills and ticks are ignored while paused or defeated; (d) a Shield Pickup is refused, not consumed, while shielded, so the pickup adapter must leave it in the world when `collect_shield_pickup()` returns false; (e) a Bomb is allowed during hit Invulnerability and extends it to `max(remaining, 2 s)`; (f) `start()` takes an optional `power_progress` so the Session can decide whether a Campaign transition carries partial Power Progress, while `RunState.advance()` carries only the level today; (g) duplicate-pickup dedup by id is left to the F7-03 pickup adapter, and the core counts every call it receives.
 - The `start()` and `take_hit()` asserts are stripped in release builds, like every `assert` here (CONVENTIONS "Setup errors are loud").

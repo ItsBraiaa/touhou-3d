@@ -1,9 +1,17 @@
 # F6-03 WeaponModel and PlayerWeapon
 
-Status: todo
+Status: done
 Type: core+adapter
 parallel-safe: no
 Depends on: F6-02, F4-01, F4-02
+Lane: trunk (part 1: oc-a)
+Model: part 1 GPT 5.6 Luna (fallback DeepSeek V4.1 Flash); part 2 Claude Opus 5.5, 2-agent workflow (implementer, reviewer)
+
+> **Split (SPRINT.md):**
+> - **Part 1, lane oc-a** (depends only on F4-01): the WeaponModel core `scripts/combat/weapon_model.gd` and its unit tests only. No scene, no `player_weapon.gd`, and no `docs/engineering/weapon-rendering.md`: put its contract in doc comments and the handoff entry. Commit with `(F6-03 part 1)`.
+> - **Part 2, lane trunk** (after F6-02 and part 1): PlayerWeapon, `player_ship.tscn` `[shared]`, the arena harness and the module-doc section. It closes the ticket.
+
+> **Sprint note (D-02, F13):** if D-02's `scenes/combat/visuals/familiar.tscn` (Node3D root, no collision) has landed, set `familiar_scene` to it; otherwise ship the dev Familiar and log "swap pending: D-02". F13 is reinstated: F13-03 adds `shots_fired(count: int)` to this script later, so keep the fire path in one function.
 
 ## Goal
 
@@ -212,3 +220,28 @@ Release every pressed action in `after_each`. Grep the output for `SCRIPT ERROR`
 ```
 Read CLAUDE.md, docs/engineering/ROADMAP.md and .scratch/weapon-rendering/issues/03-weapon-model-and-player-weapon.md, then implement that ticket. Use /run to verify firing, Aim Assist, Familiars and one-press Bombs in the dev arena harness. Finish with its Definition of Done and commit.
 ```
+
+## Outcome
+
+Part 1 implementation is committed as `combat: add WeaponModel core (F6-03 part 1)`: the Node-free `WeaponModel` emits cadence-based main/Familiar shots, counts Familiars by Power Level, and provides normalized static Aim Assist direction. No tests were added per the sprint rule. **The land blocker is resolved by the `tools/lane.ps1` fix on `dev-01` (`6a5d801`), synced into this worktree; the generated UID files are handled by sync/land.** F6-03 remains todo for trunk's part 2 (`PlayerWeapon` and scene integration).
+
+**Part 2, lane trunk, 2026-09-23 (closes the ticket).** Implementer and reviewer (the 2-agent shape). `PlayerWeapon` on `PlayerShip/Weapon` fires the `WeaponModel`'s shots through the `ProjectileSystem`:
+- from `Muzzle` and the two Familiar anchors, rotated by the camera yaw;
+- toward the view point at the lock's depth, bent onto the locked `HitVolume` inside each cone;
+- shows two dev Familiars from Power Level 2;
+- feeds the `bomb` button from events to `CombatState` once per tick.
+
+Around the weapon:
+- `PlayerController` has the required `weapon` export, and `set_controls_enabled()` also toggles fire.
+- `player_ship.tscn` [shared] changed only the `weapon` reference and the four `Weapon` exports.
+- The Session calls `weapon.setup(...)` in `_load_stage`.
+- The dev `familiar.tscn` and `TargetDummy` are added; the arena harness gets the dummies, keys 1 to 3 and the readout.
+
+- **No new tests** (the user's sprint rule); the suite stays green at 225. Verified by a throwaway run in the arena harness, headless and windowed (`WEAPONCHECK_OK`). Shots per 30 ticks were 5, 9 and 13 at levels 1, 2 and 3. A locked dummy took 10 hits in 60 ticks. After a 90° orbit shots fly along the view. No shot passed a wall, and three presses spent the 2 Bombs. Recorded in `docs/validation/weapon-rendering.md` with `weapon-rendering-familiars.png`.
+- **Reading beyond the ticket: forward is the view point, not the camera axis.** With `-camera.global_basis.z` from the Muzzle, the camera's parallax put a locked dummy 12.4° off, outside the 10° main cone, and the dummy took 0 hits. Forward now aims at the point on the view's center ray at the target's depth along the view, or at shot range with no lock, at least 8 units ahead of the origin.
+- **Reviewer fixes before landing:**
+  - the aim point could fall behind the Muzzle for a close target;
+  - a collision object at a Familiar scene's root passed the check;
+  - `_exit_tree` now disconnects;
+  - a target out of the tree is ignored.
+- **Swap pending: D-02** (the Familiar scene).

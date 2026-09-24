@@ -1,12 +1,27 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=11 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/tests/combat_arena.tscn" id="1_arena"]
 [ext_resource type="Script" path="res://scenes/dev/arena_harness.gd" id="2_harness"]
+[ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="3_hud"]
+[ext_resource type="Script" path="res://scripts/combat/projectile_system.gd" id="4_projectile_system"]
+[ext_resource type="SphereMesh" path="res://scenes/dev/projectile_player_mesh.tres" id="5_player_bullet"]
+[ext_resource type="SphereMesh" path="res://scenes/dev/projectile_hostile_mesh.tres" id="6_hostile_bullet"]
+[ext_resource type="Script" path="res://scenes/dev/dev_spray.gd" id="7_dev_spray"]
+[ext_resource type="PackedScene" path="res://scenes/dev/target_dummy.tscn" id="8_dummy"]
+[ext_resource type="PackedScene" path="res://scenes/dev/power_pickup.tscn" id="9_power_pickup"]
+[ext_resource type="PackedScene" path="res://scenes/dev/shield_pickup.tscn" id="10_shield_pickup"]
 
-[node name="ArenaHarness" type="Node3D" node_paths=PackedStringArray("arena", "readout")]
+[node name="ArenaHarness" type="Node3D" node_paths=PackedStringArray("arena", "readout", "hud", "projectile_system", "dummy_root", "pickup_root", "enemy_spawns")]
 script = ExtResource("2_harness")
 arena = NodePath("CombatArena")
 readout = NodePath("DebugLayer/Readout")
+hud = NodePath("HudLayer/HUD")
+projectile_system = NodePath("ProjectileSystem")
+dummy_root = NodePath("Dummies")
+pickup_root = NodePath("Pickups")
+enemy_spawns = NodePath("EnemySpawns")
+power_pickup_scene = ExtResource("9_power_pickup")
+shield_pickup_scene = ExtResource("10_shield_pickup")
 
 [node name="CombatArena" parent="." instance=ExtResource("1_arena")]
 
@@ -16,8 +31,46 @@ readout = NodePath("DebugLayer/Readout")
 offset_left = 16.0
 offset_top = 16.0
 offset_right = 452.0
-offset_bottom = 208.0
+offset_bottom = 500.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 6
 theme_override_font_sizes/font_size = 18
+
+[node name="HudLayer" type="CanvasLayer" parent="."]
+
+[node name="HUD" parent="HudLayer" instance=ExtResource("3_hud")]
+
+[node name="ProjectileSystem" type="Node3D" parent="."]
+script = ExtResource("4_projectile_system")
+player_projectile_mesh = ExtResource("5_player_bullet")
+hostile_projectile_mesh = ExtResource("6_hostile_bullet")
+
+[node name="DevSpray" type="Node3D" parent="." node_paths=PackedStringArray("projectile_system")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6, 0)
+script = ExtResource("7_dev_spray")
+projectile_system = NodePath("../ProjectileSystem")
+
+[node name="Dummies" type="Node3D" parent="."]
+
+[node name="DummyLeft" parent="Dummies" instance=ExtResource("8_dummy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 7, -6)
+
+[node name="DummyRight" parent="Dummies" instance=ExtResource("8_dummy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 11, -10)
+
+[node name="DummyFar" parent="Dummies" instance=ExtResource("8_dummy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 14, -34)
+
+[node name="Pickups" type="Node3D" parent="."]
+
+[node name="EnemySpawns" type="Node3D" parent="."]
+
+[node name="Spirit" type="Marker3D" parent="EnemySpawns"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 9, -12)
+
+[node name="Sentry" type="Marker3D" parent="EnemySpawns"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 10, -16)
+
+[node name="DevBoss" type="Marker3D" parent="EnemySpawns"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 13, -26)

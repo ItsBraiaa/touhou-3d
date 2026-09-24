@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="CheckpointDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/definitions/checkpoint_definition.gd" id="1_ch64h"]
+
+[resource]
+script = ExtResource("1_ch64h")
+id = &"CP1-B"
+after_encounter_id = &"S1-05"
+resume_encounter_id = &"S1-07"
+node_path = NodePath("Checkpoints/CP1-B")
+display_name = "Entrada do Santuário"
+metadata/dev = true
+metadata/reviewed = true

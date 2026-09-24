@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="EncounterDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/definitions/reward_definition.gd" id="1_6inej"]
+[ext_resource type="Script" path="res://scripts/definitions/encounter_definition.gd" id="2_dowrt"]
+[ext_resource type="Script" path="res://scripts/definitions/wave_definition.gd" id="3_wq2mm"]
+
+[sub_resource type="Resource" id="Resource_2kdtw"]
+script = ExtResource("1_6inej")
+kind = 1
+origin_marker = NodePath("ShieldPickup")
+
+[sub_resource type="Resource" id="Resource_jgmtt"]
+script = ExtResource("3_wq2mm")
+spawn_markers = Array[NodePath]([NodePath("Spawns/Wave1_Sentry1"), NodePath("Spawns/Wave1_Sentry2")])
+enemy_kinds = Array[StringName]([&"sentry", &"sentry"])
+
+[resource]
+script = ExtResource("2_dowrt")
+id = &"S1-03"
+next_id = &"S1-04"
+completion = 1
+requires_exit = true
+waves = Array[ExtResource("3_wq2mm")]([SubResource("Resource_jgmtt")])
+rewards = Array[ExtResource("1_6inej")]([SubResource("Resource_2kdtw")])
+gate_id = &"Gate_S1_03"
+metadata/dev = true
+metadata/reviewed = true

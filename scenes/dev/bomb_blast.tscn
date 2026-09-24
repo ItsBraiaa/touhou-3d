@@ -1,0 +1,10 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scenes/dev/bomb_blast.gd" id="1_blast"]
+[ext_resource type="PackedScene" path="res://scenes/combat/visuals/bomb_blast_visual.tscn" id="2_visual"]
+
+[node name="BombBlast" type="Node3D" node_paths=PackedStringArray("animation_player")]
+script = ExtResource("1_blast")
+animation_player = NodePath("Visual/AnimationPlayer")
+
+[node name="Visual" parent="." instance=ExtResource("2_visual")]

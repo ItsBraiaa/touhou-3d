@@ -1,9 +1,14 @@
 # F11-02 Campaign continuation and Direct Stage
 
-Status: todo
+Status: done
+Outcome (2026-09-24, trunk): Done. `GameSession._continue_campaign()` (Continuar, only on Campaign Results with a next stage) reads the Power Level, unpauses, `RunState.advance(power)`, loads the next stage (menu on failure) and runs `_begin_first_attempt()`, the tail now shared with `_start_run`: 100 % Health, one Shield, two Bombs, Power Progress 0. `_replay_stage()` (Jogar novamente, only on Direct Stage Results) unpauses and starts that stage as a new Direct Stage Run. Both warn and do nothing elsewhere. No new tests (sprint rule): a scratchpad driver of `main.tscn` checked Continue's carry and restore, Restart in Campaign Stage 2, the real Stage 2 clear's final victory (Stage 2 has a Director since F12-05), Replay of both stages, the Direct Stage entry values and the ignored cases, headless and windowed (`docs/validation/run-flow.md`, `run-flow-continue.png`). Power Progress is not carried (Claude's reading, in run-flow.md Open issues).
 Type: integration
 parallel-safe: no
 Depends on: F11-01
+Lane: trunk
+Model: Claude Opus 5.5, solo
+
+> **Sprint note:** Stage 2 is reinstated (F12-05 to F12-07, lane sol). Keep the `RunState`-driven final-victory test, which is still the fast and deterministic proof; F12-07's integration test proves the real victory through play once it lands. The "Stage 2 has no gameplay" statements below describe the state at the time this ticket runs, not the delivery.
 
 ## Goal
 

@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="EncounterDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/definitions/reward_definition.gd" id="1_uhjow"]
+[ext_resource type="Script" path="res://scripts/definitions/encounter_definition.gd" id="2_mqows"]
+[ext_resource type="Script" path="res://scripts/definitions/wave_definition.gd" id="3_ysmrv"]
+
+[sub_resource type="Resource" id="Resource_s240s"]
+script = ExtResource("3_ysmrv")
+spawn_markers = Array[NodePath]([NodePath("Spawns/Wave1_Boss1")])
+enemy_kinds = Array[StringName]([&"lantern_guardian"])
+
+[resource]
+script = ExtResource("2_mqows")
+id = &"S1-07"
+completion = 1
+waves = Array[ExtResource("3_ysmrv")]([SubResource("Resource_s240s")])
+checkpoint_id = &"CP1-B"
+metadata/dev = true
+metadata/reviewed = true

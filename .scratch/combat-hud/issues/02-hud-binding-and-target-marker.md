@@ -1,9 +1,11 @@
 # F4-02 HUD binding and target marker
 
-Status: todo
+Status: done
 Type: adapter
 parallel-safe: no
 Depends on: F4-01, F2-04
+Lane: trunk
+Model: Claude Opus 5.5, solo
 
 ## Goal
 
@@ -81,6 +83,15 @@ Boss panel, attack cue and threats (F4-03); anything that changes `CombatState` 
 ## Handoff notes for Astra
 
 `hud.tscn` is not edited. The binding depends on every Section 15 path under `PlayerStatus` and on `TargetMarker`: renaming one needs a matching code change. `dim_modulate` (alpha 0.25) and the full Power bar at level 3 are Claude's proposals; tune `dim_modulate` in the Inspector on the HUD root, or say if level 3 should read differently.
+
+## Outcome (2026-09-23)
+
+Delivered as specified, solo, in lane trunk. `Hud` binds a `CombatState`, a `Targeting` and a `Camera3D`; the Session owns one `CombatState`, starts it at every stage entry, pauses it with the tree, and binds the HUD to every new ship; the arena harness shows its own `CombatState` on a `HudLayer`.
+
+- **Tests:** 11 in `tests/scene/test_hud_contract.gd` (one more than listed: `test_bind_renders_values_that_differ_from_the_authored_ones`, so a HUD that only kept the authored examples would fail) and the four listed cases in `test_game_session_flow.gd`; suite green at 213, no `SCRIPT ERROR`.
+- **Verified in the harness,** headless and windowed, with a throwaway script: the marker centered on Middle, High and Low within 0.01 px of their projected `HitVolume`, hidden on every frame the locked target was behind the camera and on release. Recorded in `docs/validation/combat-hud.md` with `combat-hud-marker.png`.
+- **Deviation from the DoD wording:** orbiting cannot put a locked target behind the camera, because `CameraRig`'s lock framing pulls the aim back (a held orbit settles about 16 degrees off). The behind-camera case was measured by moving the locked target behind the camera instead, as a fast enemy would.
+- **Readings** (in `combat-hud.md` Open issues): the full Power bar at Power Level 3; Health clamped to 0..100 on the panel; the marker hides for an off-screen target.
 
 ## Kickoff prompt
 

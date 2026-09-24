@@ -1,6 +1,6 @@
 # F13-00 Plan the Audio feature
 
-Status: cut (pending the user, 2026-09-23)
+Status: done (2026-09-23)
 Type: docs
 parallel-safe: no
 Depends on: F3-02 (buses bound), F7-03 (events exist); can be planned earlier and implemented against temporary streams
@@ -36,3 +36,18 @@ Read CLAUDE.md, docs/engineering/ROADMAP.md and .scratch/audio/issues/00-plan.md
 Cut from the 2026-09-24 delivery by the one-pass planning session (commit `plan: write F4-F14 tickets`) to protect the Stage 1 loop. Do not pick it while cut; reinstating it is the user's call (set Status back to `todo`, then run this plan ticket as written).
 
 Consequence while cut: the game ships silent. `Main/Audio` keeps no script, and the events that would drive it (`pickup_accepted`, `player_hit`, `shield_broken`, `bomb_used`, graze, `enemy_defeated`, `phase_changed`, `checkpoint_activated`) exist as signals with no audio consumer. The Kenney selection and the music decision under PLANEJAMENTO Section 9 are not made.
+
+## Reinstated (2026-09-23)
+
+The PO reinstated F13 in the sprint plan in reduced but real form, because the assignment requires sound effects (PLANEJAMENTO Section 2). This supersedes the Cut section above, which stays for the record. The plan was carried out as `.scratch/audio/spec.md`, three tickets and one design ticket:
+
+- `01-audio-limiter-core.md`: F13-01, core, lane glm-a.
+- `02-audio-controller-adapter.md`: F13-02, adapter, lane glm-a. It is attached to nothing.
+- `03-audio-event-wiring.md`: F13-03, integration, trunk. It attaches the controller to `Main/Audio` and connects every producer in the Session.
+- `.scratch/design-sprint/issues/01-sfx-selection-and-import.md`: D-01, Astra, lane sol. It selects and imports the Kenney sounds and makes the music decision.
+
+The planned `02-music-per-route-and-boss` was folded in:
+
+- F13-02 carries the crossfade code.
+- F13-03 calls it per menu, route and boss.
+- D-01 decides whether any track may ship.

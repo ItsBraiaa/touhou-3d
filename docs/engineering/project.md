@@ -1,6 +1,6 @@
 # Project configuration and composition root
 
-The shared project files Claude took over with ticket F0-03 on 2026-09-21, and the `GameSession` that boots the game; its full contract since F2-04 is in [menus-session.md](menus-session.md) "GameSession contract". CODE_READY except the Windows export, which is blocked on export templates (see Open issues).
+The shared project files Claude took over with ticket F0-03 on 2026-09-21, and the `GameSession` that boots the game; its full contract since F2-04 is in [menus-session.md](menus-session.md) "GameSession contract". CODE_READY; the Windows release build is exported and verified outside the editor since F14-01 (see "Export").
 
 ## Purpose
 
@@ -10,7 +10,7 @@ Owns `project.godot` (warnings as errors, input map, main scene, bus layout refe
 
 - `project.godot`: `[debug]` sets `untyped_declaration`, `unused_variable`, `unused_parameter`, `shadowed_variable` to Error; `[application] run/main_scene` is `res://scenes/main.tscn`; `[audio] buses/default_bus_layout`; `[input]` holds the sixteen gameplay actions, plus `ui_accept` and `ui_cancel` with their default keys and the gamepad's A and B added (F2-02; Godot 4.7 binds those two to keys only).
 - `default_bus_layout.tres`: buses `Master`, `Music` (send Master), `SFX` (send Master).
-- `export_presets.cfg`: preset "Windows Desktop", `build/Touhou-3D.exe`, embedded PCK, x86_64.
+- `export_presets.cfg`: preset "Windows Desktop", `build/Touhou-3D.exe`, embedded PCK, x86_64, and the console wrapper `build/Touhou-3D.console.exe` for debug and release exports (`debug/export_console_wrapper=2`, F14-01).
 - `scenes/main.tscn`: composition root (ADR-0002); tree in GUIDE.md Section 5. `Main`, `Interface`, and `Audio` are `PROCESS_MODE_ALWAYS`; `WorldRoot` and `ProjectileRoot` are `PROCESS_MODE_PAUSABLE`, so gameplay stops with the tree while menus, pause handling, and audio keep running. Since F2-02 `Interface` carries `scripts/ui/interface.gd` with `menu_scenes` (the eight `scenes/ui/` menus) and `hud_scene` (`scenes/ui/hud.tscn`); contract in [menus-session.md](menus-session.md).
 - `scripts/session/game_session.gd` (Adapter, attached to `Main`). Since F2-04 `Main` also sets `player_scene`, `stage_scenes` and `stage_flight_bounds`.
 - `tests/scene/test_main_contract.gd`, `tests/unit/project/test_input_map.gd`, `tests/unit/project/test_audio_buses.gd`.
@@ -22,7 +22,7 @@ Owns `project.godot` (warnings as errors, input map, main scene, bus layout refe
 | Export | Type | Default | Required | Meaning |
 | --- | --- | --- | --- | --- |
 | `world_root` | Node3D | `Main/WorldRoot` | yes | Holds the loaded Stage instance; PAUSABLE, stops while the tree is paused |
-| `projectile_root` | Node3D | `Main/ProjectileRoot` | yes | Root of the projectile system; PAUSABLE, stops while the tree is paused |
+| `projectile_system` | ProjectileSystem | `Main/ProjectileRoot` | yes | The projectile system (F6-02, [weapon-rendering.md](weapon-rendering.md)); PAUSABLE, stops while the tree is paused |
 | `interface` | `Interface` (was `CanvasLayer` until F2-02) | `Main/Interface` | yes | Menus and HUD; processes while paused |
 | `player_scene`, `stage_scenes`, `stage_flight_bounds` | see [menus-session.md](menus-session.md) | set in `main.tscn` since F2-04 | `player_scene` only | The ship, the stage scenes by id, and Stage 1's Flight Volume |
 
@@ -80,8 +80,23 @@ None injected. `GameSession` receives its four children, the ship and the stage 
 
 Nothing to attach. `scenes/main.tscn` is Claude's; do not add nodes to it. Keep previewing menus with F6 on their own scenes; F5 now boots `main.tscn`, which shows the main menu exactly as before. Every script must compile with the four warnings as errors: type `for` iterator variables when the collection is an untyped `Array` (`for path: String in paths`).
 
+## Export
+
+F14-01, 2026-09-24. Evidence, FPS readings and the presentation-computer protocol: [validation/export.md](../validation/export.md).
+
+- **Environment.** Godot 4.7.2 export templates in `%APPDATA%\Godot\export_templates\4.7.2.stable\`, which the user installs; the lanes never download them.
+- **Command.** Run from the worktree root, in this order:
+  1. `tools/test.ps1`, green;
+  2. `tools/godot.ps1 --headless --path . --import`, once, so the export does not reimport; an export straight after a sync can print editor-dialog `ERROR:` lines;
+  3. `tools/godot.ps1 --headless --path . --export-release "Windows Desktop" build/Touhou-3D.exe`, which must exit 0 with no `ERROR:` or `WARNING:` line.
+- **Output.** `build/Touhou-3D.exe` (about 129 MB, the pack embedded) and `build/Touhou-3D.console.exe` (91 KB). The console exe runs the GUI exe and shows its output; use it for `--print-fps` and logs. `build/` is git-ignored.
+- **Result on the development PC.** It boots outside the repository and plays both stages. D3D12 Forward+ on an RX 9070 XT, no fallback, 1280 × 720, V-Sync capped at 60. The Storm Guardian and the Lantern Guardian held 59 to 60 FPS, with over 1,100 FPS uncapped. The build printed no `ERROR:` or `WARNING:` line.
+- **Scripting the build.** The exported build (release or debug) ignores `--script`. An autoload named in an `override.cfg` beside the exe runs, so a scratch driver can be loaded that way; do not ship such a file.
+- `user://` is `%APPDATA%\Godot\app_userdata\Touhou-3D`, shared with source runs.
+- **Package.** `tools/package.ps1` builds the academic submission zip under `build/package/` (git-ignored) and verifies the extracted copy: project import, the suite, and a 300-frame boot of `game/Touhou-3D.console.exe`, ending in `PACKAGE_OK`. Call it as `powershell -NoProfile -ExecutionPolicy Bypass -File tools\package.ps1`. It exits 2 without the executable and 3 on a dirty tree, so the package always equals a commit. F14-02 part 2; output and the acceptance record are in [validation/export.md](../validation/export.md) "Package" and [validation/acceptance.md](../validation/acceptance.md).
+
 ## Open issues
 
-- Windows export blocked: no export templates under `~/.local/share/godot/export_templates/4.7.2.stable/` on this Linux host; the export needs `windows_release_x86_64.exe` and `windows_debug_x86_64.exe` there. Install them (Editor > Manage Export Templates, or the official 4.7.2 templates archive), then run `tools/godot.sh --headless --path . --export-release "Windows Desktop" build/Touhou-3D.exe` and launch the exe once. F14 repeats the export.
+- The pack also carries `tests/`, `tools/` and `docs/validation/` files (`export_filter="all_resources"`). Nothing breaks. `exclude_filter="tests/*, tools/*, docs/*"` would drop them, but `scenes/dev/` must stay.
 - `audio/buses/default_bus_layout` is written explicitly although it equals Godot's default; the editor drops the line on its next save of `project.godot`. Harmless either way.
 - Only the Windows preset exists, as the ticket asked; no Linux preset.

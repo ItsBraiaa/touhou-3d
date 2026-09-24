@@ -1,0 +1,18 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/combat/pickup.gd" id="1_pickup"]
+[ext_resource type="PackedScene" path="res://scenes/combat/visuals/power_pickup_visual.tscn" id="2_visual"]
+
+[sub_resource type="SphereShape3D" id="PickupShape"]
+radius = 0.9
+
+[node name="PowerPickup" type="Area3D"]
+collision_layer = 0
+collision_mask = 2
+monitorable = false
+script = ExtResource("1_pickup")
+
+[node name="Collision" type="CollisionShape3D" parent="."]
+shape = SubResource("PickupShape")
+
+[node name="Visual" parent="." instance=ExtResource("2_visual")]

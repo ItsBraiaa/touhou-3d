@@ -1,9 +1,13 @@
 # F7-03 Pickup adapter and rewards
 
-Status: todo
+Status: done
 Type: adapter
 parallel-safe: no
 Depends on: F7-01
+Lane: trunk
+Model: Claude Opus 5.5, solo
+
+> **Sprint note (D-02, F13):** F13 is reinstated; `accepted` reaches audio through `StageDirector.pickup_accepted` in F13-03. Hold `Visual` as a `Node3D`, not a `MeshInstance3D`, so D-02's `power_pickup_visual.tscn` and `shield_pickup_visual.tscn` can be instanced as `Visual`. Instance them if they have landed; otherwise keep the dev meshes and log "swap pending: D-02". Collision, layers, masks, monitoring and the script stay in the Claude-owned prefab.
 
 ## Goal
 
@@ -91,6 +95,18 @@ Spawner id convention for F10-01: `&"<encounter_id>/power_<n>"` and `&"<encounte
 - For final Power Pickup and Shield Pickup scenes, keep the dev prefab's root contract: an `Area3D` with `pickup.gd`, `kind` set, `collision_layer` 0, `collision_mask` 2, `monitoring` on, and a `CollisionShape3D` child.
 - Tune `attraction_range` and `attraction_speed` there. Shapes and colors must differ between the two kinds.
 - Tell Claude the paths, and F10's Director exports will point at them.
+
+## Outcome
+
+Done 2026-09-23 by trunk (Claude, solo).
+
+`Pickup` (`scripts/combat/pickup.gd`) follows the Deliverables as written: `Kind`, `accepted(pickup_id, kind, score_awarded)` once before `queue_free()`, the three exports, `setup()` with a loud inert failure, contact tracked from its own `body_entered` and `body_exited` and polled in `_physics_process`, attraction with `move_toward`, and a Shield Pickup that is refused, unattracted and kept while shielded.
+
+- **D-02 had landed**, so both dev prefabs instance `scenes/combat/visuals/power_pickup_visual.tscn` and `shield_pickup_visual.tscn` as `Visual` (a `Node3D`); no swap is pending. The roots are named `PowerPickup` and `ShieldPickup`, so a remote tree tells them apart.
+- **No new tests** (the user's sprint rule): `tests/scene/test_pickup.gd` was not written. A throwaway script outside the repo drove the real arena harness through the ticket's ten cases, `PICKUPS_OK` headless and in a window; results and `pickups-arena.png` are in `docs/validation/combat.md` "Pickups". The suite stays green at 225.
+- **Harness additions beyond the spawn and the readout:** the dev key H calls `take_hit()` once, so the Shield Pickup can be taken by hand (the harness never ticks its core, so the Invulnerability lasts until a 1/2/3 restart). It is inside the harness files.
+- **One guard beyond the text:** each tick checks the `player` with `is_instance_valid`, so a ship replaced while Pickups stay (F10-03) cannot crash them; such a Pickup needs a new `setup`.
+- **For F10-01:** spawn under the stage's `RuntimeActors` (PAUSABLE), call `setup(## Kickoff prompt"<encounter_id>/power_<n>", combat_state, ship)` after `add_child`, and connect `accepted`; never add its `score_awarded` to the Run.
 
 ## Kickoff prompt
 

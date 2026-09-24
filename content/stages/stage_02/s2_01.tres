@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="EncounterDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/definitions/reward_definition.gd" id="1_fyops"]
+[ext_resource type="Script" path="res://scripts/definitions/encounter_definition.gd" id="2_0exue"]
+[ext_resource type="Script" path="res://scripts/definitions/wave_definition.gd" id="3_udpei"]
+
+[sub_resource type="Resource" id="Resource_8q5br"]
+script = ExtResource("3_udpei")
+spawn_markers = Array[NodePath]([NodePath("Spawns/Wave1_Spirit1"), NodePath("Spawns/Wave1_Spirit2")])
+enemy_kinds = Array[StringName]([&"spirit_twilight", &"spirit_twilight"])
+
+[resource]
+script = ExtResource("2_0exue")
+id = &"S2-01"
+next_id = &"S2-02"
+completion = 1
+requires_exit = true
+waves = Array[ExtResource("3_udpei")]([SubResource("Resource_8q5br")])
+gate_id = &"Gate_S2_01"
+metadata/dev = true
+metadata/reviewed = true

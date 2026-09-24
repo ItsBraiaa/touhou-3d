@@ -1,6 +1,6 @@
 # F3-00 Plan the Settings feature
 
-Status: cut (pending the user, 2026-09-23)
+Status: done (2026-09-23)
 Type: docs
 parallel-safe: no
 Depends on: F2-04
@@ -39,3 +39,16 @@ Read CLAUDE.md, docs/engineering/ROADMAP.md and .scratch/settings/issues/00-plan
 Cut from the 2026-09-24 delivery by the one-pass planning session (commit `plan: write F4-F14 tickets`) to protect the Stage 1 loop. Do not pick it while cut; reinstating it is the user's call (set Status back to `todo`, then run this plan ticket as written).
 
 Consequence while cut: the Options widgets show their authored defaults and apply nothing, `user://settings.cfg` is never written, `CameraRig.apply_settings()` stays uncalled, the buses from F0-03 keep their default volumes, and a controller disconnect does not pause the game.
+
+## Reinstated (2026-09-23)
+
+The PO reinstated F3 the same day in the four-lane sprint plan (`docs/engineering/SPRINT.md`), in a reduced but real form. The reduced form has no remapping and no gamepad glyph icons, applies the resolution in Janela only, and keeps no settings version. That decision supersedes the Cut section above, which stays as the record.
+
+This plan ticket is done. It produced `.scratch/settings/spec.md` and four tickets instead of three:
+
+- `01-settings-core-and-configfile.md` (F3-01, core, parallel-safe, lane glm-b);
+- `02-options-screen-binding.md` (F3-02, adapter, lane glm-b);
+- `03-input-device-mode-and-controller-disconnect.md` (F3-03, adapter, lane glm-b);
+- `04-settings-to-camera-wiring.md` (F3-04, integration, lane trunk).
+
+F3-04 exists because the glm-b lane never edits `scripts/session/game_session.gd`, so pushing camera sensitivity and invert vertical to `CameraRig.apply_settings()` moved from 02 to a trunk ticket after F10-03's `_spawn_player()`. The roadmap rows are replaced by the orchestrator, not by this ticket.

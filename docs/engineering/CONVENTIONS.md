@@ -72,12 +72,16 @@ Names in `project.godot`; bindings from PLANEJAMENTO.md Section 8. Dead zone 0.2
 
 ## Tests
 
+**Sprint override (the user's rule, 2026-09-23): no new tests, ever.** Nobody writes unit or scene tests or does TDD. `tools/lane.ps1 land` (the existing suite plus a boot smoke of the main scene) is the only automated gate, and adapters are also checked by running the game. The rest of this section describes the existing suite. See [SPRINT.md](SPRINT.md) "Product decisions".
+
 - Runner: `tests/run_tests.gd` (extends `SceneTree`), executed by `tools/test.ps1`, which wraps `tools/godot.ps1 --headless --path . --script res://tests/run_tests.gd`. Non-zero exit on any failure.
 - Framework: `tests/framework/test_case.gd` with `assert_*` helpers and `before_each`/`after_each`.
 - Layout: `tests/unit/<area>/test_<core>.gd` mirrors `scripts/`; `tests/scene/test_<scene>_contract.gd` instances a `.tscn` headless and checks its contract only.
 - Cores are tested directly. Scene tests are smoke tests, never gameplay tests.
 
 ## Definition of Done for CODE_READY
+
+During the sprint, items 1 and 2 become "`tools/lane.ps1 land` passes"; no new tests are written.
 
 1. `tools/test.ps1` passes.
 2. Every ENGINEERING_BRIEF Section 8 invariant that belongs to the ticket has a named test.
@@ -87,7 +91,8 @@ Names in `project.godot`; bindings from PLANEJAMENTO.md Section 8. Dead zone 0.2
 
 ## Git
 
-- Trunk-based on `main`, no branches, no remote until the user adds one.
+- One integration branch, the one checked out in the primary tree (`main` until 2026-09-23, `dev-01` for the sprint). The remote and pushes are the user's.
+- **Sprint lanes (2026-09-23 onward, [SPRINT.md](SPRINT.md)):** every agent works in its own `git worktree` on its own `lane/<name>` branch, never in the primary tree and never on another lane's branch. Work lands with `tools/lane.ps1 land`: merge the integration branch in, tests green, fast-forward the primary tree. `docs/HANDOFF_LOG.md` and `docs/engineering/README.md` merge with the union driver (`.gitattributes`).
 - Message format: `area: summary` (`combat: add CombatState shield ordering`). Commits touching Astra-owned files carry `[shared]` in the summary.
 - Claude commits only Claude's own changes at each CODE_READY and at every doc or ADR update. Never include another agent's unfinished work; never amend, rebase, or reset.
 
@@ -96,7 +101,11 @@ Names in `project.godot`; bindings from PLANEJAMENTO.md Section 8. Dead zone 0.2
 - One ticket per session. The ticket's kickoff line is pasted into a fresh session.
 - A session ends with: tests green, ticket `Status: done` (or the blocker recorded and `Status: blocked`), roadmap row updated, handoff log entry, commit.
 - Up to two sessions may run in parallel, only on tickets marked `parallel-safe: yes` (Node-free cores with tests on disjoint files). Shared-file edits and commits are serialized.
+- **During the sprint ([SPRINT.md](SPRINT.md)) these three rules are relaxed:**
+  - Up to six lane sessions run at once (SPRINT.md "Lanes"), each in its own worktree.
+  - Each lane works only its pre-assigned queue, so `parallel-safe` stops mattering between lanes; within one lane, tickets still run one at a time.
+  - A lane session may chain up to four tickets. Each ticket still ends with its own Definition of Done, its own commit and a `land`.
 
 ## Shared-file protocol
 
-Claude owns `project.godot`, `export_presets.cfg`, `default_bus_layout.tres`, `scenes/main.tscn`, `scenes/dev/`, and, inside any `.tscn`, script attachment, exported values, collision layers, masks, monitoring flags, and instancing of Claude's prefabs. Astra owns geometry, visuals, layout, markers, materials, and `content/*.tres` values. Every change to an Astra-owned file is announced in `docs/HANDOFF_LOG.md`. The `tools/build_*.py` generators must be reconciled before any rerun over integrated scenes.
+Claude owns `project.godot`, `export_presets.cfg`, `default_bus_layout.tres`, `scenes/main.tscn`, `scenes/dev/`, and, inside any `.tscn`, script attachment, exported values, collision layers, masks, monitoring flags, and instancing of Claude's prefabs. Astra owns geometry, visuals, layout, markers, materials, and `content/*.tres` values. Every change to an Astra-owned file is announced in `docs/HANDOFF_LOG.md`. The `tools/build_*.py` generators must be reconciled before any rerun over integrated scenes. During the sprint, lane `sol` (Astra), the OpenCode lanes `oc-a` and `oc-b`, and the optional Codex lane `terra` also implement Claude-owned code tickets under these same conventions. A ticket's Files section is its edit boundary whoever runs it, and SPRINT.md "Shared files" lists which lane may touch the scenes and session files.

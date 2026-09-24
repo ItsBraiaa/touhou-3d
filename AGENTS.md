@@ -4,6 +4,7 @@ Godot 4.7.2 third-person 3D bullet hell (working title Guardiã dos Ventos). Two
 
 ## Start here
 
+0. **Sprint to 2026-09-24:** lanes `trunk` and `path` (Claude Opus; `rescue` on demand), `oc-a` and `oc-b` (OpenCode, model chosen per ticket by its `Model:` line), `sol` (Astra on GPT Sol) and, optionally, `terra` (Codex Terra). Each lane has its own git worktree and `lane/<name>` branch. Never work in the primary tree. **Write no tests of any kind during the sprint** (user rule): `tools/lane.ps1 land` is the gate. Read [docs/engineering/SPRINT.md](docs/engineering/SPRINT.md) first; it gives your lane's queue, the worktree loop (`tools/lane.ps1 sync`, `status`, `land`) and your kickoff prompt. Claude skill names in kickoff prompts (`/mattpocock-skills:tdd`, `/run`) are Claude-only; follow their intent (test-first; verify headless).
 1. [docs/engineering/ROADMAP.md](docs/engineering/ROADMAP.md): what is done, what is next, what Astra still owes. Pick one ticket.
 2. [docs/engineering/CONVENTIONS.md](docs/engineering/CONVENTIONS.md): how code is written, tested, committed, and handed off.
 3. [docs/engineering/README.md](docs/engineering/README.md): index of the engineering docs — conventions, roadmap, ticket template, testing, and one line per module doc.

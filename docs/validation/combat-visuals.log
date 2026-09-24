@@ -1,0 +1,7 @@
+projectile_player_mesh.tres: vertices=6, dev_vertices=104
+projectile_hostile_mesh.tres: vertices=54, dev_vertices=104
+familiar.tscn: radius=0.58, clip=hover
+power_pickup_visual.tscn: radius=0.78, clip=float
+shield_pickup_visual.tscn: radius=0.76, clip=float
+bomb_blast_visual.tscn: radius=1.0, clip=blast
+COMBAT_VISUALS_QA failures=0

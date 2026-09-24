@@ -1,0 +1,111 @@
+[gd_resource type="Resource" script_class="BossDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/definitions/boss_definition.gd" id="1_boss"]
+[ext_resource type="Script" path="res://scripts/definitions/boss_phase_definition.gd" id="2_phase"]
+[ext_resource type="Script" path="res://scripts/definitions/attack_definition.gd" id="3_attack"]
+[ext_resource type="Script" path="res://scripts/definitions/attack_step_definition.gd" id="4_step"]
+[ext_resource type="Script" path="res://scripts/definitions/pattern_definition.gd" id="5_pattern"]
+
+[sub_resource type="Resource" id="Pattern_Ring"]
+script = ExtResource("5_pattern")
+id = &"dev_boss_ring"
+shape = 0
+projectiles_per_volley = 18
+volley_count = 2
+volley_interval = 0.4
+speed = 7.0
+lifetime = 9.0
+projectile_radius = 0.3
+damage = 10
+gap_degrees = 60.0
+rotation_step_degrees = 10.0
+
+[sub_resource type="Resource" id="Pattern_Fan"]
+script = ExtResource("5_pattern")
+id = &"dev_boss_fan"
+shape = 1
+projectiles_per_volley = 9
+volley_count = 3
+volley_interval = 0.3
+speed = 8.0
+lifetime = 8.0
+projectile_radius = 0.3
+damage = 10
+spread_degrees = 80.0
+
+[sub_resource type="Resource" id="Pattern_Aimed"]
+script = ExtResource("5_pattern")
+id = &"dev_boss_aimed"
+shape = 4
+projectiles_per_volley = 5
+volley_count = 4
+volley_interval = 0.15
+speed = 11.0
+lifetime = 7.0
+projectile_radius = 0.3
+damage = 10
+spread_degrees = 20.0
+
+[sub_resource type="Resource" id="Step_Ring"]
+script = ExtResource("4_step")
+pattern = SubResource("Pattern_Ring")
+anticipation_seconds = 1.0
+pause_after = 0.5
+
+[sub_resource type="Resource" id="Step_Fan"]
+script = ExtResource("4_step")
+pattern = SubResource("Pattern_Fan")
+anticipation_seconds = 0.8
+pause_after = 0.4
+
+[sub_resource type="Resource" id="Step_Aimed"]
+script = ExtResource("4_step")
+pattern = SubResource("Pattern_Aimed")
+anticipation_seconds = 0.8
+follow_player_height = true
+pause_after = 0.4
+
+[sub_resource type="Resource" id="Attack_Ring"]
+script = ExtResource("3_attack")
+display_name = "Anel de Teste"
+steps = Array[ExtResource("4_step")]([SubResource("Step_Ring")])
+reposition_seconds = 1.0
+
+[sub_resource type="Resource" id="Attack_Fan"]
+script = ExtResource("3_attack")
+display_name = "Leque de Teste"
+steps = Array[ExtResource("4_step")]([SubResource("Step_Fan"), SubResource("Step_Aimed")])
+reposition_seconds = 1.0
+
+[sub_resource type="Resource" id="Attack_Rain"]
+script = ExtResource("3_attack")
+display_name = "Chuva de Teste"
+steps = Array[ExtResource("4_step")]([SubResource("Step_Aimed"), SubResource("Step_Ring"), SubResource("Step_Fan")])
+reposition_seconds = 0.8
+
+[sub_resource type="Resource" id="Phase_1"]
+script = ExtResource("2_phase")
+health = 40
+attack = SubResource("Attack_Ring")
+transition_seconds = 0.0
+
+[sub_resource type="Resource" id="Phase_2"]
+script = ExtResource("2_phase")
+health = 40
+attack = SubResource("Attack_Fan")
+transition_seconds = 0.75
+
+[sub_resource type="Resource" id="Phase_3"]
+script = ExtResource("2_phase")
+health = 40
+attack = SubResource("Attack_Rain")
+transition_seconds = 0.75
+
+[resource]
+script = ExtResource("1_boss")
+kind = &"dev_boss"
+display_name = "Guardião (dev)"
+score = 1000
+entry_seconds = 1.0
+phases = Array[ExtResource("2_phase")]([SubResource("Phase_1"), SubResource("Phase_2"), SubResource("Phase_3")])
+metadata/dev = true

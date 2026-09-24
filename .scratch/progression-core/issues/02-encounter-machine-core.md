@@ -1,9 +1,11 @@
 # F8-02 EncounterMachine core
 
-Status: todo
+Status: done
 Type: core
 parallel-safe: yes
 Depends on: F8-01
+Lane: oc-b
+Model: GLM-5.3 (fallback GPT 5.6 Luna)
 
 ## Goal
 
@@ -65,6 +67,10 @@ Refill, commit and snapshot (F8-03); Seal guard activation and the shield rule (
 - No Error-level warnings. `docs/engineering/progression-core.md` updated with the contract, the signal order and the invariant table.
 - Handoff log entry; `Status: done` with an Outcome; ROADMAP row.
 - One commit: `progression: add EncounterMachine core`.
+
+## Outcome
+
+Implemented the full `EncounterMachine` Rules Core: route-ordered entry behind activated Checkpoints, ON_ENTRY and AFTER_PREVIOUS_WAVE scheduling with delays (delay-0 waves requested inside the scheduling call), once-only enemy counting restricted to requested waves, objective flags in any order, checkpoint first-activation, the documented completion signal order (`gate_opened` → `rewards_requested` → `encounter_completed` → `stage_cleared`), `capture`/`restore`/`reset` with the route-prefix restore rule and queued-wave cancellation, and all getters. The unit test deliverable was omitted under the sprint's no-new-tests rule; verification is `tools/lane.ps1 land`. Contract, signal order and invariants are documented in `docs/engineering/progression-core.md`.
 
 ## Handoff notes for Astra
 

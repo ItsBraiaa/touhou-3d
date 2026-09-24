@@ -5,6 +5,8 @@
 [ext_resource type="Script" path="res://scripts/player/camera_rig.gd" id="3_camera"]
 [ext_resource type="Script" path="res://scripts/player/targeting.gd" id="4_target"]
 [ext_resource type="Script" path="res://scripts/combat/player_weapon.gd" id="5_weapon"]
+[ext_resource type="PackedScene" path="res://scenes/combat/visuals/familiar.tscn" id="6_familiar"]
+[ext_resource type="PackedScene" path="res://scenes/dev/bomb_blast.tscn" id="7_bomb_blast"]
 
 [sub_resource type="StandardMaterial3D" id="Teal"]
 albedo_color = Color(0.08, 0.95, 0.84, 1)
@@ -42,7 +44,7 @@ radial_segments = 12
 rings = 6
 material = SubResource("Teal")
 
-[node name="PlayerShip" type="CharacterBody3D" node_paths=PackedStringArray("visual_root", "camera_rig", "damage_core", "graze_volume", "targeting")]
+[node name="PlayerShip" type="CharacterBody3D" node_paths=PackedStringArray("visual_root", "camera_rig", "damage_core", "graze_volume", "targeting", "weapon")]
 collision_layer = 2
 collision_mask = 1
 motion_mode = 1
@@ -57,6 +59,7 @@ camera_rig = NodePath("CameraRig")
 damage_core = NodePath("DamageCore")
 graze_volume = NodePath("GrazeVolume")
 targeting = NodePath("Targeting")
+weapon = NodePath("Weapon")
 
 [node name="BodyCollision" type="CollisionShape3D" parent="."]
 shape = SubResource("BodyShape")
@@ -109,8 +112,13 @@ position = Vector3(-1.60000, 0.25000, 0.10000)
 [node name="Right" type="Marker3D" parent="FamiliarAnchors"]
 position = Vector3(1.60000, 0.25000, 0.10000)
 
-[node name="Weapon" type="Node" parent="."]
+[node name="Weapon" type="Node" parent="." node_paths=PackedStringArray("muzzle", "familiar_anchors", "camera_rig")]
 script = ExtResource("5_weapon")
+muzzle = NodePath("../Muzzle")
+familiar_anchors = NodePath("../FamiliarAnchors")
+camera_rig = NodePath("../CameraRig")
+familiar_scene = ExtResource("6_familiar")
+bomb_visual_scene = ExtResource("7_bomb_blast")
 
 [node name="Targeting" type="Node" parent="." node_paths=PackedStringArray("camera")]
 script = ExtResource("4_target")

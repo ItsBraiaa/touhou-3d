@@ -1,0 +1,38 @@
+[gd_resource type="Resource" script_class="EncounterDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/definitions/reward_definition.gd" id="1_hyb5c"]
+[ext_resource type="Script" path="res://scripts/definitions/encounter_definition.gd" id="2_dfu5q"]
+[ext_resource type="Script" path="res://scripts/definitions/wave_definition.gd" id="3_lymf4"]
+
+[sub_resource type="Resource" id="Resource_u43xb"]
+script = ExtResource("1_hyb5c")
+count = 2
+origin_marker = NodePath("RewardOrigin")
+
+[sub_resource type="Resource" id="Resource_k5hy5"]
+script = ExtResource("1_hyb5c")
+kind = 1
+origin_marker = NodePath("ShieldPickup")
+
+[sub_resource type="Resource" id="Resource_nv6m6"]
+script = ExtResource("3_lymf4")
+spawn_markers = Array[NodePath]([NodePath("Spawns/Wave1_Spirit1"), NodePath("Spawns/Wave1_Spirit2"), NodePath("Spawns/Wave1_Sentry1")])
+enemy_kinds = Array[StringName]([&"spirit_twilight", &"spirit_twilight", &"sentry_seal"])
+
+[sub_resource type="Resource" id="Resource_pkgcw"]
+script = ExtResource("3_lymf4")
+spawn_markers = Array[NodePath]([NodePath("Spawns/Wave2_Spirit1"), NodePath("Spawns/Wave2_Spirit2"), NodePath("Spawns/Wave2_Sentry1")])
+enemy_kinds = Array[StringName]([&"spirit_twilight", &"spirit_twilight", &"sentry_seal"])
+activation = 1
+delay = 1.0
+
+[resource]
+script = ExtResource("2_dfu5q")
+id = &"S2-02"
+next_id = &"S2-03"
+completion = 1
+waves = Array[ExtResource("3_lymf4")]([SubResource("Resource_nv6m6"), SubResource("Resource_pkgcw")])
+rewards = Array[ExtResource("1_hyb5c")]([SubResource("Resource_u43xb"), SubResource("Resource_k5hy5")])
+gate_id = &"Gate_S2_02"
+metadata/dev = true
+metadata/reviewed = true

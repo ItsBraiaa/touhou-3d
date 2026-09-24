@@ -45,3 +45,12 @@ Deviations from the planned list above:
 - 01 depends on F5-04 only. It owns four Definitions, adding `AttackStepDefinition`, because Attacks are ordered Pattern steps with their own Anticipation and height. The step signal is `step_started(step_index)`.
 - 02 depends on F4-03 too, and proves the HUD panel payloads in its scene test. `spawn_setup` mirrors `EnemyActor`'s but takes a `BossDefinition`, so the Director gets a separate `boss_definitions` export in 03.
 - 03 removes F10-01's Sentry stand-in for `lantern_guardian`. The shrine lighting hook is `StageDirector.boss_defeated` plus an optional Astra-authored `AnimationPlayer` clip.
+
+**Reinstated (2026-09-23).** The product owner reinstated Stage 2 gameplay in a reduced but real form (`docs/engineering/SPRINT.md`), because the cut broke the assignment's five-minute stage requirement. The stub `04-tempest-sentinel-and-storm-guardian.md` is replaced by four tickets, and `spec.md` now covers F12-01 to F12-07:
+
+- `04-stage-02-content-draft.md` (F12-04, glm-b, parallel-safe), which also carries the Stage 2 scene/content contract test;
+- `05-stage-02-director-integration.md` (F12-05, sol): the Director, Gates, Checkpoints and Seals on `stage_02.tscn`, with Sentry stand-ins for both bosses;
+- `06-tempest-sentinel-miniboss.md` (F12-06, sol), which also depends on F12-03 for `boss_definitions` and the HUD wiring, and on D-04;
+- `07-storm-guardian.md` (F12-07, sol), which ends with Campaign victory through gameplay.
+
+Astra's boss scenes are the design tickets D-03 (`lantern_guardian.tscn`, for F12-03) and D-04 (`tempest_sentinel.tscn` and `storm_guardian.tscn`, for F12-06 and F12-07) in `.scratch/design-sprint/issues/`.

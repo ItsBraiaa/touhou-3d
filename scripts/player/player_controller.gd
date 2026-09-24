@@ -7,8 +7,8 @@ extends CharacterBody3D
 ## the edge-proximity value and the bank angle all come from the core (ADR-0001); this
 ## script is the part that needs a Node: [Input], `move_and_slide()` and the visuals.
 ## Its owner — the dev harness today, `GameSession` from F2-04 — injects the Flight
-## Volume through [method setup] and controls it through [method set_controls_enabled]
-## and [method reset_to].
+## Volume through [method setup] and controls it through [method set_controls_enabled],
+## [method reset_to] and [method set_invulnerable_visual].
 
 
 ## Re-emitted from [FlightModel] when the distance to the Flight Volume boundary has
@@ -32,6 +32,12 @@ signal focus_changed(active: bool)
 ## and 0 leaves the ship level. Frame-rate independent.
 @export var bank_smoothing: float = 8.0
 
+@export_group("Feedback")
+## Blinks per second of `VisualRoot` while the ship is Invulnerable, each one half shown
+## and half hidden. The Core, under `DamageCore`, never blinks. Claude's proposal; Astra
+## tunes it.
+@export var invulnerability_flicker_hz: float = 12.0
+
 @export_group("Scene references")
 ## Node the bank is applied to. It holds the ship model and cosmetic effects only:
 ## the damage Core, the Graze Volume and the Muzzle are siblings, so banking cannot
@@ -48,10 +54,17 @@ signal focus_changed(active: bool)
 ## Target Lock selection. Not driven from here — it reads its own actions — but the ship
 ## owns it and its camera, so this is where the one connection between them is made.
 @export var targeting: Targeting
+## The ship's weapon. Not driven from here, but [method set_controls_enabled] stops and
+## restarts its fire with the controls, so pause, defeat and transitions need one call.
+@export var weapon: PlayerWeapon
 
 var _model: FlightModel
 var _controls_enabled: bool = true
 var _focus_active: bool = false
+## Whether `VisualRoot` blinks.
+var _invulnerable_visual: bool = false
+## Seconds since the blink started, which place it in its cycle.
+var _flicker_time: float = 0.0
 
 
 func _ready() -> void:
@@ -82,10 +95,20 @@ func _physics_process(_delta: float) -> void:
 	_model.edge_proximity(global_position)
 
 
+## `_process` stops while the tree is paused, so a ship paused mid-blink is shown for the
+## pause (Pause, Defeat) instead of staying hidden under it.
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_PAUSED and visual_root != null:
+		visual_root.visible = true
+
+
 func _process(delta: float) -> void:
 	var target := _model.bank_angle(velocity, _camera_yaw(), deg_to_rad(max_bank_angle_degrees))
 	var weight := 1.0 - exp(-bank_smoothing * delta)
 	visual_root.rotation.z = lerpf(visual_root.rotation.z, target, weight)
+	if _invulnerable_visual:
+		_flicker_time += delta
+		visual_root.visible = fmod(_flicker_time * invulnerability_flicker_hz, 1.0) < 0.5
 
 
 ## Sets the Flight Volume the ship is kept inside, as a position and a size. An owner
@@ -97,8 +120,11 @@ func setup(bounds: AABB) -> void:
 
 ## Hands the ship back to the player, or takes it away: while [param enabled] is false
 ## the input is not read, the velocity is zero, Focus is released and the bank eases
-## back to level. Used by pause, defeat and stage transitions.
+## back to level, and [member weapon] stops firing. Used by pause, defeat and stage
+## transitions.
 func set_controls_enabled(enabled: bool) -> void:
+	if weapon != null:
+		weapon.set_fire_enabled(enabled)
 	if _controls_enabled == enabled:
 		return
 	_controls_enabled = enabled
@@ -106,6 +132,16 @@ func set_controls_enabled(enabled: bool) -> void:
 		return
 	velocity = Vector3.ZERO
 	_set_focus_active(false)
+
+
+## Starts or stops the Invulnerability blink of `VisualRoot` at
+## [member invulnerability_flicker_hz]. Stopping shows it again. Its owner calls it on
+## [signal CombatState.invulnerability_changed]; a new ship starts shown and still.
+func set_invulnerable_visual(active: bool) -> void:
+	_invulnerable_visual = active
+	_flicker_time = 0.0
+	if visual_root != null:
+		visual_root.visible = true
 
 
 ## Teleports the ship to [param p_transform] and clears its motion: no carried
@@ -150,6 +186,8 @@ func _validate_exports() -> bool:
 		missing.append("graze_volume")
 	if targeting == null:
 		missing.append("targeting")
+	if weapon == null:
+		missing.append("weapon")
 	for field: String in missing:
 		push_error("%s: required export '%s' is not set" % [get_path(), field])
 	return missing.is_empty()

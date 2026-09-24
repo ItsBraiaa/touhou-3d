@@ -1,0 +1,70 @@
+[gd_resource type="Resource" script_class="BossDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/definitions/boss_definition.gd" id="1_boss"]
+[ext_resource type="Script" path="res://scripts/definitions/boss_phase_definition.gd" id="2_phase"]
+[ext_resource type="Script" path="res://scripts/definitions/attack_definition.gd" id="3_attack"]
+[ext_resource type="Script" path="res://scripts/definitions/attack_step_definition.gd" id="4_step"]
+[ext_resource type="Resource" path="res://content/patterns/sentinel_aimed_burst.tres" id="5_aim"]
+[ext_resource type="Resource" path="res://content/patterns/sentinel_rotating_fan.tres" id="6_fan"]
+
+[sub_resource type="Resource" id="Step_Aim_High"]
+script = ExtResource("4_step")
+pattern = ExtResource("5_aim")
+anticipation_seconds = 1.8
+height_offset = 4.0
+pause_after = 0.4
+
+[sub_resource type="Resource" id="Step_Aim_Low"]
+script = ExtResource("4_step")
+pattern = ExtResource("5_aim")
+anticipation_seconds = 1.8
+height_offset = -4.0
+pause_after = 0.4
+
+[sub_resource type="Resource" id="Attack_Charged_Flash"]
+script = ExtResource("3_attack")
+display_name = "Clarão Carregado"
+steps = Array[ExtResource("4_step")]([SubResource("Step_Aim_High"), SubResource("Step_Aim_Low")])
+reposition_seconds = 1.0
+
+[sub_resource type="Resource" id="Phase_Charged_Flash"]
+script = ExtResource("2_phase")
+health = 440
+attack = SubResource("Attack_Charged_Flash")
+transition_seconds = 0.0
+
+[sub_resource type="Resource" id="Step_Fan_Follow"]
+script = ExtResource("4_step")
+pattern = ExtResource("6_fan")
+anticipation_seconds = 1.0
+follow_player_height = true
+pause_after = 0.5
+
+[sub_resource type="Resource" id="Step_Fan_Shift"]
+script = ExtResource("4_step")
+pattern = ExtResource("6_fan")
+anticipation_seconds = 1.0
+height_offset = 6.0
+pause_after = 0.5
+
+[sub_resource type="Resource" id="Attack_Gale_Fans"]
+script = ExtResource("3_attack")
+display_name = "Leques do Vendaval"
+steps = Array[ExtResource("4_step")]([SubResource("Step_Fan_Follow"), SubResource("Step_Fan_Shift")])
+reposition_seconds = 1.0
+
+[sub_resource type="Resource" id="Phase_Gale_Fans"]
+script = ExtResource("2_phase")
+health = 660
+attack = SubResource("Attack_Gale_Fans")
+transition_seconds = 0.75
+
+[resource]
+script = ExtResource("1_boss")
+kind = &"tempest_sentinel"
+display_name = "Sentinela da Tempestade"
+score = 500
+entry_seconds = 1.0
+phases = Array[ExtResource("2_phase")]([SubResource("Phase_Charged_Flash"), SubResource("Phase_Gale_Fans")])
+metadata/dev = true
+metadata/reviewed = true

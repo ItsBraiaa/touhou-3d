@@ -157,9 +157,9 @@ theme_override_font_sizes/font_size = 18
 [node name="ContinueButton" type="Button" parent="Layout"]
 layout_mode = 0
 offset_left = 430.0
-offset_top = 432.0
+offset_top = 557.0
 offset_right = 850.0
-offset_bottom = 484.0
+offset_bottom = 601.0
 text = "Continuar"
 alignment = 0
 focus_mode = 2
@@ -169,9 +169,9 @@ focus_previous = NodePath("../../Layout/CreditsButton")
 [node name="ReplayButton" type="Button" parent="Layout"]
 layout_mode = 0
 offset_left = 430.0
-offset_top = 432.0
+offset_top = 557.0
 offset_right = 850.0
-offset_bottom = 484.0
+offset_bottom = 601.0
 text = "Jogar novamente"
 alignment = 0
 focus_mode = 2
@@ -182,9 +182,9 @@ focus_previous = NodePath("../../Layout/ContinueButton")
 [node name="MenuButton" type="Button" parent="Layout"]
 layout_mode = 0
 offset_left = 430.0
-offset_top = 498.0
+offset_top = 432.0
 offset_right = 850.0
-offset_bottom = 550.0
+offset_bottom = 484.0
 text = "Menu principal"
 alignment = 0
 focus_mode = 2
@@ -194,9 +194,9 @@ focus_previous = NodePath("../../Layout/ReplayButton")
 [node name="CreditsButton" type="Button" parent="Layout"]
 layout_mode = 0
 offset_left = 430.0
-offset_top = 557.0
+offset_top = 498.0
 offset_right = 850.0
-offset_bottom = 601.0
+offset_bottom = 550.0
 text = "Créditos"
 alignment = 0
 focus_mode = 2

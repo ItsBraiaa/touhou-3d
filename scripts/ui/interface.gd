@@ -8,6 +8,16 @@ extends CanvasLayer
 ## Back is handled here and never reaches the Session: a Back button and `ui_cancel` both
 ## return to the caller, except on Pause, where they request `resume`, because only the
 ## Session can unpause the tree.
+##
+## It also owns the one [Settings] (F3-02): read from [member settings_path] once in
+## `_ready`, bound to the Options widgets through an [OptionsScreen] it creates under the
+## Options root, and handed to the rest of the game by [method get_settings]. Defaults
+## (`restore_defaults`) is resolved here and never reaches the Session.
+##
+## And it owns the one [InputDeviceState] (F3-03): every input event and joypad
+## connection change is noted there, every menu's keyboard hint follows its
+## [signal InputDeviceState.prompts_changed], and a controller leaving while the HUD is
+## on top pauses the game through the ordinary `pause` action.
 
 
 ## The Session should act on [param action]: every [signal MenuController.action_requested]
@@ -18,19 +28,36 @@ signal action_requested(action: StringName, payload: Dictionary)
 ## The eight scenes of GUIDE Section 14, each with a [MenuController] root. Order does
 ## not matter: each is identified by its root node name.
 @export var menu_scenes: Array[PackedScene] = []
-## GUIDE Section 15's combat HUD, drawn below every menu.
+## GUIDE Section 15's combat HUD, drawn below every menu. Its root must be a [Hud].
 @export var hud_scene: PackedScene
+## The settings file, read once in `_ready` and written after each explicit Options change.
+## Only the real game uses the default; tests inject their own path.
+@export var settings_path: String = Settings.DEFAULT_PATH
 
 var _router := ScreenRouter.new()
 var _menus: Dictionary[StringName, MenuController] = {}
-var _hud: Control
+var _hud: Hud
+var _settings: Settings
+## Null when the Options screen is missing (already reported).
+var _options_screen: OptionsScreen
+var _device_state := InputDeviceState.new()
 
 
 func _ready() -> void:
 	if not _validate_exports():
 		process_mode = Node.PROCESS_MODE_DISABLED
 		return
-	_hud = hud_scene.instantiate()
+	_settings = Settings.new(settings_path)
+	# A bad user file is not a setup error: the defaults are in use and play goes on.
+	for message: String in _settings.load_file():
+		push_warning("%s: %s" % [get_path(), message])
+	var hud_node := hud_scene.instantiate()
+	_hud = hud_node as Hud
+	if _hud == null:
+		push_error("%s: 'hud_scene' %s does not have a Hud root" % [get_path(), hud_scene.resource_path])
+		hud_node.free()
+		process_mode = Node.PROCESS_MODE_DISABLED
+		return
 	# Added first, so every menu, overlays included, draws above it.
 	add_child(_hud)
 	_hud.hide()
@@ -39,8 +66,17 @@ func _ready() -> void:
 	for id: StringName in MenuController.SCREEN_IDS.values():
 		if id not in _menus:
 			push_error("%s: no scene in 'menu_scenes' has the %s screen" % [get_path(), id])
+	_bind_options()
+	_start_device_tracking()
 	_router.screen_hidden.connect(_on_screen_hidden)
 	_router.screen_shown.connect(_on_screen_shown)
+
+
+## Notes the device behind every event for the prompts. [method _input] rather than
+## unhandled input, because a focused button consumes the gamepad's accept press; the
+## event is never handled here.
+func _input(event: InputEvent) -> void:
+	_device_state.note_event(event)
 
 
 ## `ui_cancel` belongs to the menus only while one is on top. Over running gameplay the
@@ -90,9 +126,16 @@ func is_gameplay_covered() -> bool:
 	return _router.is_gameplay_covered()
 
 
-## The HUD instance, for the Session to bind (F4). Null when [member hud_scene] is unset.
-func get_hud() -> Control:
+## The HUD instance, for the Session to bind. Null when [member hud_scene] is unset or
+## its root is not a [Hud].
+func get_hud() -> Hud:
 	return _hud
+
+
+## The one [Settings], loaded at boot: camera sensitivity and invert vertical for F3-04,
+## the input device for F3-03. Null only when the exports failed validation.
+func get_settings() -> Settings:
+	return _settings
 
 
 ## Reports each unset export with this node's path (CONVENTIONS "Setup errors are loud").
@@ -137,9 +180,66 @@ func _go_back() -> void:
 		action_requested.emit(&"back_refused", {})
 
 
+## The Options root gets an [OptionsScreen] child (under it, not under this node, whose
+## children are the HUD and the eight menus), which binds and applies the settings.
+func _bind_options() -> void:
+	var options: MenuController = _menus.get(ScreenRouter.OPTIONS)
+	if options == null:
+		return
+	_options_screen = OptionsScreen.new()
+	_options_screen.name = &"OptionsScreen"
+	options.add_child(_options_screen)
+	_options_screen.setup(options, _settings)
+
+
+## Seeds the [InputDeviceState] with the saved mode and the pads already connected,
+## connects its three sources once, and pushes the first prompt state to every menu.
+func _start_device_tracking() -> void:
+	_device_state.set_mode(_settings.get_input_device())
+	for device: int in Input.get_connected_joypads():
+		_device_state.note_joypad(device, true)
+	_device_state.prompts_changed.connect(_on_prompts_changed)
+	_settings.changed.connect(_on_settings_changed)
+	Input.joy_connection_changed.connect(_on_joy_connection_changed)
+	_on_prompts_changed(_device_state.shows_keyboard_prompts())
+
+
+func _on_prompts_changed(keyboard: bool) -> void:
+	for menu: MenuController in _menus.values():
+		menu.set_keyboard_prompts(keyboard)
+
+
+func _on_settings_changed(key: StringName, value: Variant) -> void:
+	if key == Settings.INPUT_DEVICE:
+		_device_state.set_mode(value)
+
+
+## A controller leaving while the HUD is on top pauses (PLANEJAMENTO Section 7), unless
+## the mode is Teclado. Pause, Options from Pause, Defeat, Results and the menus are left
+## alone, so nothing is ever resumed or toggled by an unplug.
+func _on_joy_connection_changed(device: int, connected: bool) -> void:
+	_device_state.note_joypad(device, connected)
+	if not connected and _device_state.pauses_on_disconnect() and _router.current() == ScreenRouter.HUD:
+		_request_pause()
+
+
+## Sends a `pause` press and release through [Input], so it reaches
+## [method GameSession._unhandled_input] like Start or Escape: the Session pauses only
+## while a stage is in play, and the keyboard can then drive Pause.
+func _request_pause() -> void:
+	for pressed: bool in [true, false]:
+		var event := InputEventAction.new()
+		event.action = &"pause"
+		event.pressed = pressed
+		Input.parse_input_event(event)
+
+
 func _on_action_requested(action: StringName, payload: Dictionary) -> void:
 	if action == &"back":
 		_go_back()
+	elif action == &"restore_defaults":
+		if _options_screen != null:
+			_options_screen.restore_defaults()
 	else:
 		action_requested.emit(action, payload)
 

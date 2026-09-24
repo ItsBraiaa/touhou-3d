@@ -1,9 +1,11 @@
 # F5-04 PatternDefinition and PatternEmitter core
 
-Status: todo
+Status: done
 Type: core
 parallel-safe: yes
 Depends on: F5-01
+Lane: oc-a
+Model: GPT 5.6 Luna (fallback DeepSeek V4.1 Flash)
 
 ## Goal
 
@@ -126,6 +128,10 @@ Grep the output for `SCRIPT ERROR`.
 - `docs/engineering/projectile-field.md` gains the definition fields with their meaning, the emitter contract and the STAGE_DESIGN mapping table.
 - A handoff log entry, ticket `Status: done` with an Outcome, and the roadmap row.
 - One commit: `combat: add PatternDefinition and PatternEmitter`.
+
+## Outcome
+
+Implemented `PatternDefinition` validation and the `PatternEmitter` core for catch-up volley timing, ring/fan/spiral/burst/aimed geometry, alternating origins, injected randomness, and hostile `ProjectileSpawn` output. Updated the Projectile Field module contract, README and roadmap. No test files were added under the sprint rule; validation is through `tools/lane.ps1 land`.
 
 ## Handoff notes for Astra
 

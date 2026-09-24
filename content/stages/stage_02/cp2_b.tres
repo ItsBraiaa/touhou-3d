@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="CheckpointDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/definitions/checkpoint_definition.gd" id="1_0s5g3"]
+
+[resource]
+script = ExtResource("1_0s5g3")
+id = &"CP2-B"
+after_encounter_id = &"S2-05"
+resume_encounter_id = &"S2-07"
+node_path = NodePath("Checkpoints/CP2-B")
+display_name = "Limiar do Cume"
+metadata/dev = true
+metadata/reviewed = true

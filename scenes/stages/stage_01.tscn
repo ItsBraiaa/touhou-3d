@@ -1,12 +1,50 @@
 [gd_scene format=3]
 
-[sub_resource type="StandardMaterial3D" id="Stone"]
-albedo_color = Color(0.17, 0.25, 0.25, 1)
-roughness = 0.9
+[ext_resource type="Shader" path="res://assets/environment/stage_02/terrain.gdshader" id="forest_terrain"]
+[ext_resource type="Shader" path="res://assets/environment/stage_02/wind.gdshader" id="forest_wind"]
+[ext_resource type="Shader" path="res://assets/environment/stage_01/gate_veil.gdshader" id="forest_gate"]
+[ext_resource type="Script" path="res://scripts/progression/stage_director.gd" id="1_director"]
+[ext_resource type="Resource" path="res://content/stages/stage_01/stage_01.tres" id="2_stage_definition"]
+[ext_resource type="PackedScene" path="res://scenes/dev/spirit.tscn" id="3_spirit"]
+[ext_resource type="PackedScene" path="res://scenes/dev/sentry.tscn" id="4_sentry"]
+[ext_resource type="PackedScene" path="res://scenes/dev/spirit_twilight.tscn" id="15_spirit_twilight"]
+[ext_resource type="PackedScene" path="res://scenes/dev/sentry_seal.tscn" id="16_sentry_seal"]
+[ext_resource type="Script" path="res://scripts/definitions/enemy_definition.gd" id="5_enemy_definition"]
+[ext_resource type="Resource" path="res://content/enemies/spirit.tres" id="6_spirit_definition"]
+[ext_resource type="Resource" path="res://content/enemies/sentry.tres" id="7_sentry_definition"]
+[ext_resource type="PackedScene" path="res://scenes/dev/power_pickup.tscn" id="8_power_pickup"]
+[ext_resource type="PackedScene" path="res://scenes/dev/shield_pickup.tscn" id="9_shield_pickup"]
+[ext_resource type="Script" path="res://scripts/progression/gate.gd" id="10_gate"]
+[ext_resource type="Script" path="res://scripts/progression/checkpoint.gd" id="11_checkpoint"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/lantern_guardian.tscn" id="12_lantern_guardian"]
+[ext_resource type="Script" path="res://scripts/definitions/boss_definition.gd" id="13_boss_definition"]
+[ext_resource type="Resource" path="res://content/bosses/lantern_guardian.tres" id="14_lantern_guardian_definition"]
 
-[sub_resource type="StandardMaterial3D" id="Moss"]
-albedo_color = Color(0.12, 0.23, 0.20, 1)
-roughness = 0.9
+[sub_resource type="FastNoiseLite" id="ForestNoise"]
+seed = 71
+frequency = 0.045
+fractal_octaves = 4
+
+[sub_resource type="NoiseTexture2D" id="ForestGrain"]
+width = 512
+height = 512
+seamless = true
+noise = SubResource("ForestNoise")
+
+
+[sub_resource type="ShaderMaterial" id="Stone"]
+shader = ExtResource("forest_terrain")
+shader_parameter/grain = SubResource("ForestGrain")
+shader_parameter/stone_color = Color(0.19, 0.23, 0.27, 1)
+shader_parameter/moss_color = Color(0.11, 0.19, 0.17, 1)
+shader_parameter/moss_amount = 0.26
+
+[sub_resource type="ShaderMaterial" id="Moss"]
+shader = ExtResource("forest_terrain")
+shader_parameter/grain = SubResource("ForestGrain")
+shader_parameter/stone_color = Color(0.23, 0.25, 0.23, 1)
+shader_parameter/moss_color = Color(0.10, 0.21, 0.16, 1)
+shader_parameter/moss_amount = 0.92
 
 [sub_resource type="StandardMaterial3D" id="Wood"]
 albedo_color = Color(0.31, 0.105, 0.08, 1)
@@ -16,20 +54,22 @@ roughness = 0.9
 albedo_color = Color(0.085, 0.12, 0.125, 1)
 roughness = 0.9
 
-[sub_resource type="StandardMaterial3D" id="Leaves"]
-albedo_color = Color(0.06, 0.20, 0.18, 1)
-roughness = 0.9
+[sub_resource type="ShaderMaterial" id="Leaves"]
+shader = ExtResource("forest_wind")
+shader_parameter/leaf_color = Color(0.055, 0.15, 0.14, 1)
+shader_parameter/sway = 0.07
 
-[sub_resource type="StandardMaterial3D" id="LeavesLight"]
-albedo_color = Color(0.12, 0.29, 0.25, 1)
-roughness = 0.9
+[sub_resource type="ShaderMaterial" id="LeavesLight"]
+shader = ExtResource("forest_wind")
+shader_parameter/leaf_color = Color(0.09, 0.20, 0.17, 1)
+shader_parameter/sway = 0.05
 
 [sub_resource type="StandardMaterial3D" id="LanternGold"]
-albedo_color = Color(1, 0.61, 0.19, 1)
-roughness = 0.9
+albedo_color = Color(1, 0.48, 0.12, 1)
+roughness = 0.8
 emission_enabled = true
-emission = Color(1, 0.61, 0.19, 1)
-emission_energy_multiplier = 1.8
+emission = Color(1, 0.36, 0.06, 1)
+emission_energy_multiplier = 2.5
 
 [sub_resource type="StandardMaterial3D" id="CheckpointTeal"]
 albedo_color = Color(0.12, 0.9, 0.73, 1)
@@ -39,39 +79,81 @@ emission = Color(0.12, 0.9, 0.73, 1)
 emission_energy_multiplier = 1.8
 
 [sub_resource type="StandardMaterial3D" id="Corrupted"]
-albedo_color = Color(0.66, 0.25, 0.68, 1)
+albedo_color = Color(0.17, 0.32, 0.47, 1)
 roughness = 0.9
 emission_enabled = true
-emission = Color(0.66, 0.25, 0.68, 1)
-emission_energy_multiplier = 1.8
+emission = Color(0.14, 0.29, 0.45, 1)
+emission_energy_multiplier = 0.7
 
-[sub_resource type="StandardMaterial3D" id="Barrier"]
-albedo_color = Color(0.48, 0.21, 0.59, 0.055)
-roughness = 0.9
-transparency = 1
-cull_mode = 2
-shading_mode = 0
+[sub_resource type="ShaderMaterial" id="Barrier"]
+shader = ExtResource("forest_gate")
 
 [sub_resource type="ProceduralSkyMaterial" id="SkyMaterial"]
-sky_top_color = Color(0.035, 0.075, 0.14, 1)
-sky_horizon_color = Color(0.31, 0.39, 0.40, 1)
-ground_bottom_color = Color(0.04, 0.08, 0.09, 1)
-ground_horizon_color = Color(0.31, 0.39, 0.40, 1)
+sky_top_color = Color(0.004, 0.009, 0.029, 1)
+sky_horizon_color = Color(0.025, 0.041, 0.077, 1)
+ground_bottom_color = Color(0.009, 0.017, 0.032, 1)
+ground_horizon_color = Color(0.025, 0.041, 0.077, 1)
 
 [sub_resource type="Sky" id="Sky"]
 sky_material = SubResource("SkyMaterial")
 
 [sub_resource type="Environment" id="Env"]
+resource_local_to_scene = true
 background_mode = 2
 sky = SubResource("Sky")
 ambient_light_source = 3
-ambient_light_color = Color(0.44, 0.66, 0.75, 1)
-ambient_light_energy = 0.8
-tonemap_mode = 2
+ambient_light_color = Color(0.37, 0.48, 0.68, 1)
+ambient_light_energy = 0.36
+tonemap_mode = 0
 fog_enabled = true
 fog_density = 0.002
-fog_light_color = Color(0.13, 0.25, 0.28, 1)
+fog_light_color = Color(0.025, 0.045, 0.08, 1)
 glow_enabled = true
+
+[sub_resource type="Animation" id="ShrineCalm"]
+resource_name = "corrupted_to_calm"
+length = 2.4
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Moonlight:light_color")
+tracks/0/interp = 1
+tracks/0/loop_wrap = false
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 2.4),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Color(0.52, 0.65, 0.92, 1), Color(0.92, 0.83, 0.64, 1)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("ShrineGlow:light_color")
+tracks/1/interp = 1
+tracks/1/loop_wrap = false
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 2.4),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Color(0.27, 0.52, 0.86, 1), Color(1, 0.78, 0.42, 1)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("ShrineGlow:light_energy")
+tracks/2/interp = 1
+tracks/2/loop_wrap = false
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 2.4),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [0.8, 2.8]
+}
+
+[sub_resource type="AnimationLibrary" id="ShrineLightingLibrary"]
+_data = {
+&"corrupted_to_calm": SubResource("ShrineCalm")
+}
 
 [sub_resource type="BoxShape3D" id="Shape13"]
 size = Vector3(90, 6, 175)
@@ -235,8 +317,11 @@ height = 12
 radial_segments = 8
 material = SubResource("LeavesLight")
 
-[sub_resource type="BoxMesh" id="Lantern"]
-size = Vector3(0.9, 1.3, 0.9)
+[sub_resource type="CylinderMesh" id="Lantern"]
+bottom_radius = 0.62
+top_radius = 0.62
+height = 1.5
+radial_segments = 10
 material = SubResource("LanternGold")
 
 [sub_resource type="BoxMesh" id="Cap"]
@@ -666,11 +751,104 @@ material = SubResource("Bark")
 size = Vector3(32, 0.45, 1.7)
 material = SubResource("LanternGold")
 
-[node name="Stage" type="Node3D"]
+[sub_resource type="StandardMaterial3D" id="BoundaryRailWood"]
+albedo_color = Color(0.39, 0.15, 0.075, 1)
+roughness = 0.88
+
+[sub_resource type="StandardMaterial3D" id="BoundaryRailCap"]
+albedo_color = Color(0.67, 0.38, 0.12, 1)
+roughness = 0.78
+emission_enabled = true
+emission = Color(0.65, 0.27, 0.06, 1)
+emission_energy_multiplier = 0.55
+
+[sub_resource type="BoxMesh" id="BoundaryRailPost"]
+size = Vector3(0.72, 3.3, 0.72)
+material = SubResource("BoundaryRailWood")
+
+[sub_resource type="BoxMesh" id="BoundaryRailBeam"]
+size = Vector3(0.38, 0.34, 1)
+material = SubResource("BoundaryRailWood")
+
+[sub_resource type="BoxMesh" id="BoundaryRailFinial"]
+size = Vector3(0.94, 0.22, 0.94)
+material = SubResource("BoundaryRailCap")
+
+[sub_resource type="StandardMaterial3D" id="MoonSurface"]
+shading_mode = 0
+albedo_color = Color(0.72, 0.78, 0.89, 1)
+emission_enabled = true
+emission = Color(0.68, 0.76, 0.95, 1)
+emission_energy_multiplier = 0.9
+
+[sub_resource type="SphereMesh" id="MoonMesh"]
+radius = 1.0
+height = 2.0
+radial_segments = 24
+rings = 12
+material = SubResource("MoonSurface")
+
+[sub_resource type="SphereMesh" id="ForestBoulder"]
+radius = 1.0
+height = 2.0
+radial_segments = 7
+rings = 4
+material = SubResource("Stone")
+
+[sub_resource type="SphereMesh" id="ForestFern"]
+radius = 1.0
+height = 2.0
+radial_segments = 8
+rings = 4
+material = SubResource("LeavesLight")
+
+[sub_resource type="PrismMesh" id="ToriiRoof"]
+size = Vector3(40, 2.4, 4.5)
+material = SubResource("Bark")
+
+[node name="Stage" type="Node3D" node_paths=PackedStringArray("defeat_presentation")]
+script = ExtResource("1_director")
+stage_definition = ExtResource("2_stage_definition")
+actor_scenes = Dictionary[StringName, PackedScene]({
+&"lantern_guardian": ExtResource("12_lantern_guardian"),
+&"sentry": ExtResource("4_sentry"),
+&"spirit": ExtResource("3_spirit"),
+&"spirit_twilight": ExtResource("15_spirit_twilight"),
+&"sentry_seal": ExtResource("16_sentry_seal")
+})
+enemy_definitions = Dictionary[StringName, ExtResource("5_enemy_definition")]({
+&"sentry": ExtResource("7_sentry_definition"),
+&"spirit": ExtResource("6_spirit_definition"),
+&"spirit_twilight": ExtResource("6_spirit_definition"),
+&"sentry_seal": ExtResource("7_sentry_definition")
+})
+boss_definitions = Dictionary[StringName, ExtResource("13_boss_definition")]({
+&"lantern_guardian": ExtResource("14_lantern_guardian_definition")
+})
+power_pickup_scene = ExtResource("8_power_pickup")
+shield_pickup_scene = ExtResource("9_shield_pickup")
+guard_links = Dictionary[StringName, NodePath]({
+&"S1-04/Wave1_Sentry1": NodePath("Environment/PortalLinks/GuardLink1"),
+&"S1-04/Wave1_Sentry2": NodePath("Environment/PortalLinks/GuardLink2"),
+&"S1-04/Wave1_Sentry3": NodePath("Environment/PortalLinks/GuardLink3")
+})
+defeat_presentation = NodePath("Environment/ShrineLighting")
+defeat_animation = &"corrupted_to_calm"
+defeat_presentation_boss_id = &"lantern_guardian"
 metadata/stage_id = "stage_01"
 metadata/handoff_state = "SCENE_READY_STATIC"
 
 [node name="Environment" type="Node3D" parent="."]
+
+[node name="ShrineGlow" type="OmniLight3D" parent="Environment"]
+position = Vector3(0, 47, -550)
+light_color = Color(0.27, 0.52, 0.86, 1)
+light_energy = 0.8
+omni_range = 45.0
+
+[node name="ShrineLighting" type="AnimationPlayer" parent="Environment"]
+process_mode = 3
+libraries/ = SubResource("ShrineLightingLibrary")
 
 
 [node name="Geometry" type="Node3D" parent="."]
@@ -696,8 +874,8 @@ environment = SubResource("Env")
 
 [node name="Moonlight" type="DirectionalLight3D" parent="Environment"]
 rotation_degrees = Vector3(-48, -25, 0)
-light_color = Color(0.65, 0.81, 1, 1)
-light_energy = 1.3
+light_color = Color(0.52, 0.65, 0.92, 1)
+light_energy = 0.72
 shadow_enabled = true
 directional_shadow_max_distance = 160.0
 
@@ -3786,9 +3964,9 @@ mesh = SubResource("Cord")
 
 
 [node name="Light" type="OmniLight3D" parent="Environment/LanternTrail/L0L"]
-light_color = Color(1, 0.62, 0.24, 1)
-light_energy = 2.0
-omni_range = 10.0
+light_color = Color(1, 0.42, 0.11, 1)
+light_energy = 3.0
+omni_range = 23.0
 
 [node name="L0R" type="Node3D" parent="Environment/LanternTrail"]
 position = Vector3(15.0, 9.0, 20)
@@ -3809,11 +3987,12 @@ mesh = SubResource("Cord")
 
 
 [node name="Light" type="OmniLight3D" parent="Environment/LanternTrail/L0R"]
-light_color = Color(1, 0.62, 0.24, 1)
-light_energy = 2.0
-omni_range = 10.0
+light_color = Color(1, 0.42, 0.11, 1)
+light_energy = 3.0
+omni_range = 23.0
 
 [node name="L1L" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(-11.6617, 10.6, 8)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L1L"]
@@ -3832,6 +4011,7 @@ mesh = SubResource("Cord")
 
 
 [node name="L1R" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(18.3383, 10.6, 8)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L1R"]
@@ -3850,6 +4030,7 @@ mesh = SubResource("Cord")
 
 
 [node name="L2L" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(-8.7997, 12.2, -4)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L2L"]
@@ -3868,6 +4049,7 @@ mesh = SubResource("Cord")
 
 
 [node name="L2R" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(21.2003, 12.2, -4)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L2R"]
@@ -3922,6 +4104,7 @@ mesh = SubResource("Cord")
 
 
 [node name="L4L" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(-6.0116, 10.6, -28)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L4L"]
@@ -3940,6 +4123,7 @@ mesh = SubResource("Cord")
 
 
 [node name="L4R" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(23.9884, 10.6, -28)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L4R"]
@@ -3958,6 +4142,7 @@ mesh = SubResource("Cord")
 
 
 [node name="L5L" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(-6.4833, 12.2, -40)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L5L"]
@@ -3976,11 +4161,12 @@ mesh = SubResource("Cord")
 
 
 [node name="Light" type="OmniLight3D" parent="Environment/LanternTrail/L5L"]
-light_color = Color(1, 0.62, 0.24, 1)
-light_energy = 2.0
-omni_range = 10.0
+light_color = Color(1, 0.42, 0.11, 1)
+light_energy = 3.0
+omni_range = 23.0
 
 [node name="L5R" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(23.5167, 12.2, -40)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L5R"]
@@ -3999,9 +4185,9 @@ mesh = SubResource("Cord")
 
 
 [node name="Light" type="OmniLight3D" parent="Environment/LanternTrail/L5R"]
-light_color = Color(1, 0.62, 0.24, 1)
-light_energy = 2.0
-omni_range = 10.0
+light_color = Color(1, 0.42, 0.11, 1)
+light_energy = 3.0
+omni_range = 23.0
 
 [node name="L6L" type="Node3D" parent="Environment/LanternTrail"]
 position = Vector3(-8.1701, 9.0, -52)
@@ -4040,6 +4226,7 @@ mesh = SubResource("Cord")
 
 
 [node name="L7L" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(-10.8313, 10.6, -64)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L7L"]
@@ -4058,6 +4245,7 @@ mesh = SubResource("Cord")
 
 
 [node name="L7R" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(19.1687, 10.6, -64)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L7R"]
@@ -4076,6 +4264,7 @@ mesh = SubResource("Cord")
 
 
 [node name="L8L" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(-14.0872, 12.2, -76)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L8L"]
@@ -4094,6 +4283,7 @@ mesh = SubResource("Cord")
 
 
 [node name="L8R" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(15.9128, 12.2, -76)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L8R"]
@@ -4148,6 +4338,7 @@ mesh = SubResource("Cord")
 
 
 [node name="L10L" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(-20.5067, 10.6, -100)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L10L"]
@@ -4166,11 +4357,12 @@ mesh = SubResource("Cord")
 
 
 [node name="Light" type="OmniLight3D" parent="Environment/LanternTrail/L10L"]
-light_color = Color(1, 0.62, 0.24, 1)
-light_energy = 2.0
-omni_range = 10.0
+light_color = Color(1, 0.42, 0.11, 1)
+light_energy = 3.0
+omni_range = 23.0
 
 [node name="L10R" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(9.4933, 10.6, -100)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L10R"]
@@ -4189,11 +4381,12 @@ mesh = SubResource("Cord")
 
 
 [node name="Light" type="OmniLight3D" parent="Environment/LanternTrail/L10R"]
-light_color = Color(1, 0.62, 0.24, 1)
-light_energy = 2.0
-omni_range = 10.0
+light_color = Color(1, 0.42, 0.11, 1)
+light_energy = 3.0
+omni_range = 23.0
 
 [node name="L11L" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(-22.7544, 12.2, -112)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L11L"]
@@ -4212,6 +4405,7 @@ mesh = SubResource("Cord")
 
 
 [node name="L11R" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(7.2456, 12.2, -112)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L11R"]
@@ -4266,6 +4460,7 @@ mesh = SubResource("Cord")
 
 
 [node name="L13L" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(-23.7679, 10.6, -136)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L13L"]
@@ -4284,6 +4479,7 @@ mesh = SubResource("Cord")
 
 
 [node name="L13R" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(6.2321, 10.6, -136)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L13R"]
@@ -4302,6 +4498,7 @@ mesh = SubResource("Cord")
 
 
 [node name="L14L" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(-22.3891, 17.2, -148)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L14L"]
@@ -4320,6 +4517,7 @@ mesh = SubResource("Cord")
 
 
 [node name="L14R" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(7.6109, 17.2, -148)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L14R"]
@@ -4356,9 +4554,9 @@ mesh = SubResource("Cord")
 
 
 [node name="Light" type="OmniLight3D" parent="Environment/LanternTrail/L15L"]
-light_color = Color(1, 0.62, 0.24, 1)
-light_energy = 2.0
-omni_range = 10.0
+light_color = Color(1, 0.42, 0.11, 1)
+light_energy = 3.0
+omni_range = 23.0
 
 [node name="L15R" type="Node3D" parent="Environment/LanternTrail"]
 position = Vector3(10.0438, 14.0, -160)
@@ -4379,11 +4577,12 @@ mesh = SubResource("Cord")
 
 
 [node name="Light" type="OmniLight3D" parent="Environment/LanternTrail/L15R"]
-light_color = Color(1, 0.62, 0.24, 1)
-light_energy = 2.0
-omni_range = 10.0
+light_color = Color(1, 0.42, 0.11, 1)
+light_energy = 3.0
+omni_range = 23.0
 
 [node name="L16L" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(-16.8161, 15.6, -172)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L16L"]
@@ -4402,6 +4601,7 @@ mesh = SubResource("Cord")
 
 
 [node name="L16R" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(13.1839, 15.6, -172)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L16R"]
@@ -4420,6 +4620,7 @@ mesh = SubResource("Cord")
 
 
 [node name="L17L" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(-13.4169, 17.2, -184)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L17L"]
@@ -4438,6 +4639,7 @@ mesh = SubResource("Cord")
 
 
 [node name="L17R" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(16.5831, 17.2, -184)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L17R"]
@@ -4492,6 +4694,7 @@ mesh = SubResource("Cord")
 
 
 [node name="L19L" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(-7.7489, 22.6, -208)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L19L"]
@@ -4510,6 +4713,7 @@ mesh = SubResource("Cord")
 
 
 [node name="L19R" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(22.2511, 22.6, -208)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L19R"]
@@ -4528,6 +4732,7 @@ mesh = SubResource("Cord")
 
 
 [node name="L20L" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(-6.2887, 24.2, -220)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L20L"]
@@ -4546,11 +4751,12 @@ mesh = SubResource("Cord")
 
 
 [node name="Light" type="OmniLight3D" parent="Environment/LanternTrail/L20L"]
-light_color = Color(1, 0.62, 0.24, 1)
-light_energy = 2.0
-omni_range = 10.0
+light_color = Color(1, 0.42, 0.11, 1)
+light_energy = 3.0
+omni_range = 23.0
 
 [node name="L20R" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(23.7113, 24.2, -220)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L20R"]
@@ -4569,9 +4775,9 @@ mesh = SubResource("Cord")
 
 
 [node name="Light" type="OmniLight3D" parent="Environment/LanternTrail/L20R"]
-light_color = Color(1, 0.62, 0.24, 1)
-light_energy = 2.0
-omni_range = 10.0
+light_color = Color(1, 0.42, 0.11, 1)
+light_energy = 3.0
+omni_range = 23.0
 
 [node name="L21L" type="Node3D" parent="Environment/LanternTrail"]
 position = Vector3(-6.0714, 27.0, -232)
@@ -4610,6 +4816,7 @@ mesh = SubResource("Cord")
 
 
 [node name="L22L" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(-7.1279, 28.6, -244)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L22L"]
@@ -4628,6 +4835,7 @@ mesh = SubResource("Cord")
 
 
 [node name="L22R" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(22.8721, 28.6, -244)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L22R"]
@@ -4646,6 +4854,7 @@ mesh = SubResource("Cord")
 
 
 [node name="L23L" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(-9.3075, 30.2, -256)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L23L"]
@@ -4664,6 +4873,7 @@ mesh = SubResource("Cord")
 
 
 [node name="L23R" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(20.6925, 30.2, -256)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L23R"]
@@ -4718,6 +4928,7 @@ mesh = SubResource("Cord")
 
 
 [node name="L25L" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(-15.6764, 28.6, -280)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L25L"]
@@ -4736,11 +4947,12 @@ mesh = SubResource("Cord")
 
 
 [node name="Light" type="OmniLight3D" parent="Environment/LanternTrail/L25L"]
-light_color = Color(1, 0.62, 0.24, 1)
-light_energy = 2.0
-omni_range = 10.0
+light_color = Color(1, 0.42, 0.11, 1)
+light_energy = 3.0
+omni_range = 23.0
 
 [node name="L25R" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(14.3236, 28.6, -280)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L25R"]
@@ -4759,11 +4971,12 @@ mesh = SubResource("Cord")
 
 
 [node name="Light" type="OmniLight3D" parent="Environment/LanternTrail/L25R"]
-light_color = Color(1, 0.62, 0.24, 1)
-light_energy = 2.0
-omni_range = 10.0
+light_color = Color(1, 0.42, 0.11, 1)
+light_energy = 3.0
+omni_range = 23.0
 
 [node name="L26L" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(-18.957, 30.2, -292)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L26L"]
@@ -4782,6 +4995,7 @@ mesh = SubResource("Cord")
 
 
 [node name="L26R" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(11.043, 30.2, -292)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L26R"]
@@ -4836,6 +5050,7 @@ mesh = SubResource("Cord")
 
 
 [node name="L28L" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(-23.437, 28.6, -316)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L28L"]
@@ -4854,6 +5069,7 @@ mesh = SubResource("Cord")
 
 
 [node name="L28R" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(6.563, 28.6, -316)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L28R"]
@@ -4872,6 +5088,7 @@ mesh = SubResource("Cord")
 
 
 [node name="L29L" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(-23.9973, 30.2, -328)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L29L"]
@@ -4890,6 +5107,7 @@ mesh = SubResource("Cord")
 
 
 [node name="L29R" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(6.0027, 30.2, -328)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L29R"]
@@ -4926,9 +5144,9 @@ mesh = SubResource("Cord")
 
 
 [node name="Light" type="OmniLight3D" parent="Environment/LanternTrail/L30L"]
-light_color = Color(1, 0.62, 0.24, 1)
-light_energy = 2.0
-omni_range = 10.0
+light_color = Color(1, 0.42, 0.11, 1)
+light_energy = 3.0
+omni_range = 23.0
 
 [node name="L30R" type="Node3D" parent="Environment/LanternTrail"]
 position = Vector3(6.726, 32.0, -340)
@@ -4949,11 +5167,12 @@ mesh = SubResource("Cord")
 
 
 [node name="Light" type="OmniLight3D" parent="Environment/LanternTrail/L30R"]
-light_color = Color(1, 0.62, 0.24, 1)
-light_energy = 2.0
-omni_range = 10.0
+light_color = Color(1, 0.42, 0.11, 1)
+light_energy = 3.0
+omni_range = 23.0
 
 [node name="L31L" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(-21.3701, 33.6, -352)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L31L"]
@@ -4972,6 +5191,7 @@ mesh = SubResource("Cord")
 
 
 [node name="L31R" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(8.6299, 33.6, -352)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L31R"]
@@ -4990,6 +5210,7 @@ mesh = SubResource("Cord")
 
 
 [node name="L32L" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(-18.5575, 35.2, -364)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L32L"]
@@ -5008,6 +5229,7 @@ mesh = SubResource("Cord")
 
 
 [node name="L32R" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(11.4425, 35.2, -364)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L32R"]
@@ -5062,6 +5284,7 @@ mesh = SubResource("Cord")
 
 
 [node name="L34L" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(-11.8833, 33.6, -388)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L34L"]
@@ -5080,6 +5303,7 @@ mesh = SubResource("Cord")
 
 
 [node name="L34R" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(18.1167, 33.6, -388)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L34R"]
@@ -5098,6 +5322,7 @@ mesh = SubResource("Cord")
 
 
 [node name="L35L" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(-8.9739, 35.2, -400)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L35L"]
@@ -5116,11 +5341,12 @@ mesh = SubResource("Cord")
 
 
 [node name="Light" type="OmniLight3D" parent="Environment/LanternTrail/L35L"]
-light_color = Color(1, 0.62, 0.24, 1)
-light_energy = 2.0
-omni_range = 10.0
+light_color = Color(1, 0.42, 0.11, 1)
+light_energy = 3.0
+omni_range = 23.0
 
 [node name="L35R" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(21.0261, 35.2, -400)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L35R"]
@@ -5139,9 +5365,9 @@ mesh = SubResource("Cord")
 
 
 [node name="Light" type="OmniLight3D" parent="Environment/LanternTrail/L35R"]
-light_color = Color(1, 0.62, 0.24, 1)
-light_energy = 2.0
-omni_range = 10.0
+light_color = Color(1, 0.42, 0.11, 1)
+light_energy = 3.0
+omni_range = 23.0
 
 [node name="L36L" type="Node3D" parent="Environment/LanternTrail"]
 position = Vector3(-6.9242, 32.0, -412)
@@ -5180,6 +5406,7 @@ mesh = SubResource("Cord")
 
 
 [node name="L37L" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(-6.0268, 33.6, -424)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L37L"]
@@ -5198,6 +5425,7 @@ mesh = SubResource("Cord")
 
 
 [node name="L37R" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(23.9732, 33.6, -424)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L37R"]
@@ -5216,6 +5444,7 @@ mesh = SubResource("Cord")
 
 
 [node name="L38L" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(-6.4095, 35.2, -436)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L38L"]
@@ -5234,6 +5463,7 @@ mesh = SubResource("Cord")
 
 
 [node name="L38R" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(23.5905, 35.2, -436)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L38R"]
@@ -5288,6 +5518,7 @@ mesh = SubResource("Cord")
 
 
 [node name="L40L" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(-10.6224, 38.6, -460)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L40L"]
@@ -5306,11 +5537,12 @@ mesh = SubResource("Cord")
 
 
 [node name="Light" type="OmniLight3D" parent="Environment/LanternTrail/L40L"]
-light_color = Color(1, 0.62, 0.24, 1)
-light_energy = 2.0
-omni_range = 10.0
+light_color = Color(1, 0.42, 0.11, 1)
+light_energy = 3.0
+omni_range = 23.0
 
 [node name="L40R" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(19.3776, 38.6, -460)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L40R"]
@@ -5329,11 +5561,12 @@ mesh = SubResource("Cord")
 
 
 [node name="Light" type="OmniLight3D" parent="Environment/LanternTrail/L40R"]
-light_color = Color(1, 0.62, 0.24, 1)
-light_energy = 2.0
-omni_range = 10.0
+light_color = Color(1, 0.42, 0.11, 1)
+light_energy = 3.0
+omni_range = 23.0
 
 [node name="L41L" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(-13.8515, 40.2, -472)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L41L"]
@@ -5352,6 +5585,7 @@ mesh = SubResource("Cord")
 
 
 [node name="L41R" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(16.1485, 40.2, -472)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L41R"]
@@ -5406,6 +5640,7 @@ mesh = SubResource("Cord")
 
 
 [node name="L43L" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(-20.3171, 38.6, -496)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L43L"]
@@ -5424,6 +5659,7 @@ mesh = SubResource("Cord")
 
 
 [node name="L43R" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(9.6829, 38.6, -496)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L43R"]
@@ -5442,6 +5678,7 @@ mesh = SubResource("Cord")
 
 
 [node name="L44L" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(-22.6312, 40.2, -508)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L44L"]
@@ -5460,6 +5697,7 @@ mesh = SubResource("Cord")
 
 
 [node name="L44R" type="Node3D" parent="Environment/LanternTrail"]
+visible = false
 position = Vector3(7.3688, 40.2, -508)
 
 [node name="Glow" type="MeshInstance3D" parent="Environment/LanternTrail/L44R"]
@@ -5478,6 +5716,7 @@ mesh = SubResource("Cord")
 
 
 [node name="Gate_S1_02" type="Node3D" parent="Gates"]
+script = ExtResource("10_gate")
 metadata/encounter_id = "S1-02"
 
 [node name="BarrierBody" type="StaticBody3D" parent="Gates/Gate_S1_02"]
@@ -5541,6 +5780,7 @@ mesh = SubResource("Trim107")
 
 
 [node name="Gate_S1_03" type="Node3D" parent="Gates"]
+script = ExtResource("10_gate")
 metadata/encounter_id = "S1-03"
 
 [node name="BarrierBody" type="StaticBody3D" parent="Gates/Gate_S1_03"]
@@ -5604,6 +5844,7 @@ mesh = SubResource("Trim116")
 
 
 [node name="Gate_S1_04" type="Node3D" parent="Gates"]
+script = ExtResource("10_gate")
 metadata/encounter_id = "S1-04"
 
 [node name="BarrierBody" type="StaticBody3D" parent="Gates/Gate_S1_04"]
@@ -5667,6 +5908,7 @@ mesh = SubResource("Trim125")
 
 
 [node name="Gate_S1_05" type="Node3D" parent="Gates"]
+script = ExtResource("10_gate")
 metadata/encounter_id = "S1-05"
 
 [node name="BarrierBody" type="StaticBody3D" parent="Gates/Gate_S1_05"]
@@ -6016,10 +6258,12 @@ position = Vector3(0, 37, -555)
 
 
 [node name="CP1-A" type="Area3D" parent="Checkpoints"]
+script = ExtResource("11_checkpoint")
 position = Vector3(0, 28, -325)
 collision_layer = 0
 collision_mask = 2
 monitoring = false
+checkpoint_id = &"CP1-A"
 metadata/checkpoint_id = "CP1-A"
 metadata/resume_encounter_id = "S1-05"
 
@@ -6078,10 +6322,12 @@ mesh = SubResource("Trim156")
 
 
 [node name="CP1-B" type="Area3D" parent="Checkpoints"]
+script = ExtResource("11_checkpoint")
 position = Vector3(0, 38, -450)
 collision_layer = 0
 collision_mask = 2
 monitoring = false
+checkpoint_id = &"CP1-B"
 metadata/checkpoint_id = "CP1-B"
 metadata/resume_encounter_id = "S1-07"
 
@@ -6256,3 +6502,1295 @@ mesh = SubResource("Trim182")
 [node name="BossFocus" type="Marker3D" parent="Geometry"]
 position = Vector3(0, 43, -520)
 
+[node name="BoundaryRails" type="Node3D" parent="Environment"]
+
+[node name="West0LowerBeam" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 12.32, -52.50)
+scale = Vector3(1, 1, 175.00)
+mesh = SubResource("BoundaryRailBeam")
+
+[node name="West0UpperBeam" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 13.68, -52.50)
+scale = Vector3(1, 1, 175.00)
+mesh = SubResource("BoundaryRailBeam")
+
+[node name="West0Post0" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 12.65, 35.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West0Cap0" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 14.35, 35.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West0Post1" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 12.65, 17.50)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West0Cap1" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 14.35, 17.50)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West0Post2" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 12.65, 0.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West0Cap2" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 14.35, 0.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West0Post3" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 12.65, -17.50)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West0Cap3" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 14.35, -17.50)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West0Post4" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 12.65, -35.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West0Cap4" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 14.35, -35.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West0Post5" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 12.65, -52.50)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West0Cap5" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 14.35, -52.50)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West0Post6" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 12.65, -70.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West0Cap6" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 14.35, -70.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West0Post7" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 12.65, -87.50)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West0Cap7" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 14.35, -87.50)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West0Post8" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 12.65, -105.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West0Cap8" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 14.35, -105.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West0Post9" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 12.65, -122.50)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West0Cap9" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 14.35, -122.50)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West0Post10" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 12.65, -140.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West0Cap10" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 14.35, -140.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West1LowerBeam" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 17.32, -162.50)
+scale = Vector3(1, 1, 45.00)
+mesh = SubResource("BoundaryRailBeam")
+
+[node name="West1UpperBeam" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 18.68, -162.50)
+scale = Vector3(1, 1, 45.00)
+mesh = SubResource("BoundaryRailBeam")
+
+[node name="West1Post0" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 17.65, -140.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West1Cap0" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 19.35, -140.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West1Post1" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 17.65, -155.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West1Cap1" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 19.35, -155.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West1Post2" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 17.65, -170.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West1Cap2" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 19.35, -170.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West1Post3" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 17.65, -185.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West1Cap3" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 19.35, -185.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West2LowerBeam" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 24.32, -205.00)
+scale = Vector3(1, 1, 40.00)
+mesh = SubResource("BoundaryRailBeam")
+
+[node name="West2UpperBeam" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 25.68, -205.00)
+scale = Vector3(1, 1, 40.00)
+mesh = SubResource("BoundaryRailBeam")
+
+[node name="West2Post0" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 24.65, -185.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West2Cap0" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 26.35, -185.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West2Post1" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 24.65, -198.33)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West2Cap1" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 26.35, -198.33)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West2Post2" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 24.65, -211.67)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West2Cap2" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 26.35, -211.67)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West2Post3" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 24.65, -225.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West2Cap3" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 26.35, -225.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West3LowerBeam" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 30.32, -280.00)
+scale = Vector3(1, 1, 110.00)
+mesh = SubResource("BoundaryRailBeam")
+
+[node name="West3UpperBeam" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 31.68, -280.00)
+scale = Vector3(1, 1, 110.00)
+mesh = SubResource("BoundaryRailBeam")
+
+[node name="West3Post0" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 30.65, -225.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West3Cap0" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 32.35, -225.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West3Post1" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 30.65, -243.33)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West3Cap1" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 32.35, -243.33)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West3Post2" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 30.65, -261.67)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West3Cap2" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 32.35, -261.67)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West3Post3" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 30.65, -280.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West3Cap3" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 32.35, -280.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West3Post4" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 30.65, -298.33)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West3Cap4" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 32.35, -298.33)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West3Post5" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 30.65, -316.67)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West3Cap5" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 32.35, -316.67)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West3Post6" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 30.65, -335.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West3Cap6" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 32.35, -335.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West4LowerBeam" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 35.32, -390.00)
+scale = Vector3(1, 1, 110.00)
+mesh = SubResource("BoundaryRailBeam")
+
+[node name="West4UpperBeam" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 36.68, -390.00)
+scale = Vector3(1, 1, 110.00)
+mesh = SubResource("BoundaryRailBeam")
+
+[node name="West4Post0" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 35.65, -335.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West4Cap0" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 37.35, -335.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West4Post1" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 35.65, -353.33)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West4Cap1" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 37.35, -353.33)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West4Post2" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 35.65, -371.67)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West4Cap2" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 37.35, -371.67)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West4Post3" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 35.65, -390.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West4Cap3" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 37.35, -390.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West4Post4" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 35.65, -408.33)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West4Cap4" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 37.35, -408.33)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West4Post5" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 35.65, -426.67)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West4Cap5" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 37.35, -426.67)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West4Post6" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 35.65, -445.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West4Cap6" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 37.35, -445.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West5LowerBeam" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 40.32, -507.50)
+scale = Vector3(1, 1, 125.00)
+mesh = SubResource("BoundaryRailBeam")
+
+[node name="West5UpperBeam" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 41.68, -507.50)
+scale = Vector3(1, 1, 125.00)
+mesh = SubResource("BoundaryRailBeam")
+
+[node name="West5Post0" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 40.65, -445.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West5Cap0" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 42.35, -445.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West5Post1" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 40.65, -462.86)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West5Cap1" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 42.35, -462.86)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West5Post2" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 40.65, -480.71)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West5Cap2" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 42.35, -480.71)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West5Post3" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 40.65, -498.57)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West5Cap3" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 42.35, -498.57)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West5Post4" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 40.65, -516.43)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West5Cap4" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 42.35, -516.43)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West5Post5" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 40.65, -534.29)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West5Cap5" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 42.35, -534.29)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West5Post6" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 40.65, -552.14)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West5Cap6" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 42.35, -552.14)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="West5Post7" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 40.65, -570.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="West5Cap7" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(-44.5, 42.35, -570.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East0LowerBeam" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 12.32, -52.50)
+scale = Vector3(1, 1, 175.00)
+mesh = SubResource("BoundaryRailBeam")
+
+[node name="East0UpperBeam" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 13.68, -52.50)
+scale = Vector3(1, 1, 175.00)
+mesh = SubResource("BoundaryRailBeam")
+
+[node name="East0Post0" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 12.65, 35.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East0Cap0" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 14.35, 35.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East0Post1" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 12.65, 17.50)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East0Cap1" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 14.35, 17.50)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East0Post2" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 12.65, 0.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East0Cap2" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 14.35, 0.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East0Post3" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 12.65, -17.50)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East0Cap3" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 14.35, -17.50)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East0Post4" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 12.65, -35.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East0Cap4" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 14.35, -35.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East0Post5" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 12.65, -52.50)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East0Cap5" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 14.35, -52.50)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East0Post6" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 12.65, -70.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East0Cap6" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 14.35, -70.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East0Post7" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 12.65, -87.50)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East0Cap7" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 14.35, -87.50)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East0Post8" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 12.65, -105.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East0Cap8" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 14.35, -105.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East0Post9" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 12.65, -122.50)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East0Cap9" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 14.35, -122.50)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East0Post10" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 12.65, -140.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East0Cap10" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 14.35, -140.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East1LowerBeam" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 17.32, -162.50)
+scale = Vector3(1, 1, 45.00)
+mesh = SubResource("BoundaryRailBeam")
+
+[node name="East1UpperBeam" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 18.68, -162.50)
+scale = Vector3(1, 1, 45.00)
+mesh = SubResource("BoundaryRailBeam")
+
+[node name="East1Post0" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 17.65, -140.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East1Cap0" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 19.35, -140.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East1Post1" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 17.65, -155.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East1Cap1" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 19.35, -155.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East1Post2" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 17.65, -170.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East1Cap2" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 19.35, -170.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East1Post3" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 17.65, -185.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East1Cap3" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 19.35, -185.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East2LowerBeam" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 24.32, -205.00)
+scale = Vector3(1, 1, 40.00)
+mesh = SubResource("BoundaryRailBeam")
+
+[node name="East2UpperBeam" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 25.68, -205.00)
+scale = Vector3(1, 1, 40.00)
+mesh = SubResource("BoundaryRailBeam")
+
+[node name="East2Post0" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 24.65, -185.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East2Cap0" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 26.35, -185.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East2Post1" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 24.65, -198.33)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East2Cap1" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 26.35, -198.33)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East2Post2" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 24.65, -211.67)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East2Cap2" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 26.35, -211.67)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East2Post3" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 24.65, -225.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East2Cap3" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 26.35, -225.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East3LowerBeam" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 30.32, -280.00)
+scale = Vector3(1, 1, 110.00)
+mesh = SubResource("BoundaryRailBeam")
+
+[node name="East3UpperBeam" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 31.68, -280.00)
+scale = Vector3(1, 1, 110.00)
+mesh = SubResource("BoundaryRailBeam")
+
+[node name="East3Post0" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 30.65, -225.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East3Cap0" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 32.35, -225.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East3Post1" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 30.65, -243.33)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East3Cap1" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 32.35, -243.33)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East3Post2" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 30.65, -261.67)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East3Cap2" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 32.35, -261.67)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East3Post3" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 30.65, -280.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East3Cap3" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 32.35, -280.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East3Post4" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 30.65, -298.33)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East3Cap4" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 32.35, -298.33)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East3Post5" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 30.65, -316.67)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East3Cap5" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 32.35, -316.67)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East3Post6" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 30.65, -335.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East3Cap6" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 32.35, -335.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East4LowerBeam" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 35.32, -390.00)
+scale = Vector3(1, 1, 110.00)
+mesh = SubResource("BoundaryRailBeam")
+
+[node name="East4UpperBeam" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 36.68, -390.00)
+scale = Vector3(1, 1, 110.00)
+mesh = SubResource("BoundaryRailBeam")
+
+[node name="East4Post0" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 35.65, -335.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East4Cap0" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 37.35, -335.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East4Post1" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 35.65, -353.33)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East4Cap1" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 37.35, -353.33)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East4Post2" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 35.65, -371.67)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East4Cap2" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 37.35, -371.67)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East4Post3" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 35.65, -390.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East4Cap3" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 37.35, -390.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East4Post4" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 35.65, -408.33)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East4Cap4" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 37.35, -408.33)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East4Post5" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 35.65, -426.67)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East4Cap5" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 37.35, -426.67)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East4Post6" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 35.65, -445.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East4Cap6" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 37.35, -445.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East5LowerBeam" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 40.32, -507.50)
+scale = Vector3(1, 1, 125.00)
+mesh = SubResource("BoundaryRailBeam")
+
+[node name="East5UpperBeam" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 41.68, -507.50)
+scale = Vector3(1, 1, 125.00)
+mesh = SubResource("BoundaryRailBeam")
+
+[node name="East5Post0" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 40.65, -445.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East5Cap0" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 42.35, -445.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East5Post1" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 40.65, -462.86)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East5Cap1" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 42.35, -462.86)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East5Post2" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 40.65, -480.71)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East5Cap2" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 42.35, -480.71)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East5Post3" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 40.65, -498.57)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East5Cap3" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 42.35, -498.57)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East5Post4" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 40.65, -516.43)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East5Cap4" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 42.35, -516.43)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East5Post5" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 40.65, -534.29)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East5Cap5" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 42.35, -534.29)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East5Post6" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 40.65, -552.14)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East5Cap6" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 42.35, -552.14)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="East5Post7" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 40.65, -570.00)
+mesh = SubResource("BoundaryRailPost")
+
+[node name="East5Cap7" type="MeshInstance3D" parent="Environment/BoundaryRails"]
+position = Vector3(44.5, 42.35, -570.00)
+mesh = SubResource("BoundaryRailFinial")
+
+[node name="Light" type="OmniLight3D" parent="Environment/LanternTrail/L3R"]
+light_color = Color(1, 0.42, 0.11, 1)
+light_energy = 3.0
+omni_range = 23.0
+
+[node name="Light" type="OmniLight3D" parent="Environment/LanternTrail/L6L"]
+light_color = Color(1, 0.42, 0.11, 1)
+light_energy = 3.0
+omni_range = 23.0
+
+[node name="Light" type="OmniLight3D" parent="Environment/LanternTrail/L9R"]
+light_color = Color(1, 0.42, 0.11, 1)
+light_energy = 3.0
+omni_range = 23.0
+
+[node name="Light" type="OmniLight3D" parent="Environment/LanternTrail/L12L"]
+light_color = Color(1, 0.42, 0.11, 1)
+light_energy = 3.0
+omni_range = 23.0
+
+[node name="Light" type="OmniLight3D" parent="Environment/LanternTrail/L18L"]
+light_color = Color(1, 0.42, 0.11, 1)
+light_energy = 3.0
+omni_range = 23.0
+
+[node name="Light" type="OmniLight3D" parent="Environment/LanternTrail/L21R"]
+light_color = Color(1, 0.42, 0.11, 1)
+light_energy = 3.0
+omni_range = 23.0
+
+[node name="Light" type="OmniLight3D" parent="Environment/LanternTrail/L24L"]
+light_color = Color(1, 0.42, 0.11, 1)
+light_energy = 3.0
+omni_range = 23.0
+
+[node name="Light" type="OmniLight3D" parent="Environment/LanternTrail/L27R"]
+light_color = Color(1, 0.42, 0.11, 1)
+light_energy = 3.0
+omni_range = 23.0
+
+[node name="Light" type="OmniLight3D" parent="Environment/LanternTrail/L33R"]
+light_color = Color(1, 0.42, 0.11, 1)
+light_energy = 3.0
+omni_range = 23.0
+
+[node name="Light" type="OmniLight3D" parent="Environment/LanternTrail/L36L"]
+light_color = Color(1, 0.42, 0.11, 1)
+light_energy = 3.0
+omni_range = 23.0
+
+[node name="Light" type="OmniLight3D" parent="Environment/LanternTrail/L39R"]
+light_color = Color(1, 0.42, 0.11, 1)
+light_energy = 3.0
+omni_range = 23.0
+
+[node name="Light" type="OmniLight3D" parent="Environment/LanternTrail/L42L"]
+light_color = Color(1, 0.42, 0.11, 1)
+light_energy = 3.0
+omni_range = 23.0
+
+[node name="Moon" type="MeshInstance3D" parent="Environment"]
+position = Vector3(-125, 185, -430)
+scale = Vector3(15, 15, 15)
+mesh = SubResource("MoonMesh")
+
+[node name="ForestDetail" type="Node3D" parent="Environment"]
+
+[node name="Boulder0W0" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(-37.96, 0.42, 21.44)
+scale = Vector3(1.01, 0.62, 2.08)
+mesh = SubResource("ForestBoulder")
+
+[node name="Fern0W1" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(-40.99, 0.35, -0.57)
+scale = Vector3(1.61, 0.38, 1.16)
+mesh = SubResource("ForestFern")
+
+[node name="Boulder0W2" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(-34.55, 0.42, -30.17)
+scale = Vector3(1.04, 0.62, 1.76)
+mesh = SubResource("ForestBoulder")
+
+[node name="Fern0W3" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(-39.52, 0.35, -53.31)
+scale = Vector3(2.01, 0.38, 1.28)
+mesh = SubResource("ForestFern")
+
+[node name="Boulder0W4" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(-35.78, 0.42, -79.50)
+scale = Vector3(1.05, 0.62, 1.71)
+mesh = SubResource("ForestBoulder")
+
+[node name="Fern0W5" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(-34.19, 0.35, -104.36)
+scale = Vector3(2.11, 0.38, 1.35)
+mesh = SubResource("ForestFern")
+
+[node name="Boulder0W6" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(-40.84, 0.42, -124.82)
+scale = Vector3(2.00, 0.62, 1.27)
+mesh = SubResource("ForestBoulder")
+
+[node name="Boulder0E0" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(34.97, 0.42, 20.39)
+scale = Vector3(2.10, 0.62, 1.56)
+mesh = SubResource("ForestBoulder")
+
+[node name="Fern0E1" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(33.14, 0.35, -3.71)
+scale = Vector3(1.68, 0.38, 1.31)
+mesh = SubResource("ForestFern")
+
+[node name="Boulder0E2" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(35.00, 0.42, -30.08)
+scale = Vector3(1.44, 0.62, 1.46)
+mesh = SubResource("ForestBoulder")
+
+[node name="Fern0E3" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(37.53, 0.35, -52.54)
+scale = Vector3(2.08, 0.38, 1.24)
+mesh = SubResource("ForestFern")
+
+[node name="Boulder0E4" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(35.43, 0.42, -79.93)
+scale = Vector3(1.32, 0.62, 1.63)
+mesh = SubResource("ForestBoulder")
+
+[node name="Fern0E5" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(35.57, 0.35, -102.64)
+scale = Vector3(1.48, 0.38, 1.60)
+mesh = SubResource("ForestFern")
+
+[node name="Boulder0E6" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(37.99, 0.42, -126.76)
+scale = Vector3(2.05, 0.62, 1.94)
+mesh = SubResource("ForestBoulder")
+
+[node name="Boulder1W0" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(-34.51, 5.42, -146.00)
+scale = Vector3(1.71, 0.62, 1.77)
+mesh = SubResource("ForestBoulder")
+
+[node name="Fern1W1" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(-37.04, 5.35, -149.62)
+scale = Vector3(1.65, 0.38, 1.20)
+mesh = SubResource("ForestFern")
+
+[node name="Boulder1W2" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(-40.86, 5.42, -153.83)
+scale = Vector3(1.75, 0.62, 1.51)
+mesh = SubResource("ForestBoulder")
+
+[node name="Fern1W3" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(-37.81, 5.35, -164.73)
+scale = Vector3(1.57, 0.38, 1.50)
+mesh = SubResource("ForestFern")
+
+[node name="Boulder1W4" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(-36.74, 5.42, -170.26)
+scale = Vector3(2.30, 0.62, 1.34)
+mesh = SubResource("ForestBoulder")
+
+[node name="Fern1W5" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(-35.55, 5.35, -175.15)
+scale = Vector3(1.79, 0.38, 1.69)
+mesh = SubResource("ForestFern")
+
+[node name="Boulder1W6" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(-40.72, 5.42, -181.83)
+scale = Vector3(1.61, 0.62, 1.50)
+mesh = SubResource("ForestBoulder")
+
+[node name="Boulder1E0" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(37.01, 5.42, -142.34)
+scale = Vector3(2.01, 0.62, 1.32)
+mesh = SubResource("ForestBoulder")
+
+[node name="Fern1E1" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(36.38, 5.35, -152.56)
+scale = Vector3(1.45, 0.38, 1.20)
+mesh = SubResource("ForestFern")
+
+[node name="Boulder1E2" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(38.52, 5.42, -155.48)
+scale = Vector3(2.36, 0.62, 1.75)
+mesh = SubResource("ForestBoulder")
+
+[node name="Fern1E3" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(35.75, 5.35, -162.17)
+scale = Vector3(1.78, 0.38, 1.23)
+mesh = SubResource("ForestFern")
+
+[node name="Boulder1E4" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(37.28, 5.42, -171.31)
+scale = Vector3(1.95, 0.62, 1.34)
+mesh = SubResource("ForestBoulder")
+
+[node name="Fern1E5" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(37.24, 5.35, -173.92)
+scale = Vector3(1.65, 0.38, 1.68)
+mesh = SubResource("ForestFern")
+
+[node name="Boulder1E6" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(35.15, 5.42, -184.65)
+scale = Vector3(1.48, 0.62, 1.74)
+mesh = SubResource("ForestBoulder")
+
+[node name="Boulder2W0" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(-40.86, 12.42, -189.34)
+scale = Vector3(1.16, 0.62, 1.50)
+mesh = SubResource("ForestBoulder")
+
+[node name="Fern2W1" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(-38.96, 12.35, -193.75)
+scale = Vector3(1.60, 0.38, 1.13)
+mesh = SubResource("ForestFern")
+
+[node name="Boulder2W2" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(-39.30, 12.42, -197.82)
+scale = Vector3(1.86, 0.62, 1.99)
+mesh = SubResource("ForestBoulder")
+
+[node name="Fern2W3" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(-36.59, 12.35, -205.63)
+scale = Vector3(1.80, 0.38, 1.10)
+mesh = SubResource("ForestFern")
+
+[node name="Boulder2W4" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(-33.49, 12.42, -208.75)
+scale = Vector3(1.12, 0.62, 2.00)
+mesh = SubResource("ForestBoulder")
+
+[node name="Fern2W5" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(-34.17, 12.35, -216.72)
+scale = Vector3(2.11, 0.38, 1.15)
+mesh = SubResource("ForestFern")
+
+[node name="Boulder2W6" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(-33.12, 12.42, -222.42)
+scale = Vector3(1.21, 0.62, 1.53)
+mesh = SubResource("ForestBoulder")
+
+[node name="Boulder2E0" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(34.03, 12.42, -186.65)
+scale = Vector3(2.14, 0.62, 1.71)
+mesh = SubResource("ForestBoulder")
+
+[node name="Fern2E1" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(40.72, 12.35, -192.54)
+scale = Vector3(1.78, 0.38, 1.00)
+mesh = SubResource("ForestFern")
+
+[node name="Boulder2E2" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(39.97, 12.42, -201.95)
+scale = Vector3(1.16, 0.62, 1.30)
+mesh = SubResource("ForestBoulder")
+
+[node name="Fern2E3" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(38.90, 12.35, -204.08)
+scale = Vector3(2.00, 0.38, 1.45)
+mesh = SubResource("ForestFern")
+
+[node name="Boulder2E4" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(40.21, 12.42, -211.75)
+scale = Vector3(1.03, 0.62, 1.28)
+mesh = SubResource("ForestBoulder")
+
+[node name="Fern2E5" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(34.51, 12.35, -213.51)
+scale = Vector3(2.07, 0.38, 1.48)
+mesh = SubResource("ForestFern")
+
+[node name="Boulder2E6" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(38.06, 12.42, -221.35)
+scale = Vector3(1.67, 0.62, 1.92)
+mesh = SubResource("ForestBoulder")
+
+[node name="Boulder3W0" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(-35.28, 18.42, -235.50)
+scale = Vector3(2.16, 0.62, 1.81)
+mesh = SubResource("ForestBoulder")
+
+[node name="Fern3W1" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(-38.52, 18.35, -247.72)
+scale = Vector3(1.63, 0.38, 1.48)
+mesh = SubResource("ForestFern")
+
+[node name="Boulder3W2" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(-39.51, 18.42, -263.87)
+scale = Vector3(1.34, 0.62, 1.31)
+mesh = SubResource("ForestBoulder")
+
+[node name="Fern3W3" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(-34.65, 18.35, -281.08)
+scale = Vector3(1.98, 0.38, 1.39)
+mesh = SubResource("ForestFern")
+
+[node name="Boulder3W4" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(-40.14, 18.42, -298.31)
+scale = Vector3(1.78, 0.62, 1.91)
+mesh = SubResource("ForestBoulder")
+
+[node name="Fern3W5" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(-36.18, 18.35, -309.96)
+scale = Vector3(1.66, 0.38, 1.44)
+mesh = SubResource("ForestFern")
+
+[node name="Boulder3W6" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(-39.41, 18.42, -324.50)
+scale = Vector3(2.44, 0.62, 1.63)
+mesh = SubResource("ForestBoulder")
+
+[node name="Boulder3E0" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(35.40, 18.42, -232.59)
+scale = Vector3(1.82, 0.62, 1.61)
+mesh = SubResource("ForestBoulder")
+
+[node name="Fern3E1" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(39.70, 18.35, -247.00)
+scale = Vector3(2.12, 0.38, 1.20)
+mesh = SubResource("ForestFern")
+
+[node name="Boulder3E2" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(33.53, 18.42, -263.40)
+scale = Vector3(1.42, 0.62, 1.66)
+mesh = SubResource("ForestBoulder")
+
+[node name="Fern3E3" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(39.91, 18.35, -282.99)
+scale = Vector3(1.83, 0.38, 1.19)
+mesh = SubResource("ForestFern")
+
+[node name="Boulder3E4" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(39.02, 18.42, -296.18)
+scale = Vector3(1.14, 0.62, 2.00)
+mesh = SubResource("ForestBoulder")
+
+[node name="Fern3E5" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(37.23, 18.35, -310.48)
+scale = Vector3(1.55, 0.38, 1.50)
+mesh = SubResource("ForestFern")
+
+[node name="Boulder3E6" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(33.56, 18.42, -328.81)
+scale = Vector3(2.28, 0.62, 1.39)
+mesh = SubResource("ForestBoulder")
+
+[node name="Boulder4W0" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(-36.87, 23.42, -341.23)
+scale = Vector3(1.84, 0.62, 1.43)
+mesh = SubResource("ForestBoulder")
+
+[node name="Fern4W1" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(-39.24, 23.35, -356.65)
+scale = Vector3(1.71, 0.38, 1.45)
+mesh = SubResource("ForestFern")
+
+[node name="Boulder4W2" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(-40.28, 23.42, -375.64)
+scale = Vector3(1.69, 0.62, 1.66)
+mesh = SubResource("ForestBoulder")
+
+[node name="Fern4W3" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(-33.78, 23.35, -389.55)
+scale = Vector3(1.67, 0.38, 1.62)
+mesh = SubResource("ForestFern")
+
+[node name="Boulder4W4" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(-34.96, 23.42, -405.18)
+scale = Vector3(1.25, 0.62, 1.95)
+mesh = SubResource("ForestBoulder")
+
+[node name="Fern4W5" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(-40.08, 23.35, -419.56)
+scale = Vector3(1.54, 0.38, 1.44)
+mesh = SubResource("ForestFern")
+
+[node name="Boulder4W6" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(-36.41, 23.42, -437.51)
+scale = Vector3(1.54, 0.62, 1.70)
+mesh = SubResource("ForestBoulder")
+
+[node name="Boulder4E0" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(33.59, 23.42, -342.42)
+scale = Vector3(1.06, 0.62, 1.19)
+mesh = SubResource("ForestBoulder")
+
+[node name="Fern4E1" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(39.89, 23.35, -356.71)
+scale = Vector3(1.94, 0.38, 1.29)
+mesh = SubResource("ForestFern")
+
+[node name="Boulder4E2" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(38.13, 23.42, -374.10)
+scale = Vector3(1.26, 0.62, 2.06)
+mesh = SubResource("ForestBoulder")
+
+[node name="Fern4E3" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(33.28, 23.35, -387.50)
+scale = Vector3(1.60, 0.38, 1.22)
+mesh = SubResource("ForestFern")
+
+[node name="Boulder4E4" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(40.27, 23.42, -403.55)
+scale = Vector3(2.42, 0.62, 1.47)
+mesh = SubResource("ForestBoulder")
+
+[node name="Fern4E5" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(34.58, 23.35, -421.16)
+scale = Vector3(1.42, 0.38, 1.51)
+mesh = SubResource("ForestFern")
+
+[node name="Boulder4E6" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(40.02, 23.42, -436.86)
+scale = Vector3(2.38, 0.62, 1.59)
+mesh = SubResource("ForestBoulder")
+
+[node name="Boulder5W0" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(-37.56, 28.42, -456.59)
+scale = Vector3(2.40, 0.62, 1.52)
+mesh = SubResource("ForestBoulder")
+
+[node name="Fern5W1" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(-37.11, 28.35, -470.92)
+scale = Vector3(1.76, 0.38, 1.34)
+mesh = SubResource("ForestFern")
+
+[node name="Boulder5W2" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(-36.58, 28.42, -491.25)
+scale = Vector3(2.19, 0.62, 1.81)
+mesh = SubResource("ForestBoulder")
+
+[node name="Fern5W3" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(-34.73, 28.35, -510.31)
+scale = Vector3(1.46, 0.38, 1.07)
+mesh = SubResource("ForestFern")
+
+[node name="Boulder5W4" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(-38.81, 28.42, -528.30)
+scale = Vector3(1.30, 0.62, 1.73)
+mesh = SubResource("ForestBoulder")
+
+[node name="Fern5W5" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(-34.24, 28.35, -541.23)
+scale = Vector3(1.60, 0.38, 1.09)
+mesh = SubResource("ForestFern")
+
+[node name="Boulder5W6" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(-40.85, 28.42, -563.28)
+scale = Vector3(2.32, 0.62, 2.07)
+mesh = SubResource("ForestBoulder")
+
+[node name="Boulder5E0" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(36.40, 28.42, -455.82)
+scale = Vector3(1.83, 0.62, 1.07)
+mesh = SubResource("ForestBoulder")
+
+[node name="Fern5E1" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(39.99, 28.35, -470.90)
+scale = Vector3(2.14, 0.38, 1.69)
+mesh = SubResource("ForestFern")
+
+[node name="Boulder5E2" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(39.41, 28.42, -490.82)
+scale = Vector3(1.31, 0.62, 1.51)
+mesh = SubResource("ForestBoulder")
+
+[node name="Fern5E3" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(33.76, 28.35, -510.06)
+scale = Vector3(1.46, 0.38, 1.29)
+mesh = SubResource("ForestFern")
+
+[node name="Boulder5E4" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(37.47, 28.42, -523.89)
+scale = Vector3(1.25, 0.62, 1.32)
+mesh = SubResource("ForestBoulder")
+
+[node name="Fern5E5" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(33.93, 28.35, -544.04)
+scale = Vector3(1.53, 0.38, 1.76)
+mesh = SubResource("ForestFern")
+
+[node name="Boulder5E6" type="MeshInstance3D" parent="Environment/ForestDetail"]
+position = Vector3(38.45, 28.42, -559.38)
+scale = Vector3(1.14, 0.62, 1.56)
+mesh = SubResource("ForestBoulder")
+
+[node name="Gate02Roof" type="MeshInstance3D" parent="Gates/Gate_S1_02/Arch"]
+position = Vector3(0, 21.6, 0)
+mesh = SubResource("ToriiRoof")
+
+[node name="Gate03Roof" type="MeshInstance3D" parent="Gates/Gate_S1_03/Arch"]
+position = Vector3(0, 21.6, 0)
+mesh = SubResource("ToriiRoof")
+
+[node name="Gate04Roof" type="MeshInstance3D" parent="Gates/Gate_S1_04/Arch"]
+position = Vector3(0, 21.6, 0)
+mesh = SubResource("ToriiRoof")
+
+[node name="Gate05Roof" type="MeshInstance3D" parent="Gates/Gate_S1_05/Arch"]
+position = Vector3(0, 21.6, 0)
+mesh = SubResource("ToriiRoof")
+
+[node name="CheckpointARoof" type="MeshInstance3D" parent="Geometry/CP1-AArch"]
+position = Vector3(0, 21.6, 0)
+mesh = SubResource("ToriiRoof")
+
+[node name="CheckpointBRoof" type="MeshInstance3D" parent="Geometry/CP1-BArch"]
+position = Vector3(0, 21.6, 0)
+mesh = SubResource("ToriiRoof")
+
+[node name="SanctuaryRoof" type="MeshInstance3D" parent="Geometry/SanctuaryArch"]
+position = Vector3(0, 21.6, 0)
+mesh = SubResource("ToriiRoof")

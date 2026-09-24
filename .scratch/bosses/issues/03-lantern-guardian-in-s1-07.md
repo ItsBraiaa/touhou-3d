@@ -1,9 +1,23 @@
 # F12-03 Lantern Guardian in S1-07
 
-Status: todo
+Status: done
+Outcome (F12-03 part 1): Created the four dev-flagged Lantern Guardian content resources: three reusable patterns and the three-phase BossDefinition. Part 2 still owns all runtime integration and closes this ticket; no tests were added under the sprint rule.
+Outcome (F12-03 part 2, 2026-09-24, trunk): Done. `StageDirector` spawns a `BossController` for any Wave kind in its new `boss_definitions` export (`_spawn_boss`: signals connected before `spawn_setup`), re-emits the fight as `boss_started`, `boss_phase_changed`, `boss_health_changed` and `threat_reported`, and on the one defeat emits `boss_defeated(kind)`, plays the optional `defeat_presentation`/`defeat_animation` (empty until D-07), then scores 1,000 and reports to the machine; `check_setup` refuses a kind in both dictionaries, an invalid or mis-keyed BossDefinition and a half-set presentation. The Session connects the four boss signals to the HUD panel once per stage load (`ATTACK_CUE_SECONDS` 3.0) and hides it on defeat, Retry and Restart. `stage_01.tscn` [shared]: the Sentry stand-in is gone; `lantern_guardian` → `scenes/enemies/lantern_guardian.tscn` (D-03's prefab, `boss_controller.gd` attached [shared] with clips Flying_Idle/Punch/Yes/Death) and `content/bosses/lantern_guardian.tres`. `tools/validate_boss_scenes.gd` accepts that root script. No tests (sprint rule): a verifier drove the real game from CP1-B through the three Phases (spawn at (0, 43, -520), panel and cues, ExitVolume inert, hostile clear per Phase, +1000 and one `stage_cleared`, Retry and Restart mid-fight), headless and windowed (`docs/validation/bosses.md`, `bosses-lantern-guardian.png`); a reviewer found no blocker. Measured: Power Level 3 deals 22.1 damage/s, so part 1's 1500/1500/2100 Phases last about 68/68/95 s against the ~25/25/35 s target (about 550/550/775 would fit): a value note for Astra (D-07 Part C).
 Type: integration
 parallel-safe: no
 Depends on: F12-02, F10-03
+Lane: trunk (part 1: oc-a)
+Model: part 1 GPT 5.6 Luna (fallback DeepSeek V4.1 Flash); part 2 Claude Opus 5.5, 3-agent workflow (implementer, test-writer, reviewer)
+
+> **Split (SPRINT.md):**
+> - **Part 1, lane oc-a** (depends on F12-01, F5-04 and F6-03 part 1): `content/bosses/lantern_guardian.tres`, the three `content/patterns/lantern_*.tres` and the content unit test only. Commit with `(F12-03 part 1)`.
+> - **Part 2, lane trunk** (after F12-02, F10-03 and part 1): the Director boss branch, the Session wiring, the `stage_01.tscn` exports and the integration test. It closes the ticket. Part 2 only references part 1's files; a needed value change becomes a note.
+
+> **Sprint notes:**
+> 1. **D-03** (lane sol) delivers `scenes/enemies/lantern_guardian.tscn` with no root script. If it has landed, attach `boss_controller.gd` to it `[shared]`, set its references and D-03's clip names, and point `actor_scenes[&"lantern_guardian"]` at it. Otherwise ship the dev boss and log "swap pending: D-03". Do not wait for D-03.
+> 2. **`scripts/progression/stage_director.gd`** is also edited by F12-05 (lane sol), which may land first. Run `tools/lane.ps1 sync` before starting, and keep your additions in separate functions.
+> 3. **Shrine lighting.** Keep the `defeat_presentation` / `defeat_animation` exports empty by default: D-07 fills them through F14-01's swap step.
+> 4. **Results timing.** D-07 sets the shrine `AnimationPlayer` to `process_mode = ALWAYS`, because Results pauses the tree right after `boss_defeated`.
 
 ## Goal
 

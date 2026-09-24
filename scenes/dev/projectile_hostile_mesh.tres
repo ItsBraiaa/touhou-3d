@@ -1,0 +1,14 @@
+[gd_resource type="SphereMesh" load_steps=2 format=3]
+
+[sub_resource type="StandardMaterial3D" id="Material_hostile"]
+shading_mode = 0
+albedo_color = Color(1, 0.36, 0.46, 1)
+emission_enabled = true
+emission = Color(1, 0.36, 0.46, 1)
+
+[resource]
+material = SubResource("Material_hostile")
+radius = 1.0
+height = 2.0
+radial_segments = 12
+rings = 6

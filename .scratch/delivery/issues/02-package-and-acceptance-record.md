@@ -1,13 +1,25 @@
 # F14-02 Package and acceptance record
 
-Status: todo
+Status: done
 Type: tooling
 parallel-safe: no
 Depends on: F14-01
+Lane: oc-b
+Model: part 1 GPT 5.6 Luna (fallback DeepSeek V4.1 Flash); part 2 DeepSeek V4.1 Flash (fallback GLM-5.3-Flash)
+
+> **Split (SPRINT.md):**
+> - **Part 1, lane oc-b** (no dependency): write and test `tools/package.ps1`. Commit with `(F14-02 part 1)`.
+> - **Part 1b, lane oc-b** (no dependency, DeepSeek V4.1 Flash): draft `docs/validation/acceptance.md` as a table. Each acceptance check in PLANEJAMENTO Section 12 and STAGE_DESIGN "Acceptance checks for stage progression" gets one row: the check, its source line, the ticket that delivers it, and "not yet verified". No code. Part 2 then only fills in results.
+> - **Part 2, lane oc-b** (after F14-01): sync, re-export with the command F14-01 recorded, package, and write the acceptance record. It closes the ticket.
+
+> **Sprint note:** F3, F13 and Stage 2 are reinstated (docs/engineering/SPRINT.md). Nothing is "not verified (cut)" unless the user cuts it at a checkpoint.
+> - Verify Options persistence, controller-disconnect recovery, sound effects (a human listening pass) and every Stage 2 item, including the five-minute measurement.
+> - A ticket that has not landed by delivery makes its items "not verified (not landed)".
+> - `tools/package.ps1` does not need F14-01: when this lane reaches the ticket early, write and test the script first, commit it, and leave the acceptance walk until F14-01 is done.
 
 ## Goal
 
-`tools/package.ps1` builds the academic submission as one zip. The zip holds the Godot project, excluding the `.godot/` cache, the raw asset packs (`All models/`, `all-sounds/`, `Music/`), `build/` and agent tooling, plus the exported executable and a short Portuguese read-me. The script then extracts the zip and checks the copy independently: the project imports and its tests pass, and the executable boots (ENGINEERING_BRIEF Section 8 "Packaging": "Reopen an extracted copy and run the exported executable independently before claiming delivery readiness").
+`tools/package.ps1` builds the academic submission as one zip. The zip holds the Godot project, excluding the `.godot/` cache, the raw asset packs (`All models/`, `all-sounds/`, `music/`), `build/` and agent tooling, plus the exported executable and a short Portuguese read-me. The script then extracts the zip and checks the copy independently: the project imports and its tests pass, and the executable boots (ENGINEERING_BRIEF Section 8 "Packaging": "Reopen an extracted copy and run the exported executable independently before claiming delivery readiness").
 
 The session also checks that credits and licenses cover every integrated asset. It walks every acceptance check of PLANEJAMENTO Section 12 and STAGE_DESIGN and records each in `docs/validation/acceptance.md` as pass, fail, not verified, or not verified (cut), with evidence. Uploading to Classroom is the user's action.
 
@@ -91,7 +103,33 @@ This is tooling, so no unit test. The evidence is one full `tools/package.ps1` r
 
 ## Handoff notes for Astra
 
-`acceptance.md` lists any asset missing from `ASSET_CREDITS.md` or the Créditos screen. Please add those entries; Claude does not edit either.
+`acceptance.md` lists any asset missing from `ASSET_CREDITS.md` or the Créditos screen. Please add those entries; Claude does not edit either. F14-02 part 2 found three: the five original D-02 materials under `assets/combat/`, the original `assets/environment/stage_01/gate_veil.gdshader`, and the Quaternius enemy/boss models, which `ASSET_CREDITS.md` credits but the in-game Créditos text does not.
+
+## Outcome
+
+Part 1 (GPT 5.6 Luna) wrote `tools/package.ps1`; part 1b (DeepSeek V4.1 Flash) drafted the
+acceptance table; part 2 (DeepSeek V4.1 Flash) finished the ticket.
+
+- **Re-export.** After `tools/lane.ps1 sync`, F14-01's export command was rerun from the synced
+  tree: `tools/test.ps1` green (225 passed, 0 failed), `--import` once, then
+  `--export-release "Windows Desktop" build/Touhou-3D.exe` — exit 0, no `ERROR:` or `WARNING:`
+  line, `Touhou-3D.exe` 129,258,616 bytes and `Touhou-3D.console.exe` 91,136 bytes,
+  byte-identical to F14-01's build. A fresh worktree needs `build/` created first, or the
+  export aborts with "the export path does not exist"; recorded in `export.md` "Package".
+- **Fix.** Part 1's `Compress-Archive` archived `build/package/Touhou-3D/*`, so the zip had no
+  `Touhou-3D/` root and the verify step failed with `Invalid project path specified`. It now
+  archives the `Touhou-3D` folder itself. No gameplay, scene or content file changed.
+- **Package.** `tools/package.ps1` on a clean tree printed `PACKAGE_ARCHIVE … bytes, 743
+  staged files` and `PACKAGE_OK`: the extracted project imported, its suite passed, and
+  `game/Touhou-3D.console.exe --headless --quit-after 300` booted with no `ERROR:` line. The
+  two refusal paths were run once: a missing executable exits 2, a dirty tree exits 3.
+  Evidence: `docs/validation/export.md` "Package".
+- **Acceptance.** `docs/validation/acceptance.md` fills all 32 checks. No **fail**. P3 and S13
+  (the five-minute Stage 2 clear) and P18 (instructor approval, the user's) are **not
+  verified**; every physical, listening, played-time and presentation-computer item is marked
+  **owed by the human pass**. Nothing is cut (SPRINT reinstates F3, F13 and Stage 2). Credits
+  coverage was recorded; the three gaps above are an Astra request.
+- **No tests** of any kind (SPRINT rule). `tools/lane.ps1 land` is the gate.
 
 ## Kickoff prompt
 

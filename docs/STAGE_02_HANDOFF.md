@@ -126,3 +126,7 @@ No active duration or playability is claimed by the static scene.
 `tools/build_stage_02.py` rewrites Stage 2, its preview, and the original OBJ
 terrain/stream/crag meshes in `assets/environment/stage_02/`. Reconcile any
 integration edits before running it again. No Stage 1 generator was executed.
+
+## Boundary rail pass (2026-09-23)
+
+Environment/BoundaryRails now follows both sides of the six mountain terraces, with posts, two beams and bronze caps. These visual rails indicate the edge enforced by the existing FlightBounds/West and East layer-1 walls and the player flight clamp. No gameplay markers, terrain collision, script wiring, collision layers or masks changed. Six 1280 x 720 review captures in docs/validation/stage-02-*.png show the rails in the route views.

@@ -1,15 +1,21 @@
 # F9-03 SealRules core and Seal adapter
 
-Status: todo
+Status: done
 Type: core+adapter
 parallel-safe: no
 Depends on: F9-02
+Lane: oc-a
+Model: part 1 GPT 5.6 Luna (fallback DeepSeek V4.1 Flash); part 2 GPT 5.6 Luna (fallback MiMo-V2.6-Pro)
+
+> **Split (SPRINT.md):**
+> - **Part 1, lane oc-a, GPT 5.6 Luna:** the SealRules core and its six-order test. Commit with `(F9-03 part 1)`.
+> - **Part 2, lane oc-a, GPT 5.6 Luna:** the Seal adapter. It closes the ticket. No tests (SPRINT "No new tests").
 
 ## Goal
 
-**Lowest priority of F9.** Its only consumer, Stage 2's S2-03, is not scheduled while F12-04 (Stage 2 gameplay) is cut pending the user. Run it only when every scheduled ticket ahead of it is done, or skip it and record that.
+Consumed by F12-05 (Stage 2 S2-03). That ticket attaches `seal.gd` in `stage_02.tscn`, spawns the Guards and wires each Seal to the Director.
 
-The Stage 2 three-seal rules, ready for when Stage 2 is un-cut. A Seal is shielded while either linked Guard lives. Its group of Guards activates once, on approach or when a Guard is shot. Once both Guards are dead the exposed Seal becomes a stationary `targetable` target with low health, destroyed exactly once by fire or a Bomb. A Bomb never reveals it early. All six destruction orders open the gate exactly once. Stage 1's S1-04 portal guards are **not** Seals: they are an ALL_REQUIRED_ENEMIES Encounter whose PortalLinks the Director hides (F10-02).
+The Stage 2 three-seal rules. A Seal is shielded while either linked Guard lives. Its group of Guards activates once, on approach or when a Guard is shot. Once both Guards are dead the exposed Seal becomes a stationary `targetable` target with low health, destroyed exactly once by fire or a Bomb. A Bomb never reveals it early. All six destruction orders open the gate exactly once. Stage 1's S1-04 portal guards are **not** Seals: they are an ALL_REQUIRED_ENEMIES Encounter whose PortalLinks the Director hides (F10-02).
 
 ## Read first
 
@@ -23,7 +29,7 @@ The Stage 2 three-seal rules, ready for when Stage 2 is un-cut. A Seal is shield
 - **Creates:** `scripts/progression/seal_rules.gd`, `scripts/progression/seal.gd`, `tests/unit/progression/test_seal_rules.gd`, `tests/scene/test_seal_contract.gd`.
 - **Edits:** none.
 - **Serialized at session end:** `docs/engineering/ROADMAP.md` (F9-03 row), `docs/HANDOFF_LOG.md`, `docs/engineering/enemies.md` ("Seal" section), `docs/GUIDE.md` Section 6 row `seal.gd` and Section 7 "Seal destroyed".
-- **Must not touch:** `scenes/stages/stage_02.tscn` (attaching the script is Stage 2 integration, cut with F12-04; the test attaches it at runtime and never saves), `scenes/stages/stage_01.tscn`, `scripts/progression/encounter_machine.gd`, `scripts/enemies/enemy_actor.gd` and `enemy_model.gd` (Guard passivity is Stage 2 integration), `scripts/progression/stage_director.gd`.
+- **Must not touch:** `scenes/stages/stage_02.tscn` (attaching the script is F12-05's; the test attaches it at runtime and never saves), `scenes/stages/stage_01.tscn`, `scripts/progression/encounter_machine.gd`, `scripts/enemies/enemy_actor.gd` and `enemy_model.gd` (Guard passivity is F12-05's), `scripts/progression/stage_director.gd`.
 - **Conflicts with:** none scheduled. It reads F8-02 and F9-02 files only.
 
 ## Deliverables
@@ -62,19 +68,28 @@ The Stage 2 three-seal rules, ready for when Stage 2 is un-cut. A Seal is shield
 
 ## Out of scope
 
-Attaching `seal.gd` in `stage_02.tscn`, spawning the Guards, Guard passivity until activation (it needs an `EnemyActor.set_engaged()`), `Gates/Gate_S2_03/PortalLights`, per-Seal Power rewards, and S2-03 content: all Stage 2 integration, cut with F12-04 pending the user.
+Attaching `seal.gd` in `stage_02.tscn`, spawning the Guards, Guard passivity until activation (`EnemyActor.set_engaged()`), `Gates/Gate_S2_03/PortalLights` and the per-Seal Power rewards are all F12-05's. S2-03 content is F12-04's.
 
 ## Definition of Done
 
 - `tools/test.ps1` green, with no `SCRIPT ERROR` in the output. Named tests cover ENGINEERING_BRIEF Section 8 "all seal orders" and STAGE_DESIGN "revisiting a seal cannot reset it or duplicate a reward". No Error-level warnings.
-- There is no `/run` step: no scheduled scene hosts a Seal. The scene contract test is the evidence, and the gap is recorded in `docs/engineering/enemies.md` Open issues.
+- There is no `/run` step here: F12-05 is the first ticket whose scene hosts a Seal. The scene contract test is the evidence.
 - `docs/engineering/enemies.md` Seal section; GUIDE Section 6 row `seal.gd` and Section 7 row.
 - Handoff log entry; `Status: done` with an Outcome; ROADMAP row.
 - One commit: `progression: add SealRules and Seal adapter`.
 
+## Outcome
+
+Implemented `SealRules` and the `Seal` adapter. The core enforces one-time Guard
+activation, duplicate-safe Guard defeat counting, shielded/exposed/destroyed
+state transitions, early-damage refusal, and silent capture/restore. The adapter
+resolves Guard ids from `guard_spawn` metadata, renders all state transitions,
+registers the exposed hit sphere, and emits one destruction event. No tests were
+added under the sprint rule; `tools/lane.ps1 land` passed.
+
 ## Handoff notes for Astra
 
-Nothing to wire now. When Stage 2 is un-cut, the Seal roots keep their children and `guard_spawn` metadata. Claude attaches `seal.gd` and sets `seal_id`, `health` and the node references. Portal-light presentation for a resolved seal is yours to author (an unresolved and a resolved state per `PortalLights/SealN`).
+Nothing to wire now. For F12-05, the Seal roots keep their children and `guard_spawn` metadata. Claude attaches `seal.gd` and sets `seal_id`, `health` and the node references. Portal-light presentation for a resolved seal is yours to author (an unresolved and a resolved state per `PortalLights/SealN`).
 
 ## Kickoff prompt
 

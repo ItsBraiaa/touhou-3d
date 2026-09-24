@@ -1,0 +1,54 @@
+[gd_scene format=3]
+
+[ext_resource type="Material" path="res://assets/combat/shield_blue.tres" id="1_bqv0h"]
+[ext_resource type="Material" path="res://assets/combat/player_shot.tres" id="2_we6gp"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_pdjbk"]
+material = ExtResource("1_bqv0h")
+radius = 0.46
+height = 0.92
+radial_segments = 10
+rings = 5
+
+[sub_resource type="TorusMesh" id="TorusMesh_bqv0h"]
+material = ExtResource("2_we6gp")
+inner_radius = 0.68
+outer_radius = 0.76
+rings = 24
+ring_segments = 6
+
+[sub_resource type="Animation" id="Animation_we6gp"]
+length = 3.0
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("VisualPivot:rotation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 3),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector3(0, 0, 0), Vector3(0, 6.2831855, 0)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_avitq"]
+_data = {
+&"float": SubResource("Animation_we6gp")
+}
+
+[node name="Visual" type="Node3D" unique_id=1680046526]
+
+[node name="VisualPivot" type="Node3D" parent="." unique_id=530662446]
+
+[node name="ShieldCore" type="MeshInstance3D" parent="VisualPivot" unique_id=516328388]
+mesh = SubResource("SphereMesh_pdjbk")
+
+[node name="ShieldRim" type="MeshInstance3D" parent="VisualPivot" unique_id=107120738]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0)
+mesh = SubResource("TorusMesh_bqv0h")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=2029430582]
+libraries/ = SubResource("AnimationLibrary_avitq")
+autoplay = &"float"

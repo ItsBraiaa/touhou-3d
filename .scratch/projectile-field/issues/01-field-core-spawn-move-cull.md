@@ -1,9 +1,11 @@
 # F5-01 ProjectileField core: spawn, move, cull
 
-Status: todo
+Status: done
 Type: core
 parallel-safe: yes
 Depends on: F0-02
+Lane: path
+Model: Claude Opus 5.5, solo
 
 ## Goal
 
@@ -100,3 +102,15 @@ None: this is code only. Capacity and the Flight Volume margin become Inspector 
 ```
 Read CLAUDE.md, docs/engineering/ROADMAP.md and .scratch/projectile-field/issues/01-field-core-spawn-move-cull.md, then implement that ticket with /mattpocock-skills:tdd. Finish with its Definition of Done and commit.
 ```
+
+## Outcome (2026-09-23)
+
+Delivered as specified, solo (lane path), test file first. Implementation choices, each pinned by a test and written in `docs/engineering/projectile-field.md`:
+
+- **Ids pack the slot and a field-wide spawn serial:** `id = (serial << 16) | slot`, with a per-slot `PackedInt64Array` of the id each slot last took (in place of the ticket's 32-bit generations). Ids are never reused across slot recycling, `clear_all` and a new `setup`, which keeps the serial. Ids are 64-bit ints, so consumers keep them in `int` or `PackedInt64Array`. `MAX_CAPACITY` is 65 536.
+- **Lowest free slot** comes from an ascending `PackedInt32Array` free list (native `bsearch` and `insert` on removal). A pass stops at one past the highest alive slot.
+- **Bounds are tested on the post-move position** (tick order step 5), so a spawn outside the bounds that flies inward within its first tick survives; the ticket's "culled on its first tick" is the case for one that stays outside.
+- **The obstacle query must not call back into the field;** documented in the class comment.
+- No event buffer yet: F5-01 emits nothing, and F5-02 adds the buffer with its first signal, following the events rule in the class comment.
+
+Tests: 12 in `tests/unit/combat/test_projectile_field.gd`; suite green at 210, no `SCRIPT ERROR`.

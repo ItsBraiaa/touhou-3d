@@ -1,9 +1,11 @@
 # F10-01 StageDirector adapter
 
-Status: todo
+Status: done
 Type: adapter
 parallel-safe: no
 Depends on: F8-02, F8-04, F9-02, F7-03, F4-03
+Lane: trunk
+Model: Claude Opus 5.5, 3-agent workflow (implementer, test-writer, reviewer)
 
 ## Goal
 
@@ -141,6 +143,29 @@ The global merge of the active Encounter's EntryVolume and ExitVolume boxes. Bot
 - Claude attached `stage_director.gd` to Stage 1's `Stage` and set its exports only. Keep the Encounter, Wave marker, `RewardOrigin` and `ShieldPickup` names: they are load-bearing.
 - `get_active_encounter_bounds()` is the value for boss-arena retreat containment (STAGE_01_HANDOFF).
 - `lantern_guardian` points at the dev Sentry until F12-03.
+
+## Outcome
+
+Done 2026-09-23 by trunk (Claude: implementer, plus a verifier agent that ran the game and a reviewer agent).
+
+`StageDirector` and the Session wiring follow the Deliverables. `stage_01.tscn` [shared] gained only nine `ext_resource` lines and the script and exports on `Stage`; `monitoring` stays off in the file.
+
+- **No new tests** (the user's sprint rule): `tests/scene/test_stage_director.gd` was not written. A throwaway driver ran the ticket's fifteen cases in the real main scene, headless, plus the windowed `/run` pass from the main menu into S1-02 (both Waves spawn and fire, five Power Pickups drop). Results and two captures are in `docs/validation/stage-director.md`. The suite stays green at 225, `test_game_session_flow.gd` needed no change, and `validate_combat.gd` is still `COMBAT_OK`.
+- **Beyond the ticket's Files: `scripts/progression/encounter_machine.gd`.** It never compiled: two parameters named `enemy_id` shadowed its static `enemy_id()`, which this project treats as an error. Nothing had loaded the class before, so F8-02's land gate never saw it, and the suite silently skipped `test_game_session_flow.gd` once the Session depended on it. Its own commit, `be64081`, renames the parameters (`defeated_id`, `candidate_id`) with no behavior change. The ticket lists this file as "must not touch"; it was changed because every later trunk ticket was blocked by it, and no other lane had it open.
+- **Beyond the text:**
+  - `_live_enemies` maps each enemy id to its score, not to the actor, so a freed actor is never held.
+  - `spawn_setup` returning false frees the actor, per `enemies.md`.
+  - After each `encounter_completed` the Director checks, deferred, whether the ship already overlaps the next EntryVolume. S1-01's ExitVolume and S1-02's EntryVolume overlap, and a body already inside reports no new `body_entered`.
+  - `get_machine()` is a read-out for tools and later tickets.
+- **Reviewer finding, fixed:** `check_setup()` now also validates every `enemy_definitions` entry and requires a `BoxShape3D` under each volume. Before the fix, an invalid definition passed the pre-check and froze its Encounter, because no enemy spawned.
+- **Commits:**
+  - `cd932b4`: a WIP draft, kept because no rebase is allowed.
+  - `be64081`: the EncounterMachine fix.
+  - The ticket commit.
+- **For Astra (handoff):**
+  - `tools/validate_stage_01.gd` now fails its "no runtime script" check, by design.
+  - `tools/build_stage_01.py` must not be rerun over the wiring.
+  - `spirit_lume.tscn` and `sentry_lantern.tscn` duplicate their glTF children, which leaks at exit and probably draws each enemy twice.
 
 ## Kickoff prompt
 

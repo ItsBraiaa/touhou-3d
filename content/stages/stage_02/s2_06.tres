@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="EncounterDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/definitions/reward_definition.gd" id="1_aot4k"]
+[ext_resource type="Script" path="res://scripts/definitions/encounter_definition.gd" id="2_p22cc"]
+[ext_resource type="Script" path="res://scripts/definitions/wave_definition.gd" id="3_7hlxq"]
+
+[resource]
+script = ExtResource("2_p22cc")
+id = &"S2-06"
+next_id = &"S2-07"
+metadata/dev = true
+metadata/reviewed = true

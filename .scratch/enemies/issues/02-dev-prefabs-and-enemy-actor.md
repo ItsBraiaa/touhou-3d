@@ -1,9 +1,11 @@
 # F9-02 EnemyActor adapter and dev Spirit and Sentry prefabs
 
-Status: todo
+Status: done
 Type: adapter
 parallel-safe: no
 Depends on: F9-01, F6-02
+Lane: path
+Model: Claude Opus 5.5, 2-agent workflow (implementer, reviewer)
 
 ## Goal
 
@@ -73,3 +75,13 @@ Your final `scenes/enemies/spirit.tscn` and `sentry.tscn` can copy the dev tree 
 ```
 Read CLAUDE.md, docs/engineering/ROADMAP.md and .scratch/enemies/issues/02-dev-prefabs-and-enemy-actor.md, then implement that ticket. Use /run to verify a Spirit and a Sentry spawning, anticipating, firing and being defeated in the arena harness. Finish with its Definition of Done and commit.
 ```
+
+## Outcome (2026-09-23)
+
+Delivered in lane path with the 2-agent shape (implementer, reviewer). `scripts/enemies/enemy_actor.gd`, the dev `spirit.tscn` and `sentry.tscn`, four dev `.tres` files, the arena harness spawns, `docs/validation/enemies.md` with `enemies-arena.png`, and the contract in `docs/engineering/enemies.md`. **No tests:** the sprint's no-new-tests rule voids the "Tests required" list and the named-tests line of the Definition of Done. Throwaway scripts drove the harness headless and windowed instead (every listed behavior, recorded in the validation page), and the land gate runs the existing suite and the boot smoke.
+
+- **Hit center at the root origin, not y 1.1 / 0.8.** Astra's visual scenes are centered on `VisualRoot` (the `Model` is offset by minus half its height), so the ticket's proposal, which assumed feet at the origin, would have put both spheres above the bodies. A drawn sphere confirmed the fit. Radii stay 1.0 and 0.9.
+- **Dev values.** Spirit: health 20, DRIFT at 2 u/s over 3 units, `attack_interval` 1.5, an AIMED burst of 3 volleys × 3 at 10 u/s. Sentry: health 30, HOVER at 1 u/s over 1.5, `attack_interval` 2.0, a 70° FAN of 7, two volleys, at 7 u/s. Damage 10 (a common bullet, PLANEJAMENTO Section 4). Health from F6-03's recorded fire (1 damage every 0.1 s at Power Level 1); a locked Spirit at 30 units fell in 2.35 s.
+- **Added beyond the ticket, all small:** `get_health()` for the readout and the Director; `take_damage` ignores the paused tree (weapon-rendering.md's open issue) and non-positive damage (the model asserts on it); `spawn_setup` also refuses a second call and an actor outside the tree; the harness's R key respawns the defeated enemies and forwards `threat_reported` to `Hud.show_threat`.
+- **Finding for trunk (F6-03, not fixed here: `player_weapon.gd` and `camera_rig.gd` are outside this ticket).** Locked shots miss enemies 10 to 16 units away once the lock framing blends in: about 3.5 units off, just outside the 10° main Aim Assist cone. Details in `docs/validation/enemies.md`.
+- **`EnemyModel` needed no fix.**

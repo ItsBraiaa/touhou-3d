@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="PatternDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/definitions/pattern_definition.gd" id="1_pattern"]
+
+[resource]
+script = ExtResource("1_pattern")
+id = &"sentry_fan"
+shape = 1
+projectiles_per_volley = 7
+volley_count = 2
+volley_interval = 0.4
+speed = 7.0
+lifetime = 7.0
+projectile_radius = 0.35
+damage = 10
+spread_degrees = 78.0
+metadata/dev = true
+metadata/reviewed = true

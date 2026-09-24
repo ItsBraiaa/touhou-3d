@@ -1,9 +1,11 @@
 # F5-02 Core hit sweep and Graze rules
 
-Status: todo
+Status: done
 Type: core
 parallel-safe: yes
 Depends on: F5-01
+Lane: path
+Model: Claude Opus 5.5, 3-agent workflow (implementer, test-writer, reviewer)
 
 ## Goal
 
@@ -85,3 +87,13 @@ None: this is code only. The Graze rule uses `GrazeVolume`'s authored radius (0.
 ```
 Read CLAUDE.md, docs/engineering/ROADMAP.md and .scratch/projectile-field/issues/02-core-hit-sweep-and-graze-rules.md, then implement that ticket with /mattpocock-skills:tdd. Finish with its Definition of Done and commit.
 ```
+
+## Outcome (2026-09-23)
+
+Delivered as specified in `scripts/combat/projectile_field.gd`, lane path, as implementer plus reviewer. **No unit tests:** the user's no-new-tests rule for the rest of the sprint (relayed by the planning session on 2026-09-23) arrived while this ticket was in progress; the test-writer was stopped before it wrote anything, and the "Tests required" list is not delivered. Verification is the existing suite (the 12 F5-01 tests still pass against the extended core), the `tools/lane.ps1 land` run, and the review. The sweep's first real run is F6-02 and F7-01.
+
+- `set_player(previous_center, center, core_radius, graze_radius, invulnerable)` and `clear_player()`; `setup()` keeps the player. It asserts `0 < core_radius <= graze_radius`.
+- Signals `player_hit(projectile_id, damage)` and `grazed(projectile_id)`, buffered during the pass (three packed arrays) and emitted after it in slot order. A listener's `clear_all()` empties the buffer, which ends the emission loop.
+- The sweep is the relative-segment closest distance of the ticket. A zero-length relative segment uses its start point.
+- Strict Invulnerability reading as the ticket states it. **Ruling 5 pending:** D-07 Part B had not landed when F5-02 did. The lenient alternative is a one-line move of the spend into the `grazed` branch.
+- Note for F5-03: a hostile clear called from a listener must cancel the pending `grazed` events of the Projectiles it removes (its ticket requires it) without dropping `player_hit`. Checking `is_alive` at emit time would be wrong, because a Projectile may graze and then leave the bounds in the same pass.

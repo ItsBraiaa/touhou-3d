@@ -1,9 +1,11 @@
 # F5-03 Bomb and Phase clears, hit spheres
 
-Status: todo
+Status: done
 Type: core
 parallel-safe: yes
 Depends on: F5-02
+Lane: path
+Model: Claude Opus 5.5, 3-agent workflow (implementer, test-writer, reviewer)
 
 ## Goal
 
@@ -80,3 +82,13 @@ None: this is code only. Each enemy's hit sphere is read from its `HitVolume` sh
 ```
 Read CLAUDE.md, docs/engineering/ROADMAP.md and .scratch/projectile-field/issues/03-bomb-phase-clears-and-hit-spheres.md, then implement that ticket with /mattpocock-skills:tdd. Finish with its Definition of Done and commit.
 ```
+
+## Outcome (2026-09-23)
+
+Delivered in `scripts/combat/projectile_field.gd`, lane path, as implementer plus reviewer. The reviewer found no defects; its three nits are applied. **No unit tests,** by the user's no-new-tests rule: the "Tests required" list is void. Verification is the existing suite (the 12 F5-01 tests pass against the extended core), the `tools/lane.ps1 land` gate, and the review. The code first runs for real in F6-02, F7-02 and F9-02.
+
+- **Clears.** `clear_hostile_in_radius(center, radius)` and `clear_hostile_all()` remove HOSTILE Projectiles only, return the count and emit nothing. `clear_hostile_all` is the same private clear with an infinite radius. Both mark the dead slots and rebuild the free list once, so a full clear costs one pass over the capacity.
+- **Graze take-back.** A hostile clear called from a listener turns each removed Projectile's pending `grazed` into a dropped event, and leaves every other event alone. `.scratch/projectile-field/spec.md` still reads "the hostile clears do not" (drop the tick's events). That is true of every event but the removed Projectiles' Graze. The spec file is outside this ticket's Files, so it is noted here and in the module doc's events rule.
+- **Registry.** Three packed arrays hold the spheres. `register_target` asserts a positive radius, and a repeated id replaces its sphere and keeps its registration place. The registry is emptied after each pass and before the events, so a registration made by a listener counts for the following tick. `setup` empties it; `clear_all` keeps it.
+- **Target sweep.** A PLAYER Projectile hits the target with the smallest entry fraction along its segment: 0 when it starts inside a sphere, with a tie going to the earlier registration. Targets are static for the tick (Open issue in the module doc).
+- `targets_in_radius` asserts a non-negative radius, and so does `clear_hostile_in_radius`.

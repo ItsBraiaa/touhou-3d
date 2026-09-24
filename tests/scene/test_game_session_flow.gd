@@ -39,7 +39,7 @@ const PAUSED_TICKS := 30
 var _main: GameSession
 var _interface: Interface
 var _world_root: Node3D
-var _projectile_root: Node3D
+var _projectile_system: ProjectileSystem
 
 
 func before_each() -> void:
@@ -50,7 +50,7 @@ func before_each() -> void:
 	tree.root.add_child(_main)
 	_interface = _main.interface
 	_world_root = _main.world_root
-	_projectile_root = _main.projectile_root
+	_projectile_system = _main.projectile_system
 	await tree.process_frame
 
 
@@ -332,11 +332,13 @@ func test_return_to_menu_unloads_everything_and_shows_the_main_menu() -> void:
 	if not assert_not_null(_main, "GameSession"):
 		return
 	_request(&"start_direct_stage", {"stage": &"stage_01"})
-	_projectile_root.add_child(Node3D.new())
+	var ahead := _ship().global_position + Vector3(0.0, 0.0, -10.0)
+	_projectile_system.spawn(ProjectileSpawn.new(ahead, Vector3.ZERO, ProjectileSpawn.Faction.HOSTILE, 5.0))
+	assert_eq(_projectile_system.count(ProjectileSpawn.Faction.HOSTILE), 1, "a hostile Projectile in flight")
 	_press_pause()
 	_request(&"return_to_menu")
 	assert_eq(_world_root.get_child_count(), 0, "WorldRoot empty")
-	assert_eq(_projectile_root.get_child_count(), 0, "ProjectileRoot empty")
+	assert_eq(_projectile_system.count(ProjectileSpawn.Faction.HOSTILE), 0, "every Projectile removed")
 	assert_eq(_interface.current_screen(), ScreenRouter.MAIN_MENU)
 	assert_eq(_visible_screens(), ["MainMenu"])
 	assert_false(tree.paused, "unpaused")
@@ -381,14 +383,18 @@ func test_a_stage_without_player_start_or_flight_volume_is_refused() -> void:
 	assert_eq(_main.get_run_state().get_phase(), RunState.Phase.IDLE, "and no Run started")
 
 
-## Until F11 builds Results, a completed stage ends the Run at the main menu.
-func test_a_completed_stage_returns_to_the_menu_until_results_exist() -> void:
+## Since F11-01 a completed stage freezes under Results; a Direct Stage is the last of its
+## order, so the Run ends with its victory. Since F15-01 Results follows the victory beat.
+func test_a_completed_stage_shows_results() -> void:
 	if not assert_not_null(_main, "GameSession"):
 		return
 	_request(&"start_direct_stage", {"stage": &"stage_01"})
 	_main.get_run_state().complete_stage()
-	assert_eq(_world_root.get_child_count(), 0)
-	assert_eq(_interface.current_screen(), ScreenRouter.MAIN_MENU)
+	# Always processing: the beat's end pauses the tree before this wait ends.
+	await tree.create_timer(GameSession.VICTORY_BEAT_SECONDS + 0.1).timeout
+	assert_true(_world_root.get_child_count() > 0, "the stage stays loaded under Results")
+	assert_eq(_interface.current_screen(), ScreenRouter.RESULTS)
+	assert_true(tree.paused, "the world is frozen under Results")
 	assert_eq(_main.get_run_state().get_phase(), RunState.Phase.RUN_ENDED)
 
 
@@ -403,6 +409,77 @@ func test_pause_and_resume_need_a_stage_in_play() -> void:
 	_interface.push_overlay(ScreenRouter.PAUSE)
 	_request(&"resume")
 	assert_eq(_interface.current_screen(), ScreenRouter.PAUSE, "a Pause the Session did not open stays")
+
+
+## F4-02: a Run starts the Session's CombatState at the stage's entry Power Level, and the
+## HUD shows it. Direct Stage 2 enters at Power Level 2 (PLANEJAMENTO Section 4).
+func test_a_run_starts_the_combat_state_and_binds_the_hud() -> void:
+	if not assert_not_null(_main, "GameSession"):
+		return
+	var combat := _main.get_combat_state()
+	_request(&"start_direct_stage", {"stage": &"stage_02"})
+	if not assert_not_null(_ship(), "PlayerShip in Stage 2"):
+		return
+	assert_eq(combat.get_power_level(), 2, "Direct Stage 2 starts at Power Level 2")
+	assert_eq([combat.get_health(), combat.has_shield(), combat.get_bombs()], [CombatState.MAX_HEALTH, true, CombatState.MAX_BOMBS])
+	var hud := _interface.get_hud()
+	assert_eq((hud.get_node(^"PlayerStatus/PowerValue") as Label).text, "2", "the HUD shows Power Level 2")
+	assert_eq((hud.get_node(^"PlayerStatus/HealthValue") as Label).text, "100%")
+	assert_eq(_connections(combat, &"power_changed", hud), 1, "the HUD observes the CombatState")
+	assert_eq(_connections(_ship().targeting, &"target_changed", hud), 1, "and the ship's Targeting")
+
+
+func test_pause_pauses_the_combat_state() -> void:
+	if not assert_not_null(_main, "GameSession"):
+		return
+	_request(&"start_direct_stage", {"stage": &"stage_01"})
+	var combat := _main.get_combat_state()
+	assert_false(combat.is_paused())
+	_press_pause()
+	assert_true(combat.is_paused(), "paused with the tree")
+	_request(&"resume")
+	assert_false(combat.is_paused(), "and resumed with it")
+
+
+## Restart gives a new ship and the stage's entry resources, and the HUD follows the new
+## ship's Targeting only.
+func test_restart_rebinds_the_hud_to_the_new_ship() -> void:
+	if not assert_not_null(_main, "GameSession"):
+		return
+	_request(&"start_direct_stage", {"stage": &"stage_01"})
+	var old_ship := _ship()
+	if not assert_not_null(old_ship, "PlayerShip"):
+		return
+	var combat := _main.get_combat_state()
+	combat.take_hit()
+	var hud := _interface.get_hud()
+	var shield := hud.get_node(^"PlayerStatus/Shield") as CanvasItem
+	assert_eq(shield.modulate, hud.dim_modulate, "the hit broke the Shield on the HUD")
+	_press_pause()
+	_request(&"restart_stage")
+	var ship := _ship()
+	if not assert_not_null(ship, "a PlayerShip after the restart"):
+		return
+	assert_eq(_connections(old_ship.targeting, &"target_changed", hud), 0, "the old ship is let go")
+	assert_eq(_connections(ship.targeting, &"target_changed", hud), 1, "the new one is followed once")
+	assert_eq(_connections(combat, &"shield_changed", hud), 1, "the CombatState still once")
+	assert_true(combat.has_shield(), "the stage's entry resources again")
+	assert_false(combat.is_paused())
+	assert_eq(shield.modulate, hud.lit_modulate, "and on the HUD")
+
+
+func test_return_to_menu_unbinds_the_hud() -> void:
+	if not assert_not_null(_main, "GameSession"):
+		return
+	_request(&"start_direct_stage", {"stage": &"stage_01"})
+	var hud := _interface.get_hud()
+	var combat := _main.get_combat_state()
+	_press_pause()
+	_request(&"return_to_menu")
+	for signal_name: StringName in [&"health_changed", &"shield_changed", &"bombs_changed", &"power_changed"]:
+		assert_eq(_connections(combat, signal_name, hud), 0, "%s disconnected" % signal_name)
+	assert_false((hud.get_node(^"TargetMarker") as CanvasItem).visible, "no marker left on screen")
+	assert_false(combat.is_paused(), "unpaused with the tree")
 
 
 func _request(action: StringName, payload: Dictionary = {}) -> void:
@@ -433,6 +510,15 @@ func _stage() -> Node3D:
 
 func _ship() -> PlayerController:
 	return _world_root.get_node_or_null(^"PlayerShip") as PlayerController
+
+
+## How many connections of [param source]'s [param signal_name] reach [param target].
+func _connections(source: Object, signal_name: StringName, target: Object) -> int:
+	var count := 0
+	for connection: Dictionary in source.get_signal_connection_list(signal_name):
+		if (connection["callable"] as Callable).get_object() == target:
+			count += 1
+	return count
 
 
 ## The names of the visible screens under `Interface`, in child order.

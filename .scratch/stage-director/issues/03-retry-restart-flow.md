@@ -1,9 +1,11 @@
 # F10-03 Retry and Restart flow
 
-Status: todo
+Status: done
 Type: integration
 parallel-safe: no
 Depends on: F10-02, F7-01
+Lane: trunk
+Model: Claude Opus 5.5, 3-agent workflow (implementer, test-writer, reviewer)
 
 ## Goal
 
@@ -127,6 +129,18 @@ There is no `restart_from_entry()`: Restart reloads, and `restart_into` is not u
 
 - Defeat shows `Último checkpoint · <display_name>`. Give CP1-A and CP1-B Portuguese place names in `content/stages/stage_01/cp1_*.tres` when you like.
 - Respawn uses the `Respawn` markers as authored, facing -Z.
+
+## Outcome
+
+Done 2026-09-23 by trunk (Claude: implementer, plus a verifier agent that ran the game and a reviewer agent).
+
+The Director's three methods and the Session's `_spawn_player`, `_retry`, Defeat param and `_flight_volume` follow the Deliverables. No scene file changed.
+
+- **No new tests** (the user's sprint rule): `tests/scene/test_retry_restart_flow.gd` was not written. A throwaway driver ran the ticket's eleven cases in the real game headless, and the windowed `/run` from the main menu died after CP1-A: Defeat named `Último checkpoint · CP1-A`, and Retry put the ship at the arch with full resources and no bullets. Results and two captures are in `docs/validation/stage-01-progression.md`. The suite stays at 225; `test_game_session_flow.gd` and `test_game_session_combat.gd` needed no change; `validate_combat.gd` and the F10-01 and F10-02 passes still pass.
+- **Deviation:** the ticket's `_spawn_player(at)` is `_spawn_player(ship, at)`. `_load_stage` still refuses a `player_scene` without a `PlayerController` root before anything unloads, and hands that same instance over, so the ship is not instanced twice. The reviewer agreed.
+- **Reviewer hardening:** `_retry()` returns unless a stage is in play. This is not reachable today, but it guards a Retry after a same-tick stage clear once F11-01 keeps the stage under Results.
+- **Open design question (in the handoff log):** Retry removes every runtime Pickup, as this ticket says, including rewards left uncollected before the Checkpoint. Their Encounters stay rewarded, so those Pickups never return. STAGE_DESIGN says "from the failed segment". The reviewer's fix, if wanted, stays inside the Director: record the live reward Pickups at each activation and respawn them after a Retry.
+- **For F11-01:** `menu_controller.gd:144` calls the Defeat `checkpoint` param an id, but it is now the Checkpoint's `display_name`.
 
 ## Kickoff prompt
 

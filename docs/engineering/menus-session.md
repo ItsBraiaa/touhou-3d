@@ -100,11 +100,13 @@ The adapter wiring (`Interface`, F2-02): on `screen_hidden(id)`, `router.remembe
 | --- | --- | --- | --- |
 | `menu_scenes` | `Array[PackedScene]` | the eight `scenes/ui/` menus; order does not matter, each is identified by its root name | yes: an empty slot disables the node; a missing, repeated or foreign scene is reported and skipped |
 | `hud_scene` | `PackedScene` | `scenes/ui/hud.tscn` | yes |
+| `settings_path` | `String` | not set: the default `Settings.DEFAULT_PATH` (`user://settings.cfg`) | no; tests inject a temp path (F3-02) |
 
 ### Behaviour
 
 - `_ready` instances the HUD first (so every menu, overlays included, draws above it), then each menu, all hidden, connects each `MenuController.action_requested` to one handler, reports any menu screen no scene provides, and connects the router's two signals. Nothing is shown until the Session calls `show_home`.
-- A menu action other than `back` is re-emitted unchanged as `action_requested(action, payload)`. `back` never leaves `Interface`: it is resolved like `ui_cancel` below.
+- Since F3-02 `_ready` first builds the one `Settings` from `settings_path` and reads the file once (its messages are `push_warning`s), and after the menus it adds an `OptionsScreen` under the Options root, which binds the eight widgets and applies the buses and the display ([settings.md](settings.md) "Options binding").
+- A menu action other than `back` and `restore_defaults` is re-emitted unchanged as `action_requested(action, payload)`. `back` never leaves `Interface`: it is resolved like `ui_cancel` below. `restore_defaults` (Options' Defaults) never leaves it either: `OptionsScreen.restore_defaults()` restores and saves once (F3-02).
 - `ui_cancel` (Escape, gamepad B) in `_unhandled_input`, while a menu is on top: on Pause it emits `action_requested(&"resume", {})` and leaves Pause up for the Session to remove, because the router's `back()` cannot unpause the tree; elsewhere it calls `back()`, and when that returns false (main menu, Defeat, Results) it emits `action_requested(&"back_refused", {})`. Either way the event is marked handled, so the same Escape press cannot also reach the Session as `pause`.
 - `ui_cancel` with the HUD on top (running gameplay), or before the first `show_home`, is left unhandled: over gameplay Escape is the Session's `pause`.
 - Focus follows the router's memory: see "Focus memory" above.
@@ -126,6 +128,7 @@ The adapter wiring (`Interface`, F2-02): on `screen_hidden(id)`, `router.remembe
 | `current_screen() -> StringName` | Session, tests | `router.current()`. |
 | `is_gameplay_covered() -> bool` | Session | `router.is_gameplay_covered()`. |
 | `get_hud() -> Control` | Session (F4 binds it) | The HUD instance. |
+| `get_settings() -> Settings` | F3-03, F3-04, tests | The one `Settings`, loaded at boot (F3-02). Null only when the exports failed validation. |
 
 ## MenuController contract
 
@@ -177,7 +180,7 @@ The Results value labels (time, score, Graze, bombs) are F11's.
 
 ### Footer
 
-`Layout/NavigationHint`, the keyboard hint on the five full screens, is hidden after a gamepad button or a stick pushed past 0.5 and shown again after a key press or when the last gamepad is disconnected. Every menu tracks this in `_input` even while hidden, so the next screen opens with the right state. Pause, Defeat and Results are authored without a footer; the path is pinned by a test instead of a runtime log.
+`Layout/NavigationHint` is the keyboard hint on the five full screens. Since F3-03 no menu tracks devices: `Interface` owns the one `InputDeviceState` and calls `MenuController.set_keyboard_prompts(shown)` on every menu when the prompts change, so the next screen opens with the right state and the menus cannot disagree. Which prompts show depends on Options' input device (Automático follows the last device used, Teclado always shows the hint, Controle hides it while a pad is connected): see [settings.md](settings.md) "Input device and disconnect". Pause, Defeat and Results are authored without a footer; the path is pinned by a test instead of a runtime log.
 
 ### Menu input bindings
 
@@ -247,7 +250,7 @@ Clear Time is committed Active Time plus the current Attempt's (CONTEXT "Clear T
 | Export | Type | Set in `main.tscn` to | Required |
 | --- | --- | --- | --- |
 | `world_root` | `Node3D` | `WorldRoot` | yes |
-| `projectile_root` | `Node3D` | `ProjectileRoot` | yes |
+| `projectile_system` | `ProjectileSystem` | `ProjectileRoot` | yes |
 | `interface` | `Interface` | `Interface` | yes |
 | `audio` | `Node` | `Audio` | yes |
 | `player_scene` | `PackedScene` | `scenes/player/player_ship.tscn`; its root must be a `PlayerController` | yes |
@@ -266,9 +269,9 @@ A missing required export is reported with `Main`'s path and the node stops proc
 | `resume` | Pause's Continuar, `ui_cancel` on Pause | Resume (below). |
 | `restart_stage` | Pause | Unpause, `run_state.restart_stage()`, reload the stage and a new ship, `begin_attempt()`, HUD. |
 | `return_to_menu` | Pause (Defeat and Results in F11) | Unpause, unload, `run_state.end_run(false)`, `show_home(MAIN_MENU)`. |
-| `quit` | main menu | `get_tree().quit()`. |
+| `quit` | main menu | `_quit()`: `audio.silence()`, then `get_tree().quit()` after `QUIT_SILENCE_SECONDS` (0.1 s), so no stream is still playing at exit. The window's close button and Alt+F4 take the same path (`auto_accept_quit` is off once the Session is set up). |
 | `back_refused` | main menu, Defeat, Results | Nothing. |
-| anything else (`restore_defaults`, `retry`, `continue_campaign`, `replay_stage`) | Options, Defeat, Results | A warning naming the action; F3 and F11 implement them. |
+| anything else (`retry`, `continue_campaign`, `replay_stage`) | Defeat, Results | A warning naming the action; F11 implements them. `restore_defaults` no longer arrives: `Interface` resolves it (F3-02). |
 
 ### Starting a stage
 
@@ -280,7 +283,7 @@ The Flight Volume is the `min`/`max` `Vector3` metadata on the stage's `FlightBo
 
 ### Unloading
 
-`_unload_stage()` removes every child of `WorldRoot` (the stage and the ship) and of `ProjectileRoot` from the tree at once, then `queue_free`s them. Removing them first keeps a stage loaded in the same frame from sharing the tree, the physics space or the `targetable` group with the old one, and keeps its name `Stage`. Today every caller runs from an input event or a button signal; F10 and F11 must defer the call when it is triggered from a physics callback (an `Area3D` `body_entered`), where removing collision objects is not allowed.
+`_unload_stage()` removes every child of `WorldRoot` (the stage and the ship) from the tree at once, then `queue_free`s them, and calls `projectile_system.clear_all()` (since F6-02; `ProjectileRoot`'s own children are the renderers and stay). `_load_stage()` ends with `projectile_system.setup(bounds, ship)` (contract in [weapon-rendering.md](weapon-rendering.md)). Removing them first keeps a stage loaded in the same frame from sharing the tree, the physics space or the `targetable` group with the old one, and keeps its name `Stage`. Today every caller runs from an input event or a button signal; F10 and F11 must defer the call when it is triggered from a physics callback (an `Area3D` `body_entered`), where removing collision objects is not allowed.
 
 ### Pause
 
@@ -391,7 +394,7 @@ Mutation-checked, twelve mutants, each failing a named test above by assertion: 
 | `ui_cancel` on Pause resumes and removes Pause | `test_cancel_on_pause_resumes_and_removes_pause` |
 | The gamepad B press that resumes never reaches gameplay as a `bomb` event, in `_input` or `_unhandled_input`; the next press does | `test_the_b_press_that_resumes_never_reaches_gameplay_as_a_bomb` |
 | Restart: a new stage and a new ship at `PlayerStart`, Clear Time 0 even after a Checkpoint commit, Attempt 2, unpaused, HUD alone | `test_restart_reloads_the_stage_with_a_new_ship_at_player_start` |
-| Return to Menu empties `WorldRoot` and `ProjectileRoot`, unpauses, ends the Run, shows the main menu | `test_return_to_menu_unloads_everything_and_shows_the_main_menu` |
+| Return to Menu empties `WorldRoot` and every Projectile, unpauses, ends the Run, shows the main menu | `test_return_to_menu_unloads_everything_and_shows_the_main_menu` |
 | A stage with a null scene is refused: nothing loaded, still on the menu, no Run; the other stage still plays | `test_a_stage_without_a_scene_is_refused_and_the_menu_stays` |
 | A stage with no Flight Volume or no `PlayerStart` is refused the same way | `test_a_stage_without_player_start_or_flight_volume_is_refused` |
 | A completed stage returns to the menu until F11 | `test_a_completed_stage_returns_to_the_menu_until_results_exist` |
