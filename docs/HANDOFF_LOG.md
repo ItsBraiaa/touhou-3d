@@ -1,5 +1,17 @@
 # Handoff Log
 
+## 2026-09-24 — Claude (path) — F16-11: Target Lock hands off when the locked target dies
+State: INTEGRATED_VERIFIED (headless in-game driver; physical play owed)
+Files: `scripts/player/target_selector.gd` (`select_successor`), `scripts/player/targeting.gd` (defeat watch, handoff, `lock_lost_to_defeat`), `scripts/player/player_controller.gd` (one connection to `CameraRig.request_recenter`); `docs/engineering/player-flight.md` (Targeting contract); `docs/validation/controls-expansion.md` (new F16-11 section); the ticket `.scratch/controls-expansion/issues/11-target-lock-handoff-on-defeat.md`; `docs/engineering/ROADMAP.md`.
+Change:
+- When the locked enemy or boss is defeated, the lock moves on the next tick to the visible, in-range target nearest the screen center. The camera, HUD and weapon follow through the normal `target_changed`.
+- With none left, the lock is released and the camera recenters to the authored follow view, except after a boss: the camera then keeps the boss's Death clip in view (the user's call).
+- An unrelated death, a manual unlock, range loss, Retry and Seals behave as before.
+
+Why: the user's request.
+
+Action required by Astra: PLANEJAMENTO Section 3 still says a lock lasts until "invalidated by target death/range". A death now hands the lock off. Please update that sentence in your words.
+
 ## 2026-09-24 — Astra (gate-fog) — closed gate clarity in both stages
 State: DELIVERED
 Files: `assets/environment/stage_01/gate_veil.gdshader`, `assets/environment/stage_02/gate_veil.gdshader`, visual mesh sizes and per-arch shader parameters in `scenes/stages/stage_01.tscn` and `scenes/stages/stage_02.tscn`, `.scratch/gate-clarity/issues/01-closed-gate-veils.md`, `docs/engineering/ROADMAP.md`.

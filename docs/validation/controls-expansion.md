@@ -355,3 +355,22 @@ The headless display server ignores `Input.mouse_mode` and sends no focus notifi
 **Engineering follow-up.** F16-06 already identified a code-reading concern in `scripts/player/targeting.gd`: remapping `lock_target` or `next_target` to the Back input can trigger it on the first tick after resuming Pause. This was not reproduced here. Claude assigned the release guard to OpenCode (oc-a) as F16-09 during this land. No `player_ship.tscn`, script or numeric edit was made by Astra.
 
 **Acceptance decision:** blocked pending interactive keyboard/mouse and available controller checks. The presentation-label change is scoped and ready for the lane gate, but F16-07 is not approved as a completed device pass.
+
+## Target Lock handoff (F16-11, path)
+
+2026-09-24, Windows 11, Godot 4.7.2, headless run of `main.tscn` by a throwaway driver outside the repo (not a test, not a physical pass). 60 Hz physics, `max_distance` 60, `max_screen_radius` 0.85.
+
+| Case | Result |
+| --- | --- |
+| (a) Locked target killed, two others eligible | pass: one `target_changed` on the death tick, to the successor rule's choice; camera, HUD and weapon on it; dying node never listed |
+| (b) An unrelated enemy killed while locked (three cases) | pass: lock kept, no emission |
+| (c) Manual unlock, then the old target killed | pass: no lock over 20 ticks, no recenter |
+| (d) Last eligible target killed (others absent, hidden, or out of range) | pass: one `target_changed(null)`, `lock_lost_to_defeat` once, the rig recenters; no reacquire afterwards |
+| (e) Range loss with another target eligible | pass: released as before, not reacquired, no recenter |
+| (f)(h) Death clip 0.67 s; `next_target` ring and the toggle | pass: unchanged |
+| Same-tick `lock_target` press on the death tick | pass: release then the press's fresh lock, as before |
+| (g) Lantern Guardian, Tempest Sentinel, Storm Guardian killed while locked | pass: lock held through Phase transitions, released at defeat, **no recenter** (boss rule); boss in the camera frustum on 39/39, 39/39 and 38/38 ticks of its Death clip. Before the boss rule the Tempest Sentinel's recenter turned 90° and kept it in view on only 7 of 39 ticks. |
+| Retry and Restart | lock cleared as before (the driver's own lock precondition was not met; read by code: every lock change resets the watch) |
+| Seal | not exercised (the driver could not lock one); by reading, a Seal has no `defeated` signal, so it keeps the old release |
+
+Physical keyboard and controller play of the handoff is owed to the user's pass.

@@ -101,7 +101,7 @@ const DASH_GLANCE_TOLERANCE := 0.02
 ## Near-miss volume, on the same terms as [member damage_core]; F5 owns graze.
 @export var graze_volume: Area3D
 ## Target Lock selection. Not driven from here — it reads its own actions — but the ship
-## owns it and its camera, so this is where the one connection between them is made.
+## owns it and its camera, so this is where the two connections between them are made.
 @export var targeting: Targeting
 ## The ship's weapon. Not driven from here, but [method set_controls_enabled] stops and
 ## restarts its fire with the controls, so pause, defeat and transitions need one call.
@@ -154,10 +154,12 @@ func _ready() -> void:
 	_setup_core_feedback()
 	_setup_dash_visual()
 	focus_changed.connect(_on_focus_changed)
-	# The camera frames whatever the targeting locks, null included, which clears it. Made
-	# here rather than in setup(), because an owner calls setup() again every time the
-	# Flight Volume changes and _ready runs once.
+	# The camera frames whatever the targeting locks, null included, which clears it, and
+	# recenters when a defeat ends the lock with no target left (F16-11). Made here rather
+	# than in setup(), because an owner calls setup() again every time the Flight Volume
+	# changes and _ready runs once.
 	targeting.target_changed.connect(camera_rig.set_lock_target)
+	targeting.lock_lost_to_defeat.connect(camera_rig.request_recenter)
 
 
 ## One tick: the dash timers first, so a window that ran out ends before this tick's
