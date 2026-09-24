@@ -26,6 +26,13 @@ Change:
 Why: F6-04, from path's F9-02 finding (PLANEJAMENTO Section 4: Aim Assist toward the lock).
 Action required by Astra: `lock_assist_degrees` (25°) is yours to tune (D-05 or D-07 Part C). Report the value to trunk for F14-01's swap step.
 Action required by Claude (trunk): none now. F13-03 adds `shots_fired` to the same `_fire`, which is still the single fire path. `WeaponModel.assist_direction` is no longer called by the weapon; it stays in the core.
+## 2026-09-24 02:00 — OpenCode (oc-a) — F9-03 part 1: SealRules core
+State: CODE_READY
+Files: `scripts/progression/seal_rules.gd`, `docs/engineering/enemies.md`
+Change: Added the Node-free SealRules lifecycle core. It activates linked Guards once, counts each linked defeat once, exposes the Seal only after all Guards are defeated, ignores early damage including Bomb damage, and emits exactly-once progression signals. Capture and restore preserve state without emitting signals.
+Why: F9-03 part 1 supplies the Stage 2 Seal progression contract for the adapter in part 2.
+Action required by other agent: none; continue with F9-03 part 2.
+
 ## 2026-09-24 01:45 — Claude (plan) — land compiles every script; EncounterMachine fix landed early
 State: dev
 Files: `tools/check_resources.gd`, `tools/lane.ps1`, `docs/engineering/SPRINT.md`, `scripts/progression/encounter_machine.gd` (cherry-picked from trunk's `be64081`, byte-identical).
