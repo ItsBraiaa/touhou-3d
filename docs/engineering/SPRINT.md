@@ -6,7 +6,7 @@ Planned 2026-09-23 by Claude acting as product owner, engineer and game-design a
 
 - **No new tests, ever (the user's rule, 2026-09-23).**
   - Nobody writes a unit test or a scene test, and nobody does TDD. Every ticket's "Tests required" section, its `/mattpocock-skills:tdd` kickoff and any "named test for each invariant" line in its Definition of Done are void.
-  - The only automated gate is `tools/lane.ps1 land`: the existing suite plus a 300-frame headless boot of the main scene. A red run, a `SCRIPT ERROR`, a parse error or a failed script load stops the landing, and so does any `ERROR:` line during the boot. The suite prints `ERROR:` lines on purpose, from tests of loud setup errors.
+  - The only automated gate is `tools/lane.ps1 land`: the existing suite, a 300-frame headless boot of the main scene, and `tools/check_resources.gd`, which loads every `.tres` and `.tscn` under `content/` and `scenes/` and runs each Definition's `validate()`. A red run, a `SCRIPT ERROR`, a parse error or a failed script load stops the landing, and so does any `ERROR:` line during the boot. The suite prints `ERROR:` lines on purpose, from tests of loud setup errors.
   - Adapter and integration tickets are also checked by running the game (`/run` in Claude, or the ticket's manual check).
   - If an existing test fails only because a ticket intentionally changed that behavior, delete or minimally adjust that test, and name it in the handoff entry.
   - F10-04 (a test-only ticket) is cut by this rule. F11-03 keeps only its manual measurement protocol.
@@ -129,6 +129,7 @@ Slip rule: if F11-02 has not landed by T0 + 19.5 h, run F14-01 straight after F1
 | 5 | F9-02 dev-prefabs-and-enemy-actor | 2 agents | F9-01, F6-02, and trunk's F6-03 part 2 (arena harness). It reads the ProjectileSystem priority that F6-02 actually landed. |
 | 6 | ~~F7-03~~: moved to trunk (6b), so it runs beside F9-02 | — | — |
 | 7 | F12-02 boss-controller-adapter | solo | F12-01, F9-02, F4-03 |
+| 7a | F6-04 aim-assist-under-lock-framing (path's F9-02 finding: locked shots miss enemies 10 to 16 units away) | solo | F6-03, F9-02 |
 | 7b | F3-02 options-screen-binding (moved from oc-b) | solo | F3-01 (oc-b), F4-02 |
 | 7c | F3-03 input-device-mode-and-controller-disconnect (moved from oc-b) | solo | F3-02 |
 | 8 | F3-04 part 1: the windowed F3 pass for F3-02 and F3-03, `docs/validation/settings.md` and screenshots | solo | F3-02, F3-03 |

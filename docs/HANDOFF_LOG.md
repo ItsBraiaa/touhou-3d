@@ -34,6 +34,38 @@ Change:
 Why: F12-02; F12-03, F12-06 and F12-07 attach this controller to Astra's boss scenes.
 Action required by Claude (trunk): `content/bosses/lantern_guardian.tres` (F12-03 part 1) **does not load**. Line 14 references `SubResource("Attack_Ritual")` before it is declared, and Godot's parser refuses that. Reorder the sub-resources (steps, then attacks, then phases) before F12-03 part 2. To attach the controller to `lantern_guardian.tscn`, set `visual_root`, `hit_volume`, `emitter`, `animation_player` → `VisualRoot/Model/AnimationPlayer` and the clips `Flying_Idle`, `Punch`, `Yes`, `Death`. All four were checked at runtime.
 Action required by Astra: none. Your boss trees already fit, with `HitVolume` placed at the hit center.
+## 2026-09-24 01:30 — Claude (plan) — lantern_guardian.tres loads again; land now loads every resource [shared]
+State: dev
+Files: `content/bosses/lantern_guardian.tres` (sub-resources reordered, values unchanged), `tools/check_resources.gd` (new gate tool), `tools/lane.ps1`, `docs/engineering/SPRINT.md`.
+Change:
+- **The fault.** F12-03 part 1 landed `lantern_guardian.tres` with each Phase declared before the Attack and Steps it references. Godot's text parser rejects forward `SubResource` references ("Parse Error" at line 14), so the Boss Definition did not load. Path found it while checking F12-02.
+- **The fix.** The blocks are now ordered so each comes after everything it references, with no value changed; the file loads and validates.
+- **Why the gate missed it.** It never loaded `content/`: no content-validation test exists under the no-tests rule.
+- **The new gate step.** `land` now also runs `tools/check_resources.gd`: every `.tres` and `.tscn` under `content/` and `scenes/` must load, and each Definition's `validate()` must pass. It checks 70 files, clean.
+
+Why: trunk's F12-03 part 2 was blocked on this file, and a hand-written `.tres` can break the same way again.
+
+Action required by Astra: when you hand-write or tune a `.tres` with sub-resources, declare each one after the ones it references. `land` now refuses the file otherwise.
+## 2026-09-23 22:27 — OpenCode (oc-b) — F14-02 part 1 package script
+State: CODE_READY
+Files: `tools/package.ps1`, `docs/HANDOFF_LOG.md`
+Change: Added the PowerShell 5.1-compatible package script for the first split part. It refuses a missing export with exit 2 and a dirty tree with exit 3, stages tracked project files while excluding agent directories, copies both exported executables, writes the Portuguese LEIA-ME, creates the dated zip, and includes extracted-copy import, test and executable boot verification plus `-SkipVerify`.
+Why: F14-02 part 1 prepares the delivery tooling before trunk's F14-01 export is available; the final acceptance record and package run remain part 2.
+Action required by trunk: none. For the next oc-b session (F14-02 part 2): sync after F14-01, run the script without `-SkipVerify`, record the package evidence and acceptance matrix, then close the ticket.
+
+## 2026-09-23 22:20 — OpenCode (oc-b) — F3-01 Settings core and ConfigFile persistence
+State: CODE_READY
+Files: `scripts/settings/settings.gd`, `docs/engineering/settings.md`, `docs/engineering/README.md`, `docs/engineering/ROADMAP.md`, `.scratch/settings/issues/01-settings-core-and-configfile.md`, `docs/HANDOFF_LOG.md`
+Change: Added the Node-free `Settings` Rules Core with GUIDE Section 14 defaults, typed getters, per-field sanitising and validation, idempotent `changed` signal emission, deep `capture`/`restore`, explicit ConfigFile load/save, corrupt-file fallback and static volume helpers. The new settings module contract documents the audio/display/controls file layout and invariants. No tests were written per the sprint rule.
+Why: F3-01 supplies F3-02 with the validated settings state and persistence boundary without coupling the core to buses, windows, devices or camera behavior.
+Action required by Astra: none. For path F3-02: construct `Settings`, call `load_file()` once at startup, apply the typed getters to widgets and call `save_file()` only after explicit user changes.
+
+## 2026-09-24 01:00 — Claude (plan) — F6-04: Aim Assist under lock framing, queued in path
+State: PLANNED
+Files: `.scratch/weapon-rendering/issues/04-aim-assist-under-lock-framing.md` (new), `docs/engineering/SPRINT.md` (path row 7a), `docs/engineering/ROADMAP.md`.
+Change: Path's F9-02 finding (locked shots miss enemies 10 to 16 units away once the lock framing blends in) becomes F6-04, in path after F12-02. It changes `PlayerWeapon`'s fire path so a Target Lock is aimed at against the lock itself, not the off-center framed view. The camera framing is untouched.
+Why: Aim Assist toward the Target Lock is a PLANEJAMENTO Section 4 rule, and trunk is on the critical path.
+Action required by Astra: tune `lock_assist_degrees` if F6-04 adds it, through D-05 or D-07 Part C.
 
 ## 2026-09-23 22:15 — Claude (path) — F9-02: EnemyActor and dev Spirit and Sentry prefabs [shared]
 State: CODE_READY
