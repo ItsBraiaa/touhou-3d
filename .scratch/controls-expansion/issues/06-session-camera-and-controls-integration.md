@@ -1,6 +1,6 @@
 # F16-06 session-camera-and-controls-integration
 
-Status: todo
+Status: done
 Type: integration
 Owner: Claude
 Lane: trunk
@@ -41,11 +41,11 @@ Also update this ticket's Outcome, only its own docs/engineering/ROADMAP.md row,
 
 ## Work
 
-- [ ] Apply saved camera mode/sensitivity/inversion/deadzone at every spawn and while paused; preserve existing settings behavior.
-- [ ] Drive cursor capture from active gameplay, release on every menu/focus-loss/disconnect/unload route, pause on focus loss, and clear stale deltas/held-action state before resume.
-- [ ] Connect recenter action and locked framing without bypassing input-capture modal ownership.
-- [ ] Verify main and pause caller focus, global defaults, pending-application rollback, device prompt policy and signals after repeated Retry/Restart.
-- [ ] Update current contracts and gameplay controls docs so their old exclusions no longer contradict shipped F16 behavior.
+- [x] Apply saved camera mode/sensitivity/inversion/deadzone at every spawn and while paused; preserve existing settings behavior.
+- [x] Drive cursor capture from active gameplay, release on every menu/focus-loss/disconnect/unload route, pause on focus loss, and clear stale deltas/held-action state before resume.
+- [x] Connect recenter action and locked framing without bypassing input-capture modal ownership.
+- [x] Verify main and pause caller focus, global defaults, pending-application rollback, device prompt policy and signals after repeated Retry/Restart. (By reading; the human walkthrough is owed to F16-07.)
+- [x] Update current contracts and gameplay controls docs so their old exclusions no longer contradict shipped F16 behavior.
 
 ## Manual acceptance / existing gate
 
@@ -59,4 +59,17 @@ Write no new tests or disposable test drivers. Run the existing tools/lane.ps1 l
 
 ## Outcome
 
-Not started. Starts only after 03/04/05 landed; path and sol must not be editing these runtime files. F16-05 in lane rescue hands `game_session.gd`, `player_controller.gd`, `hud.*` and `player_ship.tscn` back to trunk when its part 2 lands (routing, 2026-09-24).
+Done 2026-09-24 by lane trunk, one commit, after F16-03, F16-04 and F16-05 had landed. `main.tscn`, `player_ship.tscn`, `project.godot`, `settings.gd`, `menu_controller.gd`, `input_device_state.gd` and `options_screen.gd` needed no change. `interface.gd`, `controls_screen.gd` and `camera_rig.gd` changed in doc comments only.
+
+- **Camera values.** `GameSession._apply_camera_settings` now also calls `CameraRig.apply_control_settings(mode, mouse sensitivity, mouse inversion, deadzone)`. It runs at every spawn (so a Retry's new rig gets the saved mode) and on `Settings.changed` for any of the six camera keys (`CAMERA_SETTING_KEYS`), over Pause too, through F3-04's one connection.
+- **Pointer.** The Session is the only writer of `Input.mouse_mode`. It captures only while the player flies in Mouse mode with the window focused: a ship, the HUD on top, the tree running. Every other state shows it. The decision is made in `_set_paused`, `_show_hud`, `_unload_stage`, on a mode change and on a focus loss or gain, never per frame. Each one opens or closes the rig's gate. A capture also drops the pending look once more on the first physics tick after the next input flush (the capture warp). `_exit_tree` shows the pointer.
+- **Focus.** `NOTIFICATION_APPLICATION_FOCUS_OUT` or `WM_WINDOW_FOCUS_OUT` pauses a stage in play; in a beat or under a menu it only shows the pointer. Focus-in resumes nothing. Held keys are released by the engine with the focus.
+- **Unfocused window (review fix).** A gamepad still drives an unfocused window, so a Resume, Retry or Continuar can happen while it is away. `_window_focused` keeps the pointer free then; the Run goes on. On the focus-in, `_on_focus_gained` runs `_update_pointer()` outside a beat, so only a player already flying gets the capture back.
+- **Disconnect.** It is covered by F3-03's injected pause. In Teclado mode an unplug does not pause, and the capture stays. During a beat the injected pause is refused, so the capture stays until Defeat or Results.
+- **Recenter.** A `camera_recenter` press event in `GameSession._unhandled_input` calls `request_recenter()` only while flying, never in a beat. The Controls capture and the menus consume their events first.
+- **Resume guard (F16-05's question).** It is decided on the resume side. `PlayerController` ignores both dash actions from its spawn and from each `set_controls_enabled(true)` until a tick with both released, so a dash remapped to B cannot fire on the Back that resumes from Pause. The capture rules are unchanged, and any binding stays allowed.
+- **Callers.** Main menu and Pause → Options → Controls → back, global Defaults, the confirmation rollback, the prompt policy and the connection counts were checked by reading. Nothing needed changing.
+- **Not done.** No HUD key hint (PLANEJAMENTO's little-text HUD; `hud.*` is not in the Files list). `Targeting` polls `lock_target` and `next_target` the same way and is unguarded (outside the Files list). The spec API list additions F16-05 asked for were not made, because `spec.md` is outside the Files list.
+- **Docs.** GUIDE Sections 5, 6, 7 and 14 (the new "Controls screen (F16)" subsection). PLANEJAMENTO Sections 3, 4 (new "Lateral dash (Impulso)"), 7 and 8. settings.md: Purpose, Public contract, new "F16 Session integration" and Open issues. player-flight.md: new "F16 Session integration". The validation record's F16-06 section, with the 16-step human walkthrough and the integrated revision for F16-07.
+
+Verification: no tests or drivers (F16 rule). `tools/test.ps1` passed 225, 0 failed, with no script, parse or compile error. The 300-frame headless boot was clean, and `check_resources --strict-validate` failed nothing (85 resources, 86 scripts). The headless display server has no mouse mode and no focus events, so the new paths were checked by reading. `tools/lane.ps1 land` was not run in this stage; the orchestrator runs it.

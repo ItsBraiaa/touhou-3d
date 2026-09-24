@@ -116,11 +116,11 @@ Astra owns layout and reusable visual components; Claude instances the cooldown 
 
 Settings remains the one local settings owner. InputBindings is a Node-free rules object holding the catalog, validated primitive bindings, defaults, contexts and draft conflict decisions. InputBindingAdapter is the only InputMap writer/event normalizer; owned once by Interface, no autoload. ControlsScreen binds the authored widget paths and draft/capture workflow. Reuse the existing InputDeviceState and extend its prompt-family detection.
 
-Proposed primitive binding descriptor: kind (key/mouse_button/joy_button/joy_axis), code (int), axis_sign (-1 or +1 for axes), physical (bool for keys), modifiers (integer mask for key/mouse chords). Preserve existing chords such as Shift+Tab and standalone modifiers such as Left Shift/Left Ctrl; capture may not lose either. Context and Portuguese labels belong to the action catalog, not the descriptor. Reject unknown kind/action, invalid indices/signs, non-finite sensitivity/deadzone and malformed arrays. Missing newly introduced actions get defaults independently.
+Proposed primitive binding descriptor: kind (key/mouse_button/joy_button/joy_axis), code (int), axis_sign (-1 or +1 for axes), physical (bool for keys), modifiers (integer mask for key/mouse chords), plus location (KeyLocation for keys, 0 when omitted; F16-02 refinement so Left Shift/Left Ctrl match project.godot exactly). Preserve existing chords such as Shift+Tab and standalone modifiers such as Left Shift/Left Ctrl; capture may not lose either. Context and Portuguese labels belong to the action catalog, not the descriptor. Reject unknown kind/action, invalid indices/signs, non-finite sensitivity/deadzone and malformed arrays. Missing newly introduced actions get defaults independently.
 
 Storage contract: extend [controls] with controls_version=1, binding_profiles, camera_input_mode ("keys" or "mouse"), mouse_sensitivity, mouse_invert_vertical, camera_deadzone and controller_glyph_family ("auto", "xbox", "playstation"). Keep the existing camera_sensitivity and invert_vertical keys for keyboard/stick orbit. Profile IDs are keyboard_mouse and gamepad; slots are 0/1. A pending profile application includes its prior confirmed profiles and marker so boot can recover. InputBindings is owned by the existing Settings instance and exposed read-only to consumers except through the draft/apply workflow. Runtime InputMap ownership stays in Interface's adapter.
 
-Proposed APIs for the implementation tickets:
+Shipped APIs (F16-02 to F16-08, checked against the code 2026-09-24):
 ~~~text
 Settings.get_input_bindings() -> InputBindings
 Settings.get_camera_input_mode() -> StringName
@@ -128,32 +128,85 @@ Settings.get_mouse_sensitivity() -> float
 Settings.get_mouse_invert_vertical() -> bool
 Settings.get_camera_deadzone() -> float
 Settings.get_controller_glyph_family() -> StringName
+Settings.apply_input_bindings(draft: InputBindings, needs_confirmation: bool = false) -> Error   (F16-02: validate, save, then make live)
+Settings.confirm_input_bindings() -> Error   /   Settings.revert_input_bindings() -> Error   /   Settings.is_input_bindings_pending() -> bool
+Settings F16 keys and constants: CAMERA_INPUT_MODE, MOUSE_SENSITIVITY, MOUSE_INVERT_VERTICAL, CAMERA_DEADZONE, CONTROLLER_GLYPH_FAMILY, BINDING_PROFILES, CONTROLS_VERSION, CONTROL_KEYS, CAMERA_MODE_KEYS, CAMERA_MODE_MOUSE, CAMERA_INPUT_MODES, GLYPHS_AUTO, GLYPHS_XBOX, GLYPHS_PLAYSTATION, GLYPH_FAMILIES, MOUSE_SENSITIVITY_MIN, MOUSE_SENSITIVITY_MAX, DEADZONE_MIN, DEADZONE_MAX   # was: not listed
 Interface.get_input_binding_adapter() -> InputBindingAdapter
 InputBindings.capture() -> Dictionary
 InputBindings.restore(data: Dictionary) -> PackedStringArray
 InputBindings.get_bindings(profile: StringName, action: StringName) -> Array[Dictionary]
 InputBindings.find_conflicts(profile: StringName, action: StringName, binding: Dictionary) -> Array[StringName]
-InputBindings.assign(profile: StringName, action: StringName, slot: int, binding: Dictionary, resolution: StringName) -> PackedStringArray
+InputBindings.assign(profile: StringName, action: StringName, slot: int, binding: Dictionary, resolution: StringName = RESOLUTION_NONE) -> PackedStringArray   (RESOLUTION_NONE none, RESOLUTION_SWAP, RESOLUTION_REPLACE, RESOLUTION_CANCEL; an empty binding clears the slot)   # was: resolution: StringName = &""
 InputBindings.validate_profile(profile: StringName) -> PackedStringArray
 InputBindings.restore_profile_defaults(profile: StringName) -> void
+InputBindings.restore_action_defaults(profile: StringName, action: StringName) -> PackedStringArray   (F16-02: a row's Redefinir)
+InputBindings.get_default_bindings(profile: StringName, action: StringName) -> Array[Dictionary]; get_fixed_bindings(profile: StringName, action: StringName) -> Array[Dictionary]   # was: get_default_bindings(profile, action) / get_fixed_bindings(profile, action) -> Array[Dictionary]
+InputBindings.default_profiles() -> Dictionary   # was: not listed
+InputBindings.profile_for(binding: Dictionary) -> StringName   # was: not listed
+InputBindings.check_profile_data(profile: StringName, data: Variant) -> PackedStringArray   # was: not listed
+InputBindings.normalize_profile(data: Dictionary) -> Dictionary   # was: not listed
+InputBindings.key_binding(code: int, physical: bool = true, modifiers: int = 0, location: int = KEY_LOCATION_UNSPECIFIED) -> Dictionary   # was: not listed
+InputBindings.mouse_button_binding(button: int, modifiers: int = 0) -> Dictionary   # was: not listed
+InputBindings.joy_button_binding(button: int) -> Dictionary   # was: not listed
+InputBindings.joy_axis_binding(axis: int, axis_sign: int) -> Dictionary   # was: not listed
+InputBindings.parse_binding(value: Variant, profile: StringName = &"") -> Dictionary
+InputBindings.same_input(a: Dictionary, b: Dictionary) -> bool
+InputBindings.can_share(a: StringName, b: StringName) -> bool
+InputBindings.uses_physical_keys(action: StringName) -> bool
+InputBindings.get_contexts(action: StringName) -> int
+InputBindings.is_required(action: StringName) -> bool
+InputBindings.get_category(action: StringName) -> StringName
+InputBindings.get_label(action: StringName) -> String
+InputBindings.get_actions(category: StringName = &"") -> Array[StringName]
+InputBindings constants: CATALOG, CATEGORIES, CATEGORY_LABELS, KEYBOARD_MOUSE, GAMEPAD, PROFILES, SLOT_COUNT, MODIFIER_MASK, KIND_KEY, KIND_MOUSE_BUTTON, KIND_JOY_BUTTON, KIND_JOY_AXIS, CONTEXT_GAMEPLAY, CONTEXT_MENU, RESOLUTION_NONE, RESOLUTION_SWAP, RESOLUTION_REPLACE, RESOLUTION_CANCEL   # was: CATALOG only, inside the static catalog line
 InputBindingAdapter.apply_profile(profile: StringName, data: Dictionary) -> PackedStringArray
-InputBindingAdapter.describe_event(event: InputEvent) -> Dictionary
+InputBindingAdapter.apply_bindings(bindings: InputBindings) -> PackedStringArray   (F16-02: both profiles at once)
+InputBindingAdapter.apply_defaults() -> void   # was: not listed
+InputBindingAdapter.describe_event(event: InputEvent, action: StringName = &"") -> Dictionary   (F16-02: the action picks physical or layout keys)
+InputBindingAdapter.find_default_drift() -> PackedStringArray   # was: not listed
+ControlsScreen.leave_requested signal   # was: not listed
 ControlsScreen.setup(root: Control, settings: Settings, bindings: InputBindings, adapter: InputBindingAdapter) -> void
+ControlsScreen.set_prompt_families(prompt_family: StringName, controller_family: StringName) -> void   # was: not listed
+ControlsScreen.consume_modal_input(event: InputEvent) -> bool   # was: not listed
+ControlsScreen.request_leave() -> bool   # was: not listed
+ControlsScreen.note_joypad_connection(connected: bool) -> void   # was: not listed
+BindingLabels.UNBOUND   # was: not listed
+BindingLabels.describe(binding: Dictionary, family: StringName) -> String   # was: not listed
+BindingLabels.glyph_id(binding: Dictionary, family: StringName) -> StringName   # was: not listed
+BindingLabels.glyph_path(id: StringName) -> String   # was: not listed
+BindingLabels tables: PORTUGUESE_KEY_LABELS, XBOX_BUTTONS, PLAYSTATION_BUTTONS, XBOX_BUTTON_GLYPHS, PLAYSTATION_BUTTON_GLYPHS   # was: not listed
+InputDeviceState.prompt_family_changed(family: StringName) signal   # was: not listed
+InputDeviceState.controller_family_changed(family: StringName) signal   # was: not listed
+InputDeviceState.set_glyph_override(family: StringName) -> void   # was: not listed
+InputDeviceState.get_prompt_family() -> StringName   # was: not listed
+InputDeviceState.get_controller_family() -> StringName   # was: not listed
+InputDeviceState constants: MOUSE_MOTION_THRESHOLD, GLYPH_OVERRIDES, PLAYSTATION_NAME_TOKENS   # was: not listed
 CameraRig.request_recenter() -> void
-CameraRig.apply_control_settings(mode: StringName, mouse_sensitivity: float, mouse_invert: bool, deadzone: float) -> void
+CameraRig.apply_control_settings(p_mode: StringName, p_mouse_sensitivity: float, p_mouse_invert: bool, p_deadzone: float) -> void   (p_mode is MODE_KEYS or MODE_MOUSE)   # was: apply_control_settings(mode, mouse_sensitivity, mouse_invert, deadzone) -> void
+CameraRig.set_mouse_capture_active(active: bool) -> void   # was: not listed
+CameraRig.clear_pending_look() -> void   # was: not listed
 DashModel.configure(duration: float, cooldown: float) -> void
 DashModel.try_start(direction: int) -> bool
 DashModel.tick(delta: float) -> void
 DashModel.cancel() -> void
+DashModel.is_enabled() -> bool   # was: not listed
+DashModel.is_active() -> bool   # was: not listed
 DashModel.get_active_time_left() -> float
 DashModel.get_cooldown_left() -> float
+DashModel.get_direction() -> int   # was: not listed
+DashModel.resolve_direction(left_pressed: bool, right_pressed: bool, left_held: bool, right_held: bool) -> int   # was: not listed
+DashModel.TIME_EPSILON   # was: not listed
 CombatState.grant_invulnerability(seconds: float) -> void
 PlayerController.dash_started(direction: int, duration: float) signal
 PlayerController.dash_ended() signal
 PlayerController.dash_cooldown_changed(remaining: float, total: float) signal
+PlayerController.controls_enabled_changed(enabled: bool) signal   # was: not listed
+PlayerController.are_controls_enabled() -> bool   # was: not listed
+PlayerController.get_dash_cooldown_left() -> float   # was: not listed
+PlayerController.has_dash() -> bool   # was: not listed
 ~~~
 
-DashModel is Node-free and owns timing/request acceptance; PlayerController owns camera-relative direction, collision and visuals. Camera settings retain CameraRig.apply_settings(sensitivity, invert_vertical) for existing callers. Granting protection emits the existing invulnerability_changed only on state transitions, never an early false at dash end. Claude may refine seams when inspecting code, but must update this contract and dependent tickets before dispatching consumers.
+DashModel is Node-free and owns timing/request acceptance; PlayerController owns camera-relative direction, collision and visuals. Camera settings retain CameraRig.apply_settings(sensitivity, invert_vertical) for existing callers. Granting protection emits the existing invulnerability_changed only on state transitions, never an early false at dash end. This list was reconciled with the code by F16-10.
 
 ## Verification and completion
 

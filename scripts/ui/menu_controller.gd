@@ -3,8 +3,8 @@ extends Control
 ## Adapter shared by the eight menu scenes of GUIDE Section 14. Knows its screen from
 ## the root node name, turns the registry's buttons into [signal action_requested],
 ## takes focus in [method enter] and hands it back in [method leave], writes the
-## runtime text a screen is opened with, and shows or hides the keyboard footer when
-## [Interface] says which prompts to show ([method set_keyboard_prompts], F3-03).
+## runtime text a screen is opened with, and writes the navigation footer from the current
+## bindings in the prompt family [Interface] gives it ([method set_prompts], F16-03).
 ##
 ## Navigation is not decided here: [Interface] drives [method enter] and
 ## [method leave] from its [ScreenRouter], and the Session decides what an action does.
@@ -94,9 +94,11 @@ const RESULTS_VALUE_PATHS: Dictionary[String, String] = {
 	"graze": "Layout/GrazeValue",
 	"bombs_used": "Layout/BombsValue",
 }
-## The keyboard hint at the bottom of the five full screens. Pause, Defeat and Results
+## The navigation hint at the bottom of the five full screens. Pause, Defeat and Results
 ## are authored without one.
 const FOOTER_PATH := ^"Layout/NavigationHint"
+## The prompt family of the keyboard and mouse ([method InputDeviceState.get_prompt_family]).
+const KEYBOARD_FAMILY := &"keyboard_mouse"
 ## Results `mode` param: Campaign Stage 1 cleared, so Continue leads to Stage 2. Also the
 ## layout when `mode` is absent, which is how the scene is authored.
 const RESULTS_CAMPAIGN_STAGE := &"campaign_stage_1"
@@ -104,6 +106,9 @@ const RESULTS_CAMPAIGN_STAGE := &"campaign_stage_1"
 const RESULTS_DIRECT_STAGE := &"direct_stage"
 ## Results `mode` param: the Campaign's last stage cleared; neither Continue nor Replay.
 const RESULTS_FINAL_VICTORY := &"final_victory"
+## The footers of a menu that was never given its bindings (one instanced on its own, as
+## the menu contract test does): F15-07's texts for the default bindings. [Interface] gives
+## every menu the live bindings at boot, so the game never shows these.
 const KEYBOARD_NAVIGATION_HINT := "↑ ↓  Navegar     Enter  Confirmar"
 const GAMEPAD_NAVIGATION_HINT := "Analógico  Navegar     A  Confirmar     B  Voltar"
 
@@ -117,6 +122,9 @@ var _authored_label_text: String = ""
 ## Results' value Labels found in the scene, by param name; a missing one was reported.
 var _results_values: Dictionary[String, Label] = {}
 var _footer: Control
+var _prompt_family: StringName = KEYBOARD_FAMILY
+## The live bindings the footer names, from [method set_prompts]; null until then.
+var _prompt_bindings: InputBindings
 
 
 func _ready() -> void:
@@ -137,15 +145,49 @@ func _ready() -> void:
 	_footer = get_node_or_null(FOOTER_PATH) as Control
 
 
-## Selects keyboard or gamepad hint text from [param shown]. [Interface] calls it on every
-## menu from its one [InputDeviceState] (F3-03), so the menus never disagree. Does nothing
-## on Pause, Defeat and Results, which are authored without a footer.
+## Writes the footer from [param bindings] (the live [InputBindings]) in the prompt
+## [param family] (`&"keyboard_mouse"`, `&"xbox"` or `&"playstation"`): the first bound slot
+## of `ui_up` and `ui_down` to navigate, `ui_accept` to confirm and, except on the main menu,
+## which has nothing to go back to, `ui_cancel` to go back. [Interface] calls it on every
+## menu at boot and whenever the family or the bindings change (F16-03), so the menus never
+## disagree and no shortcut is fixed text. Does nothing on Pause, Defeat and Results, which
+## are authored without a footer.
+func set_prompts(family: StringName, bindings: InputBindings) -> void:
+	_prompt_family = family
+	_prompt_bindings = bindings
+	_write_footer()
+
+
+## The keyboard's prompts when [param shown], else the gamepad's (F3-03's call, kept for a
+## menu on its own): the Xbox family, from the bindings [method set_prompts] gave, or
+## F15-07's default texts before it did.
 func set_keyboard_prompts(shown: bool) -> void:
-	if _footer != null:
-		var footer_label := _footer as Label
-		if footer_label != null:
-			footer_label.text = KEYBOARD_NAVIGATION_HINT if shown else GAMEPAD_NAVIGATION_HINT
-		_footer.visible = true
+	_prompt_family = KEYBOARD_FAMILY if shown else &"xbox"
+	_write_footer()
+
+
+## The first bound slot of [param action] in the profile [param family] reads (the
+## keyboard's for `&"keyboard_mouse"`, else the gamepad's), named by
+## [method describe_binding] in [param family]; [constant BindingLabels.UNBOUND] when every
+## slot is blank. The fixed Numpad Enter is never named.
+static func prompt_for(action: StringName, family: StringName, bindings: InputBindings) -> String:
+	var profile := InputBindings.KEYBOARD_MOUSE if family == KEYBOARD_FAMILY else InputBindings.GAMEPAD
+	for binding: Dictionary in bindings.get_bindings(profile, action):
+		if not binding.is_empty():
+			return describe_binding(binding, family)
+	return BindingLabels.UNBOUND
+
+
+## [method BindingLabels.describe], except on the headless display server, which has no
+## keyboard layout and reports an error for every physical-key lookup (the suite and the
+## boot smoke run there): a physical key is named by its own code. Every prompt goes
+## through it.
+static func describe_binding(binding: Dictionary, family: StringName) -> String:
+	if binding.get("physical", false) and DisplayServer.get_name() == "headless":
+		var by_code := binding.duplicate()
+		by_code["physical"] = false
+		return BindingLabels.describe(by_code, family)
+	return BindingLabels.describe(binding, family)
 
 
 ## The [ScreenRouter] id of this screen, from the root node name, or an empty
@@ -282,6 +324,38 @@ func _first_focusable() -> Control:
 
 static func _value_or_dash(params: Dictionary, key: String) -> String:
 	return str(params[key]) if key in params else "—"
+
+
+func _write_footer() -> void:
+	if _footer == null:
+		return
+	var footer_label := _footer as Label
+	if footer_label != null:
+		footer_label.text = _footer_text()
+	_footer.visible = true
+
+
+func _footer_text() -> String:
+	if _prompt_bindings == null:
+		return KEYBOARD_NAVIGATION_HINT if _prompt_family == KEYBOARD_FAMILY else GAMEPAD_NAVIGATION_HINT
+	var up := prompt_for(&"ui_up", _prompt_family, _prompt_bindings)
+	var down := prompt_for(&"ui_down", _prompt_family, _prompt_bindings)
+	var parts := PackedStringArray([
+		"%s  Navegar" % _pair_label(up, down),
+		"%s  Confirmar" % prompt_for(&"ui_accept", _prompt_family, _prompt_bindings),
+	])
+	if _screen != ScreenRouter.MAIN_MENU:
+		parts.append("%s  Voltar" % prompt_for(&"ui_cancel", _prompt_family, _prompt_bindings))
+	return "     ".join(parts)
+
+
+## Two prompts as one: `Seta ↑` and `Seta ↓` share their first word and read `Seta ↑/↓`;
+## any other pair reads `W/S`.
+static func _pair_label(first: String, second: String) -> String:
+	var split := first.rfind(" ")
+	if split > 0 and split == second.rfind(" ") and first.left(split) == second.left(split):
+		return "%s/%s" % [first, second.substr(split + 1)]
+	return "%s/%s" % [first, second]
 
 
 func _on_button_pressed(action: StringName, payload: Dictionary) -> void:

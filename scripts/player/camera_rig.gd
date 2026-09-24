@@ -224,9 +224,10 @@ func apply_settings(p_sensitivity: float, p_invert_vertical: bool) -> void:
 ## Applies the F16 camera-input settings: [param p_mode] is [constant MODE_KEYS] or
 ## [constant MODE_MOUSE], and anything else reads as keys; [param p_mouse_sensitivity] is
 ## degrees per screen pixel; [param p_mouse_invert] inverts the mouse's vertical axis only;
-## [param p_deadzone] is the radial deadzone of the `camera_*` actions. F16-06 owns reading
-## them from [Settings]; like [method apply_settings] this only stores them. It also drops
-## the mouse motion not yet applied, so a mode change never replays it.
+## [param p_deadzone] is the radial deadzone of the `camera_*` actions. [GameSession] reads
+## them from [Settings] at every spawn and on every change (F16-06); like
+## [method apply_settings] this only stores them. It also drops the mouse motion not yet
+## applied, so a mode change never replays it.
 func apply_control_settings(
 		p_mode: StringName, p_mouse_sensitivity: float, p_mouse_invert: bool, p_deadzone: float) -> void:
 	camera_input_mode = MODE_MOUSE if p_mode == MODE_MOUSE else MODE_KEYS
@@ -237,8 +238,8 @@ func apply_control_settings(
 
 
 ## Opens or closes the gate on mouse look. The owner that captures and releases the pointer
-## calls it (F16-06: Session and Interface); the rig never changes `Input.mouse_mode` and
-## cannot tell by itself whether gameplay is active. Motion is collected only while this is
+## calls it ([GameSession], F16-06); the rig never changes `Input.mouse_mode` and cannot
+## tell by itself whether gameplay is active. Motion is collected only while this is
 ## on and the mode is [constant MODE_MOUSE]. Every call drops the motion not yet applied, so
 ## neither a capture nor a release replays it.
 func set_mouse_capture_active(active: bool) -> void:
@@ -258,8 +259,9 @@ func clear_pending_look() -> void:
 ## movement direction) at [member default_pitch_degrees] and the normal follow offset; with
 ## one it returns to the normal ship-and-target framing and keeps the lock. Camera input
 ## interrupts it once [member recenter_grace_seconds] have passed. A request during a
-## recenter restarts it from the current pose; nothing queues. The pitch limits and the obstruction ray apply throughout. F16-06 calls this on
-## the `camera_recenter` action, which the rig does not read.
+## recenter restarts it from the current pose; nothing queues. The pitch limits and the
+## obstruction ray apply throughout. [GameSession] calls this on the `camera_recenter`
+## action during gameplay (F16-06); the rig does not read the action.
 func request_recenter() -> void:
 	_recentering = true
 	_recenter_elapsed = 0.0

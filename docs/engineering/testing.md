@@ -14,6 +14,7 @@ Owns how tests are discovered, executed, and reported: `TestCase` (assertions, h
 - `tools/godot.sh`, `tools/test.sh`: POSIX mirrors of the two wrappers for hosts without PowerShell (this Linux machine, since F0-03). Same resolution order (`$GODOT_BIN`, then `~/Documents/Godot/Godot_v4.7.2-stable_linux.x86_64`), same import heuristic and stamp, same exit codes; the flags are `-f <substring>` and `-i`.
 - `tests/run_tests.gd`: the runner, `extends SceneTree`.
 - `tests/framework/test_case.gd`: `class_name TestCase`, the base class of every test.
+- `tests/framework/isolated_settings.gd`: `class_name IsolatedSettings` (F16 follow-up, the user asked for it). Every scene test that instances `scenes/main.tscn` calls `IsolatedSettings.isolate(_main)` between `instantiate()` and `add_child()`, and `IsolatedSettings.clean()` after freeing it. Its `Interface` then uses a per-process `user://test_settings_<pid>.cfg` (defaults, deleted afterwards, with the `.tmp` and `.bak` files a save leaves) instead of the player's real `user://settings.cfg`. Since F16-03 that file can hold remapped controls, and key-driven tests must not see them. A new main-scene test does the same.
 - `tests/unit/framework/test_self_check.gd`: exercises every assertion in passing and failing form, one coroutine test, the exposed tree, and the signal recorder.
 
 ## How to run

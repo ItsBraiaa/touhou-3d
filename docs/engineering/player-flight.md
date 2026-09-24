@@ -187,6 +187,8 @@ A group member that is not a `Node3D` or has no `HitVolume` child is skipped, wi
 
 `Targeting` runs after `PlayerController` and before `CameraRig` in the same tick, by tree order, so it measures the ship where it ended up this tick and the camera where the rig left it last frame.
 
+- **The resume press.** The adapter starts disarmed, and the public `require_release()` disarms it again; `PlayerController.set_controls_enabled(true)` calls it, so it runs at spawn and on every Resume (F16-09). While disarmed, a tick reads no press and only waits for both actions to be released; a held lock is still validated and released. So the press that resumed play, even when it is also `ui_cancel`, cannot lock or switch.
+
 ## Dependencies
 
 The core imports nothing, holds no Node, and is constructed with `FlightModel.new()` by the adapter, which injects the authored values through `configure()` and the Flight Volume through `set_bounds()`.
@@ -323,7 +325,113 @@ None of these is authored in `player_ship.tscn`, so the defaults apply. The spec
 
 ## F16 lateral dash (F16-05)
 
-Pending (lane rescue).
+Implemented by lane rescue on 2026-09-24. The spec's "Lateral dash" section gives the product rules. The protection contract is in [combat-hud.md "F16 dash protection and the Impulso indicator"](combat-hud.md#f16-dash-protection-and-the-impulso-indicator-f16-05). The tick-ordering proof is in the [F16-05 validation record](../validation/controls-expansion.md#lateral-dash-f16-05-rescue).
+
+### Files (F16-05)
+
+- `scripts/player/dash_model.gd` (Rules Core, `class_name DashModel extends RefCounted`, new).
+- `scripts/player/player_controller.gd`: the burst, the collision stop, the signals and the visual.
+- `scenes/player/player_ship.tscn`: the three dash exports, and Astra's `scenes/player/visuals/dash_visual.tscn` instanced as `VisualRoot/DashVisual`.
+
+### DashModel
+
+| Method | Effect |
+| --- | --- |
+| `configure(duration: float, cooldown: float) -> void` | Stores the active duration and the cooldown, in seconds. A negative value counts as 0. A duration of 0 refuses every request. |
+| `try_start(direction: int) -> bool` | Accepts -1 (left) or +1 (right) only when no burst is active and the cooldown is over. On acceptance the burst is active for the duration and the cooldown starts at once, from activation. Anything else returns false and changes nothing: a 0, a press during the cooldown (dropped, never buffered) or a call before `configure`. |
+| `tick(delta: float) -> void` | Counts both timers down by one physics step. A timer left at `TIME_EPSILON` (1e-6 s) or less becomes 0. The constant is `CombatState.TIME_EPSILON` itself, not a copy, so the burst and its protection cannot drift a tick apart. |
+| `cancel() -> void` | Ends the burst and clears the cooldown, so the next request is accepted. |
+| `is_enabled()`, `is_active()`, `get_active_time_left()`, `get_cooldown_left()`, `get_direction()` | Read-only state. `is_enabled()` is false before `configure` and with a duration of 0. The direction is that of the current or last burst, 0 before any. |
+| `static resolve_direction(left_pressed, right_pressed, left_held, right_held) -> int` | -1 for a `dash_left` press, +1 for a `dash_right` press. 0 for no press, or when both directions are down together: pressed in the same tick, or one pressed while the other is held. |
+
+### Exports (F16-05)
+
+Authored on `PlayerShip`, group **Dash**; the values are the spec's baseline.
+
+| Export | Default | Meaning |
+| --- | --- | --- |
+| `dash_distance` | 3.0 | Unobstructed travel, world units. |
+| `dash_duration` | 0.15 | Active and protected seconds. The burst speed is `dash_distance / dash_duration` (20 units/s), which Focus does not scale. 0 disables the dash, and the HUD then shows it as unavailable. |
+| `dash_cooldown` | 0.8 | Seconds from activation until the next dash in either direction. |
+| `dash_visual` | `VisualRoot/DashVisual` | Required, in **Scene references**. A missing export disables the adapter like the other references. A `DashVisual` without `TrailLeft`, `TrailRight` or `ProtectionAccent` is reported, and the dash then runs without visuals. |
+
+### Signals and methods (F16-05)
+
+| Member | Meaning |
+| --- | --- |
+| `dash_started(direction: int, duration: float)` | Emitted inside the physics tick of the activation, before the ship moves. The Session connects it without deferral to `CombatState.grant_invulnerability(duration)`. |
+| `dash_ended` | The active window ran out, or a cancel ended it. A burst stopped by scenery emits it only when its window ends. |
+| `dash_cooldown_changed(remaining: float, total: float)` | Emitted at activation (`0.8, 0.8`), on every physics tick of the cooldown down to `0, 0.8`, and on a cancel that clears it. |
+| `controls_enabled_changed(enabled: bool)` | A refinement of the spec's seams: `set_controls_enabled` changed the state. The HUD shows the dash as unavailable while it is false. |
+| `are_controls_enabled() -> bool`, `get_dash_cooldown_left() -> float`, `has_dash() -> bool` | Read at `Hud.bind`, so a new binding renders the current state. `has_dash()` is false when `dash_duration` is 0, and the HUD then never shows the dash as ready. |
+| `set_controls_enabled(false)` | With the tree paused it only freezes the dash (see below). With the tree running (a beat, a defeat, a stage clear) it cancels the dash. |
+| `reset_to(transform)` | Also cancels the dash: no carried burst, trail or cooldown. |
+
+### Rules and timing
+
+- **Input.** `dash_left` and `dash_right` are read in `_physics_process`, where movement is read. A press counts once, with `is_action_just_pressed`, so holding a key never repeats a dash.
+- **Tick order.** Each tick runs in this order:
+  1. The dash timers tick, so a window that ran out ends first.
+  2. Movement and Focus are read. Focus and the F15-07 Core cues are unchanged by a dash.
+  3. The press is resolved.
+  4. The ship flies either the burst or the ordinary velocity.
+  5. The position is clamped to the Flight Volume, and the edge feedback is updated.
+- **Direction.** At activation it is `camera_rig.global_basis.x` with y set to 0 and normalized, times the sign. The rig's basis is a pure yaw (F16-04 "Framing geometry"), so this is the camera's horizontal right. The flattening is a guard: a dash never climbs or dives. Turning the camera mid-burst does not bend it. Like movement, it reads the rig as it was left last tick.
+- **Burst.** The burst replaces the ordinary velocity: `velocity = direction * dash_distance / dash_duration`, so there is no diagonal stacking and no vertical part. Each tick moves `velocity * min(delta, active time left)`. At 60 Hz that is nine full steps of 1/3 unit, and at 144 Hz twenty-one full steps plus a clamped last one. The burst covers `dash_distance` exactly at any tick rate. Fire and Target Lock run on their own nodes and are untouched. The bank reads the burst velocity, so the model rolls into it. The camera does not roll, shake or flash.
+- **Collision.** The burst moves with `move_and_collide`, a swept motion test on the body's shape, never `move_and_slide`. So it cannot tunnel through thin scenery or a closed Gate, and it never teleports.
+  - A contact whose normal has a component of more than `DASH_GLANCE_TOLERANCE` (0.02, about 1°) against the travel stops the burst where the body touched. The rest of the travel is cancelled for good, with no tangent slide.
+  - A contact square to the travel (a floor the ship skims, a ceiling, a wall alongside) does not stop it. The remainder goes on in the same direction, never deflected, for up to `MAX_DASH_CASTS` (4) casts per step.
+  - A Flight Volume face stops the burst too. When this tick's step crossed a face, the ship goes back along its own step to the first face it met, and the travel ends there. The per-axis clamp alone would keep the part of the step along the face, a one-tick slide when the camera is at an angle to it. The ordinary clamp still runs after the move, as a safeguard.
+  - A stopped burst keeps its window: the cooldown is not refunded, the protection still ends at activation + 0.15 s, and ordinary flight resumes on the next tick.
+- **Pause.** The Session pauses the tree and then calls `set_controls_enabled(false)`. The adapter sees `can_process()` false and keeps the dash. With the tree paused the ship does not tick, so the burst's progress, its cooldown and, in `CombatState`, its protection all stand still and resume together.
+- **Lifecycle.** A beat (defeat, stage clear) disables the controls with the tree running, which cancels the dash and clears the cooldown. Every new Attempt spawns a new ship with a new `DashModel`, which starts ready: Retry, Restart, Campaign Stage 2 and Jogar novamente all do. The old ship leaves the tree the same frame. `CombatState.start` and `restore` end any leftover protection. Dash state is transient: it is not in any Snapshot.
+
+### Visual (part 2)
+
+- **Placement.** `VisualRoot/DashVisual` sits at the ship's origin under `VisualRoot`. Astra's two trails sit at the engines and bank with the model. The `DamageCore` Core stays outside `VisualRoot`. Its material draws after the translucent trail and accent (no depth test, render priority 10), so the trail never hides it.
+- **When it shows.** `DashVisual` is visible only while the burst is active **and** the ship is Invulnerable, as mirrored through `set_invulnerable_visual`. So no part of it can outlive the protection.
+  - `TrailLeft` shows for a left dash and `TrailRight` for a right one, only while the burst still travels.
+  - `ProtectionAccent` shows for the whole protected window.
+  - The dev harness grants no dash protection, so it shows no dash visual.
+- **Flicker.** Being under `VisualRoot`, the visual blinks with the existing Invulnerability flicker (12 Hz) and never out of step with it. The protection's end and the burst's end fall on the same physics tick, before any frame is drawn.
+
+### What F16-06 owns
+
+- `player_ship.tscn` goes back to trunk with this ticket. F16-06 changes only the references or values it needs.
+- A rebinding that puts a dash on a key or button that also resumes from Pause (B / `ui_cancel`, Start / `pause`) could dash on the first unpaused tick. This is the same class of problem as the known `bomb` one (menus-session.md Open issues). F16-06 decides whether capture or resume must guard it.
+- The integrated walkthrough (Retry, Restart, Campaign Stage 2, Pause and Options over Pause) belongs to F16-06. Device feel belongs to F16-07.
+
+## F16 Session integration (F16-06)
+
+Delivered by trunk on 2026-09-24. `GameSession` now drives the rig's F16-04 API and guards the dash's input; the settings side and the pointer rules are in [settings.md "F16 Session integration"](settings.md#f16-session-integration-f16-06). Each "What F16-06 owns" item above is settled here. No export value and no scene changed: `player_ship.tscn`, `main.tscn` and `project.godot` are as F16-05 and F16-02 left them.
+
+### The rig, from the Session
+
+| Rig call | When the Session makes it |
+| --- | --- |
+| `apply_settings(camera_sensitivity, invert_vertical)` and `apply_control_settings(camera_input_mode, mouse_sensitivity, mouse_invert_vertical, camera_deadzone)` | In `_spawn_player`, right after `setup`, for every new ship (Start, Direct Stage, Restart, Retry, Continuar, Jogar novamente), and on every `Settings.changed` of one of the six values, over Pause too. So a Retry's new rig, which starts in keys mode with capture off, gets the saved mode before its first tick. |
+| `set_mouse_capture_active(active)` | With every pointer decision (`GameSession._set_pointer_captured`): true only while the player flies in Mouse mode, with the HUD on top, the tree running and the window focused; false on Pause, every menu and overlay, a focus loss, an unload and a switch to Teclas. The rig collects mouse look exactly while the pointer is captured. |
+| `clear_pending_look()` | Through each gate call above, on focus changes and on Resume. Once more at the start of the first physics tick after the next input flush that follows a capture, to drop a capture warp that a backend reports as one large motion (`_drop_capture_warp`: `process_frame`, then `physics_frame`, before the rig's own tick). |
+| `request_recenter()` | On a `camera_recenter` press event (R, Mouse 3, RS / R3) in `GameSession._unhandled_input`, only while the player flies and never in a beat. A press consumed by a menu or by the Controls capture never gets there. The rig's grace, interruption and restart rules apply unchanged. |
+
+- **Lock and manual orbit** stay the rig's (F16-04): mouse look holds the lock framing off, keys and stick push against it, and a recenter keeps the lock. The Session adds no second camera writer.
+- **Several devices at once.** The mouse adds to the `camera_*` actions (keys and right stick) in Mouse mode, and every recenter input goes through the one action.
+- **In a beat** (defeat, victory) the pointer stays captured and the mouse still orbits, as the keys do; recenter and Pause are refused, as before.
+
+### The dash through the Session lifecycle
+
+- **Nothing to reapply at spawn.** Every Attempt spawns a new ship, and its `DashModel` starts ready (F16-05). The Session's only dash wiring is still the one `dash_started` connection in `_spawn_player`, freed with the ship.
+- **The order that freezes a dash is kept.** `_set_paused` sets `get_tree().paused` before `set_controls_enabled(false)`.
+- **The resume guard (new).** `PlayerController._dash_input_armed` is false from the moment the ship gets its controls, which is its spawn or a `set_controls_enabled(true)` after a pause, until a tick with both `dash_left` and `dash_right` released. That tick reads no press. So the press that resumed from Pause never dashes, even when a remap shares it with a menu action: a dash on B resumes as `ui_cancel` on the press, and `Input.is_action_just_pressed` still reports it on the first unpaused tick. Buttons (Continuar, Iniciar, Tentar novamente) act on the release, so they leave no fresh press; the guard covers every route anyway. A dash tapped within one tick of a Resume is dropped. Beats and a defeat do not re-enable the controls, so they are unaffected.
+- **Also affected, not fixed here.** `Targeting` polls `lock_target` and `next_target` the same way (`targeting.gd`, outside this ticket's files). With the defaults nothing shares them with `ui_cancel`; a remap that puts one on B would lock or switch on the first tick after Back resumes from Pause. The fix is the same guard in `Targeting`.
+
+### Open for F16-07
+
+The walkthrough in [validation/controls-expansion.md](../validation/controls-expansion.md) "Integrated walkthrough (F16-06, trunk)". It covers the capture lifecycle on a real mouse (no jump after capture, none after Continuar, a free cursor on every menu), Alt+Tab in flight and during the confirmation, recenter near scenery with and without a lock, and the dash across every Attempt route.
+
+## F16-07 acceptance status
+
+The integrated `40969f0` presentation pass remains blocked on interactive evidence. No physical keyboard, mouse or pad check was reported; dash travel, protection, trail, cooldown and camera feel are not verified. Astra made no numeric change: `dash_distance = 3.0`, `dash_duration = 0.15` and `dash_cooldown = 0.8` remain the baseline in `player_ship.tscn`. See the [F16-07 matrix](../validation/controls-expansion.md#visual-and-device-acceptance-f16-07-sol) before changing these exports.
 
 ## Open issues
 

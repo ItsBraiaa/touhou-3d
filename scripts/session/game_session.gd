@@ -10,7 +10,7 @@ extends Node
 ## Core hits and Grazes into [CombatState] and [RunState] changes, mirrors Invulnerability
 ## to the field and the ship, forwards excess-Power score, and freezes the Attempt under
 ## Defeat when the player is defeated. It also answers a Bomb with its clear, its damage
-## and its visual.
+## and its visual, and a dash with its Invulnerability (F16-05).
 ##
 ## A stage whose root is a [StageDirector] is checked before it loads, set up with the
 ## Run, the [CombatState], the field and the ship, started at every Attempt, and its clear
@@ -33,6 +33,12 @@ extends Node
 ## `_load_stage`, the ship in `_spawn_player`), every unload and every Retry silences the
 ## sound effects in flight, and the music follows the menu, the route and the boss. The
 ## kills of a Bomb's clear play no ordinary enemy-death sound (F15-01).
+##
+## Since F16-06 it also joins the controls to the Run: every ship's camera gets all six
+## camera settings at spawn and on every change, Pause included; the mouse pointer is
+## captured for mouse look only while the player flies in Mouse mode and shown everywhere
+## else; losing the window pauses a stage in play and regaining it resumes nothing; and
+## `camera_recenter` recenters the camera during gameplay only.
 
 
 ## Marker every stage root has, where the player enters (GUIDE Section 5 "Stages").
@@ -63,6 +69,13 @@ const DEFEAT_BEAT_SECONDS := 1.0
 ## Seconds of Invulnerability, with the ship's usual blink, for the ship a Checkpoint Retry
 ## respawns (F15-12). Claude's proposal, Astra tunes it; a Restart gets none.
 const RETRY_INVULNERABILITY_SECONDS := 2.0
+## The [Settings] values the ship's [CameraRig] reads: the orbit's sensitivity and inversion
+## (F3-04), and the input mode, the mouse's sensitivity and inversion and the stick deadzone
+## (F16-06). A change of any of them reaches the ship in play at once.
+const CAMERA_SETTING_KEYS: Array[StringName] = [
+	Settings.CAMERA_SENSITIVITY, Settings.INVERT_VERTICAL, Settings.CAMERA_INPUT_MODE,
+	Settings.MOUSE_SENSITIVITY, Settings.MOUSE_INVERT_VERTICAL, Settings.CAMERA_DEADZONE,
+]
 ## Menu actions that only open a full screen, which Back returns from.
 const SCREEN_BY_ACTION: Dictionary[StringName, StringName] = {
 	&"open_stage_select": ScreenRouter.STAGE_SELECT,
@@ -118,6 +131,13 @@ var _in_beat: bool = false
 ## True only inside the Bomb's damage call, while the kills it causes report their
 ## defeats, which then play no ordinary death sound (F15-01).
 var _bomb_clearing: bool = false
+## Whether this Session has the pointer captured for mouse look (F16-06); see
+## [method _update_pointer].
+var _pointer_captured: bool = false
+## False from a window focus loss until the focus comes back (F16-06). A gamepad still
+## drives an unfocused window, so a Resume can happen while it is away, and the pointer is
+## never captured then; see [method _on_focus_gained].
+var _window_focused: bool = true
 
 
 func _ready() -> void:
@@ -145,11 +165,21 @@ func _ready() -> void:
 ## `Main` processes while the tree is paused, so the tree has to be checked here: Active
 ## Time and the Invulnerability window only run while gameplay does (CONVENTIONS "Time and
 ## randomness"). `Main` ticks before `ProjectileRoot`, so a window that ends this tick is
-## already off in the field's sweep.
+## already off in the field's sweep. It ticks before the ship too (same priority, earlier in
+## the tree), so a dash granted in the ship's step is first counted down on the next tick:
+## a 0.15 s dash protects its activation tick and the next eight at 60 Hz (F16-05).
 func _physics_process(delta: float) -> void:
 	if not get_tree().paused:
 		_run_state.tick_active(delta)
 		_combat_state.tick(delta)
+
+
+## The pointer mode is process-wide, like the [InputMap] (a test builds `main.tscn` again
+## and again), so a captured pointer leaves with the Session.
+func _exit_tree() -> void:
+	if _pointer_captured:
+		_pointer_captured = false
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
 
 ## `pause` (Escape, gamepad Start) pauses a stage in play from the HUD and resumes it from
@@ -157,24 +187,41 @@ func _physics_process(delta: float) -> void:
 ## not resume under Options. Escape on Pause is `ui_cancel` as well, which [Interface]
 ## consumes first and turns into `resume`. A beat refuses it too, whatever the Run's
 ## phase (F15-01).
+##
+## `camera_recenter` (R, Mouse 3, RS) asks the ship's camera for a recenter only while the
+## player flies ([method _gameplay_active]), never in a beat (F16-06). It is read as an
+## event, so a press some screen consumed never gets here: the Controls capture takes every
+## event in [method Interface._input], and a menu's buttons take theirs in the GUI.
 func _unhandled_input(event: InputEvent) -> void:
-	if _in_beat or not event.is_action_pressed(&"pause") or not _is_in_stage():
+	if _in_beat or not _is_in_stage():
 		return
-	var screen := interface.current_screen()
-	if screen == ScreenRouter.HUD:
-		_pause()
-	elif screen == ScreenRouter.PAUSE:
-		_resume()
-	else:
-		return
-	get_viewport().set_input_as_handled()
+	if event.is_action_pressed(&"pause"):
+		var screen := interface.current_screen()
+		if screen == ScreenRouter.HUD:
+			_pause()
+		elif screen == ScreenRouter.PAUSE:
+			_resume()
+		else:
+			return
+		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed(&"camera_recenter") and _gameplay_active():
+		_player.camera_rig.request_recenter()
+		get_viewport().set_input_as_handled()
 
 
 func _notification(what: int) -> void:
-	# Only once _ready took the close request over: a Session with missing exports leaves
-	# Godot's own quit alone.
-	if what == NOTIFICATION_WM_CLOSE_REQUEST and not get_tree().auto_accept_quit:
-		_quit()
+	match what:
+		NOTIFICATION_WM_CLOSE_REQUEST:
+			# Only once _ready took the close request over: a Session with missing exports
+			# leaves Godot's own quit alone.
+			if not get_tree().auto_accept_quit:
+				_quit()
+		NOTIFICATION_APPLICATION_FOCUS_OUT, NOTIFICATION_WM_WINDOW_FOCUS_OUT:
+			_window_focused = false
+			_on_focus_lost()
+		NOTIFICATION_APPLICATION_FOCUS_IN, NOTIFICATION_WM_WINDOW_FOCUS_IN:
+			_window_focused = true
+			_on_focus_gained()
 
 
 ## Sair, the window's close button and Alt+F4: silences every sound, then quits once the
@@ -283,7 +330,7 @@ func _begin_first_attempt() -> void:
 	_run_state.begin_attempt()
 	if _director != null:
 		_director.start_attempt(_attempt_seed(_run_state.get_attempt_index()))
-	interface.show_home(ScreenRouter.HUD)
+	_show_hud()
 
 
 ## Pause's Restart, and Defeat's Retry before any Checkpoint: the stage from its entry
@@ -304,7 +351,7 @@ func _restart_stage() -> void:
 	_run_state.begin_attempt()
 	if _director != null:
 		_director.start_attempt(_attempt_seed(_run_state.get_attempt_index()))
-	interface.show_home(ScreenRouter.HUD)
+	_show_hud()
 
 
 ## Leaves the Run for the main menu, from Pause, Defeat and Results.
@@ -326,7 +373,8 @@ func _pause() -> void:
 ## Gamepad B resumes through `ui_cancel` and is `bomb` too: [Interface] consumes that
 ## press, so a reader of `bomb` events never sees it, but a poll of
 ## `Input.is_action_just_pressed(&"bomb")` on the first unpaused tick still would
-## (menus-session.md Open issues).
+## (menus-session.md Open issues). The dash polls its actions that way, so the ship ignores
+## them until they have been released once after the controls return (F16-06).
 func _resume() -> void:
 	if not get_tree().paused:
 		return
@@ -335,13 +383,16 @@ func _resume() -> void:
 
 
 ## Freezes or releases everything a pause covers: the tree, and with it the stage, the
-## ship and the projectiles; the Run's Active Time; and the ship's controls.
+## ship and the projectiles; the Run's Active Time; and the ship's controls. The tree is
+## paused before the controls go, which is what freezes a dash instead of cancelling it
+## (F16-05). The pointer then follows (F16-06).
 func _set_paused(paused: bool) -> void:
 	get_tree().paused = paused
 	_run_state.set_paused(paused)
 	_combat_state.set_paused(paused)
 	if _player != null:
 		_player.set_controls_enabled(not paused)
+	_update_pointer()
 
 
 ## Holds a beat of [param seconds] with the tree running, then calls [param finish]
@@ -441,6 +492,9 @@ func _spawn_player(ship: PlayerController, at: Transform3D) -> void:
 	_player.weapon.setup(_combat_state, projectile_system, _player.targeting)
 	# Freed with the ship, so a Retry's new ship has exactly one.
 	_player.weapon.shots_fired.connect(_on_shots_fired)
+	# Freed with the ship too. Not deferred: the grant has to reach the field inside the
+	# ship's physics step, before the ProjectileSystem sweeps that tick (F16-05).
+	_player.dash_started.connect(_on_dash_started)
 
 
 ## Listens to the player's settings once for the Session's life, so a Restart or a Retry
@@ -452,20 +506,104 @@ func _connect_camera_settings() -> void:
 		settings.changed.connect(_on_setting_changed)
 
 
-## Gives the ship in play the player's camera sensitivity and invert vertical. Called at
-## every spawn, after `setup` and before the ship's first physics tick, and on every
-## change of either value, even from Options over Pause: the rig only stores them, so
-## they take effect on the first tick the tree runs.
+## Gives the ship in play every [constant CAMERA_SETTING_KEYS] value: the orbit's sensitivity
+## and inversion through [method CameraRig.apply_settings], and the input mode, the mouse's
+## sensitivity and inversion and the stick deadzone through
+## [method CameraRig.apply_control_settings] (F16-06). Called at every spawn, after `setup`
+## and before the ship's first physics tick, since a new rig starts at its scene values, in
+## Teclas mode; and on every change of one of them, even from Options or Controls over Pause:
+## the rig only stores them, so they take effect on the first tick the tree runs.
 func _apply_camera_settings() -> void:
 	var settings := interface.get_settings()
 	if _player == null or settings == null:
 		return
-	_player.camera_rig.apply_settings(settings.get_camera_sensitivity(), settings.get_invert_vertical())
+	var rig := _player.camera_rig
+	rig.apply_settings(settings.get_camera_sensitivity(), settings.get_invert_vertical())
+	rig.apply_control_settings(settings.get_camera_input_mode(), settings.get_mouse_sensitivity(),
+			settings.get_mouse_invert_vertical(), settings.get_camera_deadzone())
 
 
+## A camera value reaches the ship in play; the input mode also decides the pointer, which
+## a menu on top keeps shown until the player flies again.
 func _on_setting_changed(key: StringName, _value: Variant) -> void:
-	if key == Settings.CAMERA_SENSITIVITY or key == Settings.INVERT_VERTICAL:
-		_apply_camera_settings()
+	if key not in CAMERA_SETTING_KEYS:
+		return
+	_apply_camera_settings()
+	if key == Settings.CAMERA_INPUT_MODE:
+		_update_pointer()
+
+
+## Shows the HUD alone, the first screen of an Attempt, and captures the pointer for mouse
+## look when the camera input mode is Mouse (F16-06).
+func _show_hud() -> void:
+	interface.show_home(ScreenRouter.HUD)
+	_update_pointer()
+
+
+## Whether the player is flying: a ship in play, the HUD on top and the tree running. A beat
+## counts, since its camera still orbits; a menu, an overlay and the pause do not.
+func _gameplay_active() -> bool:
+	return _player != null and not get_tree().paused and interface.current_screen() == ScreenRouter.HUD
+
+
+## The pointer is captured for mouse look only while [method _gameplay_active], the camera
+## input mode is Mouse (spec "Camera") and the window has the focus, and shown in every
+## other state, so the menus, Pause, Defeat, Results and the Controls capture always have a
+## free cursor. Called after every transition that can change any of them: a pause or
+## resume, an Attempt's HUD, an unload, a change of the mode and the focus coming back.
+## Never per frame, because each call drops the rig's pending look.
+func _update_pointer() -> void:
+	var settings := interface.get_settings()
+	var mouse_camera := settings != null and settings.get_camera_input_mode() == Settings.CAMERA_MODE_MOUSE
+	_set_pointer_captured(_window_focused and _gameplay_active() and mouse_camera)
+
+
+## Captures or shows the pointer and opens or closes the ship's mouse-look gate with it
+## ([method CameraRig.set_mouse_capture_active], which also drops the pending look).
+func _set_pointer_captured(capture: bool) -> void:
+	var newly_captured := capture and not _pointer_captured
+	if capture != _pointer_captured:
+		_pointer_captured = capture
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED if capture else Input.MOUSE_MODE_VISIBLE
+	if _player != null:
+		_player.camera_rig.set_mouse_capture_active(capture)
+	if newly_captured:
+		_drop_capture_warp()
+
+
+## Some backends report the warp that capturing the pointer makes as one large motion, with
+## the input of a later frame (F16-04). So the rig's pending look is dropped once more at the
+## start of the first physics tick after the next input flush: after this frame's process
+## step, and before the rig's own tick spends it. A few milliseconds of real look go with it.
+func _drop_capture_warp() -> void:
+	var tree := get_tree()
+	await tree.process_frame
+	await tree.physics_frame
+	if _pointer_captured and _player != null:
+		_player.camera_rig.clear_pending_look()
+
+
+## The window lost focus: a stage in play pauses, as `pause` would, and in any other state
+## the pointer is only shown (a beat refuses Pause; a menu already shows it). Regaining focus
+## resumes nothing; Continuar does (spec "Camera"). Godot's desktop backends release every
+## held key and button with the focus, so nothing stays held into that Resume.
+func _on_focus_lost() -> void:
+	if _player == null:
+		return
+	if not _in_beat and _is_in_stage() and interface.current_screen() == ScreenRouter.HUD:
+		_pause()
+	else:
+		_set_pointer_captured(false)
+
+
+## The window has the focus again. Nothing resumes: after a focus loss the Run is paused, or
+## was in a beat or under a screen. The pointer is captured again only when the player
+## already flies, which takes a Resume, a Retry or a Continuar made with the gamepad while
+## the window was away; that capture was held back until now. A beat keeps the free pointer
+## the loss gave it until Defeat or Results. Without a ship there is nothing to capture for.
+func _on_focus_gained() -> void:
+	if _player != null and not _in_beat:
+		_update_pointer()
 
 
 ## Defeat's Retry: resumes from the latest activated Checkpoint's Snapshot in place, with
@@ -494,14 +632,18 @@ func _retry() -> void:
 	_combat_state.grant_invulnerability(RETRY_INVULNERABILITY_SECONDS)
 	# The Director removed any boss mid-fight; as on Restart, its panel goes explicitly.
 	interface.get_hud().hide_boss()
-	interface.show_home(ScreenRouter.HUD)
+	_show_hud()
 
 
-## Cancels any beat in progress, silences every sound effect in flight, takes the stage
-## and the ship out of the tree at once, so a stage loaded in the same frame never shares
-## it with them, frees them at the end of the frame, and removes every Projectile.
+## Cancels any beat in progress, shows the pointer, silences every sound effect in flight,
+## takes the stage and the ship out of the tree at once, so a stage loaded in the same frame
+## never shares it with them, frees them at the end of the frame, and removes every
+## Projectile.
 func _unload_stage() -> void:
 	_cancel_beat()
+	# Every caller has already left the HUD; this keeps leaving a Run from ever holding the
+	# pointer (F16-06).
+	_set_pointer_captured(false)
 	audio.stop_all()
 	interface.get_hud().unbind()
 	for child: Node in world_root.get_children():
@@ -653,6 +795,16 @@ func _on_invulnerability_changed(invulnerable: bool) -> void:
 	projectile_system.set_player_invulnerable(invulnerable)
 	if _player != null:
 		_player.set_invulnerable_visual(invulnerable)
+
+
+## A dash started inside the ship's physics step (priority 0, after this node's own tick
+## of the same step). The grant, and through [signal CombatState.invulnerability_changed]
+## the field's pass-through, are in place before the [ProjectileSystem] sweeps that step at
+## [constant ProjectileSystem.TICK_PRIORITY], so the activation tick is protected. The core
+## keeps a longer Bomb, hit or Retry window, and the dash's end never touches it. Ignored
+## while the core is not live (F16-05).
+func _on_dash_started(_direction: int, duration: float) -> void:
+	_combat_state.grant_invulnerability(duration)
 
 
 ## A Bomb went off, its edge and its 2 s of Invulnerability already the core's. Clears

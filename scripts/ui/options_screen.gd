@@ -10,7 +10,9 @@ extends Node
 ## changed something, and written back to its widget. [signal Settings.changed] is the one
 ## place anything is applied, whatever changed the value (a widget, Defaults, or another
 ## caller). Camera sensitivity, invert vertical and the input device are only stored here:
-## F3-04 applies the camera values and F3-03 the input device.
+## F3-04 applies the camera values and F3-03 the input device. The Controls screen's Câmera
+## tab ([ControlsScreen]) edits the same two camera values, so either screen shows the
+## other's change.
 
 
 ## The display was applied: [param window_mode], and the window size set for Janela, or
@@ -68,7 +70,10 @@ func setup(options: Control, settings: Settings) -> void:
 
 
 ## Restores every field to GUIDE Section 14's defaults and saves once. Each field that
-## differed is applied and written back through [signal Settings.changed].
+## differed is applied and written back through [signal Settings.changed]. That covers the
+## F16 values and both binding profiles too ([method Settings.restore_defaults]):
+## [Interface] reinstalls the profiles and the glyph family, and the Controls screen's
+## widgets follow the same signal, its next draft starting from the defaults.
 func restore_defaults() -> void:
 	if _settings == null:
 		return

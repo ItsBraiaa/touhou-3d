@@ -2,11 +2,13 @@
 
 ## Purpose
 
-The Settings Rules Core owns the eight GUIDE Section 14 Options values, their
-defaults, validation and ConfigFile persistence. It is Node-free and does not
-apply values to audio buses, the window, input devices or the camera; F3-02 (the
-`OptionsScreen` adapter, "Options binding" below) and later adapters consume the
-typed getters.
+The Settings Rules Core owns thirteen values and the two binding profiles, with their
+defaults, validation and ConfigFile persistence. The values are the eight GUIDE Section 14
+Options values (`KEYS`) and, since F16-02, the five camera and prompt values
+(`CONTROL_KEYS`). It is Node-free and does not apply values to audio buses, the window,
+input devices, the `InputMap` or the camera. F3-02 (the `OptionsScreen` adapter, "Options
+binding" below) and later adapters consume the typed getters: `InputBindingAdapter`
+(F16-02), `ControlsScreen` (F16-03) and `GameSession` (F3-04, F16-06).
 
 ## Files
 
@@ -27,10 +29,14 @@ typed getters.
 `WindowMode` is `WINDOWED` (0) or `FULLSCREEN` (1). `InputDevice` is
 `AUTOMATIC` (0), `KEYBOARD` (1) or `GAMEPAD` (2). `KEYS` is ordered as Master,
 Music, SFX, Window Mode, Resolution, Input Device, Camera Sensitivity and
-Invert Vertical.
+Invert Vertical: the eight values the Options screen binds. `CONTROL_KEYS` holds the
+five F16 values (Camera Input Mode, Mouse Sensitivity, Mouse Invert Vertical, Camera
+Deadzone and Controller Glyph Family), which the Controls screen binds; their ranges and
+defaults are in "F16 binding profiles and persistence" below. `BINDING_PROFILES` is the
+key of the two profiles, read through `get_input_bindings()`.
 
 `RESOLUTIONS` is `(1280, 720)`, `(1600, 900)` and `(1920, 1080)`. Volumes are
-0–100. Sensitivity is 0.2–2.0 in 0.05 steps. Defaults are 80, 65, 80,
+0–100. Sensitivity is 0.2–2.0 in 0.05 steps. The eight Options defaults are 80, 65, 80,
 Windowed, 1280×720, Automatic, 1.0 and false.
 
 ### Methods
@@ -40,17 +46,20 @@ Windowed, 1280×720, Automatic, 1.0 and false.
 | `_init(path := DEFAULT_PATH)` | Starts at defaults without I/O; the default path is `user://settings.cfg`. |
 | `get_value` / `set_value` | Read or sanitise one field. `set_value` never saves and reports unknown keys with `push_error`. |
 | Typed getters | Return each validated field in its native type. |
-| `restore_defaults()` | Restores defaults and emits only actual changes. |
-| `capture()` / `restore(data)` | Deep-copy all fields; restore sanitises known keys, defaults missing fields and ignores unknown keys, returning diagnostics. |
-| `load_file()` | Missing files use defaults silently; corrupt files use defaults, report the path/error and remain untouched; valid files are restored field by field. |
-| `save_file()` | Writes all eight fields to a fresh ConfigFile and returns its `Error`. |
+| `restore_defaults()` | Restores all thirteen values and both profiles to their defaults (Options' global Defaults) and emits only actual changes. |
+| `capture()` / `restore(data)` | Deep-copy all fields and the profiles; restore sanitises known keys, defaults missing fields and ignores unknown keys, returning diagnostics. |
+| `load_file()` | Missing files use defaults silently; corrupt files use defaults, report the path/error and remain untouched; valid files are restored field by field. A file from before F16-02 keeps its eight values and gets the rest at their defaults. |
+| `save_file()` | Writes all thirteen values and both profiles through a temporary file (the atomic save of F16-02) and returns its `Error`. |
+| F16 binding methods | `get_input_bindings()`, `apply_input_bindings(draft, needs_confirmation)`, `confirm_input_bindings()`, `revert_input_bindings()` and `is_input_bindings_pending()`: see "F16 binding profiles and persistence". |
 | `volume_db(percent)` / `is_muted(percent)` | Static helpers for F3-02 bus application. |
 
 ## File layout
 
 `[audio]` stores `master_volume`, `music_volume` and `sfx_volume`.
 `[display]` stores `window_mode` and `resolution` (`Vector2i`). `[controls]`
-stores `input_device`, `camera_sensitivity` and `invert_vertical`.
+stores `input_device`, `camera_sensitivity` and `invert_vertical` and, since F16-02, the
+five F16 values, `binding_profiles` and `controls_version` (schema under "File schema"
+below).
 
 ## Sanitising rules
 
@@ -223,7 +232,205 @@ Delivered by path on 2026-09-24 (part 2; the windowed pass of part 1 is in [vali
 
 ## F16 binding profiles and persistence (F16-02)
 
-Pending (lane trunk).
+Delivered by trunk on 2026-09-24. It adds the rebindable action catalog, two editable binding profiles, the five F16 camera and prompt values, a versioned `[controls]` schema with an atomic save and crash recovery, and the one `InputMap` writer. It extends "Public contract" above: `KEYS` still lists the eight Options values (OptionsScreen binds exactly those), the new values are `CONTROL_KEYS`, and `DEFAULTS`, `capture`, `restore`, `restore_defaults`, `load_file` and `save_file` now cover all thirteen values plus the profiles. Every existing key, getter and signal keeps its meaning.
+
+### Files
+
+- `scripts/settings/input_bindings.gd`: `InputBindings`, Rules Core (`RefCounted`). The catalog, descriptors, defaults, contexts, conflicts and edit transactions.
+- `scripts/settings/settings.gd`: the new values, the profiles, the schema, migration, the atomic save and the pending confirmation.
+- `scripts/ui/input_binding_adapter.gd`: `InputBindingAdapter` (`RefCounted`). The only `InputMap` writer for catalog actions, the event describer and the default-drift check.
+- `scripts/ui/interface.gd`: owns the adapter and installs the saved profiles before any menu exists.
+
+### The catalog (`InputBindings.CATALOG`, display order)
+
+Gameplay keys are physical (by position). Keys of menu-only actions are keycodes of the active layout, so Enter and the arrows follow it. Every default equals `project.godot`, or Godot's built-in events for the four `ui_*` directions and `ui_focus_next`/`ui_focus_prev`.
+
+| Action | Label | Category | Contexts | Required | Teclado e mouse | Controle |
+| --- | --- | --- | --- | --- | --- | --- |
+| `move_forward` | Avançar | Movimento | gameplay | yes | W | left stick up (axis 1 −) |
+| `move_back` | Recuar | Movimento | gameplay | yes | S | left stick down (axis 1 +) |
+| `move_left` | Mover à esquerda | Movimento | gameplay | yes | A | left stick left (axis 0 −) |
+| `move_right` | Mover à direita | Movimento | gameplay | yes | D | left stick right (axis 0 +) |
+| `ascend` | Subir | Movimento | gameplay | yes | Space | RB (button 10) |
+| `descend` | Descer | Movimento | gameplay | yes | Left Ctrl | LB (9) |
+| `dash_left` | Impulso à esquerda | Movimento | gameplay | no | Q | D-pad left (13) |
+| `dash_right` | Impulso à direita | Movimento | gameplay | no | E | D-pad right (14) |
+| `fire` | Disparar | Combate | gameplay | yes | J | RT (axis 5 +) |
+| `focus` | Foco | Combate | gameplay | no | Left Shift | LT (axis 4 +) |
+| `lock_target` | Fixar alvo | Combate | gameplay | no | K | Y (3) |
+| `next_target` | Trocar alvo | Combate | gameplay | no | Tab | X (2) |
+| `bomb` | Bomba | Combate | gameplay | no | L | B (1) |
+| `camera_left` / `_right` / `_up` / `_down` | Câmera à esquerda / à direita / para cima / para baixo | Câmera | gameplay | no | the arrows | right stick (axes 2 and 3) |
+| `camera_recenter` | Centralizar câmera | Câmera | gameplay | no | R, Mouse 3 | RS press (8) |
+| `pause` | Pausa | Menus | gameplay and menu | yes | Escape | Start (6) |
+| `ui_up` / `ui_down` / `ui_left` / `ui_right` | Navegar para cima / para baixo / à esquerda / à direita | Menus | menu | yes | the arrows | D-pad (11 to 14), then the left stick |
+| `ui_accept` | Confirmar | Menus | menu | yes | Enter, Space (Numpad Enter fixed) | A (0) |
+| `ui_cancel` | Voltar | Menus | menu | yes | Escape | B (1) |
+| `ui_focus_next` | Próximo item | Menus | menu | no | Tab | none |
+| `ui_focus_prev` | Item anterior | Menus | menu | no | Shift+Tab | none |
+
+- **Categories** are `CATEGORIES` (`&"movement"`, `&"combat"`, `&"camera"`, `&"menus"`), with Portuguese names in `CATEGORY_LABELS`.
+- **Required** means each profile must keep at least one slot bound, so nobody loses the way to play, pause or drive the menus.
+- **Fixed bindings** (`get_fixed_bindings`): Numpad Enter on `ui_accept` is Godot's third default key for it. It is installed with the keyboard profile, but never shown in a slot, edited or saved, so the two slots lose no default. It counts as a conflict for other actions, but not towards a required action's binding.
+- The inventory grep found only these actions. The scripts read `move_*`, `ascend`, `descend`, `focus`, `fire`, `bomb`, `lock_target`, `next_target`, `camera_*`, `pause` and `ui_cancel`, and Godot's focus navigation and buttons read the other `ui_*` actions. No key is hardcoded anywhere else. `ui_select`, `ui_page_*` and the text-editing `ui_*` actions are not in the catalog; they keep their engine events.
+
+### The binding descriptor
+
+| Field | Type | Meaning |
+| --- | --- | --- |
+| `kind` | String | `"key"`, `"mouse_button"`, `"joy_button"` or `"joy_axis"`. The keyboard-and-mouse profile takes the first two, the gamepad profile the last two. |
+| `code` | int | A key: the physical keycode when `physical`, otherwise the layout keycode. It must be a code a key reports: a printable character (from `KEY_SPACE` to U+10FFFF, without the control characters and surrogates), or one of the special keys Godot 4.7 names in `Key` (`KEY_UNKNOWN` and the unassigned codes between them are refused). A mouse button: 1 to 9, including the wheel. A joypad button: 0 to `JOY_BUTTON_MAX` − 1. An axis: 0 to `JOY_AXIS_MAX` − 1. |
+| `axis_sign` | int | −1 or +1 for an axis; a trigger (axis 4 or 5) only has +1. It is 0 for everything else. |
+| `physical` | bool | Keys only. |
+| `modifiers` | int | A `KEY_MASK_SHIFT`/`CTRL`/`ALT`/`META` chord for a key or mouse button, such as Shift+Tab. A modifier key's own bit is dropped, so Left Shift stays a standalone key. |
+| `location` | int | Keys only: `KeyLocation`, to tell Left Shift and Left Ctrl from the right-hand keys. **Refinement of the spec's five fields**, needed to match `project.godot` exactly. It may be omitted on input (read as 0), and it is always present in a normalized descriptor. |
+
+- A blank slot is `{}`. Each action has `SLOT_COUNT` (2) slots per profile. Bound slots come first and a repeat is dropped (packed).
+- Rejected: a non-Dictionary, an unknown field or kind, a wrong-typed field, a code out of range (for a key, a code no key reports), a sign on a non-axis or a negative trigger, unknown modifier bits, and a descriptor of the other profile's device.
+- `same_input(a, b)` is true for the same kind and code, the same chord, the same axis sign (opposite signs are distinct) and compatible key locations (unspecified matches either side). It ignores `physical`, so a physical key and a layout key with the same code count as one key.
+  - **Known limit: mixed key spaces on a non-QWERTY layout.** The comparison is exact for the special keys (Escape, Enter, Tab, the arrows) on any layout, and for every key on US QWERTY. On another layout, a physical and a layout character key are compared by code, not by key, because the Node-free core does not know the layout. Only `pause` (physical, since it is a gameplay action too) and the menu-only actions (layout) meet this way. On AZERTY, for example, `pause` on physical Q and `ui_accept` on layout A are the same key but are not reported, while physical A and layout A are two keys that are reported. The defaults are special keys, so they are not affected. **For F16-03:** when a capture puts a character key on `pause`, or on a menu-only action while `pause` holds one, compare in the layout's space (`DisplayServer.keyboard_get_keycode_from_physical`) in the capture flow before calling `assign`.
+- Helpers: `key_binding(code, physical := true, modifiers := 0, location := 0)`, `mouse_button_binding(button, modifiers := 0)`, `joy_button_binding(button)`, `joy_axis_binding(axis, sign)`, `parse_binding(value, profile := &"") -> Dictionary` (normalized, or `{}`), and `profile_for(binding) -> StringName`.
+
+### Contexts and conflicts
+
+- **Contexts.** `CONTEXT_GAMEPLAY` is read while a stage runs with the HUD on top, and `CONTEXT_MENU` while a menu has focus. `pause` has both, because it also resumes from Pause (`GameSession._unhandled_input`).
+- **Conflicts** are checked within one profile, between actions whose contexts overlap (`can_share(a, b)` is false).
+  - Gameplay and menu-only actions never overlap. So the defaults' shared stick, D-pad, arrows, Space and B stay valid, and movement may share menu navigation.
+  - The only permitted overlap is `pause` with `ui_cancel` (Escape): on Pause, `Interface` takes `ui_cancel` first, and both mean resume.
+  - `pause` does conflict with every other menu action. Pause bound to Enter would then eat Confirmar on the Pause screen.
+- **`validate_profile(profile)`** reports every required action left unbound, and every input that two actions hold when they may not share it.
+
+### Edit transactions (`InputBindings`)
+
+`assign(profile, action, slot, binding, resolution := RESOLUTION_NONE) -> PackedStringArray` is one transaction. An empty result means it was applied; otherwise it returns the reasons, and nothing changed.
+
+- It is refused for:
+  - an unknown profile, action, slot or resolution;
+  - an invalid binding;
+  - a binding that is already in the action's other slot or its fixed binding.
+- **Resolutions**, when `find_conflicts(profile, action, binding) -> Array[StringName]` is not empty:
+  - `&""` (`RESOLUTION_NONE`) refuses, and names the conflicting actions;
+  - `&"swap"` (Trocar) gives each conflicting action this slot's previous binding. A blank previous binding makes it a replacement.
+  - `&"replace"` (Substituir) removes the binding from each conflicting action;
+  - `&"cancel"` (Cancelar) always refuses and changes nothing.
+- **The result must validate.** A replacement that would leave a required action unbound is refused. So is a swap that moves the old binding into a new conflict, or anything that would move a fixed binding. F16-03 can disable Substituir by trying it on a draft copy.
+- **An empty `binding` clears the slot:** a refinement, for blanking an Alternativo. It is refused when it would leave a required action unbound.
+- **`restore_action_defaults(profile, action) -> PackedStringArray`** is a row's Redefinir, and a refinement. It is refused, with reasons, when another action now holds one of the defaults and the two cannot share it.
+- **`restore_profile_defaults(profile)`** is Restaurar esta aba. `get_default_bindings(profile, action)` gives the default slots of one action.
+- **`capture()`** deep-copies both profiles: profile id → action → slots. **`restore(data)`** has these fallbacks:
+  - a missing profile or action takes its default silently, so a later new action is defaulted independently;
+  - malformed slots fall back to that action's default;
+  - a fallen-back (missing or malformed) action leaves out each default input that an action kept from the file holds and cannot share, so the player's remaps survive. A required action that this would leave with no binding takes those inputs back from their holders instead. For example, with `fire` on K and `lock_target` on J, a malformed `fire` falls back to J, which `lock_target` holds. `fire` is required, so it takes J back, `lock_target` is left blank, and every other remap stays. An optional action in `fire`'s place would be left blank instead;
+  - an unknown key is reported and ignored;
+  - a profile that is still inconsistent afterwards falls back to its defaults. That happens only when the kept bindings conflict with each other, or when a take-back leaves a required holder with no binding.
+
+  Each fallback, each default left out and each take-back returns one diagnostic.
+- **Static checks for data from outside:** `check_profile_data(profile, data) -> PackedStringArray` is strict (every action present, and nothing else), and `normalize_profile(data)` normalizes data that passed it.
+
+### Settings: new values
+
+| Key | Type | Default | Accepted |
+| --- | --- | --- | --- |
+| `camera_input_mode` | StringName | `&"keys"` | `CAMERA_MODE_KEYS` or `CAMERA_MODE_MOUSE` (a String is converted) |
+| `mouse_sensitivity` | float, degrees per pixel | 0.12 | finite, clamped to 0.02 to 0.50 (not snapped) |
+| `mouse_invert_vertical` | bool | false | bool only |
+| `camera_deadzone` | float | 0.2 | finite, clamped to 0.05 to 0.5 (not snapped) |
+| `controller_glyph_family` | StringName | `&"auto"` | `GLYPHS_AUTO`, `GLYPHS_XBOX` or `GLYPHS_PLAYSTATION` |
+
+- `camera_sensitivity` and `invert_vertical` keep their meaning: keyboard and stick orbit.
+- Getters: `get_camera_input_mode()`, `get_mouse_sensitivity()`, `get_mouse_invert_vertical()`, `get_camera_deadzone()` and `get_controller_glyph_family()`. `get_value`/`set_value` also take the new keys.
+- Two fixes for every value:
+  - an equal float is compared approximately;
+  - a restored value of the wrong type is reported instead of hitting Godot 4.7's mixed-type `!=` error.
+- `restore_defaults()`, which is Options' global Defaults, now also resets all five new values and both profiles.
+
+### File schema (`[controls]`, `controls_version=1`)
+
+~~~ini
+[controls]
+input_device=0
+camera_sensitivity=1.0
+invert_vertical=false
+camera_input_mode=&"keys"
+mouse_sensitivity=0.12
+mouse_invert_vertical=false
+camera_deadzone=0.2
+controller_glyph_family=&"auto"
+binding_profiles={ &"keyboard_mouse": { &"move_forward": [{ "kind": "key", "code": 87, "axis_sign": 0, "physical": true, "modifiers": 0, "location": 0 }, {}], ... }, &"gamepad": { ... } }
+bindings_pending_confirmation=true   ; only while a change waits for Manter controles
+confirmed_binding_profiles={ ... }   ; only beside the marker
+controls_version=1                   ; written last
+~~~
+
+`[audio]` and `[display]` are unchanged. No `InputEvent` and no device index is ever saved.
+
+### Loading (`load_file`, never writes)
+
+- **Old files.** A file without `controls_version` predates F16-02. Its eight values are read as before, and the five new values and both profiles take their defaults silently. The user's real file is in this form, and every boot smoke loads it unchanged. It is only rewritten, in the new form, by the next explicit save (an Options change, Defaults, or F16-03's Aplicar).
+- **Version 1.** A missing value or profile is reported and defaulted. Malformed bindings fall back per action, then per profile, as in `restore`, without touching the other values.
+- **A malformed version** is read as version 1, and a newer one reads only the known values; each gets one diagnostic.
+- **A pending marker.** When `bindings_pending_confirmation` is true, the confirmed profiles are live, never the unconfirmed ones, with one diagnostic. Missing or malformed confirmed profiles mean the defaults. The file keeps its marker until the next save, which harms nothing, because every boot comes back to the same confirmed profiles.
+- **The path missing but `<path>.bak` present:** only a crash between the save's two renames leaves this, and the backup is read.
+
+### Saving (`save_file`, `apply_input_bindings`)
+
+1. Everything goes to a fresh ConfigFile. `controls_version` is written last.
+2. The file is saved to `<path>.tmp` and loaded back, and `controls_version` is checked.
+3. The old file is renamed to `<path>.bak`, the temporary file to the path, and the backup is removed.
+4. On any failure the temporary file is removed and the old file stays, or is renamed back, and the Error is returned.
+
+Two renames, because a rename onto an existing file is not atomic on every platform.
+
+### Applying a draft and the pending confirmation (for F16-03)
+
+~~~gdscript
+var draft := InputBindings.new()
+draft.restore(settings.get_input_bindings().capture())
+draft.assign(InputBindings.KEYBOARD_MOUSE, &"ui_accept", 0, adapter.describe_event(event, &"ui_accept"), InputBindings.RESOLUTION_SWAP)
+var error := settings.apply_input_bindings(draft, true)  # true: a menu binding changed
+~~~
+
+- **`apply_input_bindings(draft, needs_confirmation := false) -> Error`.**
+  1. `ERR_INVALID_DATA` unless both profiles of the draft validate.
+  2. The file is saved with the draft's profiles. With `needs_confirmation` it also gets the marker and the profiles to return to (the live ones, or the original ones when a change is already pending).
+  3. Only after a successful save do the live profiles change, and `changed(BINDING_PROFILES, capture)` fires; `Interface` installs it in the `InputMap`.
+
+  On failure nothing changes, neither the file nor the live map. The caller shows Não foi possível salvar os controles.
+- **`confirm_input_bindings() -> Error`** (Manter controles) clears the marker and saves. If that save fails, the live profiles stay, but the next boot comes back to the previous controls; report it.
+- **`revert_input_bindings() -> Error`** (Reverter, the timeout, a disconnect, a focus loss) makes the confirmed profiles live at once, then saves. If the save fails, the file's marker still restores them at boot.
+- **`is_input_bindings_pending() -> bool`.**
+- **`get_input_bindings() -> InputBindings`** is the live instance. It is read-only by contract: editing it directly would skip the save-then-install order.
+
+### `InputBindingAdapter` (owned by `Interface`)
+
+| Member | Meaning |
+| --- | --- |
+| `apply_profile(profile, data) -> PackedStringArray` | Installs one profile (`capture()[profile]`) and keeps the other's events. Refused, with `InputMap` unchanged, unless `check_profile_data` passes. |
+| `apply_bindings(bindings) -> PackedStringArray` | Both profiles at once, or neither (refinement). |
+| `apply_defaults()` | Every catalog action back at the `project.godot` events. |
+| `describe_event(event, action := &"") -> Dictionary` | Event to normalized descriptor (refinement: the optional action). A key is physical or layout as the action takes it (`uses_physical_keys`); with no action, as the event is written. Axis and sign, without magnitude. Mouse motion, `InputEventAction`, a centred axis and a negative trigger give `{}`. Echo, drift and hold filtering are F16-03's job. |
+| `find_default_drift() -> PackedStringArray` | Compares the catalog defaults with `ProjectSettings` `input/<action>` events. `Interface` reports each drift with `push_error` in editor builds, so the boot smoke fails on it. |
+
+- Each catalog action's events are its keyboard-and-mouse slots, its gamepad slots and its fixed bindings, all with device −1. So any pad index works and a reconnect keeps the profile.
+- Deadzones are never changed, so an axis keeps its analog strength (`get_vector`, `get_axis`, `get_action_strength`). A button bound to movement is digital, as before.
+- Only an action whose events differ, or that has a device-bound event, is rewritten, and it is then released with `Input.action_release`, so a key held through the change cannot stay pressed.
+- Actions outside the catalog are never touched.
+
+### Wiring in `Interface`
+
+- **`_ready`,** right after `load_file()`: in an editor build `find_default_drift()` runs, then `apply_bindings(settings.get_input_bindings())`. This is before the HUD and the menus are instanced, so no menu accepts input on the old map.
+- **`Settings.changed`** with `BINDING_PROFILES` reinstalls both profiles. That covers `apply_input_bindings`, `revert_input_bindings`, `restore_defaults` and `restore`.
+- **`_exit_tree`** calls `apply_defaults()`: the `InputMap` is process-wide, and the suite builds `main.tscn` again and again.
+- **`get_input_binding_adapter()`** returns the adapter.
+
+### Verification (no tests: the F16 rule)
+
+- The existing suite passed: 225 tests, and no script, parse or compile error.
+- The 300-frame headless boot of `main.tscn` printed no ERROR or WARNING line.
+- `check_resources.gd --strict-validate` passed: 82 resources, 83 scripts.
+- The user's real `settings.cfg` (old form) was not rewritten; its timestamp is unchanged.
+- The drift check was proven live: one default was temporarily broken (`ui_up` on W), and the boot reported exactly that action with both event lists. It was reverted, and the check is clean on the real defaults, built-in `ui_*` events included.
+- The rest was checked by reading: see [validation/controls-expansion.md](../validation/controls-expansion.md) "Binding profiles and persistence".
 
 ## F16 binding labels and prompt family (F16-08)
 
@@ -255,14 +462,177 @@ Static only, no state, never asserts. It reads the F16 primitive descriptor `{ki
 
 ## F16 capture workflow and prompts (F16-03)
 
-Pending (lane trunk).
+Delivered by trunk on 2026-09-24. Opções → Controles is now a working editor for both binding profiles and the F16 camera values, and every menu footer names the live bindings in the current prompt family. It consumes F16-01's layout, F16-02's `InputBindings`, `Settings` and `InputBindingAdapter`, and F16-08's `BindingLabels` and prompt family. Applying the camera values to the live rig stays F16-06's job.
+
+### Files
+
+- `scripts/ui/controls_screen.gd`: `ControlsScreen`, Adapter (`Node`). New.
+- `scripts/ui/interface.gd`: creates it, routes modal input and Back through it, pushes the prompts, applies the glyph override.
+- `scripts/ui/menu_controller.gd`: `set_prompts`, `prompt_for`, `describe_binding`; footers from the bindings.
+- `scripts/ui/input_device_state.gd`: `get_controller_family` and `controller_family_changed`.
+- `scripts/ui/options_screen.gd`: doc comments only (global Defaults already covers F16, below).
+- `scenes/ui/controls.tscn` [shared]: wiring only. The six `Preview*` rows and their `binding_row.tscn` reference are gone, `CaptureDialog/Buttons/UseButton` ("Usar", hidden) and `ConflictDialog/Buttons/ReplaceButton` ("Substituir") are new, `ConflictDialog/Buttons/CancelButton` reads "Cancelar" (was "Escolher outro") and `ConfirmBindingsDialog/Buttons/ConfirmButton` reads "Manter controles" (was "Manter"), as the spec names them. No geometry, style or other text changed.
+
+### `ControlsScreen` contract
+
+| Member | Meaning |
+| --- | --- |
+| `signal leave_requested` | The draft is settled (Descartar, or an Aplicar that was kept) after a refused Back; `Interface` goes back. |
+| `setup(root, settings, bindings, adapter)` | Once. Resolves every spec path (a missing or mistyped one is reported with its path and the whole screen stays inert), builds the rows, gives the camera sliders the `Settings` ranges, connects everything. `bindings` is the live `InputBindings`, read only. |
+| `set_prompt_families(prompt_family, controller_family)` | From `Interface`: the menus' family (`keyboard_mouse`, `xbox`, `playstation`) and the Controle tab's glyph family. |
+| `consume_modal_input(event) -> bool` | From `Interface._input`, for every event, before the GUI. True when an open dialog consumed it. |
+| `request_leave() -> bool` | From `Interface._go_back` on Controls. False while a dialog is open, or when the draft is dirty (it opens the Dirty dialog). |
+| `note_joypad_connection(connected)` | From `Interface`'s `joy_connection_changed`. A disconnect during the confirmation reverts. |
+
+`Interface._bind_controls` creates it as `Controls/ControlsScreen`, after `OptionsScreen` and before the device tracking, and connects `leave_requested` to `_go_back`. The menu scene registry is unchanged: `Layout/BackButton` still requests `back`, and `_go_back` asks `request_leave` first, for both the button and `ui_cancel`.
+
+### Rows, tabs and focus
+
+- **Rows.** `BindingScroll/Rows` is filled by code only (anything authored there is removed): a heading per `InputBindings.CATEGORIES` entry (Movimento, Combate, Câmera, Menus), then one `binding_row.tscn` instance per catalog action, named `<Action>Row` with `action_id` metadata. The same 27 rows serve both binding tabs; they show the current tab's profile.
+- **A slot** shows `BindingLabels.glyph_path(glyph_id)` as its icon when the file exists (32 px wide), else `describe()` text. The tooltip is the text plus Astra's tooltip. The keyboard tab never has glyphs; the Controle tab uses the controller family (the Ícones override, else the last pad, else Xbox), whichever device is in use.
+- **Changed rows** show `• ` before the label and `state` metadata `changed`; Aplicar is disabled while the draft equals the live profiles.
+- **Tabs** are toggle buttons (the theme's pressed style marks the active one) and switch on press. KeyboardMouse and Gamepad show the column headings and the rows; Camera shows `CameraSettings`, and `SectionTitle` reads "AJUSTES DA CÂMERA". Entering the screen picks Controle when the menus show controller prompts, else Teclado e mouse.
+- **Focus order** (`focus_next`/`focus_previous`, wrapping): the three tabs, Ícones (`DeviceFamily`), the content (each row Principal → Alternativo → Redefinir; on Câmera the six widgets), Restaurar esta aba, Aplicar, Voltar. Up and down move by row in the same column, left and right within a row; up from the first row reaches the active tab, down from the last row reaches Restaurar esta aba, up from the tabs reaches Voltar, down from the footer the active tab. Down from the tabs and up from the footer enter the content at that tab's last focused control. Only controls of the shown tab are ever linked, and the scroll bar never takes focus.
+- **Entry focus** stays on Voltar, the menu contract the existing tests pin (F16-01's gate note); Tab or down leads to the tabs.
+- **Scrolling.** A focused row is kept visible with `ScrollContainer.ensure_control_visible`, together with its category heading when it is the category's first row.
+- **ActionHelp** shows the focused control's help (a slot: action, slot, binding, "obrigatória" when required, and the live accept prompt to change it; Redefinir: the defaults; a camera widget: its meaning and value). Above it, the last operation's outcome, or "Há alterações não aplicadas." while the draft is dirty.
+
+### Capture (CaptureDialog)
+
+A slot's press opens the dialog; the pressed slot gets focus back when it closes. The deadline is 10 s (`CAPTURE_MSEC`) and restarts for the review; a timeout changes nothing.
+
+1. **Waiting for release.** Until no key, mouse button or joypad button is held. Keys are tracked from events while the screen is shown, since `Input` cannot list them; mouse buttons and pad buttons are polled.
+2. **Listening.** Every event is consumed. Echoes, releases, `InputEventAction`, mouse motion and gestures are ignored.
+   - A key or mouse button proposes itself; a modifier held with it makes a chord (Shift+Tab). A modifier pressed alone waits: its release with no other press proposes it alone (Left Shift, Left Ctrl, with their location).
+   - A joypad button proposes itself.
+   - An axis must be seen centred (pull below 0.2, `AXIS_NEUTRAL`) during this capture, and then pass 0.6 (`AXIS_DELIBERATE`): it proposes its axis and sign. Axes centred when listening starts are armed at once, so a stick held from the menus or drifting above 0.2 never binds, and other inputs still work. A trigger's pull is its 0 to 1 value; a backend that reports −1 at rest is recognised by its first reading below −0.2 and rescaled, and a trigger only ever proposes +1.
+   - Keys are named through `describe_event(event, action)`, so gameplay actions and `pause` get physical keys and menu-only actions layout keys.
+   - A press of the other tab's device is refused with a hint ("Esta aba só aceita o controle." / "… teclado e mouse."), except that device's `ui_cancel` (Escape on the Controle tab, B on the keyboard tab), which cancels: it can never be a candidate there.
+   - A left click on Cancelar cancels. Every other input, Escape and the current accept and cancel included, is a candidate.
+3. **Review, after release.** The candidate is shown, and the dialog waits until every key and button is released and an axis candidate is centred again. Only then do Usar and Cancelar take input, with the old (live) menu bindings, so a captured key's own release never confirms it.
+4. **Usar.** With no conflict the candidate goes into the draft (`assign` with no resolution); a refusal (the binding is already in the action's other slot or its fixed Numpad Enter) is reported in ActionHelp. With a conflict, ConflictDialog opens.
+
+**Consuming input.** While a dialog is open `Interface._input` offers it every event first and marks it handled when `consume_modal_input` says so: during steps 1 to 3, and for every dialog until the keys and buttons held when it opened are released. Nothing reaches the GUI, `Interface`'s `ui_cancel`, the Session's `pause` or a row behind it. After that the dialog's buttons are driven by the GUI with the live bindings: focus is trapped among its shown, enabled buttons (Tab, Shift+Tab, left and right cycle them; up and down stay), `ui_cancel` is consumed as the dialog's cancel, and `Overlays` stops the mouse (`MOUSE_FILTER_STOP`) so nothing behind can be clicked or scrolled. Losing the window during a capture cancels it (key releases are lost with it).
+
+### Conflicts (ConflictDialog)
+
+- The conflicts are `InputBindings.find_conflicts` in the draft, plus the layout-only ones below. The message names the candidate and the holders.
+- **Trocar** and **Substituir** are `assign` with `RESOLUTION_SWAP` and `RESOLUTION_REPLACE` on a copy of the draft, committed only when it succeeds. Each button is enabled only when a trial on another copy succeeds, so Substituir is disabled when it would leave a required action unbound or move a fixed binding (Numpad Enter on `ui_accept`). The message names that reason, or gives a generic one for any other refusal. A disabled button cannot take focus. **Cancelar** (and `ui_cancel`) changes nothing.
+- **F16-02's layout limit, resolved here.** `pause` takes physical keys and the menu-only actions layout keys, and the core compares them by code. For a character key (below `KEY_SPECIAL`) on the keyboard tab the screen also compares `pause` with the menu-only actions in the active layout's space (`DisplayServer.keyboard_get_keycode_from_physical`), so AZERTY's physical Q on `pause` meets layout A on `ui_accept`. Such a layout-only conflict can only be replaced: Trocar is disabled, and Substituir first clears the matching slots, which fails for a required action's last binding. The core's own same-code matches stay; they are conservative, never unsafe. On the headless display server, which has no layout, a physical code is its own keycode.
+
+### Draft, Aplicar and confirmation
+
+- **The draft** is `InputBindings.new()` + `restore(live.capture())`, taken each time the screen is shown. Every edit is an `InputBindings` transaction, so the draft is always valid. Nothing is saved or installed before Aplicar.
+- **Redefinir** is `restore_action_defaults` into the draft; a refusal names the action holding the default. **Restaurar esta aba** is `restore_profile_defaults` for a binding tab, and on Câmera it stores and saves the six camera defaults at once.
+- **Aplicar** calls `Settings.apply_input_bindings(draft, needs_confirmation)`, which validates both profiles, saves, and only then makes them live (`Interface` installs them and refreshes every prompt). `needs_confirmation` is true when the draft changes, in either profile, an action read by the menus: `pause` and the eight `ui_*` actions.
+  - **On failure** ActionHelp shows "Não foi possível salvar os controles."; the draft, the file and the live map are unchanged. An invalid draft (`ERR_INVALID_DATA`) is a programming error and is reported with `push_error`.
+  - **ConfirmBindingsDialog** runs on the new bindings: "Os novos comandos já estão valendo. Mantê-los?" with a 10 s countdown (`CONFIRM_MSEC`). Focus starts on Reverter, so keeping proves the new bindings can move focus and confirm. **Manter controles** is `confirm_input_bindings()`. **Reverter**, `ui_cancel`, the timeout, a controller disconnect, the window losing focus (`NOTIFICATION_APPLICATION_FOCUS_OUT`) and the screen being hidden are `revert_input_bindings()`: the previous profiles are live at once and ActionHelp says why. The draft keeps the reverted change, so it can be fixed and applied again. A crash during the countdown is F16-02's pending marker: the next boot uses the confirmed profiles.
+  - A failed save on Manter keeps the change live and shows the failure text; the file's marker brings the previous controls back at the next boot. A failed save on revert only warns: the previous controls are live, and the marker restores them at boot too.
+- **Voltar with a dirty draft** opens DirtyDialog. Continuar editando (and `ui_cancel`) closes it. Descartar resets the draft and leaves. Aplicar applies: a failed save stays with the failure text; a change needing confirmation leaves only after Manter controles; otherwise it leaves at once. The leave is deferred one frame, so the screen is not left inside the pressed button's own signal.
+
+### Câmera tab and Ícones do controle
+
+These are ordinary settings, not part of the draft: each edit is stored (`set_value`, sanitised) and saved at once, as on the Options screen, and `Settings.changed` rewrites the widget.
+
+| Widget | Key | Range or items |
+| --- | --- | --- |
+| `CameraSettings/Mode` | `camera_input_mode` | item 0 Teclas (`keys`), 1 Mouse (`mouse`) |
+| `CameraSettings/MouseSensitivity` | `mouse_sensitivity` | 0.02 to 0.50, step 0.01 |
+| `CameraSettings/OrbitSensitivity` | `camera_sensitivity` | 0.2 to 2.0, step 0.05 (the Options slider's key) |
+| `CameraSettings/MouseInvert` | `mouse_invert_vertical` | toggle |
+| `CameraSettings/OrbitInvert` | `invert_vertical` | toggle (the Options toggle's key) |
+| `CameraSettings/Deadzone` | `camera_deadzone` | 0.05 to 0.5, step 0.01 |
+| `ControlsPanel/DeviceFamily` | `controller_glyph_family` | item 0 Automático, 1 Xbox, 2 PlayStation |
+
+- The sliders' ranges are set from the `Settings` constants in `setup` (the authored 0.1 to 3.0 ranges are overridden), so they cannot drift.
+- `Interface._on_settings_changed` passes `controller_glyph_family` to `InputDeviceState.set_glyph_override`, and `_start_device_tracking` seeds it from the saved value. So the Ícones choice, global Defaults and a boot all apply it the same way.
+- The camera values reach the ship only in F16-06 (`CameraRig.apply_control_settings`); today they are stored and saved.
+
+### Prompts everywhere in menus
+
+- **`MenuController.set_prompts(family, bindings)`** writes `Layout/NavigationHint` on the five full screens: `<ui_up>/<ui_down>  Navegar     <ui_accept>  Confirmar     <ui_cancel>  Voltar`, without Voltar on the main menu (nothing to go back to). Each prompt is the action's first bound slot in the family's profile (`MenuController.prompt_for`), named by `BindingLabels`; a shared first word is merged (`Seta ↑/↓`, `D-pad ↑/↓`). Defaults: `Seta ↑/↓  Navegar     Enter  Confirmar     Esc  Voltar`, `D-pad ↑/↓  Navegar     A  Confirmar     B  Voltar`, and PlayStation's `✕` and `○`.
+- **`Interface._push_prompts`** calls it on every menu, and `ControlsScreen.set_prompt_families`, at boot and on `prompt_family_changed`, `controller_family_changed` and every `BINDING_PROFILES` change. This replaces the old `prompts_changed` → `set_keyboard_prompts` link. The device policy (Automático, Teclado, Controle, the 8 px mouse threshold, disconnect pause) is unchanged.
+- **`set_keyboard_prompts(shown)`** stays for a menu on its own: before `set_prompts` it shows F15-07's texts for the default bindings (the existing contract test pins the gamepad one); the running game never shows them.
+- **`MenuController.describe_binding(binding, family)`** is `BindingLabels.describe`, except on the headless display server, where `keyboard_get_label_from_physical` is unsupported and prints an ERROR for every physical key: there a physical key is named by its code. Every prompt and row goes through it, which keeps the boot smoke and the suite free of that error.
+- **`InputDeviceState.get_controller_family()`** is the override, else the last pad's family, else `xbox`, whichever prompts show; `get_prompt_family()` is `keyboard_mouse` or it. **`controller_family_changed`** fires on a change.
+- **The HUD** shows no control hints today, so it is unchanged. A hint added later (for example beside F16-05's Impulso indicator) should use `MenuController.prompt_for` with the prompt family.
+
+### Global Defaults
+
+`OptionsScreen.restore_defaults` → `Settings.restore_defaults` already resets the five F16 values and both profiles (F16-02) and saves once. Through `Settings.changed`, `Interface` now reinstalls the profiles, refreshes every prompt and reapplies the glyph override, and the Câmera tab and Ícones widgets rewrite themselves. The Controls draft is taken again on the next visit.
+
+### Verification (no tests: the F16 rule)
+
+- The existing suite passed (225, 0 failed; no script, parse or compile error). The 300-frame headless boot printed no ERROR or WARNING line. `check_resources.gd --strict-validate`: 85 resources, 85 scripts, none failed.
+- The suite enters Controls through `main.tscn` (Options → Controls → Back → Back), so `setup`, the rows, the tabs, the focus links and a clean Back ran there without an error.
+- Capture, conflicts, the dialogs, the confirmation and the camera widgets were checked by reading only. The walkthrough for the human pass is in [validation/controls-expansion.md](../validation/controls-expansion.md) "Rebinding workflow and prompts".
+
+## F16 Session integration (F16-06)
+
+Delivered by trunk on 2026-09-24. It joins the settings above to the Run through `GameSession` (`scripts/session/game_session.gd`). No `Settings`, `InputBindings`, `InputBindingAdapter`, `ControlsScreen` or `Interface` behavior changed; only doc comments. The rig side is in [player-flight.md "F16 Session integration"](player-flight.md#f16-session-integration-f16-06). It supersedes the F16-03 line "The camera values reach the ship only in F16-06": they do now.
+
+### The camera values reach the ship
+
+| Session member | Effect |
+| --- | --- |
+| `CAMERA_SETTING_KEYS` | The six values the rig reads: `camera_sensitivity`, `invert_vertical`, `camera_input_mode`, `mouse_sensitivity`, `mouse_invert_vertical` and `camera_deadzone`. |
+| `_apply_camera_settings()` | `CameraRig.apply_settings(camera_sensitivity, invert_vertical)` as in F3-04, then `CameraRig.apply_control_settings(camera_input_mode, mouse_sensitivity, mouse_invert_vertical, camera_deadzone)`. Called in `_spawn_player` right after `setup`, so every ship gets all six before its first tick: Start, Direct Stage, Restart, Retry, Continuar and Jogar novamente. A new rig starts at its scene values, in Teclas mode with capture off. |
+| `_on_setting_changed(key, _value)` | For any of the six keys: `_apply_camera_settings()`. For `camera_input_mode` also `_update_pointer()`. The connection is F3-04's, made once in `_ready`, so a Restart or a Retry never doubles it. |
+
+- **While paused.** The Câmera tab, Options' two camera widgets and global Defaults all write through `Settings.set_value` or `restore_defaults`, so `changed` reaches the live rig at once, over Pause too. The rig only stores the values; they take effect on the first tick the tree runs.
+- **The glyph family and the profiles** stay `Interface`'s (F16-02, F16-03), as does the input device (F3-03).
+
+### Who owns the pointer
+
+`GameSession` is the only writer of `Input.mouse_mode` (`ControlsScreen`, `Interface` and `CameraRig` never touch it).
+
+- **Captured** only while the player flies in Mouse mode with the window focused: a ship in play, the HUD on top, the tree running, `camera_input_mode` is `mouse`, and `_window_focused` (`_gameplay_active()` and `_update_pointer()`). A beat (defeat, victory) counts as flying, because its camera still orbits.
+- **Shown** in every other state: the menus, Options and Controls from either caller, the Controls capture dialog, Pause, Defeat, Results, a stage unload and the main menu. So the Controls screen always has a free cursor for mouse-button capture and for Cancelar.
+- **Where it is decided.** `_set_paused` (every pause, resume, Defeat, Results, Restart, Retry, Continuar and Return to Menu passes through it), `_show_hud` (the HUD of every Attempt), `_unload_stage`, `_on_setting_changed` (the mode), `_on_focus_lost` and `_on_focus_gained`. Never per frame, because each decision also opens or closes the rig's gate, which drops its pending look.
+- `_exit_tree` shows the pointer if the Session had captured it, since the mode is process-wide.
+
+### Focus loss
+
+- `NOTIFICATION_APPLICATION_FOCUS_OUT` or `NOTIFICATION_WM_WINDOW_FOCUS_OUT` pauses a stage in play (`_pause()`, as `pause` would, with the Pause overlay) when the HUD is on top and no beat runs. A beat, which refuses Pause, and any screen on top only show the pointer.
+- **Regaining focus resumes nothing.** The Run stays paused; Continuar resumes it and captures. The pointer must be shown on the loss itself, because Godot's Windows backend applies the current mode again when the window is activated, and a mode left at captured would take the pointer back.
+- **No capture while the window is away.** A gamepad still drives an unfocused window, so Continuar, Tentar novamente or a Results button can be pressed while it is away. `_window_focused` (false from either focus-out notification to `NOTIFICATION_APPLICATION_FOCUS_IN` or `NOTIFICATION_WM_WINDOW_FOCUS_IN`) holds that capture back, because Windows would clip the cursor to a background window. The Run itself goes on. On the focus-in, `_on_focus_gained` runs `_update_pointer()` outside a beat, so a player already flying gets the capture back; a paused Run, a screen on top and a beat keep the pointer free.
+- **Held input.** Godot's desktop backends release every held key and button with the focus (`Input.release_pressed_events`), so nothing stays held into that Continuar.
+- Both engine behaviors are recalled from the engine source, not exercised here; walkthrough steps 5 and 6 check them.
+- A Controls confirmation open at the time still reverts itself (F16-03); the Session only shows the pointer there.
+
+### Controller disconnect
+
+A pad leaving while the HUD is on top injects `pause` (F3-03, unchanged), so the pointer is shown with Pause. In Teclado mode an unplug does not pause, so a keyboard-and-mouse player keeps flying with the pointer captured. That is deliberate: nobody is playing on the pad (F3-03's rule). During a defeat or victory beat the injected `pause` is refused like any other, so the pointer stays captured until Defeat or Results show it, one to two and a half seconds later.
+
+### Resume, and presses shared with menus
+
+A dash can be bound to an input that also drives the menus, because gameplay and menu-only actions never conflict (F16-02): for example a dash on B, which is `ui_cancel`. Back on Pause acts on the press (`Interface._unhandled_input`), and `Input.is_action_just_pressed` still reports that press on the first unpaused tick (the known `bomb` problem, menus-session.md Open issues), which the dash polls. A focused button acts on the release instead (Godot's default `action_mode`), so Continuar and a menu's Iniciar or Retry never leave a fresh press behind. `pause` can never share an input with a dash (their contexts overlap).
+
+**The guard is on the resume side, not in the capture rules:** `PlayerController` ignores both dash actions from the moment it gets its controls (a new ship, or `set_controls_enabled(true)`) until a tick with both released. That tick reads no press, so even a tap shorter than a frame cannot dash. The player may still bind a dash anywhere. `camera_recenter` is read as an event, and a press a menu consumed never reaches it. `Targeting` polls `lock_target` and `next_target` the same way and is not guarded (outside this ticket; see player-flight.md "F16 Session integration").
+
+### Options → Controls → caller
+
+Checked by reading; nothing here changed. From the main menu and from Pause, Opções → Controles → Voltar → Voltar returns through `ScreenRouter` to the caller with its focus: `BindingsButton` on Opções, then `OptionsButton` on the main menu or on Pause. Pause stays under Options with the tree paused, and Start is ignored until Pause is on top again. Global Defaults (`Settings.restore_defaults`) resets the F16 values and both profiles; `Interface` reinstalls the profiles and the glyph override, the Session reapplies the camera values, and the Controls draft is taken again on the next visit. A confirmation pending on Controls reverts on Reverter, the timeout, a disconnect, a focus loss or leaving the screen (F16-03). The prompt family follows the device policy (F3-03, F16-08). No connection is made per ship except the existing `shots_fired` and `dash_started`, freed with the ship. `ControlsScreen` connects `Settings.changed` and the root's `visibility_changed` once, in `setup`, and the HUD's `bind` unbinds first, so repeated Retry and Restart never double a handler.
+
+### Deliberately not done
+
+- **No HUD key hint.** The Impulso indicator stays label-only. PLANEJAMENTO Section 7 asks for a clear HUD with little text and no combat instruction overlays, and the spec's cooldown is "one compact shared indicator". `hud.*` is not in this ticket's Files list. Any hint added later uses `MenuController.prompt_for` from `Interface._push_prompts` (F16-03's note).
+- **In Mouse mode the arrow keys still orbit.** Keys and the right stick share the `camera_*` actions (F16-04), so Mouse mode adds the mouse to them. A player who wants the arrows free unbinds them in Controles.
+
+### Verification (no tests: the F16 rule)
+
+- `tools/test.ps1` passed: 225, 0 failed, with no script, parse or compile error.
+- The 300-frame headless boot printed no ERROR or WARNING line.
+- `check_resources.gd --strict-validate`: 85 resources, 86 scripts, none failed.
+- The flows were checked by reading only. The headless display server ignores the mouse mode and sends no focus notifications, so neither was exercised. The human walkthrough is in [validation/controls-expansion.md](../validation/controls-expansion.md) "Integrated walkthrough (F16-06, trunk)".
 
 ## Open issues
 
-- Bus and window application are live since F3-02 ("Options binding"), the input device since F3-03 ("Input device and disconnect"), and the camera values since F3-04 ("Camera wiring").
+- Bus and window application are live since F3-02 ("Options binding"), the input device since F3-03 ("Input device and disconnect"), the camera values since F3-04 ("Camera wiring"), and the F16 camera values, the pointer and focus-loss pause since F16-06 ("F16 Session integration").
 - **Owed: the physical keyboard and DualSense pass** over Options and the camera orbit at a saved sensitivity, invert on and off. F3-04 drove the orbit with `Input.action_press` only.
 - **Owed: a physical DualSense unplug in flight** (ENGINEERING_BRIEF Section 8: a simulated gamepad event does not replace a physical controller). F3-03 was verified with synthetic events and `joy_connection_changed` emissions only. It belongs to the human pass.
-- No gamepad glyphs or gamepad hint text: Controle and Automático after pad use hide the keyboard hint (GUIDE Section 14 allows hiding).
+- ~~No gamepad glyphs or gamepad hint text~~: resolved by F16-03 and F16-08. Every menu footer names the live bindings in the prompt family: keyboard text, Xbox or PlayStation names. The Controle tab shows Astra's glyphs, with a text fallback. Glyphs in the footers and on the HUD are not shipped; the footers use text.
+- **Owed (F16-07): the integrated device pass** in the F16-06 walkthrough: the pointer lifecycle, focus-loss pause and the resume guard on real hardware.
 - **The windowed display pass** (a real resize, fullscreen, the layout intact at each resolution) was run by F3-04 part 1 and is recorded in [validation/settings.md](../validation/settings.md); F3-02 itself was verified headless through `display_applied`.
 - Defaults applies the display twice when both the window mode and the resolution differ (one `changed` each). This is harmless, and it keeps `changed` as the one application point.
 - Defaults remain the GUIDE-authored values until Astra tunes them.

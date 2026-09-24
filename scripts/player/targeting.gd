@@ -48,6 +48,12 @@ var _ship: Node3D
 ## Instance ids of group members already reported for lacking a `HitVolume`, so each is
 ## reported once and not every tick.
 var _reported_ids: Dictionary[int, bool] = {}
+## False from the moment the ship gets its controls (it enters play, or a Resume gives them
+## back) until a tick after it with both targeting actions released (F16-09). The press that
+## resumed play can share its input with a lock or a switch: either action remapped to B
+## resumes from Pause as `ui_cancel`, on the press, and `Input.is_action_just_pressed` still
+## reports that press on the first tick the ship runs, so it must not lock or switch.
+var _input_armed: bool = false
 
 
 func _ready() -> void:
@@ -62,6 +68,10 @@ func _ready() -> void:
 func _physics_process(_delta: float) -> void:
 	var lock_pressed := Input.is_action_just_pressed(&"lock_target")
 	var next_pressed := Input.is_action_just_pressed(&"next_target")
+	if not _input_armed:
+		_input_armed = not Input.is_action_pressed(&"lock_target") and not Input.is_action_pressed(&"next_target")
+		lock_pressed = false
+		next_pressed = false
 	var current := _selector.get_current_id()
 	# Nothing is locked and nothing was asked for: no rays to cast this tick.
 	if current == TargetSelector.NO_TARGET and not lock_pressed and not next_pressed:
@@ -90,6 +100,13 @@ func get_current_target() -> Node3D:
 	if id == TargetSelector.NO_TARGET:
 		return null
 	return instance_from_id(id) as Node3D
+
+
+## Disarms the targeting actions until both are released, called by the ship's owner when
+## the controls come back. The press that resumed play, or started the stage, is then not
+## read as a lock or a switch (F16-09).
+func require_release() -> void:
+	_input_armed = false
 
 
 ## Describes every node in [member group_name] as the camera sees it now: one

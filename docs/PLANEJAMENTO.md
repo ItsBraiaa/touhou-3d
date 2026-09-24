@@ -59,6 +59,8 @@ On each route, fly toward visible landmarks, fight waves, collect items, and rea
 
 The camera follows behind the ship with a stable horizon and horizontal rotation. Horizontal movement is camera-relative; ascent and descent follow the world's vertical axis. There is no aircraft roll control. While locked on, frame the player and target to support orbiting and changes in height and distance. Return smoothly to follow mode when unlocked.
 
+Camera input (F16): the keyboard-and-mouse player chooses **Câmera: Teclas** (the default, arrow keys) or **Câmera: Mouse**, and the right stick orbits in both. In Mouse mode the pointer is captured only while the player flies with the window focused. Menus, Pause, Defeat, Results, losing the window, a controller disconnect that pauses (in every input mode but Teclado) and leaving a run all show it again. A defeat or victory beat keeps it captured until Defeat or Results, unless the window is lost. Regaining the window never resumes play; it recaptures the pointer only when the player already resumed with the gamepad while the window was away. Mouse orbit converts the motion to an angle once (0.12 degrees per pixel by default, 0.02–0.50), independently of frame rate, with its own vertical inversion. The existing keyboard/stick sensitivity (0.2–2.0) and inversion keep their meaning, and the right stick has a deadzone (0.2 by default, 0.05–0.5). While locked on, deliberate mouse motion holds the lock framing off without releasing the lock and blends back 0.25 seconds after it stops. **Centralizar câmera** (R or middle mouse; right-stick press) returns the camera over 0.25 seconds, along the shorter turn, to the ship's authored forward at the default pitch, or with a lock to the ship-and-target framing, keeping the lock. Manual camera input interrupts it, and a repeat restarts it. Obstruction limits and pitch limits still apply.
+
 Aim assist prioritizes visible targets near the screen center. Lock remains stable until explicitly switched, released, or invalidated by target death/range. Assisted shots respect obstacles. The ship may become partially transparent when it obscures bullets near the vulnerable core.
 
 Communicate playable-volume boundaries through scenery and subtle feedback. New threats originating outside the camera view require directional and audio warnings. Bound retreat distance so that the player cannot attack indefinitely from a risk-free position.
@@ -103,6 +105,17 @@ Focus makes the core more visible and supports precise movement on all axes. A s
 - One use must not eliminate an entire boss phase.
 - Each activation consumes one charge. Bombs cannot activate while paused or defeated.
 - Removed bullets award no graze. The blast effect must preserve visibility of subsequent attacks.
+
+### Lateral dash (Impulso)
+
+Approved with F16; the numbers are the playtest baseline.
+
+- **Impulso à esquerda / Impulso à direita** make a short burst along the camera's horizontal left or right, captured when it starts: 3.0 world units in 0.15 seconds. The burst replaces ordinary movement: there is no diagonal speed stacking, no vertical dash, and Focus does not change it. Fire and Target Lock continue normally.
+- **Invulnerable** for the whole 0.15-second burst: protected hits cost neither health nor Shield, and no graze is awarded. A longer hit or Bomb invulnerability that is already running is kept.
+- **Shared cooldown** of 0.8 seconds, from activation. One press makes one dash. Presses during the cooldown are ignored, not buffered. Both directions pressed together do nothing and cost nothing. There is no Shield, Bomb, power or pickup cost.
+- **Collision.** The dash sweeps against scenery and the Flight Volume, and contact stops the rest of it without sliding. Closed Gates stay solid, and thin scenery is never crossed. A stopped dash keeps its cooldown, and its protection still ends 0.15 seconds after it started.
+- **Pause and restarts.** Pause freezes the dash, its protection and its cooldown. Defeat, Retry, Restart and stage transitions cancel it, and every new attempt starts ready. The press that resumes play from a menu never dashes.
+- **Feedback.** A short cyan trail and a ship accent show during the protection, with the Core still visible, and never outlast it. There is no camera roll, shake or flash. The HUD shows one compact indicator, **Impulso**, reading `PRONTO` when ready, the seconds left while cooling down, and dimmed while unavailable.
 
 ### Graze and score
 
@@ -179,9 +192,11 @@ Approved direction: a clear interface with little text and no extensive tutorial
 | Opções | Open settings |
 | Sair | Close the game |
 
-Settings include master/music/SFX volume, windowed/fullscreen mode, resolution, camera sensitivity and vertical inversion, Automatic/Keyboard/Gamepad selection, control diagram, and restore defaults. Save settings locally. Automatic mode follows the last-used device and updates input icons.
+Settings include master/music/SFX volume, windowed/fullscreen mode, resolution, camera sensitivity and vertical inversion, Automatic/Keyboard/Gamepad selection, the **Controles** screen, and restore defaults. Save settings locally. Automatic mode follows the last-used device and updates input icons.
 
-Pause menu: Continue, Restart Stage, Options, and Return to Menu, localized into Portuguese. Pausing freezes movement, projectiles, combat timers, and active elapsed time. Defeat offers Retry and Main Menu, indicating whether retry starts at the boss or stage entrance. Victory shows results and actions appropriate to campaign or isolated-stage mode.
+Since F16, Opções → Controles edits every gameplay and menu action for keyboard and mouse and for the controller. It has two slots per action per profile, conflict handling (Trocar, Substituir, Cancelar), and changes held as a draft until Aplicar. A change to the menu controls must be confirmed within 10 seconds (Manter controles) or it reverts. Its Câmera tab holds the camera input mode, both sensitivities, both inversions and the stick deadzone. **Ícones do controle** (Automático, Xbox, PlayStation) chooses the controller names and glyphs. Menu hints always name the current bindings in the device in use. Restaurar padrões also restores the controls.
+
+Pause menu: Continue, Restart Stage, Options, and Return to Menu, localized into Portuguese. Pausing freezes movement, projectiles, combat timers, and active elapsed time. Losing the application window during play pauses the game, and returning to it does not resume play. Defeat offers Retry and Main Menu, indicating whether retry starts at the boss or stage entrance. Victory shows results and actions appropriate to campaign or isolated-stage mode.
 
 Persistent combat HUD: health bar with percentage, one shield icon, bomb icons/charges, and a compact power indicator. Targets and destinations use world-space or screen-edge markers. Show score and total graze in pause/results instead of persistent combat counters; graze uses subtle light and sound feedback. During bosses, add a segmented health bar and short boss name. Briefly display attack names during transitions. Off-screen threat warnings use simple directional indicators.
 
@@ -199,16 +214,18 @@ Every menu supports keyboard and gamepad navigation with visible selection focus
 | --- | --- | --- |
 | Forward/back/strafe | W/A/S/D | Left stick |
 | Ascend/descend | Space / Left Ctrl | RB / LB |
-| Rotate camera | Arrow keys; optional mouse | Right stick |
+| Rotate camera | Arrow keys; the mouse in Câmera: Mouse | Right stick |
+| Recenter camera (Centralizar câmera) | R or middle mouse | Right-stick press (RS/R3) |
+| Lateral dash (Impulso à esquerda/direita) | Q / E | D-pad left / right (in play) |
 | Fire | Hold J | Hold RT |
 | Focus | Hold Left Shift | Hold LT |
 | Lock/unlock target | K | Y |
 | Next target | Tab | X |
 | Bomb | L | B |
 | Pause | Esc | Menu/Start |
-| Menu navigation | Arrows and Enter; Esc to return | D-pad, A to confirm, B to return |
+| Menu navigation | Arrows and Enter; Esc to return | D-pad or left stick, A to confirm, B to return |
 
-Validate simultaneous ascent/descent, firing, and focus on a physical gamepad. Full input remapping is an expansion feature; device selection and the control diagram are part of this delivery.
+Validate simultaneous ascent/descent, firing, and focus on a physical gamepad. These are the defaults. Since F16 every action above is remappable in Opções → Controles, for keyboard and mouse and for the controller separately, with Xbox or PlayStation names and glyphs.
 
 ## 9. Art, animation, and audio
 

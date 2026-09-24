@@ -54,6 +54,7 @@ func before_each() -> void:
 	if packed == null:
 		return
 	_main = packed.instantiate()
+	IsolatedSettings.isolate(_main)
 	tree.root.add_child(_main)
 	_interface = _main.get_node_or_null(^"Interface") as Interface
 	await tree.process_frame
@@ -65,6 +66,7 @@ func after_each() -> void:
 	tree.root.remove_child(_main)
 	_main.free()
 	_main = null
+	IsolatedSettings.clean()
 	_interface = null
 
 
