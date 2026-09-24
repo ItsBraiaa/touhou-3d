@@ -30,7 +30,7 @@ Inspected on 2026-09-20:
 - No gameplay scenes or scripts were found at the project root.
 - `All models/kenney_space-kit`, `All models/Ultimate Monsters`, and `All models/Ultimate nature` exist.
 - `all-sounds/` contains Digital Audio, Impact Sounds, Interface Sounds, and Sci-fi Sounds packages.
-- `Music/` contains five MP3s with the previously discussed Touhou track names. Their presence does not establish recording provenance or redistribution permission.
+- `music/` contains five MP3s with the previously discussed Touhou track names. Their presence does not establish recording provenance or redistribution permission.
 - No Godot executable resolved through the shell's `godot`/`godot4` lookup. Locate the existing installation before installing anything.
 - No `.git` directory was visible at the project root. Do not assume commits or worktrees are available; check repository status before using Git.
 
@@ -319,7 +319,7 @@ func stop_music() -> void
 - [ ] Select trees/rocks from Ultimate nature and dress both routes with the agreed palettes. Ensure collision geometry, camera clearance, and firing paths still work.
 - [ ] Add simple ship banking/core pulses/propulsion and clearly visible boss model animation. Ensure visual banking does not move the damage core.
 - [ ] Audition short SFX from the verified `all-sounds/` packs. Use `laser1.ogg` only as an initial candidate, not a final selection. Bind menu, shot, hit, pickup, shield break, bomb, warning, victory, and defeat events.
-- [ ] Use Master/Music/SFX buses. Cap simultaneous repeated shot sounds so dense fire does not drown out warnings or the soundtrack.
+- [ ] Use Master/music/SFX buses. Cap simultaneous repeated shot sounds so dense fire does not drown out warnings or the soundtrack.
 - [ ] Inspect the five MP3 recordings and source permissions before including them in a distributable export. If provenance remains unresolved, use permitted alternate tracks from the documented catalog; keep combat functional independently of music availability.
 - [ ] Verify atmosphere, bullet contrast, readable UI, and sound balance through complete runs. Save asset decisions and animation checks in the validation record.
 

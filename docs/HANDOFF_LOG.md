@@ -10,6 +10,21 @@ Change: This supersedes the entry below on Stage 2. F12-06 and F12-07 part 2 lan
 Stage 2's five-minute clear is still not measured; a person must play it. `clear-time.md` step 5 is ready for F14-02's human pass.
 Why: the ticket's sprint note says to measure Stage 2 once F12-07 has landed. The rules are now checked on both real routes; the played duration still needs a person.
 Action required by Astra: none. Sol's `docs/validation/bosses.md` says a controlled fight through both Stage 2 bosses is owed. This scripted pass fought both through all their Phases, via the Director, by direct damage. That is not a feel or difficulty check.
+## 2026-09-24 — Astra (sol) — D-01 selected sound folder and music path casing
+State: done
+Files: `sound_effects/` (17 original Ogg clips, four pack licenses, selection.json, README.md, .gdignore); `.gitignore`; folder references in design, audio, foundation, delivery and project documentation.
+Change: User requested the measured 17-event shortlist in `sound_effects/`, and lowercase `music` folder references. The folder is a curated source selection, excluded from Godot discovery via .gdignore; runtime copies and audio event wiring remain as delivered. Gains and repetition settings in the manifest remain proposals pending listening. Documentation and ignore rules now use `music/`. The Godot bus named `Music` is unchanged. Earlier handoff entries are historical and retain their original wording; their `Music/` source-folder references mean `music/` today.
+Verification: all 17 copied clips match the reviewed selection byte for byte; four source licenses included. No new tests. The lane landing gate records automated validation.
+Action required by audio owner: use this selection for the next approved runtime mapping/mix pass; do not interpret the folder move as a completed listening pass.
+
+## 2026-09-24 — Astra (sol) — Stage 2 content review (D-06 pass 3) [shared]
+State: SCENE_READY
+Files: `content/bosses/tempest_sentinel.tres`; `content/bosses/storm_guardian.tres`; five `content/patterns/{sentinel,storm}_*.tres`; `docs/validation/stage-02-pacing.md`; ROADMAP; D-06 ticket.
+
+Tempest Sentinel health 520/780 → 440/660 (about 20/30 s at measured Power-3 boss DPS 22.1). Storm Guardian health 1040/1040/1300 → 885/885/1105 (about 40/40/50 s). `storm_spiral` volley count is unchanged at six, and projectiles per volley 8 → 6 to open wider corridors. Entry 1.0 s, transitions 0/0.75 s, step timing, other pattern numbers, Attack names, structure and scores 500/1000 are unchanged. All seven boss resources gained `metadata/reviewed = true`; `metadata/dev` remains. Bomb damage 20 is below the smallest Phase health 440.
+
+The reward audit remains exact: seven Power and two Shield, including one Power per Seal. Five early Power items can lift a Direct Stage 2 player from Power 2 to 3 before S2-04; a Campaign player already at Power 3 scores excess pickups. Conditional estimates are about 336 s efficient and 426 s normal, not measured; the ≥300 s requirement remains unverified until F11-03/F14-02's uninterrupted human clear. No content bug or Stage-2-only common-enemy request. `lane.ps1 land` is the gate; no new tests were written.
+
 
 ## 2026-09-24 11:35 — Claude (trunk) — Active Time and Clear Time verification (F11-03)
 State: docs

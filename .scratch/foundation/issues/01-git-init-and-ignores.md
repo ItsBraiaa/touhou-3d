@@ -18,12 +18,12 @@ Turn the folder into a git repository with a clean baseline commit, ignoring gen
 
 - No `.git` exists. Global git identity is configured (`Braia`, personal email); do not change it.
 - `.gitignore` currently contains `.godot/` and `/android/`. `.gitattributes` sets `* text=auto eol=lf`.
-- Raw packs: `All models/` (334 MB), `all-sounds/` (9.6 MB), `Music/` (58 MB); each has a `.gdignore`. `assets/` holds the selected runtime copies.
+- Raw packs: `All models/` (334 MB), `all-sounds/` (9.6 MB), `music/` (58 MB); each has a `.gdignore`. `assets/` holds the selected runtime copies.
 - Four empty stray editor-data folders at the root: `export_templates/`, `feature_profiles/`, `script_templates/`, `text_editor_themes/`.
 
 ## Deliverables
 
-- `.gitignore` with: `.godot/`, `/android/`, `/build/`, `/All models/`, `/all-sounds/`, `/Music/`, `*.tmp`. Keep `*.import` files tracked (Godot convention).
+- `.gitignore` with: `.godot/`, `/android/`, `/build/`, `/All models/`, `/all-sounds/`, `/music/`, `*.tmp`. Keep `*.import` files tracked (Godot convention).
 - The four empty stray folders removed.
 - `git init` on branch `main`, `git config core.autocrlf false` for this repo (the attributes file already normalizes to LF).
 - One baseline commit: `chore: baseline import of scenes, docs, and planning` containing everything currently in the tree, including `.scratch/`.
