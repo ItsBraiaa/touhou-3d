@@ -8,8 +8,9 @@ extends RefCounted
 ## drives it with direct calls; the Stage Director reports Checkpoints and stage
 ## completion through the Session. Each stage accounts for its own Clear Time, Graze and
 ## bombs used; score is a Run result (PLANEJAMENTO Section 5) and a Campaign carries it,
-## with the Power Level, into the next stage. Combat resources, Power Progress and
-## Encounter flags are not held here; F8-03 adds them to the Snapshot.
+## with the Power Level and, since F15-11, the Power Progress, into the next stage. Only
+## those stage-entry values are held here: the live combat resources and Encounter flags
+## are not; F8-03 adds them to the Snapshot.
 ##
 ## Every call that changes the Attempt is ignored unless a stage is in play
 ## ([constant Phase.IN_STAGE]), so a completed stage's result is final and a duplicate
@@ -67,6 +68,7 @@ var _order: Array[StringName] = []
 var _stage_index: int = 0
 var _phase: Phase = Phase.IDLE
 var _entry_power_level: int = 1
+var _entry_power_progress: int = 0
 var _entry_score: int = 0
 var _attempt_index: int = 0
 var _paused: bool = false
@@ -87,7 +89,7 @@ func start(mode: RunMode, first_stage: StringName) -> void:
 		_order = [first_stage]
 	_stage_index = 0
 	set_paused(false)
-	_enter_stage(ENTRY_POWER_LEVEL.get(first_stage, 1), 0)
+	_enter_stage(ENTRY_POWER_LEVEL.get(first_stage, 1), 0, 0)
 
 
 ## Begins a new Attempt in the stage in play: counts it, discards whatever the previous
@@ -172,15 +174,16 @@ func complete_stage() -> void:
 
 
 ## Leaves a completed stage: enters the next stage of the order, or ends the Run with a
-## victory after the last one. [param power_level] is the player's Power Level at the
-## end of the completed stage, which the next stage of a Campaign starts at; it is
-## unused when the Run ends. Ignored unless a stage has just completed.
-func advance(power_level: int) -> void:
+## victory after the last one. [param power_level] and [param power_progress] are the
+## player's Power Level and Power Progress at the end of the completed stage, which the
+## next stage of a Campaign starts at (F15-11); both are unused when the Run ends.
+## Ignored unless a stage has just completed.
+func advance(power_level: int, power_progress: int = 0) -> void:
 	if _phase != Phase.STAGE_COMPLETE:
 		return
 	if _stage_index + 1 < _order.size():
 		_stage_index += 1
-		_enter_stage(power_level, _committed.score + _attempt.score)
+		_enter_stage(power_level, power_progress, _committed.score + _attempt.score)
 	else:
 		end_run(true)
 
@@ -220,7 +223,7 @@ func stage_result() -> Dictionary:
 
 ## The committed values, the stage-entry values and the stage position, as a Dictionary
 ## of primitives that shares nothing with this core (CONVENTIONS "Snapshots"): `mode`,
-## `stage_order`, `stage_index`, `entry_power_level`, `entry_score`,
+## `stage_order`, `stage_index`, `entry_power_level`, `entry_power_progress`, `entry_score`,
 ## `committed_active_time`, `committed_score`, `committed_graze`,
 ## `committed_bombs_used`. The current Attempt's uncommitted values are not in it.
 func capture() -> Dictionary:
@@ -229,6 +232,7 @@ func capture() -> Dictionary:
 		"stage_order": _order.duplicate(),
 		"stage_index": _stage_index,
 		"entry_power_level": _entry_power_level,
+		"entry_power_progress": _entry_power_progress,
 		"entry_score": _entry_score,
 		"committed_active_time": _committed.active_time,
 		"committed_score": _committed.score,
@@ -246,6 +250,7 @@ func restore(data: Dictionary) -> void:
 	_order.assign(data["stage_order"])
 	_stage_index = data["stage_index"]
 	_entry_power_level = data["entry_power_level"]
+	_entry_power_progress = data["entry_power_progress"]
 	_entry_score = data["entry_score"]
 	_committed = Tally.new()
 	_committed.active_time = data["committed_active_time"]
@@ -280,14 +285,22 @@ func starting_power_level() -> int:
 	return _entry_power_level
 
 
+## Power Progress the player starts the current stage at, beside
+## [method starting_power_level]: 0 for a stage entered by [method start], and what
+## [method advance] passed for Campaign Stage 2 (F15-11). Restart uses it too.
+func starting_power_progress() -> int:
+	return _entry_power_progress
+
+
 func _is_in_stage() -> bool:
 	return _phase == Phase.IN_STAGE
 
 
 ## Records the stage-entry values of the stage at [member _stage_index] and puts it in
 ## play with nothing committed beyond them and no Attempt begun.
-func _enter_stage(power_level: int, score: int) -> void:
+func _enter_stage(power_level: int, power_progress: int, score: int) -> void:
 	_entry_power_level = power_level
+	_entry_power_progress = power_progress
 	_entry_score = score
 	_attempt_index = 0
 	_committed = _entry_tally()

@@ -7,6 +7,25 @@ Change: Wrote the user's requested plan for all gameplay/menu keyboard and contr
 Why: The user asked for a written plan for Astra's screen/layout work and for Claude to orchestrate the complete feature, after approving dash invulnerability. Existing F3 settings work is retained; its earlier no-remapping/no-glyph/no-migration exclusions are superseded only by this planned feature. The current export/package is not represented as containing F16.
 Validation: Planning self-review covers each requested feature, named dependencies, relative links, file ownership, proposed interfaces and the no-new-tests constraint. Existing `tools/lane.ps1 land` is the landing gate; final result is reported with the session's commit. Physical keyboard/controller and gameplay acceptance belong to F16-07 and are not claimed by this document work.
 Action required by Claude: Read `docs/engineering/controls-expansion-plan.md` and `.scratch/controls-expansion/CLAUDE_KICKOFF.md`; after implementation is requested, check lane availability and run the stated ticket sequence. Do not edit Astra's component geometry while she is authoring it, and never dispatch two writers into one worktree. Do not write tests or disposable test drivers. Physical Xbox, DualShock and DualSense results must be recorded individually; unavailable devices remain not verified.
+## 2026-09-24 13:50 — Claude (trunk) — F15-11: Power Progress carries into Campaign Stage 2
+State: INTEGRATED_VERIFIED
+Files:
+- `scripts/session/run_state.gd`: `_entry_power_progress`, `advance(power_level, power_progress = 0)`, `starting_power_progress()`, and `entry_power_progress` in `capture()` and `restore()`.
+- `scripts/session/game_session.gd`: `_continue_campaign`, `_begin_first_attempt`, `_restart_stage`.
+- `scripts/progression/checkpoint_store.gd`: `restart_into`.
+- Docs: `docs/engineering/run-flow.md` (the Continuar section; the open issue is closed), `docs/GUIDE.md` (one phrase in the GameSession row), `docs/engineering/ROADMAP.md` (the F15-11 row).
+Change: the user said yes to carrying Power Progress.
+- Results' Continuar passes the Power Level and the Power Progress Stage 1 ended with to `RunState.advance`, which keeps both as Stage 2's entry values.
+- Stage 2's first Attempt, a Restart, and a Retry before any Checkpoint start `CombatState` from both.
+- A Checkpoint Snapshot keeps the entry Progress, so a Restart after a Retry still returns to it.
+- A Direct Stage 2 still enters at Power Level 2 with 0.
+Verification: a headless `main.tscn` driver (throwaway, not in the repo).
+- Stage 1 ended at 2 with 2 of 5, and Campaign Stage 2 entered at 2 with 2.
+- A Pickup took it to 2/3, and Restart returned to 2/2. A defeat, then Retry before any Checkpoint, also returned to 2/2.
+- A Direct Stage 2 entered at 2/0.
+- A Stage 1 finished at level 3 entered Stage 2 at 3/0.
+No tests (sprint rule).
+Action required by Astra: none. PLANEJAMENTO Section 6's carry line may want "and the Power Progress".
 
 ## 2026-09-24 13:45 — Claude (trunk) — F15-10: defeat beat before the Defeat overlay
 State: INTEGRATED_VERIFIED
