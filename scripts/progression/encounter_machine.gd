@@ -141,22 +141,22 @@ func notify_exited(encounter_id: StringName) -> void:
 					_complete(encounter)
 
 
-## Counts the enemy [param enemy_id] of Encounter [param encounter_id] once, only while
+## Counts the enemy [param defeated_id] of Encounter [param encounter_id] once, only while
 ## that Encounter is ACTIVE and the enemy belongs to an already-requested Wave.
 ## Duplicates and strangers are ignored. When the last enemy of a Wave falls, the next
 ## AFTER_PREVIOUS_WAVE Wave is scheduled after its delay. An ALL_REQUIRED_ENEMIES
 ## Encounter completes when every Wave was requested and every enemy counted, so three
 ## Bomb deaths in one tick with repeated reports complete it exactly once.
-func notify_enemy_defeated(enemy_id: StringName, encounter_id: StringName) -> void:
+func notify_enemy_defeated(defeated_id: StringName, encounter_id: StringName) -> void:
 	if _active_id != encounter_id:
 		return
 	var encounter: EncounterDefinition = _stage.find_encounter(encounter_id)
 	if encounter == null:
 		return
-	var wave_index: int = _owning_requested_wave_index(encounter, enemy_id)
-	if wave_index < 0 or _counted.has(enemy_id):
+	var wave_index: int = _owning_requested_wave_index(encounter, defeated_id)
+	if wave_index < 0 or _counted.has(defeated_id):
 		return
-	_counted[enemy_id] = true
+	_counted[defeated_id] = true
 	if _is_wave_defeated(encounter, wave_index):
 		var next_index: int = wave_index + 1
 		if next_index < encounter.waves.size():
@@ -406,14 +406,14 @@ func _schedule_wave(encounter: EncounterDefinition, wave_index: int) -> void:
 
 
 ## The Wave of [param encounter] that already had its request and owns
-## [param enemy_id], or -1 when the enemy belongs to no requested Wave.
+## [param candidate_id], or -1 when the enemy belongs to no requested Wave.
 func _owning_requested_wave_index(encounter: EncounterDefinition,
-		enemy_id: StringName) -> int:
+		candidate_id: StringName) -> int:
 	for wave_index: int in range(encounter.waves.size()):
 		if not _requested_waves.has(wave_index):
 			continue
 		for marker: NodePath in encounter.waves[wave_index].spawn_markers:
-			if enemy_id(encounter.id, marker) == enemy_id:
+			if enemy_id(encounter.id, marker) == candidate_id:
 				return wave_index
 	return -1
 
