@@ -124,11 +124,11 @@ User-requested on 2026-09-24; implementation is planned, not part of the already
 | Ticket | Owner / lane | Depends on | Status |
 | --- | --- | --- | --- |
 | F16-00 plan-and-orchestration | Astra / sol | F3-04, F7-02 | done (spec, seven implementation tickets, layout contract and Claude kickoff) |
-| F16-01 controls-layout-and-dash-visuals | Astra / sol | F16-00 | todo |
+| F16-01 controls-layout-and-dash-visuals | Astra / sol | F16-00 | done (2026-09-24: Controls scene, binding row, cooldown and dash visual components, 36 original glyphs; three rendered viewport captures and node inventory in validation; no tests added) |
 | F16-02 binding-profiles-and-persistence | Claude / trunk | F16-00 | done 2026-09-24 (part 1 by lane plan: the three new action defaults; part 2 by trunk: `InputBindings` catalog and profiles, `Settings` `controls_version=1` with migration, atomic save and pending-confirmation recovery, `InputBindingAdapter` installed by `Interface`; settings.md "F16 binding profiles and persistence") |
-| F16-08 binding-labels-and-prompt-family | OpenCode / oc-a | F16-00 | todo |
+| F16-08 binding-labels-and-prompt-family | OpenCode / oc-a | F16-00 | done (2026-09-24: static `BindingLabels` label/glyph table plus `InputDeviceState` prompt-family detection with the 8 px mouse threshold; no new tests per the sprint rule; the physical Xbox/PlayStation glyph pass belongs to F16-07) |
 | F16-03 rebind-workflow-and-prompts | Claude / trunk | F16-01, F16-02, F16-08 | todo |
-| F16-04 mouse-camera-and-recenter | Claude / path | F16-00 | todo |
+| F16-04 mouse-camera-and-recenter | Claude / path | F16-00 | done (2026-09-24: CameraRig mouse orbit, locked look override and recenter; Session wiring and capture lifecycle are F16-06) |
 | F16-05 invulnerable-lateral-dash | Claude / rescue | F16-00 (part 2: F16-01) | todo |
 | F16-06 session-camera-and-controls-integration | Claude / trunk | F16-03, F16-04, F16-05 | todo |
 | F16-07 controls-visual-and-device-acceptance | Astra / sol; Claude engineering fixes | F16-06 | todo |
@@ -196,6 +196,8 @@ Dependencies Claude has on scene and content work. These are needs by Feature, n
 Stage 1 night and both-stage boundary rails: .scratch/stage-night-rails/issues/01-night-forest-and-boundary-rails.md — **done** (night palette, warm lanterns, low gate veil, textured forest detail, visible rails along existing flight walls).
 
 Stage 2 art revision: `.scratch/stage-02-area/issues/02-mountain-art-pass.md` — **done** (textures, terrain, vegetation and ambient visual motion; gameplay pending).
+
+Stage 2 water flow correction: `.scratch/stage-02-area/issues/03-water-flow-direction.md` — **done** (stream and waterfall animation reversed toward the bottom of the route).
 
 Stage 2 scene ticket: `.scratch/stage-02-area/issues/01-mountain-route.md` — **done** (static scene only).
 

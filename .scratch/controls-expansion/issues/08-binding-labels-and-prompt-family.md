@@ -1,6 +1,6 @@
 # F16-08 binding-labels-and-prompt-family
 
-Status: todo
+Status: done
 Type: core+adapter
 Owner: OpenCode
 Lane: oc-a
@@ -106,4 +106,10 @@ Model: DeepSeek V4.1 Flash. You are lane oc-a. Work only in C:\Users\Braia\Docum
 
 ## Outcome
 
-Not started.
+Done 2026-09-24 (lane oc-a, DeepSeek V4.1 Flash). One commit `(F16-08) binding labels and prompt family`.
+
+- `scripts/ui/binding_labels.gd` (new, with its `.uid`): `BindingLabels`, static and Node-free. `describe()` renders keys (physical or not, with the modifier prefixes and the Portuguese table), mouse buttons, and per-family joypad buttons and axes; malformed data returns `—`. `glyph_id()` returns Astra's stable ids or `&""`; `glyph_path()` uses the `res://assets/ui/controls/glyphs/<id>.png` convention.
+- `scripts/ui/input_device_state.gd` (additions only): `prompt_family_changed`, `set_glyph_override`, `get_prompt_family`, the memory-only last-pad id, the `MOUSE_MOTION_THRESHOLD` (8 px) accumulator, and mouse button/motion handling in `note_event`. Every existing function, signal and behavior is unchanged.
+- Docs: `settings.md` and `validation/controls-expansion.md` F16-08 sections, the ROADMAP row, and the handoff entry.
+- No tests or driver scripts. `tools/lane.ps1 land` is the gate. Physical Xbox/PlayStation checks and the glyph art are F16-07's.
+
