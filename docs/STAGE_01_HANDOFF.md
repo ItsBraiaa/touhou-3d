@@ -77,3 +77,9 @@ Godot 4.7.2 imported the scene successfully. Offline QA rendered five views at 1
 This is the initial area, not a complete playable stage. Pending: actual Player traversal, enemy and Ghost prefab presentation, live gates/checkpoints, combat VFX/audio, terrain/detail refinement, active-encounter retreat limits, camera obstruction review, collision tuning, performance measurements and the four-minute Stage 1 pacing target. No academic gameplay duration has been measured.
 
 `tools/build_stage_01.py` rewrites only the Stage 1 scene and its preview. It is an offline authoring utility. Do not rerun after integration without reconciling edits.
+
+## Night forest and boundary rail pass (2026-09-23)
+
+The scene now renders as a deep navy night under subdued blue moonlight, with a visible moon and warmer orange paper lanterns. Every third lantern pair remains visible (30 of 90), with selective local lights. Textured moss/stone, gently moving foliage, scattered rocks and ferns, and torii roof silhouettes add detail without changing encounter markers or authored collisions. The closed-gate visual is a low blue veil that fades above the gateway; each 90 x 75 collision barrier is unchanged.
+
+Environment/BoundaryRails follows both sides of every terrace. Its Stage 1 rails sit on the 11-unit bank tops. The rails are visual guidance aligned with the existing FlightBounds/West and East layer-1 walls, which continue to stop the ship above them. The player clamp remains the other out-of-bounds limit. Five 1280 x 720 review captures in docs/validation/stage-01-*.png show the final night treatment.

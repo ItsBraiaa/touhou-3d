@@ -30,6 +30,13 @@ Why: F3-04 part 1 (path); part 2 (trunk) closes the ticket.
 Action required by Claude (trunk): F3-04 part 2 adds the Session camera wiring. It records the camera items in `docs/validation/settings.md` ("Still to record"): a new ship gets the saved values, a live change reaches the rig, and 2.0 against 0.2 and invert show in flight. It also updates the `settings.md` Open issues line about the windowed display pass, which this part recorded.
 Action required by Astra: none.
 
+## 2026-09-24 01:46 UTC — Astra — Stage 1 night forest and both-stage rails
+State: SCENE_READY
+Files: scenes/stages/stage_01.tscn, scenes/stages/stage_02.tscn, assets/environment/stage_01/gate_veil.gdshader, Stage 1 and Stage 2 validation captures and handoffs, ROADMAP, local issue.
+Change: Stage 1 has a navy night palette, moon, warm sparse lanterns, textured forest detail and low blue gate veils; both stages have visible side rails along every route terrace. Stage 1 rails sit on the bank tops. No runtime node names, markers, gate collision, collision layers, masks or script wiring changed.
+Merge note: scenes/stages/stage_01.tscn overlapped with trunk F10-01 Stage Director attachment; the merge keeps both resource declarations and the Director script exports.
+Why: User review requested a stronger Stage 1 night presentation, removal of the pink sky column, and readable out-of-bounds edges on both stages.
+Action required by Claude: preserve Environment/BoundaryRails and the authored lighting/veil when attaching Stage Director and stage actors. The existing FlightBounds walls continue to provide physical containment; include them in the integrated flight pass. No wiring change is required for the rails.
 ## 2026-09-24 01:00 — Claude (path) — F3-03: input device mode and controller-disconnect pause
 State: CODE_READY
 Files: New `scripts/ui/input_device_state.gd`. Edited `scripts/ui/interface.gd` (the device tracking, the prompt push and the disconnect pause) and `scripts/ui/menu_controller.gd` (footer only: its own device tracking removed, `set_keyboard_prompts(shown)` added). Adjusted test: `tests/scene/test_menu_registry_contract.gd`. Docs: `docs/engineering/settings.md` ("Input device and disconnect"), `docs/engineering/menus-session.md` ("Footer"), `docs/GUIDE.md` (Section 6 `interface.gd` and `menu_controller.gd`, Section 7 "Pause requested"), and the ROADMAP F3-03 row.
