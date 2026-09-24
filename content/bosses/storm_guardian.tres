@@ -23,7 +23,7 @@ reposition_seconds = 0.8
 
 [sub_resource type="Resource" id="Phase_Spiral"]
 script = ExtResource("2_phase")
-health = 1040
+health = 885
 attack = SubResource("Attack_Spiral")
 transition_seconds = 0.0
 
@@ -49,7 +49,7 @@ reposition_seconds = 0.8
 
 [sub_resource type="Resource" id="Phase_Thunder_Rings"]
 script = ExtResource("2_phase")
-health = 1040
+health = 885
 attack = SubResource("Attack_Thunder_Rings")
 transition_seconds = 0.75
 
@@ -89,7 +89,7 @@ reposition_seconds = 1.2
 
 [sub_resource type="Resource" id="Phase_Storm_Eye"]
 script = ExtResource("2_phase")
-health = 1300
+health = 1105
 attack = SubResource("Attack_Storm_Eye")
 transition_seconds = 0.75
 
@@ -101,3 +101,4 @@ score = 1000
 entry_seconds = 1.0
 phases = Array[ExtResource("2_phase")]([SubResource("Phase_Spiral"), SubResource("Phase_Thunder_Rings"), SubResource("Phase_Storm_Eye")])
 metadata/dev = true
+metadata/reviewed = true

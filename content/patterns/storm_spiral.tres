@@ -6,7 +6,7 @@
 script = ExtResource("1_pattern")
 id = &"storm_spiral"
 shape = 2
-projectiles_per_volley = 8
+projectiles_per_volley = 6
 volley_count = 6
 volley_interval = 0.3
 speed = 9.0
@@ -16,3 +16,4 @@ damage = 10
 rotation_step_degrees = 18.0
 height_offsets = PackedFloat32Array(-8.0, -4.0, 0.0, 4.0, 8.0, 4.0)
 metadata/dev = true
+metadata/reviewed = true

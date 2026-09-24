@@ -97,7 +97,7 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | | | | 03 lantern-guardian-scene | design | — | sol | done (2026-09-23: Ghost prefab, clips and dusk render verified) |
 | | | | 04 stage-2-boss-scenes | design | — | sol | done (2026-09-23: Tempest Sentinel and Storm Guardian prefabs, clips and Stage 2 renders verified) |
 | | | | 05 stage-1-tuning-and-pacing | design | — | sol | done (2026-09-23: content values, names, clip candidates and provisional 221 s estimate) |
-| | | | 06 stage-2-content-review | design | — | sol | todo (passes 1–2 landed: values/rewards and explicit Seal health 10; pass 3 boss tuning pending) |
+| | | | 06 stage-2-content-review | design | — | sol | done (2026-09-24: rewards and Seals reviewed, bosses tuned to 20/30 and 40/40/50 s; 336 s efficient estimate, measured clear pending) |
 | | | | 07 shrine-lighting-and-boss-rulings | design | — | sol | done (2026-09-24: 2.4 s shrine clip, five rulings, Lantern Guardian health 550/550/775; trunk export swap pending) |
 | | | | 08 enemy-visuals-duplicate-parts | design | — | oc-a | done (2026-09-24: Part 1 confirmed duplicate glTF and embedded model parts in all four visuals; Part 2 removed the instance links, post-fix counts and validator clean) |
 
@@ -157,6 +157,8 @@ Dependencies Claude has on scene and content work. These are needs by Feature, n
 2026-09-23: D-03 Lantern Guardian prefab is SCENE_READY at `scenes/enemies/lantern_guardian.tscn`; tree, clip names, hit sphere and emitter are in [ENEMY_VISUAL_HANDOFF.md](../ENEMY_VISUAL_HANDOFF.md). Trunk F12-03 owns the script attachment and scene export wiring.
 
 2026-09-24: D-07 is complete. The five Part B rulings are in [PLANEJAMENTO.md](../PLANEJAMENTO.md); F12-06 applied the two-Phase HUD offsets. Part A authored `Environment/ShrineLighting` and the `corrupted_to_calm` clip in Stage 1; trunk F14-01 sets the Stage exports. Part C tuned Lantern Guardian health to 550/550/775 and reviewed its patterns. Captures and reset checks are in [stage-01-shrine.md](../validation/stage-01-shrine.md).
+
+2026-09-24: D-06 is complete as a content review. Tempest Sentinel health is 440/660; Storm Guardian health is 885/885/1105, with six rather than eight spiral projectiles per volley. [stage-02-pacing.md](../validation/stage-02-pacing.md) estimates about 336 s efficient and 426 s normal. A no-death strong-play Results Clear Time is still required before the ≥300 s acceptance line can be verified.
 
 Stage 1 night and both-stage boundary rails: .scratch/stage-night-rails/issues/01-night-forest-and-boundary-rails.md — **done** (night palette, warm lanterns, low gate veil, textured forest detail, visible rails along existing flight walls).
 

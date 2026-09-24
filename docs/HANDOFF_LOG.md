@@ -1,5 +1,14 @@
 # Handoff Log
 
+## 2026-09-24 — Astra (sol) — Stage 2 content review (D-06 pass 3) [shared]
+State: SCENE_READY
+Files: `content/bosses/tempest_sentinel.tres`; `content/bosses/storm_guardian.tres`; five `content/patterns/{sentinel,storm}_*.tres`; `docs/validation/stage-02-pacing.md`; ROADMAP; D-06 ticket.
+
+Tempest Sentinel health 520/780 → 440/660 (about 20/30 s at measured Power-3 boss DPS 22.1). Storm Guardian health 1040/1040/1300 → 885/885/1105 (about 40/40/50 s). `storm_spiral` volley count is unchanged at six, and projectiles per volley 8 → 6 to open wider corridors. Entry 1.0 s, transitions 0/0.75 s, step timing, other pattern numbers, Attack names, structure and scores 500/1000 are unchanged. All seven boss resources gained `metadata/reviewed = true`; `metadata/dev` remains. Bomb damage 20 is below the smallest Phase health 440.
+
+The reward audit remains exact: seven Power and two Shield, including one Power per Seal. Five early Power items can lift a Direct Stage 2 player from Power 2 to 3 before S2-04; a Campaign player already at Power 3 scores excess pickups. Conditional estimates are about 336 s efficient and 426 s normal, not measured; the ≥300 s requirement remains unverified until F11-03/F14-02's uninterrupted human clear. No content bug or Stage-2-only common-enemy request. `lane.ps1 land` is the gate; no new tests were written.
+
+
 ## 2026-09-24 11:35 — Claude (trunk) — Active Time and Clear Time verification (F11-03)
 State: docs
 Files: `docs/validation/clear-time.md` (new); `docs/engineering/run-flow.md` ("Time accounting evidence"); `docs/engineering/ROADMAP.md` (F11-03 row); F11-03 ticket.

@@ -1,6 +1,6 @@
 # D-06 Stage 2 content review
 
-Status: todo
+Status: done
 Type: design
 Owner: Astra (GPT Sol)
 Lane: sol
@@ -125,3 +125,7 @@ Read AGENTS.md, docs/engineering/SPRINT.md (lane sol), docs/GUIDE.md Sections 3 
 ## Pass 2 outcome
 
 2026-09-24, Astra (sol): all three Seal health exports are explicitly 10 (default 10 → authored 10), preserving the value verified by F12-05. Estimated exposed confirmation is 0.74 s efficient / 0.93 s normal at Power 2, without extending the Guard fight through Seal padding. No other scene property changed. The pacing record incorporates D-05's landed common-enemy health in its estimate: about 336 s efficient / 414 s normal, conditional on the still-provisional boss budgets and not a measured clear. Seven Power/two Shield rewards remain exact. No content bug or Stage-2-only enemy request. Status stays todo until pass 3 after F12-07. Commit uses (D-06 pass 2); sprint land is the gate.
+
+## Pass 3 outcome
+
+2026-09-24, Astra (sol): Tempest Sentinel health 520/780 → 440/660, targeting 20/30 s at the observed 22.1 Power-3 boss damage/s. Storm Guardian health 1040/1040/1300 → 885/885/1105, targeting 40/40/50 s. `storm_spiral` projectiles per volley 8 → 6 for broader gaps. Both boss Definitions and all five Stage 2 boss patterns gained `metadata/reviewed = true`, while `metadata/dev = true` remains pending a measured clear. Attack names, scores, structure, entry and transition values remain unchanged. Bomb damage 20 stays below the smallest Phase health 440. The final pacing estimate is about 336 s efficient and 426 s normal, conditional on route execution and boss accuracy; no uninterrupted Results clear was measured, so the five-minute requirement is not claimed verified. No content bug or Stage-2-only common-enemy request was found. The sprint land gate is the verification; no new tests were written.
