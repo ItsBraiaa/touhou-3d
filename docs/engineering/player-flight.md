@@ -427,6 +427,10 @@ Delivered by trunk on 2026-09-24. `GameSession` now drives the rig's F16-04 API 
 
 The walkthrough in [validation/controls-expansion.md](../validation/controls-expansion.md) "Integrated walkthrough (F16-06, trunk)". It covers the capture lifecycle on a real mouse (no jump after capture, none after Continuar, a free cursor on every menu), Alt+Tab in flight and during the confirmation, recenter near scenery with and without a lock, and the dash across every Attempt route.
 
+## F16-07 acceptance status
+
+The integrated `40969f0` presentation pass remains blocked on interactive evidence. No physical keyboard, mouse or pad check was reported; dash travel, protection, trail, cooldown and camera feel are not verified. Astra made no numeric change: `dash_distance = 3.0`, `dash_duration = 0.15` and `dash_cooldown = 0.8` remain the baseline in `player_ship.tscn`. See the [F16-07 matrix](../validation/controls-expansion.md#visual-and-device-acceptance-f16-07-sol) before changing these exports.
+
 ## Open issues
 
 ### Astra design decisions — 2026-09-22, F1-05

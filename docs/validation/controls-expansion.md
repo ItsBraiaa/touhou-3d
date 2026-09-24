@@ -323,4 +323,35 @@ The headless display server ignores `Input.mouse_mode` and sends no focus notifi
 
 ## Visual and device acceptance (F16-07, sol)
 
-Pending.
+2026-09-24, Astra (sol). Integrated source: `40969f0`; `40dd592` changes only the scene-test settings isolation. Windows 11, Godot 4.7.2, OpenGL Compatibility on AMD Radeon RX 9070 XT. The user reported **no physical checks yet**. Actual keyboard, mouse, Xbox, DualShock and DualSense devices exercised for this pass: **none**. Every physical-device result below is **not verified**; no simulated event or earlier headless check is counted as a device pass.
+
+**Inspection and scoped presentation change.** The F16-01 static `1280×720`, `1600×900` and `1920×1080` images show the authored keyboard page, but predate the dynamic catalog, focused scrolling and modal states. The integrated Godot window opened after a local class-cache import; the sandbox desktop did not provide a capturable screen (`CopyFromScreen`: invalid handle), so no interactive frame or play input could be judged. The initial direct launch, before import, printed missing global-class parse errors; importing refreshed the worktree cache and the second launch reached the OpenGL window. The second launch printed only a sandbox root-certificate-store error. Neither launch is an acceptance pass. Scene inspection found that the three Câmera sliders were named only in tooltips and ActionHelp. `controls.tscn` now draws 15 px Portuguese labels inside the existing MouseSensitivity, OrbitSensitivity and Deadzone rows, without changing their paths or input wiring. Their rendered appearance remains not verified.
+
+| Acceptance branch | Actual device / backend | Result | Evidence or remaining action |
+| --- | --- | --- | --- |
+| Integrated Controls readability at 1280×720, 1600×900, 1920×1080; long names, focus outline and row clipping | None / Windows OpenGL Compatibility window | not verified | Only F16-01 static images exist; capture the integrated page at all three sizes. |
+| Focused row scrolling, heading at category boundary, per-tab focus memory, fixed footer | None / Windows OpenGL Compatibility window | not verified | Walk the populated catalog in the running game. |
+| Câmera tab labels, sliders, inversion, deadzone and value persistence | None / Windows OpenGL Compatibility window | not verified | New slider labels are present in the scene source; inspect and operate them in-game. |
+| Listening, candidate review, timeout, cancel and focus return | None / Windows OpenGL Compatibility window | not verified | F16-03 steps 3–5. |
+| Conflict Trocar/Substituir/Cancelar, required/fixed refusals and exact Portuguese copy | None / Windows OpenGL Compatibility window | not verified | F16-03 step 6, including the revised fixed-binding message. |
+| Draft mark, Redefinir, restore tab, dirty exit, save failure and persistence after relaunch | None / Windows OpenGL Compatibility window | not verified | F16-03 steps 7, 10–12. |
+| Ten-second new-binding confirmation; timeout, unplug, focus-loss and crash rollback | None / Windows OpenGL Compatibility window | not verified | F16-03 steps 8–9 and 12; do not alter the real settings file just to claim a pass. |
+| Dynamic keyboard/Xbox/PlayStation row glyphs and all menu footers after remapping | None / Windows OpenGL Compatibility window | not verified | F16-03 steps 2, 14–15. |
+| `✕ ○ □ △` in the actual footer font | None / Windows OpenGL Compatibility window | not verified | The theme names no custom font; an actual PlayStation footer frame is still required. The PNG row glyphs alone cannot prove footer text rendering. |
+| Keyboard-only menu navigation and binding capture | None / Windows OpenGL Compatibility window | not verified | F16-03 steps 1, 3–17; no keyboard report was supplied. |
+| Xbox pad buttons, D-pad/sticks, trigger neutral/drift, glyphs and disconnect | None / no Xbox pad or backend reported | not verified | F16-03 steps 2–9, 14, 17; F16-06 steps 3, 5, 7, 11–16. |
+| DualShock pad buttons, D-pad/sticks, trigger neutral/drift, glyphs and disconnect | None / no DualShock pad or backend reported | not verified | Same device walk, with the controller model and connection type recorded. |
+| DualSense pad buttons, D-pad/sticks, trigger neutral/drift, glyphs and disconnect | None / no DualSense pad or backend reported | not verified | Same device walk, including the PlayStation footer characters. |
+| Non-US layout conflict detection | None / no keyboard layout reported | not verified | F16-03 step 16. |
+| Mouse capture, free/locked orbit, no jump, recenter, inversion and obstruction | None / Windows OpenGL Compatibility window | not verified | F16-04 and F16-06 steps 1–6, 10–11. |
+| Pause, focus loss, controller unplug, defeat/victory beat and every Attempt route | None / Windows OpenGL Compatibility window | not verified | F16-06 steps 5–9, 12–16, including the F16-06 review additions. |
+| Dash left/right travel, Focus independence, simultaneous/held input, cooldown and resume guard | None / Windows OpenGL Compatibility window | not verified | F16-05 owed checks; F16-06 steps 12–13. |
+| Dash stop at wall, trunk, gate, floor and angled Flight Volume face | None / Windows OpenGL Compatibility window | not verified | F16-05 obstruction list, including the review-fixed angled-face case. |
+| Live-bullet protection, no Shield/Health loss or Graze, Bomb/hit overlap | None / Windows OpenGL Compatibility window | not verified | F16-05 protection list; a headless boot cannot establish it. |
+| Trail side/accent/Core readability and cooldown ready, active, paused and disabled states at three sizes | None / Windows OpenGL Compatibility window | not verified | Run dashes both ways and inspect the HUD at all three sizes. |
+
+**Design rulings pending the visual pass.** No dash, camera or HUD numbers are changed. The spec's `3.0` units, `0.15` s active/protected window and `0.8` s cooldown remain the baseline. The pointer during defeat/victory beats, arrows in Mouse mode, a HUD without a key hint and a dash tapped within one tick of Resume require the requested player-facing judgment in a real run; none is accepted or rejected by this record.
+
+**Engineering follow-up for Claude.** F16-06 already identified a code-reading concern in `scripts/player/targeting.gd`: remapping `lock_target` or `next_target` to the Back input can trigger it on the first tick after resuming Pause. This was not reproduced here. Claude owns the release guard and an interactive reproduction. No `player_ship.tscn`, script or numeric edit was made by Astra.
+
+**Acceptance decision:** blocked pending interactive keyboard/mouse and available controller checks. The presentation-label change is scoped and ready for the lane gate, but F16-07 is not approved as a completed device pass.
