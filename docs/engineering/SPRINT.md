@@ -201,6 +201,36 @@ Sol idles from about T0 + 8.7 h to T0 + 15.2 h, waiting for F10-03. It reads ahe
 
 Ticket files: `.scratch/<feature>/issues/NN-slug.md`, found by ID with `tools/lane.ps1 status <ID>`. Folders: F3 `settings`, F4 `combat-hud`, F5 `projectile-field`, F6 `weapon-rendering`, F7 `damage-pickups`, F8 `progression-core`, F9 `enemies`, F10 `stage-director`, F11 `run-flow`, F12 `bosses`, F13 `audio`, F14 `delivery`, D `design-sprint`.
 
+
+## Delivery-day polish (F15): what came back, and the freeze
+
+A sweep of every "Out of scope", "Open issues" and design line against the code (2026-09-24, about 13:00) found the items below still missing, and worth adding before the 18:00 delivery. There are no ticket files: each lane gets its item in its kickoff prompt, adds a ROADMAP row `F15-0N`, and writes one handoff entry. No tests, as always.
+
+**Freeze at 15:30.** Anything not landed by 15:30 stays on its lane branch and is not shipped. At 15:30 trunk re-exports (F14-01 again) and oc-b re-packages (F14-02 again), and the user's human pass runs on that zip from 16:30.
+
+| ID | Lane | What | Files |
+| --- | --- | --- | --- |
+| F15-01 | trunk | **Victory beat.** After the final boss's defeat, stop Active Time and turn controls off, but keep the tree running for about 2.5 s, so the boss's Death clip and the Stage 1 shrine calm (or the Stage 2 storm calm) are seen. Then pause and show Results; Pause is refused during the beat. Also: no ordinary enemy-death sounds during a Bomb clear. | `scripts/session/game_session.gd` |
+| F15-02 | path | **Enemy feedback.** Play each visual's `metadata/anticipation_clip` over the Anticipation window, instead of the dev scale pulse. Show a short HitReact or emissive flash on each accepted hit. On defeat, report `defeated`, leave `targetable` and stop registering at once, play Death, then free. Turn `VisualRoot` (yaw only, smoothed) toward the player. Warn of a threat only once per new threat. | `scripts/enemies/enemy_actor.gd` (check the Director's Retry cleanup of dying actors) |
+| F15-03 | path, after F15-02 | **Boss feedback.** Turn the boss's `VisualRoot` (yaw only) toward the player. Before Círculos do Trovão, show a code-built ring cue at the next attack's height; it is freed with the boss. | `scripts/enemies/boss_controller.gd` |
+| F15-04 | sol | **Storm resolution.** An `AnimationPlayer` (process_mode ALWAYS) in `stage_02.tscn` that calms the storm (fog, sky energy, storm light) when the Storm Guardian falls. Key the Director's defeat presentation by `boss_id`, so the Tempest Sentinel does not trigger it, move Stage 1's shrine to the keyed form, and reset it on Retry. | `scenes/stages/stage_02.tscn`, `scripts/progression/stage_director.gd`, `scenes/stages/stage_01.tscn` (the export only) |
+| F15-05 | sol, first | **UI truth.** The Controls screen stops promising a mouse camera that does not exist. Final-victory Results closes its empty button slot. | `scenes/ui/controls.tscn`, `scenes/ui/results.tscn` |
+| F15-06 | oc-a | **Checkpoint glow and Gate fade.** A code-built glow (a light plus a tween) when a Checkpoint activates, restored on Retry and Restart. A Gate fades its `ClosedVisual` out when it opens, instead of hiding it; the restore stays instant and idempotent. | `scripts/progression/checkpoint.gd`, `scripts/progression/gate.gd`, the small call sites in `stage_director.gd` |
+| F15-07 | oc-b | **Ship and menu cues.** Focus brightens the Core, and the Core pulses gently at idle. The menu footers show gamepad text while a gamepad is in use (no glyph art). | `scripts/player/player_controller.gd`, `scripts/ui/menu_controller.gd` |
+| F15-08 | sol, last, only if time before 15:30 | **Enemy colour variants.** Twilight Spirits and seal Sentries, per ENEMY_VISUAL_HANDOFF's suggested assignment, and the violet pair in Stage 2. Same definitions. | new `scenes/dev/` prefabs, the stage `actor_scenes` exports, the content `enemy_kinds` |
+
+**Shared files today.** `stage_director.gd` is edited by F15-04 and F15-06, and `game_session.gd` by F15-01 only. The same rule as always: sync right before you start, keep your additions in their own functions, and the second lander merges both.
+
+**Not brought back.** These are high risk or large, or they need the user:
+- music: licensing, and a download is the user's call;
+- camera obstruction smoothing, physics interpolation and input remapping;
+- fitted tree collision;
+- boss-arena containment: a wrong box traps the ship;
+- a hit that cancels its own Graze: a core rule, and it needs a ruling;
+- a mouse camera: the label is fixed instead;
+- more display options, positional audio, a destination marker;
+- respawn Invulnerability and carrying Power Progress into Stage 2: the user's call.
+
 ## Model budgets (OpenCode: one shared meter)
 
 All OpenCode models draw on one shared usage budget, with 5-hour, weekly and monthly limits. A model's "requests per 5 h" is how far one 5-hour budget stretches on that model alone, so a request costs 1 / (requests per 5 h) of the window.
