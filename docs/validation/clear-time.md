@@ -1,7 +1,7 @@
 # Active Time and Clear Time — F11-03
 
 2026-09-24. This page has two parts:
-- the time rules, checked through the real Session by a scripted headless pass;
+- the time rules, checked through the real Session by a scripted headless pass, on both stages' real routes;
 - the manual protocol for the academic duration check, with its record.
 
 Nothing on this page is a play-duration measurement yet. The Stage 1 and Stage 2 clear times need a person to play, so they are owed by the human pass (SPRINT.md "Human steps"). Contract: [engineering/run-flow.md "Time accounting evidence"](../engineering/run-flow.md#time-accounting-evidence).
@@ -20,18 +20,18 @@ Nothing on this page is a play-duration measurement yet. The Stage 1 and Stage 2
 | Host | This Windows 11 Pro machine (10.0.26200), the development PC |
 | Date | 2026-09-24 |
 | Engine | Godot 4.7.2.stable.official.ed1daf0bf, console binary, `--headless`, physics 60 Hz |
-| Build | Source tree, not an exported build: `lane/trunk` at `dev-01` `f2acaf9`. `game_session.gd` md5 `2d8dea68…`, `run_state.gd` md5 `2bb9beb2…` |
+| Build | Source tree, not an exported build. Runs 1 and 2 at `dev-01` `f2acaf9`; run 3 at `lane/trunk` `6284db6`, which merges `dev-01` `1c3f4bf` with F12-06 and F12-07 part 2 and D-07 Parts A and C. `game_session.gd` md5 `2d8dea68…` and `run_state.gd` md5 `2bb9beb2…` in all three |
 | Input | Scripted only. `pause` and `ui_cancel` went through `Viewport.push_input`, menu buttons through their `pressed` signal, and the controller disconnect through `Input.joy_connection_changed`. The route used teleports and direct damage. No physical keyboard or gamepad was used, and a simulated event is not a physical pass (ENGINEERING_BRIEF Section 8). |
 
 ## 2. Driven pass: the time rules (scripted, headless)
 
 A throwaway `SceneTree` script, kept in the session scratchpad and not in the repo, instanced `scenes/main.tscn` and drove the real Session.
 - **The probe.** A node running just before `Main` in every physics step counted the ticks in which the Session may add Active Time: the tree running, the Run `IN_STAGE` and its pause flag clear. Clear Time was compared with that count, to float precision, and with the wall clock.
-- **The route.** Stage 1 was flown by teleport through all seven Encounters, with direct damage to the Waves and to each of the Lantern Guardian's three Phases. The clear came from the Director's own `stage_cleared`.
-- **Survival.** The script refilled the ship's `CombatState` at CP1-A, at CP1-B and before each Phase, so a scripted run never died by accident. The refill touches no `RunState` value.
+- **The routes.** Each stage was flown by teleport through all seven Encounters, with direct damage throughout. On Stage 1 that hit the Waves and each of the Lantern Guardian's three Phases. On Stage 2 it hit the Waves, the Guards, the three Seals, the Tempest Sentinel's two Phases and the Storm Guardian's three. The ship passed through each Checkpoint's arch. Every clear came from the Director's own `stage_cleared`.
+- **Survival.** The script refilled the ship's `CombatState` along the way, so a scripted run never died by accident. The refill touches no `RunState` value.
 - **Short checks.** Checks that only need a clear used `StageDirector.stage_cleared.emit()`, which reaches `complete_stage()` deferred, as a real clear does.
 
-Two runs passed (`TA_OK`), the second after the Retry scenario gained a kill and a Bomb. Neither printed `SCRIPT ERROR`, `ERROR:` or `WARNING:`.
+Three runs passed (`TA_OK`). The second added a kill and a Bomb to the Retry scenario. The third reran everything on the merged tree, with the two Stage 2 scenarios added now that F12-07 has landed. None printed `SCRIPT ERROR`, `ERROR:` or `WARNING:`.
 
 | Rule | Scenario | Measured |
 | --- | --- | --- |
@@ -53,8 +53,12 @@ Two runs passed (`TA_OK`), the second after the Retry scenario gained a kill and
 | An uninterrupted clear's Clear Time is its total Active Time | Direct Stage 1 through the real route and the Lantern Guardian, no pause or death | `attempt=1`, 7.1833 s = 431 counted ticks exactly; the wall clock read 7.16 s |
 | Results shows that time | The same clear | `TimeValue` `0:07`, the `M:SS` of 7.1833 s |
 | Retry exclusion against a stopwatch | Direct Stage 1 with the failed segment above, then the real route and the boss | `attempt=2`. Results 8.5833 s (`0:08`) = the committed 2.0667 s + 391 ticks after the Retry. The wall clock from stage entry read 12.98 s; the 4.4 s gap is the failed segment, Pause and Defeat |
+| The same on Stage 2 | Direct Stage 2 through the real route and both bosses, no pause or death | `attempt=1`, 6.5000 s = 390 counted ticks exactly; the wall clock read 6.52 s. `TimeValue` `0:06`, heading `Fase concluída` |
+| Each Campaign stage has its own Clear Time, through play | Iniciar, Stage 1's real route, Continuar, Stage 2's real route | Stage 1 7.1833 s = 431 counted ticks, `attempt=1`. Stage 2 starts at 0.0000 s |
+| Retry after the miniboss rolls back to CP2-A | The Tempest Sentinel (S2-04) beaten after CP2-A, 60 ticks, a defeat | Retry from `Portão dos Selos`: 3.9333 → 2.0000 s, the committed time, and score back to the committed 4100. S2-04 must be fought again |
+| The Campaign's final clear | Stage 2 finished after that Retry | `attempt=2`. 6.4167 s = the committed 2.0000 s + 265 ticks after the Retry, against 8.35 s of Stage 2 play in all. Heading `Jornada concluída`; `run_ended` `[true]` once |
 
-The `STAGE_RESULT` lines of the second run, in order:
+The `STAGE_RESULT` lines of the third run, in order:
 
 ```
 STAGE_RESULT stage=stage_01 mode=DIRECT_STAGE clear_time=0.52 score=0 graze=0 bombs=0 attempt=2
@@ -63,11 +67,16 @@ STAGE_RESULT stage=stage_02 mode=CAMPAIGN clear_time=0.75 score=300 graze=0 bomb
 STAGE_RESULT stage=stage_01 mode=DIRECT_STAGE clear_time=2.02 score=0 graze=0 bombs=0 attempt=4
 STAGE_RESULT stage=stage_01 mode=DIRECT_STAGE clear_time=7.18 score=2700 graze=0 bombs=0 attempt=1
 STAGE_RESULT stage=stage_01 mode=DIRECT_STAGE clear_time=8.58 score=2700 graze=0 bombs=0 attempt=2
+STAGE_RESULT stage=stage_02 mode=DIRECT_STAGE clear_time=6.50 score=3500 graze=0 bombs=0 attempt=1
+STAGE_RESULT stage=stage_01 mode=CAMPAIGN clear_time=7.18 score=2700 graze=0 bombs=0 attempt=1
+STAGE_RESULT stage=stage_02 mode=CAMPAIGN clear_time=6.42 score=6200 graze=0 bombs=0 attempt=2
 ```
 
-The uninterrupted clear and the retried clear both end at score 2700: the failed segment's 300 points were not kept.
+**No farming.** Failed segments keep no points:
+- Stage 1's uninterrupted and retried clears both end at 2700, without the failed segment's 300.
+- The Campaign's Stage 2 ends at 6200: Stage 1's carried 2700 plus the 3500 a Direct Stage 2 earns, without the miniboss's first 500.
 
-**The 7.18 s and 8.58 s are not play durations.** Teleports and instant kills skip the flight and the fights. They show only that Clear Time equals the counted ticks. The wall clock matched Active Time within 0.02 s while nothing was paused, because the game ran its 60 physics ticks per second. On a machine that falls below that rate, Active Time is simulated time and runs slower than a stopwatch.
+**The clear times above are not play durations.** Teleports and instant kills skip the flight and the fights. They show only that Clear Time equals the counted ticks. The wall clock matched Active Time within 0.02 s while nothing was paused, because the game ran its 60 physics ticks per second. On a machine that falls below that rate, Active Time is simulated time and runs slower than a stopwatch.
 
 **No defect found.** `run_state.gd` and `game_session.gd` are unchanged.
 
@@ -101,7 +110,7 @@ The uninterrupted clear and the retried clear both end at score 2700: the failed
    - Clear the stage with the stopwatch running from stage entry to Results.
    - Pass: `attempt=2`, and the Results time falls short of the stopwatch by at least the failed segment plus the Defeat screen. The scripted pass above already shows this (12.98 s on the wall clock against 8.58 s in Results). The human run repeats it at play length.
 5. **Stage 2, the five-minute requirement (PLANEJAMENTO Section 2).**
-   - **Status: pending F12-07.** F12-06 and F12-07 part 2 have not landed, so Stage 2's miniboss and final boss are still the dev stand-ins, and a clear is not the real stage. F14-02's human pass measures it once they land.
+   - **Status: not measured, owed by the human pass (F14-02).** F12-06 and F12-07 part 2 landed on 2026-09-24, so Stage 2 now has its real miniboss and final boss. The scripted pass above flew it end to end, but a scripted clear is not a play duration.
    - Efficient clear: Selecionar fase → Montanha da Tempestade, a Direct Stage 2 at Power 2, uninterrupted, with Bombs and upgrades used well.
    - Normal clear: a Campaign run through Continuar, with Stage 1's Power carried.
    - Pass: the uninterrupted efficient clear reaches at least 300 s (STAGE_DESIGN "Acceptance checks for stage progression"). D-06's estimates are about 336 s efficient and 414 s normal, conditional and not measured.
@@ -115,9 +124,10 @@ The uninterrupted clear and the retried clear both end at score 2700: the failed
 | 3. Stage 1 normal, Campaign | — | — | — | Campaign Stage 1, Power 1 | none | — | — | — | — | **not measured** (owed by the human pass) |
 | 4. Retry exclusion | 2026-09-24 | source, headless | scripted, not physical | Direct Stage 1, Power 1 | CP1-A once | 1 in the failed segment, rolled back | 8.58 s (`0:08`) | `…clear_time=8.58 score=2700 graze=0 bombs=0 attempt=2` | 12.98 s (wall clock) | **rule verified, scripted**; the human run at play length is owed |
 | 4. Retry exclusion | — | — | — | — | — | — | — | — | — | **not measured** (owed by the human pass) |
-| 5. Stage 2 efficient | — | — | — | Direct Stage 2, Power 2 | none | — | — | — | — | **pending F12-07**, then F14-02's human pass |
-| 5. Stage 2 normal, Campaign | — | — | — | Campaign Stage 2, Power carried | none | — | — | — | — | **pending F12-07**, then F14-02's human pass |
+| 5. Stage 2 rules | 2026-09-24 | source, headless (run 3) | scripted, not physical | Direct Stage 2, Power 2 | none | 0 | 6.50 s (`0:06`) | `…stage=stage_02 mode=DIRECT_STAGE clear_time=6.50 score=3500 graze=0 bombs=0 attempt=1` | 6.52 s (wall clock) | **rules verified, scripted**; not a duration |
+| 5. Stage 2 efficient | — | — | — | Direct Stage 2, Power 2 | none | — | — | — | — | **not measured** (owed by F14-02's human pass) |
+| 5. Stage 2 normal, Campaign | — | — | — | Campaign Stage 2, Power carried | none | — | — | — | — | **not measured** (owed by F14-02's human pass) |
 
 ## For Astra
 
-This page gives the measured Stage 1 clear times against the 240 s target, once the human pass fills steps 2 and 3. They inform the pacing values in `content/stages/stage_01/*.tres`. F12-03 noted the Lantern Guardian's Phase health at about 2.7× the pacing target (for D-07 Part C), so a played clear may run past D-05's 221 s estimate.
+This page gives the measured Stage 1 clear times against the 240 s target, once the human pass fills steps 2 and 3. They inform the pacing values in `content/stages/stage_01/*.tres`. D-07 Part C has since cut the Lantern Guardian's Phase health to 550/550/775, which keeps D-05's estimate of about 221 s. The human pass shows whether a played clear gets near it.
