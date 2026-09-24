@@ -598,6 +598,7 @@ func _on_checkpoint_entered(checkpoint_id: StringName) -> void:
 	if not _checkpoint_store.activate(checkpoint_id, _combat_state, _run_state, _machine):
 		return
 	_record_checkpoint_pickups()
+	_present_checkpoint_activation(checkpoint_id)
 	checkpoint_activated.emit(checkpoint_id)
 	_enter_if_inside(definition.resume_encounter_id)
 
@@ -606,7 +607,7 @@ func _on_checkpoint_entered(checkpoint_id: StringName) -> void:
 ## encounter rules").
 func _on_gate_opened(gate_id: StringName) -> void:
 	_projectile_system.clear_hostile_all()
-	_gate(gate_id).set_open(true)
+	_present_gate_open(gate_id)
 
 
 ## Sets every Gate and PortalLink from the machine's state: a Gate is open only when its
@@ -618,7 +619,9 @@ func _apply_progress() -> void:
 	var open_ids := _machine.get_open_gate_ids()
 	for encounter: EncounterDefinition in stage_definition.encounters:
 		if not encounter.gate_id.is_empty():
-			_gate(encounter.gate_id).set_open(encounter.gate_id in open_ids)
+			_restore_gate(encounter.gate_id, encounter.gate_id in open_ids)
+	for definition: CheckpointDefinition in stage_definition.checkpoints:
+		_restore_checkpoint_glow(definition)
 	for enemy_id: StringName in guard_links:
 		var encounter_id := StringName(String(enemy_id).get_slice("/", 0))
 		(get_node(guard_links[enemy_id]) as Node3D).visible = not _machine.is_completed(encounter_id)
@@ -631,6 +634,25 @@ func _hide_guard_link(enemy_id: StringName) -> void:
 
 func _gate(gate_id: StringName) -> Gate:
 	return get_node(NodePath("%s/%s" % [GATES_PATH, gate_id])) as Gate
+
+
+func _present_checkpoint_activation(checkpoint_id: StringName) -> void:
+	var definition := stage_definition.find_checkpoint(checkpoint_id)
+	if definition != null:
+		(get_node(definition.node_path) as Checkpoint).activate_glow()
+
+
+func _restore_checkpoint_glow(definition: CheckpointDefinition) -> void:
+	var checkpoint := get_node(definition.node_path) as Checkpoint
+	checkpoint.restore_glow(_machine.is_checkpoint_activated(definition.id))
+
+
+func _present_gate_open(gate_id: StringName) -> void:
+	_gate(gate_id).set_open(true)
+
+
+func _restore_gate(gate_id: StringName, open: bool) -> void:
+	_gate(gate_id).restore_open(open)
 
 
 func _encounter_root(encounter_id: StringName) -> Node:

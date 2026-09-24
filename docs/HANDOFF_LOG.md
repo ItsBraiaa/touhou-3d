@@ -6,6 +6,12 @@ Files: `scripts/player/player_controller.gd`; `scripts/ui/menu_controller.gd`; `
 Change: The ship's Core now duplicates its authored material at runtime, pulses gently while idle, and raises its emission while Focus is active via `focus_changed`. Existing menu device updates now keep footers visible and switch them between keyboard and explicit gamepad text (`Analógico`, `A`, `B`), without glyph art. No tests added (sprint rule).
 Verification: A short headless run completed without script or error output. The existing menu contract assertion was minimally updated because F15-07 intentionally changes gamepad prompts from hidden to visible text; no new test was added. `tools/lane.ps1 land` is the remaining gate.
 Action required by trunk: none.
+## 2026-09-24 — OpenCode (oc-a) — F15-06 checkpoint glow and Gate fade
+State: DELIVERED
+Files: `scripts/progression/checkpoint.gd`, `scripts/progression/gate.gd`, `scripts/progression/stage_director.gd`, `docs/engineering/ROADMAP.md`.
+Change: Checkpoints create an activation OmniLight3D and bloom it on first activation; `_apply_progress()` restores each glow immediately from the machine state for Retry and Restart. Gates now tween `ClosedVisual` transparency when opening, while `restore_open()` cancels presentation tweens and restores collision, visibility and transparency immediately and idempotently. Stage Director call sites remain in small private presentation/restore functions for the shared-file merge.
+Verification: `tools/lane.ps1 land` and the short headless boot are the gate; no tests added (sprint rule).
+Action required by sol: merge the small F15-06 additions in `stage_director.gd` when landing F15-04.
 ## 2026-09-24 — Astra (sol) — F15-04 storm resolution [shared]
 State: DELIVERED
 Files: `scenes/stages/stage_02.tscn`, `scenes/stages/stage_01.tscn` (one export), `scripts/progression/stage_director.gd`, `docs/engineering/ROADMAP.md`.
