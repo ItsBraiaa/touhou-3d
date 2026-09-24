@@ -1,47 +1,31 @@
 class_name BombBlast
 extends Node3D
-## Dev only: the Bomb's blast visual, a translucent unshaded sphere of the Bomb's radius
-## that fades out over [constant FADE_SECONDS] and frees itself. It has no collision and
-## decides nothing: the Session clears and damages before it appears. It pauses with the
-## tree, under `WorldRoot`. The final effect is D-02's; it must keep later attacks readable
-## (PLANEJAMENTO Section 4 "Spiritual bomb").
+## The Bomb's blast visual: D-02's `bomb_blast_visual.tscn` (see-through rings with a unit
+## outer edge, whose `blast` clip autoplays and hides them), scaled to the Bomb's radius, and
+## freed when that clip finishes. It has no collision and decides nothing: the Session clears
+## and damages before it appears. It pauses with the tree, under `WorldRoot`. It must keep
+## later attacks readable (PLANEJAMENTO Section 4 "Spiritual bomb").
 
 
-## Seconds from full to invisible.
+## Seconds from full to invisible: the length of D-02's `blast` clip.
 const FADE_SECONDS := 0.4
 
-## The sphere, a mesh of radius 1 scaled to the Bomb radius. Required.
-@export var sphere: MeshInstance3D
-
-var _material: StandardMaterial3D
-var _start_alpha: float = 0.0
-var _elapsed: float = 0.0
+## The visual's player; its autoplay clip is the blast. Required.
+@export var animation_player: AnimationPlayer
 
 
 func _ready() -> void:
-	var source: StandardMaterial3D = null
-	if sphere != null and sphere.mesh != null:
-		source = sphere.mesh.surface_get_material(0) as StandardMaterial3D
-	if source == null:
-		push_error("%s: 'sphere' needs a mesh with a StandardMaterial3D" % get_path())
-		set_process(false)
+	if animation_player == null or not animation_player.is_playing():
+		push_error("%s: 'animation_player' must be set and autoplay the blast clip" % get_path())
 		queue_free()
 		return
-	# Its own copy, so two blasts fade independently.
-	_material = source.duplicate() as StandardMaterial3D
-	sphere.material_override = _material
-	_start_alpha = _material.albedo_color.a
+	animation_player.animation_finished.connect(_on_animation_finished)
 
 
-func _process(delta: float) -> void:
-	_elapsed += delta
-	var remaining := 1.0 - _elapsed / FADE_SECONDS
-	if remaining <= 0.0:
-		queue_free()
-		return
-	_material.albedo_color.a = _start_alpha * remaining
-
-
-## Scales the unit sphere to [param radius], the Bomb radius in world units.
+## Scales the unit visual to [param radius], the Bomb radius in world units.
 func setup(radius: float) -> void:
 	scale = Vector3.ONE * radius
+
+
+func _on_animation_finished(_clip: StringName) -> void:
+	queue_free()

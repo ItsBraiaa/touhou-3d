@@ -804,7 +804,7 @@ material = SubResource("LeavesLight")
 size = Vector3(40, 2.4, 4.5)
 material = SubResource("Bark")
 
-[node name="Stage" type="Node3D"]
+[node name="Stage" type="Node3D" node_paths=PackedStringArray("defeat_presentation")]
 script = ExtResource("1_director")
 stage_definition = ExtResource("2_stage_definition")
 actor_scenes = Dictionary[StringName, PackedScene]({
@@ -826,6 +826,8 @@ guard_links = Dictionary[StringName, NodePath]({
 &"S1-04/Wave1_Sentry2": NodePath("Environment/PortalLinks/GuardLink2"),
 &"S1-04/Wave1_Sentry3": NodePath("Environment/PortalLinks/GuardLink3")
 })
+defeat_presentation = NodePath("Environment/ShrineLighting")
+defeat_animation = &"corrupted_to_calm"
 metadata/stage_id = "stage_01"
 metadata/handoff_state = "SCENE_READY_STATIC"
 
