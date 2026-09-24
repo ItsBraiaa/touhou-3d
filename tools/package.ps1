@@ -19,6 +19,22 @@ function Invoke-Checked([string]$FilePath, [string[]]$ArgumentList, [string]$Lab
     }
 }
 
+# Captures a native command's combined output and exit code. $ErrorActionPreference is
+# scoped to 'Continue' so that a child writing to stderr does not become a terminating
+# error under this script's 'Stop' preference.
+function Invoke-Captured([string]$FilePath, [string[]]$ArgumentList) {
+    $previousPreference = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try {
+        $captured = & $FilePath @ArgumentList 2>&1
+        $capturedCode = $LASTEXITCODE
+    } finally {
+        $ErrorActionPreference = $previousPreference
+    }
+    $text = ($captured | ForEach-Object { $_.ToString() }) -join "`n"
+    return @{ Output = $text; ExitCode = $capturedCode }
+}
+
 $repoRoot = (Get-Location).Path
 $exePath = Join-Path $repoRoot $Exe
 if (-not (Test-Path -LiteralPath $exePath -PathType Leaf)) {
@@ -117,13 +133,13 @@ $godotScript = Join-Path $repoRoot 'tools/godot.ps1'
 
 Invoke-Checked 'powershell.exe' @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', $godotScript, '--headless', '--path', $verifyProject, '--import') 'project import'
 
-$testOutput = & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $godotScript --headless --path $verifyProject --script res://tests/run_tests.gd 2>&1
-if ($LASTEXITCODE -ne 0 -or ($testOutput -join "`n") -match 'SCRIPT ERROR') {
+$testResult = Invoke-Captured 'powershell.exe' @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', $godotScript, '--headless', '--path', $verifyProject, '--script', 'res://tests/run_tests.gd')
+if ($testResult.ExitCode -ne 0 -or $testResult.Output -match 'SCRIPT ERROR') {
     Write-Failure 1 'extracted project tests failed or emitted SCRIPT ERROR.'
 }
 
-$bootOutput = & (Join-Path $verifyGame 'Touhou-3D.console.exe') --headless --quit-after 300 2>&1
-if ($LASTEXITCODE -ne 0 -or ($bootOutput -join "`n") -match 'ERROR:') {
+$bootResult = Invoke-Captured (Join-Path $verifyGame 'Touhou-3D.console.exe') @('--headless', '--quit-after', '300')
+if ($bootResult.ExitCode -ne 0 -or $bootResult.Output -match 'ERROR:') {
     Write-Failure 1 'extracted executable boot failed or emitted ERROR:.'
 }
 
