@@ -1,5 +1,14 @@
 # Handoff Log
 
+## 2026-09-24 — Claude — music plays: the five `music/` tracks wired to `Main/Audio`
+State: INTEGRATED_VERIFIED (headless: all five streams load and loop, menu track playing after launch; listening pass owed)
+Files: `assets/audio/music/` (new: five MP3 copies and their `.import` files, `loop=true`); `scenes/main.tscn` (`Main/Audio.music_tracks`, five ext_resources); `docs/ASSET_CREDITS.md` (Music section); `README.md` (Credits); `docs/engineering/ROADMAP.md` (the F13 row of Astra's table).
+Change: The music files were never imported (`music/` has a `.gdignore`) and `music_tracks` was empty, so every `play_music` call was a no-op. Selected copies now live under `assets/audio/music/`, mapped as PLANEJAMENTO Section 9 suggests: `menu` Sealed Gods, `stage_01_route` The Gensokyo the Gods Loved, `stage_01_boss` Faith Is for the Transient People, `stage_02_route` Fall of Fall ~ Autumnal Waterfall, `stage_02_boss` The Venerable Ancient Battlefield ~ Suwa Foughten Field. The originals in `music/` are unchanged. No script changed.
+
+Why: the user's request.
+
+Action required by Astra: the listening pass for the music level against the SFX (the Music bus default is 65%). The recordings' source and redistribution permission are still undocumented; `docs/ASSET_CREDITS.md` says so.
+
 ## 2026-09-24 — Claude (path) — F16-11: Target Lock hands off when the locked target dies
 State: INTEGRATED_VERIFIED (headless in-game driver; physical play owed)
 Files: `scripts/player/target_selector.gd` (`select_successor`), `scripts/player/targeting.gd` (defeat watch, handoff, `lock_lost_to_defeat`), `scripts/player/player_controller.gd` (one connection to `CameraRig.request_recenter`); `docs/engineering/player-flight.md` (Targeting contract); `docs/validation/controls-expansion.md` (new F16-11 section); the ticket `.scratch/controls-expansion/issues/11-target-lock-handoff-on-defeat.md`; `docs/engineering/ROADMAP.md`.

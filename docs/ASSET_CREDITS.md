@@ -62,7 +62,15 @@ The [event-to-file table](engineering/audio.md#mapping-f13-04) records every shi
 
 ## Music
 
-No music ships in this delivery. The five files in the ignored `music/` source folder have *Touhou 10* composition titles, but their source and redistribution permission are not documented. They remain references only and were not copied to runtime assets. A new permitted track requires a separate selection and credit decision.
+Five tracks ship in `assets/audio/music/`, copied from the `music/` source folder (the originals stay there, excluded from Godot by its `.gdignore`) and imported with looping on. They are compositions by ZUN from *Touhou 10: Mountain of Faith*, placed as PLANEJAMENTO Section 9 suggests. The source of these recordings and the permission to redistribute them are not documented.
+
+| Music track id | Composition | Runtime file |
+| --- | --- | --- |
+| `menu` | Sealed Gods | `sealed_gods.mp3` |
+| `stage_01_route` | The Gensokyo the Gods Loved | `the_gensokyo_the_gods_loved.mp3` |
+| `stage_01_boss` | Faith Is for the Transient People | `faith_is_for_the_transient_people.mp3` |
+| `stage_02_route` | Fall of Fall ~ Autumnal Waterfall | `fall_of_fall_autumnal_waterfall.mp3` |
+| `stage_02_boss` | The Venerable Ancient Battlefield ~ Suwa Foughten Field | `suwa_foughten_field.mp3` |
 
 ## Stage 2 mountain environment
 
