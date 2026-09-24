@@ -206,11 +206,27 @@ A throwaway `SceneTree` script, deleted after use, ran headless on `main.tscn` w
   - In Teclado mode during gameplay: no pause.
 - **Regressions.** `tools/validate_menus.gd` still gives `MENUS_OK`, footer checks included, and the suite passes (225 tests). `test_menu_registry_contract.gd`'s footer case now drives `set_keyboard_prompts` directly (`test_set_keyboard_prompts_shows_and_hides_the_footer`).
 
+## Camera wiring (F3-04)
+
+Delivered by path on 2026-09-24 (part 2; the windowed pass of part 1 is in [validation/settings.md](../validation/settings.md)). `GameSession` (`scripts/session/game_session.gd`) applies the camera sensitivity and invert vertical to the ship in play through `CameraRig.apply_settings(sensitivity, invert_vertical)`. No `Settings`, `OptionsScreen`, `Interface`, rig or scene file changed.
+
+| Session member | Effect |
+| --- | --- |
+| `_connect_camera_settings()` | Called once from `_ready`, after the other connections: `interface.get_settings().changed.connect(_on_setting_changed)`. Skipped when `get_settings()` is null, because `Interface` disabled itself and reported why. Never per stage, so Restart and Retry never double it. |
+| `_apply_camera_settings()` | Returns when there is no `_player` or no `Settings`; otherwise `_player.camera_rig.apply_settings(settings.get_camera_sensitivity(), settings.get_invert_vertical())`. |
+| `_spawn_player(ship, at)` | Calls `_apply_camera_settings()` right after `setup(_flight_volume)`, before the ship's first physics tick. Every ship passes through it: Start, Direct Stage, Restart, Retry and, from F11-02, the Campaign continuation. |
+| `_on_setting_changed(key, _value)` | Calls `_apply_camera_settings()` for `Settings.CAMERA_SENSITIVITY` and `Settings.INVERT_VERTICAL` only. |
+
+- **While paused.** Options from Pause is under `Interface`, which always processes, so a change reaches the live rig at once. The rig only stores the values, so they take effect on the first tick after Resume.
+- **The rig's own exports** `sensitivity` and `invert_vertical` in `player_ship.tscn` are overwritten at every spawn. The orbit rate is tuned with `orbit_speed_degrees`.
+- **Verification (no tests: the sprint rule).** A throwaway headless script ran the ticket's six cases (16 checks) and measured the orbit: six ticks of `camera_up` turn 0.4189 rad at 2.0, 0.0419 rad at 0.2 and −0.4189 rad at 2.0 inverted. A short windowed run showed the same. Both are in [validation/settings.md](../validation/settings.md) "Camera wiring".
+
 ## Open issues
 
-- Bus and window application are live since F3-02 ("Options binding"), and the input device since F3-03 ("Input device and disconnect"). The camera values (F3-04) are stored and saved but not applied yet.
+- Bus and window application are live since F3-02 ("Options binding"), the input device since F3-03 ("Input device and disconnect"), and the camera values since F3-04 ("Camera wiring").
+- **Owed: the physical keyboard and DualSense pass** over Options and the camera orbit at a saved sensitivity, invert on and off. F3-04 drove the orbit with `Input.action_press` only.
 - **Owed: a physical DualSense unplug in flight** (ENGINEERING_BRIEF Section 8: a simulated gamepad event does not replace a physical controller). F3-03 was verified with synthetic events and `joy_connection_changed` emissions only. It belongs to the human pass.
 - No gamepad glyphs or gamepad hint text: Controle and Automático after pad use hide the keyboard hint (GUIDE Section 14 allows hiding).
-- **Owed: the windowed display pass** (a real resize, fullscreen, the layout intact at each resolution). F3-04 part 1's `/run` records it; F3-02 was verified headless through `display_applied`.
+- **The windowed display pass** (a real resize, fullscreen, the layout intact at each resolution) was run by F3-04 part 1 and is recorded in [validation/settings.md](../validation/settings.md); F3-02 itself was verified headless through `display_applied`.
 - Defaults applies the display twice when both the window mode and the resolution differ (one `changed` each). This is harmless, and it keeps `changed` as the one application point.
 - Defaults remain the GUIDE-authored values until Astra tunes them.

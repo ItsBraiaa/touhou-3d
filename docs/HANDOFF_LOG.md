@@ -26,6 +26,34 @@ Action required by <other agent>: <what they must do, or "none">
 
 ---
 
+## 2026-09-24 09:45 — Claude (plan) — Delivery day: Retry pickups, validators, duplicate visuals; F13-03 and F3-04 part 2 to path
+State: PLANNED
+Files: `.scratch/stage-director/issues/05-retry-restores-checkpoint-pickups.md`, `06-stage-validators-accept-the-director.md` and `.scratch/design-sprint/issues/08-enemy-visuals-duplicate-parts.md` (new); `docs/engineering/SPRINT.md`, `docs/engineering/ROADMAP.md`; the Lane and Model lines of F13-03 and F3-04.
+Change:
+- **F10-05** carries Astra's Retry rule in lane path. The pickups that existed when the Checkpoint was activated come back on Retry: those collected before it stay collected, those available at it reappear, and those generated after it are removed and return through the replayed encounters' rewards.
+- **F10-06** (oc-a) makes `tools/validate_stage_01.gd` accept the Stage's Director.
+- **D-08** (oc-a) first confirms the duplicate model parts trunk reported in the four enemy visual scenes, and fixes them only if confirmed.
+- **Queue moves.** To shorten trunk's serial chain, F13-03 and F3-04 part 2 move to path. `game_session.gd` and `main.tscn` are edited by two lanes today, under the sync-first, separate-functions, second-lander-merges rule.
+- **Checkpoint names.** CP1-A and CP1-B already have their Portuguese names (Portal Selado, Entrada do Santuário); the report of ids on Defeat was stale.
+
+Why: Astra's design answer, and delivery-day throughput.
+
+Action required by Astra: review D-08's result when it lands; it edits your four visual scenes [shared].
+## 2026-09-24 09:40 — Claude (path) — F3-04 part 2: camera settings reach every ship; F3-04 done
+State: CODE_READY
+Files: `scripts/session/game_session.gd` (trunk's file, by the 2026-09-24 exception in the path queue), `docs/engineering/settings.md`, `docs/validation/settings.md`, `docs/GUIDE.md` (the `game_session.gd` and `camera_rig.gd` rows), `docs/engineering/ROADMAP.md` (F3-04 row), `.scratch/settings/issues/04-settings-to-camera-wiring.md`.
+
+Change:
+- **Part 2 (it closes F3-04).** The Session applies the camera sensitivity and invert vertical through `CameraRig.apply_settings()` at every spawn, right after `setup`, and on every change of either value, even from Options over Pause.
+- **Four additions, each in its own function.** `_connect_camera_settings()` (one call in `_ready`, one `Settings.changed` connection for the Session's life), `_apply_camera_settings()`, one call in `_spawn_player`, and `_on_setting_changed()`. Nothing else in `game_session.gd` changed.
+- **Verified** headless by a throwaway script (the ticket's six cases, 16 checks), and by one short windowed run: 2.0 swings the view up, 0.2 barely moves it, and invert swings it down. Recorded in `docs/validation/settings.md` "Camera wiring". No new tests (the sprint rule), so `tests/scene/test_settings_camera_wiring.gd` was not created. No existing test changed.
+
+Why: F3-04 part 2, moved from trunk to path on 2026-09-24.
+
+Action required by trunk: when you land after this, keep the one-line `_connect_camera_settings()` call in `_ready`, the `_apply_camera_settings()` call after `_player.setup(_flight_volume)` in `_spawn_player`, and the three new functions after `_spawn_player`.
+Action required by Astra: `CameraRig.sensitivity` and `invert_vertical` in `player_ship.tscn` are now overwritten by the player's settings at every spawn. Tune the orbit rate with `orbit_speed_degrees` instead.
+Owed to a person: the physical keyboard and DualSense pass over Options and the camera orbit, and a real controller unplug in flight.
+
 ## 2026-09-23 23:36 — Claude (path) — F14-01 pre-flight: dev-01 exported and run outside the repository
 State: docs
 Files: `docs/HANDOFF_LOG.md` only (this entry). No code, scene, preset, ticket or ROADMAP edit; F14-01 stays `todo` for trunk.
