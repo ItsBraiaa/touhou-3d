@@ -110,8 +110,8 @@ F11-03, 2026-09-24. A scripted headless pass checked the time rules through the 
 | Failed attempts cannot inflate completed-stage duration | ENGINEERING_BRIEF 4.H | Three defeats before CP1-A, then a clear: Clear Time is the last Attempt's ticks (plus the clear's tick), `attempt=4` |
 | Retry rolls back the failed segment | STAGE_DESIGN "Time and score integrity" | After CP1-A, a failed segment's 2.42 s, its score and its Bomb are dropped by Retry, which resumes from the committed time |
 | Restart zeroes Clear Time, after a Checkpoint too | STAGE_DESIGN "Restart Stage explicitly discards checkpoint progress" | Reiniciar fase gives 0 before a Checkpoint and after CP1-A, with committed time 0 and no retry location |
-| Each Campaign stage accounts for its own Clear Time | CONTEXT "Clear Time", RunState contract | Campaign Stage 2 starts at 0 with the score carried; its Restart returns to that entry |
-| An uninterrupted clear's Clear Time equals its total Active Time | F11-03 | A real-route Stage 1 clear through the Lantern Guardian: `attempt=1`, Clear Time exactly the 431 counted ticks, and the wall clock within 0.02 s |
+| Each Campaign stage accounts for its own Clear Time | CONTEXT "Clear Time", RunState contract | Campaign Stage 2 starts at 0 with the score carried, and its Restart returns to that entry. Through both real routes, a Retry after the miniboss returns to CP2-A's committed time and score |
+| An uninterrupted clear's Clear Time equals its total Active Time | F11-03 | Real-route clears with `attempt=1`: Stage 1 through the Lantern Guardian equals its 431 counted ticks, and Direct Stage 2 through the Tempest Sentinel and the Storm Guardian its 390. Both are within 0.02 s of the wall clock |
 
 An **uninterrupted clear** is one whose `STAGE_RESULT` line ends in `attempt=1`. Pause keeps a run uninterrupted, because it adds no Active Time. A Restart does not: its clear reports `attempt=2` even though its Clear Time counts only from the Restart. So the protocol starts every measured run from the menu.
 
@@ -141,6 +141,6 @@ No test is added (the sprint's no-new-tests rule). Every row was checked by the 
 ## Open issues
 
 - **Power Progress is not carried into Campaign Stage 2** (F11-02, Claude's reading above). Tell Claude if it should be; it needs an entry-progress value in `RunState`.
-- **The Campaign's final victory through play:** F12-06 and F12-07 replaced both Stage 2 boss stand-ins. S2-07's final-Phase defeat now feeds the Director's `stage_cleared` route used by F11-02. A full manual Campaign flight remains a delivery verification step.
+- **The Campaign's final victory through play:** F12-06 and F12-07 replaced both Stage 2 boss stand-ins, and S2-07's final-Phase defeat feeds the Director's `stage_cleared`. F11-03's scripted route reached `Jornada concluída` through both stages' real Encounters and bosses, by teleport and direct damage ([validation/clear-time.md](../validation/clear-time.md)). A Campaign flown by a person remains for the human pass.
 - **Results over Defeat.** A Defeat raised in the same physics step as the last kill is replaced by Results: the stage was cleared. The player's defeated `CombatState` stays frozen under Results. Continuar (F11-02) starts a new `CombatState` anyway.
 - **`menus-session.md` "Params"** still calls Defeat's `checkpoint` param an id; it is the Checkpoint's `display_name` (the doc comment in `menu_controller.gd` is fixed).

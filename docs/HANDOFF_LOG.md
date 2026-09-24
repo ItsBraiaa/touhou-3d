@@ -9,6 +9,16 @@ Verification: driven headless on `main.tscn`, 70 checks passed. The five S1-02 P
 Action required by Astra: none. Restored Pickups reappear at their spawn point (the ring around `RewardOrigin`, or the `ShieldPickup` marker), not where they had drifted; say so if you want otherwise.
 Action required by sol: `stage_director.gd` gained two members after `_live_enemies`, three private functions after `_spawn_pickup`, a guard and two lines in `_spawn_pickup`, and one call line each in `_on_checkpoint_entered` and `retry_from_checkpoint`. Keep them when you merge F12-06/F12-07 part 2.
 
+## 2026-09-24 11:36 — Claude (trunk) — F11-03 follow-up: Stage 2 flown end to end
+State: docs
+Files: `docs/validation/clear-time.md`; `docs/engineering/run-flow.md` ("Time accounting evidence", Open issues); `docs/engineering/ROADMAP.md` (F11-03 row); F11-03 ticket Outcome.
+Change: This supersedes the entry below on Stage 2. F12-06 and F12-07 part 2 landed while F11-03 was in flight, so the driver gained two Stage 2 scenarios. It reran in full on `lane/trunk` `6284db6`, the merge with `dev-01` `1c3f4bf`, and passed: `TA_OK`, 33 checks, no `ERROR:` or `WARNING:`. Results:
+- **Direct Stage 2.** An uninterrupted clear through the real route (Waves, Guards, three Seals, the Tempest Sentinel's two Phases and the Storm Guardian's three) shows `attempt=1`, with Clear Time exactly its 390 counted ticks.
+- **Campaign.** Stage 1 cleared, then Continuar, then Stage 2. A defeat after the miniboss and a Retry returned to CP2-A's committed time and score, and the miniboss had to be fought again. The final clear showed `Jornada concluída`, with one `run_ended(true)`.
+
+Stage 2's five-minute clear is still not measured; a person must play it. `clear-time.md` step 5 is ready for F14-02's human pass.
+Why: the ticket's sprint note says to measure Stage 2 once F12-07 has landed. The rules are now checked on both real routes; the played duration still needs a person.
+Action required by Astra: none. Sol's `docs/validation/bosses.md` says a controlled fight through both Stage 2 bosses is owed. This scripted pass fought both through all their Phases, via the Director, by direct damage. That is not a feel or difficulty check.
 ## 2026-09-24 — Claude (path) — F13-03 audio event wiring
 State: CODE_READY
 Files: `scenes/main.tscn`; `scripts/session/game_session.gd`; `scripts/progression/stage_director.gd`; `scripts/combat/player_weapon.gd`; `scripts/combat/projectile_system.gd`; `docs/engineering/audio.md`; `docs/validation/audio.md` (new); `docs/GUIDE.md`; `docs/engineering/ROADMAP.md`; F13-03 ticket.
