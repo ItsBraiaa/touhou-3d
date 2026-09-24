@@ -15,6 +15,38 @@ Action required by <other agent>: <what they must do, or "none">
 
 ---
 
+## 2026-09-23 23:36 — Claude (path) — F14-01 pre-flight: dev-01 exported and run outside the repository
+State: docs
+Files: `docs/HANDOFF_LOG.md` only (this entry). No code, scene, preset, ticket or ROADMAP edit; F14-01 stays `todo` for trunk.
+
+Change:
+- **Export.** `dev-01` at `921cbbd`, exported in the path worktree with `tools/godot.ps1 --headless --path . --export-release "Windows Desktop" build/Touhou-3D.exe`. It exited 0. `build/Touhou-3D.exe` is 125,878,832 bytes; the template is 109,268,480, so the embedded pack is about 16.6 MB. The 4.7.2 templates are in `%APPDATA%\Godot\export_templates\4.7.2.stable\`.
+- **Headless run** of a copy in a scratch folder outside the repository, `--headless --quit-after 300`: exit 0, no `ERROR:` or `WARNING:` line.
+- **Windowed run.** Startup line `D3D12 12_0 - Forward+ - Using Device #0: AMD - AMD Radeon RX 9070 XT`, no fallback, V-Sync on, window 1280 × 720. `--print-fps` read:
+  - 60 on the main menu, and 59 to 60 flying S1-01;
+  - one-sample load hitches: 1 then 52 on the first Stage 1 load, 41 and 49 on Retry's reload, 51 and 22 on the Stage 2 load.
+- **Walk.** Synthesized keyboard input, sent as scancodes to the game window:
+  - Selecionar fase, then Floresta das Lanternas: the stage and the HUD load, and the ship flies and fires (player shots render).
+  - Hostile fire took the ship to Defeat ("Tente outra vez", "Início da fase"), and Tentar novamente restarted the stage at 100 %.
+  - Esc paused; Opções from Pause opened Options; Esc went back to Pause with Opções focused; Esc resumed.
+  - Voltar ao menu; then Direct Stage 2 loads (Power 2, two Familiars), and back to the menu.
+  - The build printed no `ERROR:`, `SCRIPT ERROR` or `WARNING:` line during the walk, and no setting changed.
+- **Not done:** flying past `Gate_S1_02`, the busiest-wave and S1-07 FPS, and Sair. The walk stopped when the user took the desktop back, and the process was closed.
+
+Findings for F14-01. None is an export-only failure of the game.
+1. **A release export writes no console wrapper.** `export_presets.cfg` has `debug/export_console_wrapper=1` ("debug only"), so `--export-release` writes only `Touhou-3D.exe`, and the ticket's `build/Touhou-3D.console.exe` does not exist. Either set the key to `2` ("debug and release") in that trunk-only file, or capture the GUI exe's output with `cmd /c "Touhou-3D.exe --print-fps > run.log 2>&1"`, which works and is what this pass used.
+2. **39 `ERROR: Attempting to parent and popup a dialog that already has a parent.`** (`scene/main/window.cpp:2297`) came from the first export after `sync`.
+   - They appear while the editor converts every scene that instances the enemy visuals: `scenes/dev/sentry.tscn` and `spirit.tscn`, the four `scenes/enemies/visuals/*.tscn`, and 16 for `scenes/tests/enemy_variants_preview.tscn`.
+   - That run also reimported the 15 new `docs/validation/*.png` and re-registered `Gate`, `Checkpoint` and `StageDirector`. A second export straight after it (verbose) printed none, and exited 0. The exported scenes load and play.
+   - So F14-01 should import once before the recorded export (`tools/test.ps1`, or `tools/godot.ps1 --headless --path . --import`), or export twice and record the second, to meet "no `ERROR:` lines".
+3. **`--script` does nothing in the release build.** It boots the main scene instead: neither a `-s` script at an absolute path that only calls `quit()`, nor the packed `res://tools/check_resources.gd`, ever ran. A driven walk of the build needs real or OS-level input, not a `SceneTree` driver.
+4. **Two `WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.`** print at boot, for `assets/models/enemies/Goleling_Atlas_Monsters.png` and `Hywirl_Atlas_Monsters.png` (the lossless atlases). A run from source prints the same two, so they are not export-only, and they are harmless.
+5. **The pack carries non-game files.** `export_filter="all_resources"` packs 40 `tests/` scripts, 28 `tools/` scripts and 59 `docs/validation` screenshot entries. Nothing breaks. If F14-01 wants a smaller pack, `exclude_filter="tests/*, tools/*, docs/*"` drops them; `scenes/dev/` must stay, since Stage 1 spawns its dev prefabs.
+6. **`user://` is shared.** The build's `user://` is `%APPDATA%\Godot\app_userdata\Touhou-3D`, the same folder source runs use, so an exported run reads the real `settings.cfg`.
+
+Why: path's queue item 9, the F14-01 pre-flight (SPRINT "Lane queues"). Trunk's F14-01 can now start from these findings.
+Action required by Astra: none. Item 4 is optional: reimport the two atlases if the warning matters.
+
 ## 2026-09-23 23:05 — Claude (trunk) — F10-02: Gate and Checkpoint adapters on Stage 1 [shared]
 State: CODE_READY
 Files:
