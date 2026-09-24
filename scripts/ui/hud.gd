@@ -96,7 +96,8 @@ var _dash_label: Label
 var _dash_progress: ProgressBar
 var _dash_ready_accent: CanvasItem
 ## What the Impulso indicator shows: the ship's cooldown left and total, in seconds, and
-## whether its controls are on. Unbound, the controls count as off.
+## whether it can dash, that is its controls are on and it has a dash
+## ([method PlayerController.has_dash]). Unbound, it cannot.
 var _dash_cooldown_left: float = 0.0
 var _dash_cooldown_total: float = 0.0
 var _dash_enabled: bool = false
@@ -182,7 +183,7 @@ func bind(combat_state: CombatState, targeting: Targeting, camera: Camera3D) -> 
 		_player.controls_enabled_changed.connect(_on_controls_enabled_changed)
 		_dash_cooldown_left = _player.get_dash_cooldown_left()
 		_dash_cooldown_total = _player.dash_cooldown
-		_dash_enabled = _player.are_controls_enabled()
+		_dash_enabled = _player.are_controls_enabled() and _player.has_dash()
 	_render_dash()
 	_on_health_changed(_combat_state.get_health())
 	_on_shield_changed(_combat_state.has_shield())
@@ -363,16 +364,16 @@ func _on_dash_cooldown_changed(remaining: float, total: float) -> void:
 
 
 func _on_controls_enabled_changed(enabled: bool) -> void:
-	_dash_enabled = enabled
+	_dash_enabled = enabled and _player.has_dash()
 	_render_dash()
 
 
-## Draws the Impulso indicator in one of three states. Ready (controls on, no cooldown
-## left): `PRONTO`, `Progress` full, `ReadyAccent` shown, lit. Cooling down: the seconds
-## left, `Progress` filling from empty at activation to full, no accent. Unavailable
-## (controls off, or no ship bound): the bare label, no accent, the whole indicator at
-## [member dim_modulate], `Progress` held where the cooldown froze. Only the first can
-## read as ready.
+## Draws the Impulso indicator in one of three states. Ready (controls on, a dash, no
+## cooldown left): `PRONTO`, `Progress` full, `ReadyAccent` shown, lit. Cooling down: the
+## seconds left, `Progress` filling from empty at activation to full, no accent.
+## Unavailable (controls off, a ship without a dash, or no ship bound): the bare label, no
+## accent, the whole indicator at [member dim_modulate], `Progress` held where the cooldown
+## froze. Only the first can read as ready.
 func _render_dash() -> void:
 	var dash_ready := _dash_enabled and _dash_cooldown_left <= 0.0
 	var filled := 1.0

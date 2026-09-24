@@ -184,20 +184,20 @@ The dash itself is in [player-flight.md "F16 lateral dash"](player-flight.md#f16
 - **First and last tick.** The grant happens inside the ship's physics step, after `Main` has ticked the core and before `ProjectileRoot` sweeps, so the activation tick is protected. The core first counts the grant down on the next tick. At 60 Hz a 0.15 s dash therefore protects the activation tick and the next eight: nine ticks, exactly 0.15 s. The tick that starts at activation + 0.15 s is vulnerable.
 - **The epsilon fix.** Before F16-05 the float residue of `0.15 - 9 × (1/60)`, 2e-17 s, kept a tenth tick protected. `CombatState.TIME_EPSILON` (1e-6 s) ends a window at that residue.
   - The same fix makes a Bomb's or a Retry's 2.0 s window exactly 120 ticks at 60 Hz instead of 121. The 1.0 s hit window was already exact.
-  - `DashModel` uses the same epsilon, so the burst and its protection end on the same tick.
+  - `DashModel.TIME_EPSILON` is `CombatState.TIME_EPSILON` itself, not a copy, so the burst and its protection end on the same tick.
 - **Pause and beats.** A paused tree freezes the ship, and `set_paused(true)` freezes the core. A beat pauses the core and cancels the dash. The protection a cancelled dash granted stays in the core, which is paused under the beat. A stage clear is followed by Results, then a new stage and `start`. A defeat cannot happen while protected, and it leads to Retry or Restart, which call `restore` or `start` and end any window.
 
 ### Impulso indicator (`Hud`)
 
 - **Scene.** `hud.tscn` instances Astra's `scenes/ui/components/dash_cooldown.tscn` as `DashCooldown`. It is anchored bottom-left at offsets (32, -191)–(280, -144), 12 px above `PlayerStatus` and aligned with its left edge. At 1280×720 that is y 529–576, clear of the threats (y 344–376), the boss panel and the attack cue at the top.
 - **Load-bearing paths.** The paths are `DashCooldown`, `DashCooldown/Label`, `DashCooldown/Progress` and `DashCooldown/ReadyAccent` (`DASH_*_PATH`), required like the Section 15 paths. Every earlier path is unchanged.
-- **Binding.** `bind` connects the ship's `dash_cooldown_changed` and `controls_enabled_changed` beside `edge_proximity_changed`, whenever `targeting`'s parent is a `PlayerController`. It then renders from `get_dash_cooldown_left()`, `dash_cooldown` and `are_controls_enabled()`. `unbind` disconnects them and shows the indicator unavailable.
+- **Binding.** `bind` connects the ship's `dash_cooldown_changed` and `controls_enabled_changed` beside `edge_proximity_changed`, whenever `targeting`'s parent is a `PlayerController`. It then renders from `get_dash_cooldown_left()`, `dash_cooldown`, `are_controls_enabled()` and `has_dash()`. `unbind` disconnects them and shows the indicator unavailable.
 
 | State | When | `Label.text` | `Progress` | `ReadyAccent` | Modulate |
 | --- | --- | --- | --- | --- | --- |
-| Ready | Controls on, cooldown 0 | `IMPULSO  ·  PRONTO` | full | shown | `lit_modulate` |
+| Ready | Controls on, the ship has a dash, cooldown 0 | `IMPULSO  ·  PRONTO` | full | shown | `lit_modulate` |
 | Cooling down | Controls on, cooldown > 0 | `IMPULSO  ·  0,6 s`: the seconds left rounded up to a tenth, decimal comma, never `0,0` | `1 - remaining / total` of `max_value`, empty at activation, full at 0 | hidden | `lit_modulate` |
-| Unavailable | Controls off (Pause, beats, Defeat, Results) or unbound | `IMPULSO` | held where it froze | hidden | `dim_modulate` |
+| Unavailable | Controls off (Pause, beats, Defeat, Results), a ship with `dash_duration` 0 (`has_dash()` false), or unbound | `IMPULSO` | held where it froze | hidden | `dim_modulate` |
 
 Only the first state shows `PRONTO` or the accent, so neither a cooldown nor a frozen ship can read as ready. The HUD still calls no `CombatState` method except the getters.
 

@@ -130,7 +130,7 @@ The yaw value may leave [-π, π] inside a tick. It is written as `Basis(Vector3
   - `tools/test.ps1`: 225 passed, 0 failed, with no script, parse or compile error.
   - `check_resources.gd --strict-validate`: 85 resources and 85 scripts, none failed.
   - The 300-frame boot of `main.tscn` printed no ERROR or WARNING.
-  - No test or driver was written (sprint rule). Line numbers below are for the F16-05 commit.
+  - No test or driver was written (sprint rule). Line numbers below are for the F16-05 commit (`601b722`). The fixes that followed its review are under "Review fixes".
 
 ### Physics order inside one tick
 
@@ -182,20 +182,28 @@ All of it returns before step 3 moves the ship, so it is in place long before st
 | Both directions do nothing and cost nothing | `DashModel.resolve_direction` returns 0 when both are down, pressed together or one pressed while the other is held. `try_start(0)` returns before touching the cooldown (`dash_model.gd:47`) | pass (reading) |
 | Cooldown presses are dropped, not buffered | `try_start` refuses while `_cooldown_left > 0`, and the press is spent that tick. The 0.8 s run from activation: at 60 Hz, 48 decrements, so a press on tick N+48 is accepted | pass (reading) |
 | No vertical part, no diagonal stacking, no Focus scaling | The burst assigns `velocity = direction * distance / duration`, with the direction flattened (`:304–306`, `:320`). It replaces `compute_velocity` for the tick | pass (reading) |
-| Stops at scenery and closed Gates without sliding or tunnelling | `move_and_collide` sweep. Any contact normal facing the travel cancels the rest of the travel (`:322–331`, `:336–340`). A Flight Volume face does the same through the clamp (`:175–178`) | pass (reading); no scenery was flown |
+| Stops at scenery and closed Gates without sliding or tunnelling | `move_and_collide` sweep. Any contact normal facing the travel cancels the rest of the travel (`:322–331`, `:336–340`). A Flight Volume face does the same: since the review fixes, `_stop_dash_at_flight_volume` puts the ship back along its own step at the first face it crossed, so no part of the step slides along the face | pass (reading); no scenery was flown |
 | No health, Shield or Graze loss while protected | Field rules at `projectile_field.gd:241` and `:246–249`, unchanged. The Session's `take_hit` rejects while invulnerable (`combat_state.gd:134`) | pass (reading) |
 | Pause freezes progress, protection and cooldown | The ship and `ProjectileRoot` are PAUSABLE and the core is paused (`game_session.gd:341–346`). `set_controls_enabled(false)` keeps the dash when `can_process()` is false (`player_controller.gd:227–229`) | pass (reading) |
 | Beats, defeat, Retry, Restart and unload leave nothing behind | A beat cancels the dash (`game_session.gd:362`, `player_controller.gd:229`). Every Attempt spawns a new ship with a ready `DashModel`, and its `dash_started` connection is freed with the old ship. `start` and `restore` end the core's window | pass (reading) |
 | Dash state is not in a Snapshot | Nothing in `CombatState.capture`, `RunState` or the Director reads the ship's dash | pass (reading) |
-| HUD never looks ready while unavailable or cooling | `Hud._render_dash`: `PRONTO` and `ReadyAccent` only with the controls on and 0 left | pass (reading) |
+| HUD never looks ready while unavailable or cooling | `Hud._render_dash`: `PRONTO` and `ReadyAccent` only with the controls on, a dash (`has_dash()`, since the review fixes) and 0 left | pass (reading) |
 | Existing HUD paths | All GUIDE Section 15 and F4-03 paths unchanged. `test_hud_contract.gd` passes | pass (existing gate) |
+
+### Review fixes
+
+The review of `601b722` found three minor issues. All three were fixed and checked by reading, and the same gate was run again.
+
+- **Slide along a Flight Volume face.** The clamp works axis by axis. With the camera at an angle to a face, it kept the part of a crossing step along the face: up to 1/3 unit in one tick. Now `_move_dash` records where its step started, and `_stop_dash_at_flight_volume` puts the ship at the fraction of the step where it first met a face, then ends the travel. If the step started outside a Flight Volume that has just narrowed, the fraction is held to 0..1 and the ordinary clamp does the rest.
+- **One epsilon.** `DashModel.TIME_EPSILON` is now `CombatState.TIME_EPSILON` itself, so the two countdowns cannot be tuned apart.
+- **A ship without a dash.** With `dash_duration` 0, every request is refused, yet the HUD showed `PRONTO`. Now `DashModel.is_enabled()` and `PlayerController.has_dash()` report it, and the HUD shows such a ship as unavailable. The shipped 0.15 s is unaffected.
 
 ### Manual checks owed
 
 None of these was run: no one pressed a key or watched a frame.
 
 - **Travel and duration.** Fly the arena or Stage 1, dash left and right from rest and at full speed, forward and diagonal, with the camera turned. Expect 3.0 units along the camera's horizontal left or right, no climb, in 0.15 s. Hold Focus and expect the same distance.
-- **Obstruction.** Dash into a wall, a tree trunk, a closed Gate and each Flight Volume face, straight and at a glancing angle. Expect the ship to stop at contact with no slide and no pass-through. Dash along the floor while resting on it: it must not stop. If it does, Jolt is reporting the side-on floor contact as facing the travel, and `DASH_GLANCE_TOLERANCE` needs another look.
+- **Obstruction.** Dash into a wall, a tree trunk, a closed Gate and each Flight Volume face, straight and at a glancing angle. Expect the ship to stop at contact with no slide and no pass-through, including at a Flight Volume face met at an angle with the camera turned. Dash along the floor while resting on it: it must not stop. If it does, Jolt is reporting the side-on floor contact as facing the travel, and `DASH_GLANCE_TOLERANCE` needs another look.
 - **Protection.**
   - Cross a hostile pattern with and without the Shield: no Health or Shield loss and no Graze during the burst.
   - Graze normally right after it.

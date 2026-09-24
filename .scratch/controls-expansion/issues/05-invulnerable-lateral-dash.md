@@ -78,4 +78,10 @@ Done 2026-09-24 by lane rescue, parts 1 and 2 in one commit. CameraRig was only 
   - The field's Graze and hit rules were already correct and are unchanged.
 - **HUD.** `DashCooldown` sits in `hud.tscn` above the player panel. It shows PRONTO with the accent only when the controls are on and the cooldown is 0. While cooling it shows the tenths left. While the controls are off it is dimmed.
 
+Review fixes (a separate commit, "F16-05: review fixes"):
+
+- A dash that crosses a Flight Volume face at an angle no longer slides along it for one tick: the ship goes back along its step to the first face it met.
+- `DashModel.TIME_EPSILON` is `CombatState.TIME_EPSILON` itself, not a copy.
+- A ship with `dash_duration` 0 shows as unavailable on the HUD, never `PRONTO`, through the new `DashModel.is_enabled()` and `PlayerController.has_dash()`.
+
 Verification: code reading and the existing gate pieces. The suite passed 225 of 225, the boot smoke was clean, and the resource check failed nothing. The proof and the owed manual checks are in `docs/validation/controls-expansion.md` (F16-05). Not verified: physical feel, collision along real scenery (including whether Jolt reports a skimmed floor as facing the travel), and the visual look (F16-07).

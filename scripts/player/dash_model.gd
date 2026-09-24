@@ -18,9 +18,10 @@ extends RefCounted
 
 ## Seconds at or below which a countdown counts as over. A window of whole physics ticks
 ## leaves a rounding residue after its last tick (0.15 s at 60 Hz leaves 2e-17 s), which
-## would keep it open one tick longer than it lasts. The same value as
-## [constant CombatState.TIME_EPSILON], and far below one tick at any physics rate.
-const TIME_EPSILON := 1e-6
+## would keep it open one tick longer than it lasts. Taken from
+## [constant CombatState.TIME_EPSILON], never a copy of it: the burst ends on the tick its
+## protection does only while both cores count down with the same value.
+const TIME_EPSILON := CombatState.TIME_EPSILON
 
 var _duration: float = 0.0
 var _cooldown: float = 0.0
@@ -44,7 +45,7 @@ func configure(duration: float, cooldown: float) -> void:
 ## cooldown runs, or before [method configure]. An accepted burst is active for the
 ## configured duration, and its cooldown starts at once.
 func try_start(direction: int) -> bool:
-	if absi(direction) != 1 or _duration <= 0.0 or is_active() or _cooldown_left > 0.0:
+	if absi(direction) != 1 or not is_enabled() or is_active() or _cooldown_left > 0.0:
 		return false
 	_direction = direction
 	_active_left = _duration
@@ -65,6 +66,12 @@ func tick(delta: float) -> void:
 func cancel() -> void:
 	_active_left = 0.0
 	_cooldown_left = 0.0
+
+
+## Whether any request can be accepted at all: false before [method configure], and after
+## it set a duration of 0, when [method try_start] refuses every direction.
+func is_enabled() -> bool:
+	return _duration > 0.0
 
 
 ## Whether a burst is active: from the tick [method try_start] accepted it until its

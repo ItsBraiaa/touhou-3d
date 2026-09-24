@@ -337,9 +337,9 @@ Implemented by lane rescue on 2026-09-24. The spec's "Lateral dash" section give
 | --- | --- |
 | `configure(duration: float, cooldown: float) -> void` | Stores the active duration and the cooldown, in seconds. A negative value counts as 0. A duration of 0 refuses every request. |
 | `try_start(direction: int) -> bool` | Accepts -1 (left) or +1 (right) only when no burst is active and the cooldown is over. On acceptance the burst is active for the duration and the cooldown starts at once, from activation. Anything else returns false and changes nothing: a 0, a press during the cooldown (dropped, never buffered) or a call before `configure`. |
-| `tick(delta: float) -> void` | Counts both timers down by one physics step. A timer left at `TIME_EPSILON` (1e-6 s) or less becomes 0. |
+| `tick(delta: float) -> void` | Counts both timers down by one physics step. A timer left at `TIME_EPSILON` (1e-6 s) or less becomes 0. The constant is `CombatState.TIME_EPSILON` itself, not a copy, so the burst and its protection cannot drift a tick apart. |
 | `cancel() -> void` | Ends the burst and clears the cooldown, so the next request is accepted. |
-| `is_active()`, `get_active_time_left()`, `get_cooldown_left()`, `get_direction()` | Read-only state. The direction is that of the current or last burst, 0 before any. |
+| `is_enabled()`, `is_active()`, `get_active_time_left()`, `get_cooldown_left()`, `get_direction()` | Read-only state. `is_enabled()` is false before `configure` and with a duration of 0. The direction is that of the current or last burst, 0 before any. |
 | `static resolve_direction(left_pressed, right_pressed, left_held, right_held) -> int` | -1 for a `dash_left` press, +1 for a `dash_right` press. 0 for no press, or when both directions are down together: pressed in the same tick, or one pressed while the other is held. |
 
 ### Exports (F16-05)
@@ -349,7 +349,7 @@ Authored on `PlayerShip`, group **Dash**; the values are the spec's baseline.
 | Export | Default | Meaning |
 | --- | --- | --- |
 | `dash_distance` | 3.0 | Unobstructed travel, world units. |
-| `dash_duration` | 0.15 | Active and protected seconds. The burst speed is `dash_distance / dash_duration` (20 units/s), which Focus does not scale. 0 disables the dash. |
+| `dash_duration` | 0.15 | Active and protected seconds. The burst speed is `dash_distance / dash_duration` (20 units/s), which Focus does not scale. 0 disables the dash, and the HUD then shows it as unavailable. |
 | `dash_cooldown` | 0.8 | Seconds from activation until the next dash in either direction. |
 | `dash_visual` | `VisualRoot/DashVisual` | Required, in **Scene references**. A missing export disables the adapter like the other references. A `DashVisual` without `TrailLeft`, `TrailRight` or `ProtectionAccent` is reported, and the dash then runs without visuals. |
 
@@ -361,7 +361,7 @@ Authored on `PlayerShip`, group **Dash**; the values are the spec's baseline.
 | `dash_ended` | The active window ran out, or a cancel ended it. A burst stopped by scenery emits it only when its window ends. |
 | `dash_cooldown_changed(remaining: float, total: float)` | Emitted at activation (`0.8, 0.8`), on every physics tick of the cooldown down to `0, 0.8`, and on a cancel that clears it. |
 | `controls_enabled_changed(enabled: bool)` | A refinement of the spec's seams: `set_controls_enabled` changed the state. The HUD shows the dash as unavailable while it is false. |
-| `are_controls_enabled() -> bool`, `get_dash_cooldown_left() -> float` | Read at `Hud.bind`, so a new binding renders the current state. |
+| `are_controls_enabled() -> bool`, `get_dash_cooldown_left() -> float`, `has_dash() -> bool` | Read at `Hud.bind`, so a new binding renders the current state. `has_dash()` is false when `dash_duration` is 0, and the HUD then never shows the dash as ready. |
 | `set_controls_enabled(false)` | With the tree paused it only freezes the dash (see below). With the tree running (a beat, a defeat, a stage clear) it cancels the dash. |
 | `reset_to(transform)` | Also cancels the dash: no carried burst, trail or cooldown. |
 
@@ -379,7 +379,7 @@ Authored on `PlayerShip`, group **Dash**; the values are the spec's baseline.
 - **Collision.** The burst moves with `move_and_collide`, a swept motion test on the body's shape, never `move_and_slide`. So it cannot tunnel through thin scenery or a closed Gate, and it never teleports.
   - A contact whose normal has a component of more than `DASH_GLANCE_TOLERANCE` (0.02, about 1°) against the travel stops the burst where the body touched. The rest of the travel is cancelled for good, with no tangent slide.
   - A contact square to the travel (a floor the ship skims, a ceiling, a wall alongside) does not stop it. The remainder goes on in the same direction, never deflected, for up to `MAX_DASH_CASTS` (4) casts per step.
-  - A Flight Volume face stops the burst too: when the clamp has to move the ship back, the travel ends there.
+  - A Flight Volume face stops the burst too. When this tick's step crossed a face, the ship goes back along its own step to the first face it met, and the travel ends there. The per-axis clamp alone would keep the part of the step along the face, a one-tick slide when the camera is at an angle to it. The ordinary clamp still runs after the move, as a safeguard.
   - A stopped burst keeps its window: the cooldown is not refunded, the protection still ends at activation + 0.15 s, and ordinary flight resumes on the next tick.
 - **Pause.** The Session pauses the tree and then calls `set_controls_enabled(false)`. The adapter sees `can_process()` false and keeps the dash. With the tree paused the ship does not tick, so the burst's progress, its cooldown and, in `CombatState`, its protection all stand still and resume together.
 - **Lifecycle.** A beat (defeat, stage clear) disables the controls with the tree running, which cancels the dash and clears the cooldown. Every new Attempt spawns a new ship with a new `DashModel`, which starts ready: Retry, Restart, Campaign Stage 2 and Jogar novamente all do. The old ship leaves the tree the same frame. `CombatState.start` and `restore` end any leftover protection. Dash state is transient: it is not in any Snapshot.

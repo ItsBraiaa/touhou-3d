@@ -70,7 +70,7 @@ const DASH_GLANCE_TOLERANCE := 0.02
 ## scale.
 @export var dash_distance: float = 3.0
 ## Seconds a dash is active, and the seconds of Invulnerability its owner grants for it.
-## 0 disables the dash.
+## 0 disables the dash, and the HUD then shows it as unavailable.
 @export var dash_duration: float = 0.15
 ## Seconds from a dash's activation until the next one, in either direction, is accepted.
 @export var dash_cooldown: float = 0.8
@@ -172,11 +172,8 @@ func _physics_process(delta: float) -> void:
 		move_and_slide()
 	# The authored walls stop the body; the clamp is the rule, and it also covers the
 	# Flight Volume faces an Encounter narrows to without scenery (CONVENTIONS "Collision").
-	var clamped := _model.clamp_position(global_position)
-	if _dash_travelling and not clamped.is_equal_approx(global_position):
-		# A Flight Volume face ends the burst like a wall does, with no slide along it.
-		_stop_dash_travel()
-	global_position = clamped
+	# A dash has already stopped at a face it crossed, so for it this is only a safeguard.
+	global_position = _model.clamp_position(global_position)
 	_model.edge_proximity(global_position)
 
 
@@ -237,6 +234,12 @@ func are_controls_enabled() -> bool:
 ## Seconds until the next dash is accepted, or 0 when ready.
 func get_dash_cooldown_left() -> float:
 	return _dash.get_cooldown_left()
+
+
+## Whether this ship dashes at all: false when [member dash_duration] is 0, which refuses
+## every dash, so the HUD never shows one as ready.
+func has_dash() -> bool:
+	return _dash.is_enabled()
 
 
 ## Starts or stops the Invulnerability blink of `VisualRoot` at
@@ -315,20 +318,40 @@ func _try_start_dash() -> void:
 ## that is shorter, so the burst covers [member dash_distance] exactly at any tick rate.
 ## The motion goes through the body's own collision: a contact that faces the travel
 ## stops the burst where the body touched it, with nothing slid along the obstacle, and
-## the body never passes through it.
+## the body never passes through it. A Flight Volume face stops it the same way.
 func _move_dash(delta: float) -> void:
+	var start := global_position
 	velocity = _dash_direction * (dash_distance / dash_duration)
 	var motion := velocity * minf(delta, _dash.get_active_time_left())
 	for _cast: int in MAX_DASH_CASTS:
 		var collision := move_and_collide(motion)
 		if collision == null:
-			return
+			break
 		if _blocks_dash(collision):
 			_stop_dash_travel()
-			return
+			break
 		# A surface along the travel, such as the floor the ship skims: the rest of the
 		# motion goes on in the same direction, never deflected.
 		motion = collision.get_remainder()
+	_stop_dash_at_flight_volume(start)
+
+
+## Ends the burst where this tick's step from [param start] first met a Flight Volume face,
+## when it crossed one. The clamp works axis by axis, so on its own it would keep the part
+## of the step along the face, a one-tick slide; instead the ship goes back along its own
+## step to the face. A start outside a Flight Volume that has just narrowed gives a
+## fraction outside 0..1, which is held to it, and the clamp after the move does the rest.
+func _stop_dash_at_flight_volume(start: Vector3) -> void:
+	var clamped := _model.clamp_position(global_position)
+	if clamped.is_equal_approx(global_position):
+		return
+	var moved := global_position - start
+	var fraction := 1.0
+	for axis: int in 3:
+		if not is_equal_approx(clamped[axis], global_position[axis]) and not is_zero_approx(moved[axis]):
+			fraction = minf(fraction, (clamped[axis] - start[axis]) / moved[axis])
+	global_position = start + moved * clampf(fraction, 0.0, 1.0)
+	_stop_dash_travel()
 
 
 ## Whether any contact of [param collision] faces the dash, however glancing. A normal

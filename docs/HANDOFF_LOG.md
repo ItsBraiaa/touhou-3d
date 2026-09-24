@@ -1,5 +1,17 @@
 # Handoff Log
 
+## 2026-09-24 — Claude (rescue) — F16-05: review fixes
+State: CODE_READY
+Files: `scripts/player/player_controller.gd`; `scripts/player/dash_model.gd`; `scripts/ui/hud.gd`; `docs/engineering/player-flight.md` (only "F16 lateral dash (F16-05)"); `docs/engineering/combat-hud.md` (only the F16-05 section); `docs/validation/controls-expansion.md` (only the F16-05 section); `.scratch/controls-expansion/issues/05-invulnerable-lateral-dash.md` (Outcome). No scene changed.
+Change:
+- **No slide along a Flight Volume face.** Before, the clamp worked axis by axis. When a dash crossed a face at an angle to the camera, the clamp kept the part of that tick's step along the face, up to 1/3 unit. Now `_move_dash` records where its step started, and the new `_stop_dash_at_flight_volume` puts the ship at the fraction of the step where it first met a face, then ends the travel. The ordinary clamp still runs after it, as a safeguard.
+- **One epsilon.** `DashModel.TIME_EPSILON` is now `CombatState.TIME_EPSILON` itself, not a second literal. The burst and its protection end on the same tick only while the two match.
+- **A ship without a dash never reads ready.** With `dash_duration` 0 every request was refused, yet the HUD showed `PRONTO`. The new `DashModel.is_enabled()` and `PlayerController.has_dash()` report it, `try_start` uses the first, and `Hud` counts a ship without a dash as unavailable. Shipped values are unaffected.
+Why: three minor findings from the review of `601b722`, verdict ship.
+Verification: no tests or drivers (sprint rule). The fixes were checked by reading, and the existing gate was run again.
+Action required by trunk (F16-06): add `DashModel.is_enabled()` and `PlayerController.has_dash()` to the spec's API list, next to the getters listed in the entry below, when trunk next edits `.scratch/controls-expansion/spec.md`.
+Action required by Astra (F16-07): when checking the Flight Volume stops, also dash into a face at an angle with the camera turned. The ship should stop where it meets the face, with no slide along it.
+
 ## 2026-09-24 — Claude (rescue) — F16-05: invulnerable lateral dash, cooldown HUD and dash visual [shared]
 State: CODE_READY
 Files: `scripts/player/dash_model.gd` (new) and its `.uid`; `scripts/player/player_controller.gd`; `scripts/combat/combat_state.gd`; `scripts/session/game_session.gd` (dash wiring and doc comments only); `scripts/ui/hud.gd`; `scenes/player/player_ship.tscn` [shared] (three dash exports, the `dash_visual` reference, Astra's `dash_visual.tscn` instanced as `VisualRoot/DashVisual`); `scenes/ui/hud.tscn` [shared] (Astra's `dash_cooldown.tscn` instanced as `DashCooldown`, bottom-left at (32, -191)–(280, -144), 12 px above `PlayerStatus`); `docs/engineering/player-flight.md` (only "F16 lateral dash (F16-05)"); `docs/engineering/combat-hud.md` (the `invulnerability_changed`, `tick` and `grant_invulnerability` rows, and a new "F16 dash protection and the Impulso indicator (F16-05)" section); `docs/validation/controls-expansion.md` (only the F16-05 section); `.scratch/controls-expansion/issues/05-invulnerable-lateral-dash.md` (Status, Work, Outcome); `docs/engineering/ROADMAP.md` (the F16-05 row). `projectile_system.gd` and `camera_rig.gd` are unchanged.
