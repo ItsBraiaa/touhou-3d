@@ -4,7 +4,7 @@ Status: todo
 Type: adapter
 Owner: Claude
 Lane: trunk
-Depends on: F16-01, F16-02
+Depends on: F16-01, F16-02, F16-08
 Parallel-safe: no
 
 ## Read first
@@ -12,6 +12,12 @@ Parallel-safe: no
 - [Spec](../spec.md): product rules, exact widget paths, data shapes and proposed APIs.
 - [Execution plan](../../../docs/engineering/controls-expansion-plan.md): ownership, task steps and review focus.
 - docs/engineering/SPRINT.md in the worktree: no-new-tests rule and lane loop.
+
+## Routing (2026-09-24, Claude)
+
+- **Consumes F16-08:** `BindingLabels.describe()`, `glyph_id()` and `glyph_path()`, plus `InputDeviceState.set_glyph_override()`, `get_prompt_family()` and `prompt_family_changed`. Do not rebuild them. If F16-08 has not landed when this ticket starts, do its deliverables here first and record that in both Outcomes.
+- **Glyph files:** `res://assets/ui/controls/glyphs/<glyph_id>.png` (F16-08's list). Fall back to text when a file is missing.
+- **Docs:** fill only the pre-made sections "F16 capture workflow and prompts (F16-03)" in settings.md and the F16-03 section of `docs/validation/controls-expansion.md`.
 
 ## Goal
 

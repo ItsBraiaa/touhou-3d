@@ -202,6 +202,34 @@ Sol idles from about T0 + 8.7 h to T0 + 15.2 h, waiting for F10-03. It reads ahe
 Ticket files: `.scratch/<feature>/issues/NN-slug.md`, found by ID with `tools/lane.ps1 status <ID>`. Folders: F3 `settings`, F4 `combat-hud`, F5 `projectile-field`, F6 `weapon-rendering`, F7 `damage-pickups`, F8 `progression-core`, F9 `enemies`, F10 `stage-director`, F11 `run-flow`, F12 `bosses`, F13 `audio`, F14 `delivery`, D `design-sprint`.
 
 
+## After delivery: F16 controls, camera and dash (from 2026-09-24 evening)
+
+The delivered build is frozen. PR #1 (`dev-01` → `main`, https://github.com/ItsBraiaa/touhou-3d/pull/1) holds it, plus F15-07, which missed the 16:30 freeze and landed afterwards. F16 is Astra's plan (`docs/engineering/controls-expansion-plan.md`, `.scratch/controls-expansion/`). The same rules as the sprint apply: no tests of any kind (the F16 plan also forbids throwaway test drivers), one agent per worktree, and `tools/lane.ps1 land` as the gate.
+
+| Lane | Who | F16 queue |
+| --- | --- | --- |
+| sol | Astra on **GPT 5.6** (game design from now on) | F16-01 layout, glyphs, dash and cooldown components; later F16-07 acceptance |
+| trunk | Claude Opus, a workflow agent run from lane plan | F16-02 part 2 → F16-03 (after F16-01 and F16-08) → F16-06 |
+| path | Claude Opus, workflow agent | F16-04 mouse camera and recenter (starts now) |
+| rescue | Claude Opus, workflow agent | F16-05 part 1 dash mechanics and protection (now) → part 2 Astra's components (after F16-01) |
+| oc-a | OpenCode, DeepSeek V4.1 Flash | F16-08 binding labels and prompt family (small, now) |
+| oc-b | OpenCode | idle; small fixes that come out of review or F16-07 |
+
+**File boundaries while these run in parallel.**
+
+| Lane | Owns |
+| --- | --- |
+| trunk | Settings, Interface, `input_bindings.gd`, `input_binding_adapter.gd`, menus and the Controls screen wiring |
+| rescue | `game_session.gd`, `player_controller.gd`, `combat_state.gd`, `projectile_system.gd`, `hud.*` and `player_ship.tscn`, until F16-05 part 2 lands |
+| path | `camera_rig.gd` only |
+| oc-a | `binding_labels.gd` and `input_device_state.gd` |
+| sol | `controls.tscn`, the new component scenes and the new assets |
+
+`settings.md`, `player-flight.md` and `docs/validation/controls-expansion.md` have one pre-made section per ticket; fill only yours.
+
+**PR #1.** Merge it on GitHub before pushing `dev-01` again, or the F16 commits join it.
+
+
 ## Delivery-day polish (F15): what came back, and the freeze
 
 A sweep of every "Out of scope", "Open issues" and design line against the code (2026-09-24, about 13:00) found the items below still missing, and worth adding before the 18:00 delivery. There are no ticket files: each lane gets its item in its kickoff prompt, adds a ROADMAP row `F15-0N`, and writes one handoff entry. No tests, as always.

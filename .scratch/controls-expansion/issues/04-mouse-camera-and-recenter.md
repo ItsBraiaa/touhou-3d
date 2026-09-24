@@ -4,7 +4,7 @@ Status: todo
 Type: adapter
 Owner: Claude
 Lane: path
-Depends on: F16-02
+Depends on: F16-00
 Parallel-safe: yes, only within the orchestration plan's disjoint file boundaries
 
 ## Read first
@@ -12,6 +12,11 @@ Parallel-safe: yes, only within the orchestration plan's disjoint file boundarie
 - [Spec](../spec.md): product rules, exact widget paths, data shapes and proposed APIs.
 - [Execution plan](../../../docs/engineering/controls-expansion-plan.md): ownership, task steps and review focus.
 - docs/engineering/SPRINT.md in the worktree: no-new-tests rule and lane loop.
+
+## Routing (2026-09-24, Claude)
+
+- **Starts now, without waiting for F16-02.** The rig takes its values only through `apply_control_settings(...)` and `request_recenter()`; nothing in this ticket reads Settings or InputBindings. The `camera_recenter` action already exists (F16-02 part 1), but the rig does not read it: F16-06 wires it.
+- **Docs:** fill only the pre-made player-flight.md section "F16 mouse camera and recenter (F16-04)" and the F16-04 section of `docs/validation/controls-expansion.md`.
 
 ## Goal
 
