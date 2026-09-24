@@ -159,7 +159,7 @@ func _ready() -> void:
 	# than in setup(), because an owner calls setup() again every time the Flight Volume
 	# changes and _ready runs once.
 	targeting.target_changed.connect(camera_rig.set_lock_target)
-	targeting.lock_lost_to_defeat.connect(camera_rig.request_recenter)
+	targeting.lock_lost_to_defeat.connect(_on_lock_lost_to_defeat)
 
 
 ## One tick: the dash timers first, so a window that ran out ends before this tick's
@@ -467,6 +467,14 @@ func _update_core_feedback(delta: float) -> void:
 
 func _on_focus_changed(active: bool) -> void:
 	_core_focus_active = active
+
+
+## A defeat ended the lock with no target left (F16-11). The camera recenters only while
+## the ship has its controls, as a pressed `camera_recenter` is refused in a beat, and
+## without the grace a pressed recenter has, since no press asked for this one.
+func _on_lock_lost_to_defeat() -> void:
+	if _controls_enabled:
+		camera_rig.request_recenter(false)
 
 
 func _on_model_edge_proximity_changed(value: float) -> void:

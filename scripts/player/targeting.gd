@@ -30,8 +30,8 @@ signal target_changed(target: Node3D)
 
 ## The locked target was defeated and no other target could take the lock (F16-11).
 ## Emitted right after [signal target_changed] reported null, in the same tick. The ship
-## connects it to [method CameraRig.request_recenter], so the camera returns to the
-## authored follow view rather than staying turned toward the defeat. Never emitted for a
+## answers it with [method CameraRig.request_recenter] while it has its controls, so the
+## camera returns to the authored follow view rather than staying turned toward the defeat. Never emitted for a
 ## release by the player, by range, or by a target that disappeared without a defeat, nor
 ## for a boss whose `Death` clip is playing.
 signal lock_lost_to_defeat
@@ -81,8 +81,9 @@ var _input_armed: bool = false
 var _watched_id: int = TargetSelector.NO_TARGET
 ## Instance id of the locked target that reported its defeat, or
 ## [constant TargetSelector.NO_TARGET]. Recorded by the signal and spent by the next tick
-## that finds the lock invalid, because the signal can arrive outside a physics step (a
-## Bomb clear) and the candidates need one. Every lock change forgets it.
+## that finds the lock invalid: every kill (the weapon's Bomb at physics priority 50, the
+## field's hits at 100) lands after this node's own tick (priority 0), and the handoff
+## needs that tick's candidates. Every lock change forgets it.
 var _defeated_id: int = TargetSelector.NO_TARGET
 
 

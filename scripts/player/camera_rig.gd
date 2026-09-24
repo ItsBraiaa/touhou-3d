@@ -137,6 +137,9 @@ var _look_override: float = 0.0
 var _recentering: bool = false
 ## Seconds since the recenter in progress started or last restarted.
 var _recenter_elapsed: float = 0.0
+## Whether the recenter in progress ignores camera input for its first
+## [member recenter_grace_seconds]; see [method request_recenter].
+var _recenter_has_grace: bool = true
 
 
 func _ready() -> void:
@@ -261,9 +264,13 @@ func clear_pending_look() -> void:
 ## interrupts it once [member recenter_grace_seconds] have passed. A request during a
 ## recenter restarts it from the current pose; nothing queues. The pitch limits and the
 ## obstruction ray apply throughout. [GameSession] calls this on the `camera_recenter`
-## action during gameplay (F16-06); the rig does not read the action.
-func request_recenter() -> void:
+## action during gameplay (F16-06); the rig does not read the action. The grace protects a
+## pressed recenter from the press itself; [PlayerController] passes
+## [param with_grace] false for the automatic recenter after a defeat ends the lock
+## (F16-11), which no press asked for, so the player's camera input interrupts it at once.
+func request_recenter(with_grace: bool = true) -> void:
 	_recentering = true
+	_recenter_has_grace = with_grace
 	_recenter_elapsed = 0.0
 	# A recenter is a return to the framing, so it ends a mouse-look hold instead of
 	# waiting it out, and the framing is live again the tick the recenter ends.
@@ -298,7 +305,7 @@ func _advance_aim(delta: float, pivot: Vector3) -> float:
 	_pending_look = Vector2.ZERO
 	var mouse_deliberate := mouse.length() > mouse_jitter_speed * _advance_look_clock()
 	if _recentering:
-		var in_grace := _recenter_elapsed < recenter_grace_seconds
+		var in_grace := _recenter_has_grace and _recenter_elapsed < recenter_grace_seconds
 		if in_grace or (orbit.is_zero_approx() and not mouse_deliberate):
 			return _advance_recenter(delta, pivot, yaw)
 		_recentering = false
