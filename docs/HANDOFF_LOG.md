@@ -8,6 +8,65 @@ Why: The user asked for a written plan for Astra's screen/layout work and for Cl
 Validation: Planning self-review covers each requested feature, named dependencies, relative links, file ownership, proposed interfaces and the no-new-tests constraint. Existing `tools/lane.ps1 land` is the landing gate; final result is reported with the session's commit. Physical keyboard/controller and gameplay acceptance belong to F16-07 and are not claimed by this document work.
 Action required by Claude: Read `docs/engineering/controls-expansion-plan.md` and `.scratch/controls-expansion/CLAUDE_KICKOFF.md`; after implementation is requested, check lane availability and run the stated ticket sequence. Do not edit Astra's component geometry while she is authoring it, and never dispatch two writers into one worktree. Do not write tests or disposable test drivers. Physical Xbox, DualShock and DualSense results must be recorded individually; unavailable devices remain not verified.
 
+## 2026-09-24 13:45 — Claude (trunk) — F15-10: defeat beat before the Defeat overlay
+State: INTEGRATED_VERIFIED
+Files: `scripts/session/game_session.gd` (`DEFEAT_BEAT_SECONDS`, `_on_player_defeated`, new `_show_defeat`, the `_on_stage_completed` doc); `docs/engineering/ROADMAP.md` (the F15-10 row; the F15-01 row moved beside the other lanes' F15 rows, in their format).
+Change:
+- **Defeat beat.** The defeating hit plays `player_defeated` and starts a 1.0 s beat through F15-01's `_begin_beat`. The tree keeps running, and the ship's controls, the CombatState and Active Time are frozen. Hostile fire is cleared (safe inside the field's step, which reports its events after its sweep), and Pause is refused. Then the tree pauses under the Defeat overlay, as before.
+- **A clear during the beat.** A stage clear during the beat starts the victory beat, which cancels the defeat beat's finish, so Results follows and never Defeat. Before, a Defeat raised in the step of the last kill already gave way to Results.
+Verification: a headless `main.tscn` driver (throwaway, not in the repo).
+- Defeat showed 1.02 s after the hit. The tree was never paused and the controls were never on before it, and Clear Time did not move.
+- Pause pressed in the beat was refused.
+- Retry returned to the HUD with the tree running and the controls on.
+- A clear 10 ticks into the beat showed Results after the 2.5 s victory beat, and Defeat never appeared.
+- The F15-01 S1-07 scenario passed again on the same build, with path's F15-02 merged.
+No tests (sprint rule).
+Action required by Astra: none. 1.0 s is Claude's proposal; tune `DEFEAT_BEAT_SECONDS`.
+
+## 2026-09-24 13:45 — Claude (trunk) — F15-01: victory beat, and a silent Bomb clear
+State: INTEGRATED_VERIFIED
+Files: `scripts/session/game_session.gd` (`VICTORY_BEAT_SECONDS`, `_begin_beat`, `_cancel_beat`, `_show_results`, `_in_beat`, `_beat_serial`, `_bomb_clearing`); `tests/scene/test_game_session_flow.gd` (`test_a_completed_stage_shows_results` now waits out the beat before its three unchanged asserts: the sprint rule's minimal adjustment of a test the ticket broke on purpose); `docs/engineering/audio.md` (Open issues); `docs/engineering/ROADMAP.md` (the F15-01 row).
+Change:
+- **Victory beat.** A stage clear still completes the stage at once, so Clear Time stops at the kill. Then, for 2.5 s, the tree keeps running:
+  - the ship's controls and fire are off, and the CombatState is paused, so no hit, Bomb or Pickup is taken;
+  - hostile fire is cleared, and Grazes are ignored;
+  - Pause is refused.
+  After the beat the tree pauses and Results shows, with `stage_cleared` and the `STAGE_RESULT` line as before. A Defeat raised in the physics step of the last kill still gets Results at once, with no beat.
+- **Reuse.** `_begin_beat(seconds, finish)` and `_cancel_beat()` are the mechanism F15-10 reuses. An unload (Restart, Menu, Continuar, Jogar novamente) or a Retry cancels a beat in progress.
+- **Bomb clear.** Enemies killed by a Bomb's damage play no `enemy_defeated`; its `bomb_used` covers them. A boss it kills still rings `boss_defeated` once.
+Verification: implementer and reviewer agents, then a headless `main.tscn` driver through the real Stage 1 route to S1-07 (throwaway, not in the repo):
+- Results came 2.52 s (151 ticks) after the Lantern Guardian's defeat. The tree was never paused, the screen stayed on the HUD, controls were off and the CombatState paused on every tick, and Clear Time was frozen at the kill.
+- Pause pressed 1 s into the beat was refused.
+- The boss `Death` clip (0.67 s) and the shrine's `corrupted_to_calm` (2.4 s) both played to the end before Results.
+- A Bomb kill in S1-05 left 0 `enemy_defeated` voices and 1 `bomb_used`; an ordinary kill right after still sounded.
+No tests (sprint rule).
+Action required by Astra: none. 2.5 s is Claude's proposal (the shrine clip is 2.4 s); retune `VICTORY_BEAT_SECONDS` if F15-04's storm calm is longer.
+Action required by path: in F15-02, keep `EnemyActor`'s `defeated` report inside its damage call, before the Death clip ("report `defeated` at once"). The Bomb-clear flag is only set during that call.
+## 2026-09-24 — Claude (path) — F15-02: enemy feedback
+State: INTEGRATED_VERIFIED
+Files: `scripts/enemies/enemy_actor.gd`; `docs/engineering/enemies.md` (new "Presentation (F15-02)", signal and export rows, Setup for Astra, Open issues); `docs/GUIDE.md` (the `enemy_actor.gd` row); `docs/engineering/ROADMAP.md` (the F15-02 row).
+Change:
+- **Anticipation clip.** Each Anticipation plays the clip named by `VisualRoot`'s `metadata/anticipation_clip` (`Yes` for Spirits, `Punch` for Sentries) on `VisualRoot/Model/AnimationPlayer`, stretched to the Anticipation (1.167 s clip over 1.0 s, speed 1.167), then returns to `Flying_Idle`. The dev scale pulse is gone.
+- **Hit flash.** Each accepted hit flashes the meshes under `VisualRoot`. The flash is an additive, unshaded, fog-free overlay that fades from 0.85 grey to black in 0.12 s and is then removed. Each actor has its own material, so no other enemy lights up. `HitReact` is not used, because held fire would restart it on every shot.
+- **Death.** `defeated` still fires at once on the lethal hit. The actor leaves `targetable` and stops registering its hit sphere, and the Director scores and the Encounter advances. Then `Death` plays for 0.667 s, and the actor frees itself.
+- **Facing.** `VisualRoot` turns toward the player (yaw only, eased at rate 6 per second, snapped at spawn).
+- **Threats.** An Enemy warns once, on its first off-screen Anticipation. This is Astra's "new threat" rule.
+- A visual that lacks the player or a named clip gets one `push_warning`, and that cue is skipped.
+Verification: a headless throwaway driver (not in the repo), run after syncing F15-08's twilight and seal prefabs. Every check passed:
+- Arena harness: the clips and their speeds, the flash rising and then removed while the other enemy stays dark, the yaw target and the eased turn, one warning from three off-screen Anticipations, and a lethal hit. After that hit, `defeated` fired once at once, the actor was out of `targetable`, a Bomb at its center found 0 targets, it was still dying at 0.53 s and was freed by 0.73 s.
+- Retry: Stage 1 from CP1-A. Three S1-05 enemies were killed and died mid-Death; the score rose at once. A Defeat followed, all three were still dying under the pause, and after Retry none was left in the tree. The stage then cleared.
+- A Direct Stage 2 clear.
+- No `SCRIPT ERROR` and no clip warning.
+No tests (sprint rule).
+Action required by Astra: none required. To change the Anticipation gesture, edit `metadata/anticipation_clip` on a visual. The flash colour and length and the turn rate are Claude's proposals; send Claude values to change them.
+Action required by trunk: none. F15-01's victory beat will show a common enemy's `Death` too, since the actor now outlives its report by 0.667 s.
+
+## 2026-09-24 — OpenCode (oc-a) — F15-09 HUD edge cues
+State: DELIVERED
+Files: `scripts/ui/hud.gd`, `tests/scene/test_hud_contract.gd` (obsolete expectation only), `docs/engineering/ROADMAP.md`.
+Change: The locked target marker now remains visible when its projection is off-screen or behind the camera, clamped inside the screen edge and rotated toward the target. Hud builds a subtle full-screen boundary vignette in code and connects the bound ship's `edge_proximity_changed` through `Targeting`'s parent, with a short fade tween. No `hud.tscn` or Session edit.
+Verification: The existing HUD contract expectation for behind-camera hiding was minimally updated because F15-09 intentionally replaces it with an edge marker; no new test was added. `tools/lane.ps1 land` is the gate.
+Action required by trunk: the pre-existing behind-camera marker expectation is superseded by F15-09 behavior if an acceptance test still asserts hiding it.
 ## 2026-09-24 — Astra (sol) — F15-08 enemy colour variants [shared]
 State: DELIVERED
 Files: `scenes/dev/spirit_twilight.tscn`, `scenes/dev/sentry_seal.tscn`, `scenes/stages/stage_01.tscn`, `scenes/stages/stage_02.tscn`, `content/stages/stage_01/s1_02.tres`, `s1_04.tres`, `s1_05.tres`, `content/stages/stage_02/s2_01.tres`, `s2_02.tres`, `s2_03.tres`, `s2_05.tres`, `docs/engineering/ROADMAP.md`.
