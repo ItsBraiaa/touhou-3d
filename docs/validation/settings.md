@@ -60,8 +60,48 @@ was deleted at the end. Widgets were driven the way a player's edit arrives (a s
 - **Listening.** The volume changes were read back from `AudioServer`, not heard; the game
   has no sound until F13-03.
 
-## Still to record (F3-04 part 2, trunk)
+# Camera wiring — 2026-09-24 (F3-04 part 2)
 
-The camera wiring: a new ship gets the saved sensitivity and invert, a change from Options
-(also from Pause) reaches the live rig, and 2.0 against 0.2 and invert are visibly different
-in flight.
+Part 2 of F3-04, run by lane path (the ticket moved there from trunk): the Session applies
+the camera sensitivity and invert vertical to every ship. Contract in
+[engineering/settings.md "Camera wiring"](../engineering/settings.md#camera-wiring-f3-04).
+
+## Method
+
+Two throwaway `SceneTree` scripts, deleted after use, drove `scenes/main.tscn` with
+`Interface.settings_path` on a per-process `user://` file, deleted before and after; the real
+`user://settings.cfg` was never touched. Widgets were driven the way a player's edit arrives
+(the slider's `value`, the toggle's `button_pressed`). No `SCRIPT ERROR` or `ERROR:` line in
+either run. No new tests (the sprint rule).
+
+## Headless run (16 checks, all passed)
+
+| Check | Measured |
+| --- | --- |
+| File seeded with 1.5 and invert on, then Direct Stage 1 | Rig 1.5, invert on |
+| Sensitivity 0.5 from Options on the main menu, then Direct Stage 1 | Rig 0.5 on the first ship |
+| Pause, Options from Pause, Sensitivity 1.25 and invert off | Tree paused, Options on top, rig 1.25 and off while paused |
+| Back, Resume | HUD, tree running, rig still 1.25 and off |
+| Three Restarts | Each new rig 1.25 and off; `Settings.changed` has one connection to the Session |
+| Defeat, then Retry from CP1-A (its Snapshot injected into the Director's store) | The Checkpoint branch: a new ship at the Respawn (0, 27, −329), rig 1.25 and off |
+| Rig set to 0.77 by hand, then Master volume 33 | Rig still 0.77 |
+| Six ticks of `camera_up`, from pitch 0 | 2.0: +0.4189 rad; 0.2: +0.0419 rad (a tenth); 2.0 inverted: −0.4189 rad |
+
+## Windowed look (one short run)
+
+Direct Stage 1 in a 1280 × 720 window. The same 18-tick `camera_up` hold, from pitch 0,
+at each setting:
+
+- **2.0:** the view swings up to the sky, the ship seen from below (pitch 0.611 rad, the
+  35° limit).
+- **0.2:** barely moves; the road ahead is still level in view (0.119 rad).
+- **2.0 inverted:** the view swings down, the ship seen from above over the ground (−1.047
+  rad, the −60° limit).
+
+The screenshots stayed in the session's scratch folder (the ticket files only the two
+display screenshots of part 1).
+
+## Owed to a person (camera)
+
+- **The physical keyboard and DualSense pass** of the orbit at a saved sensitivity, with
+  invert on and off. Every input above was simulated (`Input.action_press`).
