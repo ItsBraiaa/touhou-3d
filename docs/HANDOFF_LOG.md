@@ -1,5 +1,12 @@
 # Handoff Log
 
+## 2026-09-24 — Claude (readme) — repository README
+State: DELIVERED
+Files: `README.md` (new).
+Change: The repository had no README. It now has a short description of the game and its two stages, how to play the Windows build, run from source and export, the gameplay rules, the default controls (read from `project.godot` and `InputBindings`), and the credits, taken from `docs/ASSET_CREDITS.md`.
+Verification: docs only. Every control and credit line was checked against `project.godot`, `scripts/settings/input_bindings.gd`, the menu scenes and `docs/ASSET_CREDITS.md`. `tools/lane.ps1 land` is the gate.
+Action required by Astra: none. Add group member names to the Credits if the delivery needs them.
+
 ## 2026-09-24 — Astra (gate-fog) — closed gate clarity in both stages
 State: DELIVERED
 Files: `assets/environment/stage_01/gate_veil.gdshader`, `assets/environment/stage_02/gate_veil.gdshader`, visual mesh sizes and per-arch shader parameters in `scenes/stages/stage_01.tscn` and `scenes/stages/stage_02.tscn`, `.scratch/gate-clarity/issues/01-closed-gate-veils.md`, `docs/engineering/ROADMAP.md`.
