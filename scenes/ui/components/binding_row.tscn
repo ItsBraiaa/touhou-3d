@@ -1,0 +1,56 @@
+[gd_scene format=3]
+
+[ext_resource type="Theme" path="res://assets/ui/menu_theme.tres" id="1_theme"]
+
+[sub_resource type="StyleBoxFlat" id="FocusRing"]
+bg_color = Color(0.09, 0.22, 0.26, 0.96)
+border_width_left = 3
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.51, 0.91, 0.91, 1)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[node name="BindingRow" type="HBoxContainer"]
+custom_minimum_size = Vector2(0, 48)
+theme = ExtResource("1_theme")
+theme_override_constants/separation = 8
+metadata/action_id = ""
+metadata/state = "idle"
+
+[node name="ActionLabel" type="Label" parent="."]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 1.6
+text = "Avançar"
+theme_override_font_sizes/font_size = 18
+text_overrun_behavior = 3
+
+[node name="PrimaryButton" type="Button" parent="."]
+custom_minimum_size = Vector2(166, 44)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "W"
+focus_mode = 2
+theme_override_styles/focus = SubResource("FocusRing")
+tooltip_text = "Alterar comando principal"
+
+[node name="SecondaryButton" type="Button" parent="."]
+custom_minimum_size = Vector2(166, 44)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "—"
+focus_mode = 2
+theme_override_styles/focus = SubResource("FocusRing")
+tooltip_text = "Alterar comando alternativo"
+
+[node name="ResetButton" type="Button" parent="."]
+custom_minimum_size = Vector2(48, 44)
+layout_mode = 2
+text = "↺"
+focus_mode = 2
+theme_override_styles/focus = SubResource("FocusRing")
+tooltip_text = "Restaurar comando padrão"

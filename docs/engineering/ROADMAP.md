@@ -124,7 +124,7 @@ User-requested on 2026-09-24; implementation is planned, not part of the already
 | Ticket | Owner / lane | Depends on | Status |
 | --- | --- | --- | --- |
 | F16-00 plan-and-orchestration | Astra / sol | F3-04, F7-02 | done (spec, seven implementation tickets, layout contract and Claude kickoff) |
-| F16-01 controls-layout-and-dash-visuals | Astra / sol | F16-00 | todo |
+| F16-01 controls-layout-and-dash-visuals | Astra / sol | F16-00 | done (2026-09-24: Controls scene, binding row, cooldown and dash visual components, 36 original glyphs; three rendered viewport captures and node inventory in validation; no tests added) |
 | F16-02 binding-profiles-and-persistence | Claude / trunk | F16-00 | todo (part 1 done 2026-09-24 by lane plan: `camera_recenter`, `dash_left` and `dash_right` defaults in `project.godot`) |
 | F16-08 binding-labels-and-prompt-family | OpenCode / oc-a | F16-00 | todo |
 | F16-03 rebind-workflow-and-prompts | Claude / trunk | F16-01, F16-02, F16-08 | todo |

@@ -73,3 +73,8 @@ No music ships in this delivery. The five files in the ignored `music/` source f
   vegetation pack, image-generation output or new licensed download was integrated.
 - Trees, shrubs, flowers, shrine structures and waterfalls are original mesh
   compositions in `scenes/stages/stage_02.tscn`.
+
+## F16 controls and dash visuals
+
+- `assets/ui/controls/glyphs/`: 36 original 64×64 PNG controller glyphs drawn for this project; no external source.
+- `scenes/player/visuals/dash_visual.tscn`: original translucent cyan mesh composition; no external source.

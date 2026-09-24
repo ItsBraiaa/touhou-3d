@@ -1,6 +1,6 @@
 # F16-01 controls-layout-and-dash-visuals
 
-Status: todo
+Status: done
 Type: design
 Owner: Astra
 Lane: sol
@@ -47,4 +47,4 @@ Write no new tests or disposable test drivers. Run the existing tools/lane.ps1 l
 
 ## Outcome
 
-Not started. Runtime interaction acceptance belongs to F16-03/F16-07; this ticket establishes the visual contract.
+Done (2026-09-24, lane sol). Authored the Controls scene, row, cooldown and dash visuals plus all 36 F16-08 glyph IDs. Direct Godot renders at 1280×720, 1600×900 and 1920×1080 and the full node inventory are in `docs/validation/controls-expansion.md`. Runtime interaction acceptance remains with F16-03/F16-07. No tests added.
