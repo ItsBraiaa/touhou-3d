@@ -1,7 +1,7 @@
 # Handoff Log
 
 ## 2026-09-24 — Astra (sol) — F16-01 controls layout, glyphs and dash visuals [shared]
-State: DELIVERED; landing gate pending.
+State: INTEGRATED_VERIFIED. The landing gate passed the existing suite (225 passed), 300-frame boot and resource check; `lane/sol` landed on `dev-01`.
 Files: `scenes/ui/controls.tscn`, `scenes/ui/components/binding_row.tscn`, `scenes/ui/components/dash_cooldown.tscn`, `scenes/player/visuals/dash_visual.tscn`, `assets/ui/controls/glyphs/*.png` and import sidecars, `docs/ASSET_CREDITS.md`, F16-01 section of `docs/validation/controls-expansion.md`, ticket Outcome and ROADMAP row. No scripts, InputMap, camera or dash rules changed.
 Node inventory: `Layout/ControlsPanel/Tabs/{KeyboardMouse,Gamepad,Camera}`; `Layout/ControlsPanel/{DeviceFamily,BindingScroll/Rows,ActionHelp,CameraSettings/{Mode,MouseSensitivity,OrbitSensitivity,MouseInvert,OrbitInvert,Deadzone}}`; `Layout/{RestoreTabButton,ApplyButton,BackButton,NavigationHint}`; `Overlays/{CaptureDialog,ConflictDialog,DirtyDialog,ConfirmBindingsDialog}` (each has `Title`, `Message`, `Buttons`). Components: `BindingRow/{ActionLabel,PrimaryButton,SecondaryButton,ResetButton}`; `DashCooldown/{Label,Progress,ReadyAccent}`; `DashVisual/{TrailLeft,TrailRight,ProtectionAccent}`.
 Screenshots: `docs/validation/controls-expansion/controls-1280x720.png`, `controls-1600x900.png`, `controls-1920x1080.png`. Godot 4.7.2 OpenGL Compatibility rendered each viewport. Text, columns, scroll area and fixed footer were visually inspected; physical controller input and runtime remapping remain for F16-03/F16-07.
