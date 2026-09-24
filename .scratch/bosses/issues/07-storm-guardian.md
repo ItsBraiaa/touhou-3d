@@ -4,8 +4,14 @@ Status: todo
 Type: integration
 parallel-safe: no
 Depends on: F12-06, D-04
-Lane: sol
-Model: GPT Sol (Codex)
+Lane: sol (part 1: oc-a)
+Model: part 1 GPT 5.6 Luna (fallback DeepSeek V4.1 Flash); part 2 GPT Sol (Codex)
+
+> **Split (SPRINT.md):**
+> - **Part 1, lane oc-a** (depends on F12-01, F5-04 and D-04): `content/bosses/storm_guardian.tres` and `storm_spiral.tres`, `storm_thunder_rings.tres` and `storm_aimed_burst.tres` under `content/patterns/`. Take their values from this ticket's Deliverables, and give every file `metadata/dev = true`. No tests.
+> - **Order the sub-resources.** Declare every `[sub_resource]` after the ones it references: steps, then attacks, then phases, then `[resource]`. Godot rejects forward references, and `land`'s resource check refuses the file otherwise.
+> - **Commit part 1** with `(F12-07 part 1)` in its message.
+> - **Part 2, lane sol** (after part 1 and this ticket's other dependencies): the scene's root script and exports, the `stage_02.tscn` exports, and the integration. It closes the ticket. It only references part 1's files; a needed value change becomes a note.
 
 ## Goal
 

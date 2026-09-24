@@ -26,7 +26,7 @@ Planned 2026-09-23 by Claude acting as product owner, engineer and game-design a
 - **Late asset swaps.** A consumer ticket never waits for a D asset:
   - It uses the D asset if it is already on the integration branch, and otherwise ships its dev placeholder and logs "swap pending: D-0N".
   - F14-01 starts by applying every pending swap, and every value Astra asks trunk to set in a trunk-only file (D-05's weapon and Bomb values in `player_ship.tscn`, D-07's shrine exports on Stage 1), as one `[shared]` commit.
-- **Split tickets.** F6-03, F9-03, F12-03, F3-04, F14-02, D-06 and D-07 run in parts across lanes or windows. Each part commits with `(<ID> part N)` in its message and writes a handoff entry saying "part N". Only the final part sets `Status: done`. Check a part with `git log dev-01 --oneline --grep "<ID> part N"`. A part's own dependencies are the ones in the queue tables below, not the ticket's full `Depends on` line.
+- **Split tickets.** F6-03, F9-03, F12-03, F12-06, F12-07, F3-04, F14-02, D-06 and D-07 run in parts across lanes or windows. Each part commits with `(<ID> part N)` in its message and writes a handoff entry saying "part N". Only the final part sets `Status: done`. Check a part with `git log dev-01 --oneline --grep "<ID> part N"`. A part's own dependencies are the ones in the queue tables below, not the ticket's full `Depends on` line.
 
 ## Lanes
 
@@ -151,6 +151,8 @@ Expected gaps (stop the session): about T0 + 4.0 to 5.9 h, T0 + 10.7 to 12.4 h, 
 | 7 | F12-03 part 1: `lantern_guardian.tres`, three lantern patterns, the content unit test | GPT 5.6 Luna (DeepSeek V4.1 Flash) | F12-01, F5-04, F6-03 part 1 |
 | 8 | F9-03 part 1: the SealRules core | GPT 5.6 Luna (DeepSeek V4.1 Flash) | F9-02 |
 | 9 | F9-03 part 2: the Seal adapter; closes the ticket | GPT 5.6 Luna (MiMo-V2.6-Pro) | F9-03 part 1 |
+| 10 | F12-06 part 1: `content/bosses/tempest_sentinel.tres` and its two patterns only (content, no tests) | GPT 5.6 Luna (DeepSeek V4.1 Flash) | F12-01, F5-04, D-04 |
+| 11 | F12-07 part 1: `content/bosses/storm_guardian.tres` and its three patterns only (content, no tests) | GPT 5.6 Luna (DeepSeek V4.1 Flash) | F12-01, F5-04, D-04 |
 
 ### oc-b (OpenCode; model per ticket)
 
@@ -181,8 +183,8 @@ Expected gaps (stop the session): about T0 + 4.0 to 5.9 h, T0 + 10.7 to 12.4 h, 
 | 7 | D-05 stage-1-tuning-and-pacing (see its timing rule in "Shared files") | F8-04, F9-02, F6-03 |
 | 8 | F12-05 stage-02-director-integration | F10-03, F9-03, F12-04 |
 | 9 | D-06 pass 2: the Seal health exports | F12-05 |
-| 10 | F12-06 tempest-sentinel-miniboss | F12-05, F12-02, F12-03, D-04 |
-| 11 | F12-07 storm-guardian | F12-06, D-04 |
+| 10 | F12-06 part 2: the scene script, the `stage_02.tscn` exports, the integration, and the ruling 3 `hud.gd` follow-up; closes the ticket | F12-05, F12-02, F12-03, D-04, F12-06 part 1 (oc-a) |
+| 11 | F12-07 part 2: the scene script, the `stage_02.tscn` exports, the integration; closes the ticket | F12-06, D-04, F12-07 part 1 (oc-a) |
 | 12 | D-07 Parts A and C: the shrine clip and the lantern values; closes the ticket | F12-03 |
 | 13 | D-06 pass 3: the boss values; closes the ticket | F12-07 |
 
