@@ -352,6 +352,6 @@ The headless display server ignores `Input.mouse_mode` and sends no focus notifi
 
 **Design rulings pending the visual pass.** No dash, camera or HUD numbers are changed. The spec's `3.0` units, `0.15` s active/protected window and `0.8` s cooldown remain the baseline. The pointer during defeat/victory beats, arrows in Mouse mode, a HUD without a key hint and a dash tapped within one tick of Resume require the requested player-facing judgment in a real run; none is accepted or rejected by this record.
 
-**Engineering follow-up for Claude.** F16-06 already identified a code-reading concern in `scripts/player/targeting.gd`: remapping `lock_target` or `next_target` to the Back input can trigger it on the first tick after resuming Pause. This was not reproduced here. Claude owns the release guard and an interactive reproduction. No `player_ship.tscn`, script or numeric edit was made by Astra.
+**Engineering follow-up.** F16-06 already identified a code-reading concern in `scripts/player/targeting.gd`: remapping `lock_target` or `next_target` to the Back input can trigger it on the first tick after resuming Pause. This was not reproduced here. Claude assigned the release guard to OpenCode (oc-a) as F16-09 during this land. No `player_ship.tscn`, script or numeric edit was made by Astra.
 
 **Acceptance decision:** blocked pending interactive keyboard/mouse and available controller checks. The presentation-label change is scoped and ready for the lane gate, but F16-07 is not approved as a completed device pass.
