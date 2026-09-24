@@ -2221,6 +2221,7 @@ idle_clip = &"Flying_Idle"
 step_clip = &"Punch"
 phase_clip = &"Yes"
 defeat_clip = &"Death"
+ring_cue = true
 
 [node name="VisualRoot" type="Node3D" parent="." unique_id=1838222781]
 

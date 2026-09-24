@@ -1,5 +1,23 @@
 # Handoff Log
 
+## 2026-09-24 — Claude (path) — F15-03: boss feedback [shared]
+State: INTEGRATED_VERIFIED
+Files: `scripts/enemies/boss_controller.gd`; `scenes/enemies/storm_guardian.tscn` [shared] (one line on the `Enemy` root: `ring_cue = true`); `docs/engineering/bosses.md` (new "Presentation (F15-03)", export and wiring rows, Setup for Astra); `docs/engineering/enemies.md` (F15-02's Retry sentence corrected for F15-10's defeat beat); `docs/GUIDE.md` (the `boss_controller.gd` row); `docs/engineering/ROADMAP.md` (the F15-03 row).
+Change:
+- **Facing.** Every boss turns `VisualRoot` toward the player. The turn is yaw only, eased at rate 4 per second, and snapped at spawn. `Emitters/Main` and `HitVolume` do not turn. The Lantern and Storm rotation tracks animate `VisualRoot`'s children, not `VisualRoot`, so nothing fights the turn.
+- **Ring cue.** A new `ring_cue` export (group Cues, default off) is set only on the Storm Guardian. With it on, `spawn_setup` builds a hidden `RingCue` under the boss root, so it is freed with the boss. The cue is a flat torus, 1.5 × the hit radius (7.5), additive, unshaded, fog-free, and casts no shadow. Before each step whose Pattern is a RING at a fixed height, the cue appears at `Emitters/Main` + `height_offset` and grows from 0.3 to full size over the Anticipation. It hides when the rings fire, on the next step, and on a Phase's depletion. On the Storm Guardian only Círculos do Trovão qualifies, with cues at +8 and -8.
+Verification: a headless throwaway driver through `main.tscn`, run after syncing F15-01 and F15-10. Every check passed:
+- The yaw hits its target and eases.
+- No cue appears in Phases 0 and 2.
+- The high cue sits at emitter + 8 and the low cue at emitter - 8.
+- The cue grows from 0.33 to 0.92, stays frozen under Pause, and hides as the rings fire and at once on a mid-cue depletion.
+- The boss and its cue are freed with the stage after the victory, and by a Retry during a cue.
+- The Lantern Guardian faces the ship and has no cue.
+- Both stages clear.
+F15-02's driver was rerun on the same tree and passed: `retry_from_checkpoint` called while three enemies were mid-Death removed them at once. No tests (sprint rule).
+Action required by Astra: none required. `storm_guardian.tscn` gained only `ring_cue = true`. Set it on another boss to give its fixed-height rings the same cue. The cue's size, colour and growth and both turn rates are Claude's proposals; send Claude values to change them.
+Action required by trunk: none.
+
 ## 2026-09-24 13:45 — Claude (trunk) — F15-10: defeat beat before the Defeat overlay
 State: INTEGRATED_VERIFIED
 Files: `scripts/session/game_session.gd` (`DEFEAT_BEAT_SECONDS`, `_on_player_defeated`, new `_show_defeat`, the `_on_stage_completed` doc); `docs/engineering/ROADMAP.md` (the F15-10 row; the F15-01 row moved beside the other lanes' F15 rows, in their format).
