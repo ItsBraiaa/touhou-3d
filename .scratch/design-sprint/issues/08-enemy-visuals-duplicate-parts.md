@@ -1,6 +1,6 @@
 # D-08 Duplicate model parts in the enemy visual scenes
 
-Status: todo
+Status: done
 Type: design
 parallel-safe: no
 Owner: Astra (GPT Sol)
@@ -163,6 +163,10 @@ This form is used instead of trunk's suggestion, rewriting the typed blocks as `
 Review the four scenes' diff: two deletions each, and nothing else in them changed. `Model` no longer instances the glTF, so a new import of `Hywirl.gltf` or `Goleling.gltf` needs re-authoring, and never a generator rerun over these files. If the untinted copy was drawing, the enemies now show only your tint. Check it once in the arena. If you want the glTF link back, the override form of `tempest_sentinel.tscn` is the alternative, as your own later edit.
 
 For trunk, the same entry says whether the leak in `stage-director.md` "Not verified" is gone.
+
+## Outcome
+
+Part 1 confirmed the duplicate in all four visual scenes: before the fix each had two meshes, surfaces, skeletons and animation players, four detached nodes and four left nodes, while each glTF control had one of each and zero detached/left. The arena harness also reported visual-class leaks (`Animation`, `Skin`, `ArrayMesh`, `MeshInstance3D`, `Skeleton3D`, `AnimationPlayer`) and `26 resources still in use at exit`. Part 2 removed exactly the four glTF instance ext_resources and four `instance=ExtResource(...)` attributes, one pair per scene. Post-fix counts for every scene match its control at 1 mesh, 1 surface, 1 skeleton, 1 player, 0 detached and 0 left. `validate_enemy_visuals.gd` passed with `ENEMY_VISUAL_QA failures=0`; a short windowed launch reached Forward+ and was closed after ten seconds. No tests were written and the generator was not run.
 
 ## Kickoff prompt
 

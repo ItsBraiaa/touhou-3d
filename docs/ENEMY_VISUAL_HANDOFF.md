@@ -17,6 +17,8 @@ Height normalization uses imported mesh bounds before animation. Goleling has br
 
 Instance the selected scene as the Enemy's `VisualRoot`. Keep Enemy root, HitVolume and Emitters outside the scaled imported `Model`. Both Spirit variants share the same health configuration; both Sentry variants share the same health configuration. These visual scenes do not define hit radius; retain the gameplay type's radius across variants rather than deriving it from rendered size.
 
+Since D-08, `Model` is a plain `Node3D` holding an embedded copy of the glTF subtree, so reimporting `Hywirl.gltf` or `Goleling.gltf` no longer reaches these four scenes.
+
 All four roots are Node3D named VisualRoot. AnimationPlayer is `Model/AnimationPlayer` relative to VisualRoot. Available clips: `Death`, `Fast_Flying`, `Flying_Idle`, `Headbutt`, `HitReact`, `No`, `Punch`, `Yes`. Flying_Idle loops and autoplays; Claude can take over playback for state transitions. No casting/contact attack is implied by an animation name. Rings are static MeshInstance3D children `MagicRing1` and, for the seal variant, `MagicRing2`.
 
 Suggested assignment: S1-02 first wave lume and second wave twilight; S1-03 lantern sentries; S1-04 three seal sentries; S1-05 mixed spirit colors with lantern sentries. Counts and rewards stay unchanged. No models were inserted into live encounter markers: StageDirector must spawn actors once and own their cleanup.

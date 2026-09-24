@@ -1,5 +1,14 @@
 # Handoff Log
 
+## 2026-09-24 — OpenCode (oc-a) — D-08 enemy visual duplicate parts [shared]
+State: dev
+Files: `scenes/enemies/visuals/spirit_lume.tscn`; `spirit_twilight.tscn`; `sentry_lantern.tscn`; `sentry_seal.tscn`; `tools/build_enemy_visuals.gd`; `docs/ENEMY_VISUAL_HANDOFF.md`; `docs/validation/enemy-visuals.md`; `docs/engineering/ROADMAP.md`; D-08 ticket.
+
+Change: Part 1 confirmed that every visual scene loaded both its glTF instance subtree and its embedded tinted subtree: two meshes, surfaces, skeletons and animation players, four detached nodes and four left nodes. The arena harness also leaked visual classes at exit. Part 2 removed exactly the glTF ext_resource and `instance=ExtResource(...)` from each `Model`, leaving the embedded tinted/looping set. The generator now clears `scene_file_path` before packing and warns that reruns drop D-05's anticipation metadata; it was not run.
+Verification: post-fix counts match both controls at 1/1/1/1/0/0; `validate_enemy_visuals.gd` passed with `failures=0`; the short windowed launch reached Forward+ and was closed after ten seconds. No new tests.
+Action required by Astra: inspect the four-scene diff and confirm the single tinted body in a normal arena run; do not rerun the generator over these integrated scenes.
+Action required by trunk: the enemy visual leak note in `docs/engineering/stage-director.md` is resolved for these four scenes.
+
 ## 2026-09-24 — OpenCode (oc-a) — Stage validators accept the Director
 State: dev
 Files: `tools/validate_stage_01.gd`; `docs/engineering/ROADMAP.md`; F10-06 ticket.

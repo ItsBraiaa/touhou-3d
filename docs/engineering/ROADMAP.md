@@ -99,7 +99,7 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | | | | 05 stage-1-tuning-and-pacing | design | — | sol | done (2026-09-23: content values, names, clip candidates and provisional 221 s estimate) |
 | | | | 06 stage-2-content-review | design | — | sol | todo (passes 1–2 landed: values/rewards and explicit Seal health 10; pass 3 boss tuning pending) |
 | | | | 07 shrine-lighting-and-boss-rulings | design | — | sol | doing (Part B rulings delivered; Parts A and C await F12-03) |
-| | | | 08 enemy-visuals-duplicate-parts | design | — | oc-a | todo |
+| | | | 08 enemy-visuals-duplicate-parts | design | — | oc-a | done (2026-09-24: Part 1 confirmed duplicate glTF and embedded model parts in all four visuals; Part 2 removed the instance links, post-fix counts and validator clean) |
 
 Order rationale: Player before Menus (highest UX risk and GUIDE Section 13's assignment). Audio buses are created in F0-03 so F3 can bind Options to them. Enemies (F9) come before the Stage Director (F10) so the Director is integrated against real Waves. The sprint's lane queues, checkpoints and kickoff prompts are in [SPRINT.md](SPRINT.md).
 
@@ -143,6 +143,8 @@ Dependencies Claude has on scene and content work. These are needs by Feature, n
 | F14 | Nothing new; credits and licenses must already cover every integrated asset. F14-02 lists any gaps it finds. |
 
 ## Received from Astra
+
+2026-09-24: D-08 confirmed duplicate embedded and instanced enemy model parts in all four Stage 1 visual scenes, then removed the duplicate instance links. Post-fix counts are one mesh/surface/skeleton/player with zero detached or left nodes; `validate_enemy_visuals.gd` passed. See [enemy-visuals.md](../validation/enemy-visuals.md).
 
 2026-09-23: D-05 reviewed Stage 1 content and shared Spirit/Sentry values, named both checkpoints and selected candidate Anticipation clips. [stage-01-pacing.md](../validation/stage-01-pacing.md) estimates an efficient clear at about 221 s against the 240 s design target; it is not a measured result. Trunk owns clip playback and any PlayerShip value follow-up; D-06 must recompute its Stage 2 estimate from the revised shared enemy health.
 

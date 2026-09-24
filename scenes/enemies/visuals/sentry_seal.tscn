@@ -1,6 +1,5 @@
 [gd_scene format=4]
 
-[ext_resource type="PackedScene" path="res://assets/models/enemies/Goleling.gltf" id="1_hbrms"]
 [ext_resource type="Texture2D" path="res://assets/models/enemies/Goleling_Atlas_Monsters.png" id="2_k17vg"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_7l687"]
@@ -819,7 +818,7 @@ ring_segments = 8
 [node name="VisualRoot" type="Node3D" unique_id=1750619053]
 metadata/anticipation_clip = "Punch"
 
-[node name="Model" type="Node3D" parent="." unique_id=1839102925 instance=ExtResource("1_hbrms")]
+[node name="Model" type="Node3D" parent="." unique_id=1839102925]
 transform = Transform3D(1.2885047, 0, 0, 0, 1.2885047, 0, 0, 0, 1.2885047, 0, -2.9184206, 0.5916066)
 
 [node name="CharacterArmature" type="Node3D" parent="Model" unique_id=792014586]
