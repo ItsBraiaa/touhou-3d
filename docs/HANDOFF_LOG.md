@@ -15,6 +15,19 @@ Action required by <other agent>: <what they must do, or "none">
 
 ---
 
+## 2026-09-24 01:30 — Claude (plan) — lantern_guardian.tres loads again; land now loads every resource [shared]
+State: dev
+Files: `content/bosses/lantern_guardian.tres` (sub-resources reordered, values unchanged), `tools/check_resources.gd` (new gate tool), `tools/lane.ps1`, `docs/engineering/SPRINT.md`.
+Change:
+- **The fault.** F12-03 part 1 landed `lantern_guardian.tres` with each Phase declared before the Attack and Steps it references. Godot's text parser rejects forward `SubResource` references ("Parse Error" at line 14), so the Boss Definition did not load. Path found it while checking F12-02.
+- **The fix.** The blocks are now ordered so each comes after everything it references, with no value changed; the file loads and validates.
+- **Why the gate missed it.** It never loaded `content/`: no content-validation test exists under the no-tests rule.
+- **The new gate step.** `land` now also runs `tools/check_resources.gd`: every `.tres` and `.tscn` under `content/` and `scenes/` must load, and each Definition's `validate()` must pass. It checks 70 files, clean.
+
+Why: trunk's F12-03 part 2 was blocked on this file, and a hand-written `.tres` can break the same way again.
+
+Action required by Astra: when you hand-write or tune a `.tres` with sub-resources, declare each one after the ones it references. `land` now refuses the file otherwise.
+
 ## 2026-09-23 22:20 — OpenCode (oc-b) — F3-01 Settings core and ConfigFile persistence
 State: CODE_READY
 Files: `scripts/settings/settings.gd`, `docs/engineering/settings.md`, `docs/engineering/README.md`, `docs/engineering/ROADMAP.md`, `.scratch/settings/issues/01-settings-core-and-configfile.md`, `docs/HANDOFF_LOG.md`
