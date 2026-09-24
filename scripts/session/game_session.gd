@@ -12,8 +12,12 @@ extends Node
 ## Defeat when the player is defeated. It also answers a Bomb with its clear, its damage
 ## and its visual.
 ##
-## Nothing here decides gameplay: movement, targeting and the Run's accounting belong to
-## their cores. Stage completion and results arrive with F10 and F11.
+## A stage whose root is a [StageDirector] is checked before it loads, set up with the
+## Run, the [CombatState], the field and the ship, started at every Attempt, and its clear
+## completes the stage; its off-screen threats reach the HUD (F10-01).
+##
+## Nothing here decides gameplay: movement, targeting, progression and the Run's
+## accounting belong to their cores. Results arrive with F11.
 
 
 ## Marker every stage root has, where the player enters (GUIDE Section 5 "Stages").
@@ -23,6 +27,8 @@ const PLAYER_START_PATH := ^"PlayerStart"
 const FLIGHT_LIMITS_PATH := ^"FlightBounds/Limits"
 ## Score one Graze is worth (PLANEJAMENTO Section 4 "Graze and score").
 const GRAZE_SCORE := 10
+## Seconds the HUD shows an off-screen threat cue for one report. Claude's proposal.
+const THREAT_CUE_SECONDS := 1.0
 ## Menu actions that only open a full screen, which Back returns from.
 const SCREEN_BY_ACTION: Dictionary[StringName, StringName] = {
 	&"open_stage_select": ScreenRouter.STAGE_SELECT,
@@ -58,6 +64,9 @@ var _run_state := RunState.new()
 var _combat_state := CombatState.new()
 ## The ship of the stage in play, or null while none is loaded.
 var _player: PlayerController
+## The loaded stage's root when it is a [StageDirector], else null: a stage without one
+## loads and flies as a static stage (F10-01).
+var _director: StageDirector
 
 
 func _ready() -> void:
@@ -153,6 +162,8 @@ func _start_run(mode: RunState.RunMode, stage: StringName) -> void:
 	_run_state.start(mode, stage)
 	_combat_state.start(_run_state.starting_power_level())
 	_run_state.begin_attempt()
+	if _director != null:
+		_director.start_attempt(_attempt_seed(_run_state.get_attempt_index()))
 	interface.show_home(ScreenRouter.HUD)
 
 
@@ -167,6 +178,8 @@ func _restart_stage() -> void:
 	_combat_state.start(_run_state.starting_power_level())
 	_load_stage(stage)
 	_run_state.begin_attempt()
+	if _director != null:
+		_director.start_attempt(_attempt_seed(_run_state.get_attempt_index()))
 	interface.show_home(ScreenRouter.HUD)
 
 
@@ -207,9 +220,11 @@ func _set_paused(paused: bool) -> void:
 
 
 ## Replaces whatever is loaded with the stage [param stage_id] and a new ship at its
-## `PlayerStart`, kept inside its Flight Volume. When the stage has no scene, no
-## `PlayerStart` or no Flight Volume, or the ship is not a [PlayerController], reports
-## it, changes nothing and returns false.
+## `PlayerStart`, kept inside its Flight Volume, and sets up the stage's [StageDirector]
+## when its root is one. When the stage has no scene, no `PlayerStart` or no Flight
+## Volume, the ship is not a [PlayerController], or the Director's
+## [method StageDirector.check_setup] reports anything, reports it, changes nothing and
+## returns false.
 func _load_stage(stage_id: StringName) -> bool:
 	var scene: PackedScene = stage_scenes.get(stage_id)
 	if scene == null:
@@ -219,6 +234,7 @@ func _load_stage(stage_id: StringName) -> bool:
 	var player := player_scene.instantiate()
 	var start := stage.get_node_or_null(PLAYER_START_PATH) as Node3D
 	var bounds := _flight_bounds(stage_id, stage)
+	var director := stage as StageDirector
 	var problem := ""
 	if start == null:
 		problem = "stage '%s' has no Node3D at '%s'" % [stage_id, PLAYER_START_PATH]
@@ -226,6 +242,8 @@ func _load_stage(stage_id: StringName) -> bool:
 		problem = "stage '%s' has no Flight Volume: no '%s' min/max metadata and no 'stage_flight_bounds' entry" % [stage_id, FLIGHT_LIMITS_PATH]
 	elif not player is PlayerController:
 		problem = "'player_scene' %s does not have a PlayerController root" % player_scene.resource_path
+	elif director != null:
+		problem = "; ".join(director.check_setup())
 	if not problem.is_empty():
 		push_error("%s: %s; the stage is not started" % [get_path(), problem])
 		stage.free()
@@ -242,6 +260,13 @@ func _load_stage(stage_id: StringName) -> bool:
 	interface.get_hud().bind(_combat_state, _player.targeting, _player.camera_rig.camera)
 	projectile_system.setup(bounds, _player)
 	_player.weapon.setup(_combat_state, projectile_system, _player.targeting)
+	_director = director
+	if _director != null:
+		_director.setup(_run_state, _combat_state, projectile_system, _player)
+		# Deferred: the last defeat arrives inside a physics step, and completing the stage
+		# unloads it.
+		_director.stage_cleared.connect(_on_stage_cleared, CONNECT_DEFERRED)
+		_director.threat_reported.connect(_on_threat_reported)
 	return true
 
 
@@ -255,6 +280,7 @@ func _unload_stage() -> void:
 		child.queue_free()
 	projectile_system.clear_all()
 	_player = null
+	_director = null
 
 
 ## The Flight Volume of [param stage]: the `min`/`max` metadata on its
@@ -271,6 +297,21 @@ func _flight_bounds(stage_id: StringName, stage: Node) -> AABB:
 
 func _is_in_stage() -> bool:
 	return _run_state.get_phase() == RunState.Phase.IN_STAGE
+
+
+## The seed of Attempt [param attempt_index] of the stage in play: deterministic per
+## stage and Attempt, with no global random state (CONVENTIONS "Time and randomness").
+func _attempt_seed(attempt_index: int) -> int:
+	return hash("%s#%d" % [_run_state.stage_result()["stage"], attempt_index])
+
+
+## The Director reported its last Encounter complete.
+func _on_stage_cleared() -> void:
+	_run_state.complete_stage()
+
+
+func _on_threat_reported(side: int) -> void:
+	interface.get_hud().show_threat(side, THREAT_CUE_SECONDS)
 
 
 ## A hostile Projectile met the Core. The field reports at most one per tick, and treats

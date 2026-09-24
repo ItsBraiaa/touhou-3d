@@ -100,11 +100,13 @@ The adapter wiring (`Interface`, F2-02): on `screen_hidden(id)`, `router.remembe
 | --- | --- | --- | --- |
 | `menu_scenes` | `Array[PackedScene]` | the eight `scenes/ui/` menus; order does not matter, each is identified by its root name | yes: an empty slot disables the node; a missing, repeated or foreign scene is reported and skipped |
 | `hud_scene` | `PackedScene` | `scenes/ui/hud.tscn` | yes |
+| `settings_path` | `String` | not set: the default `Settings.DEFAULT_PATH` (`user://settings.cfg`) | no; tests inject a temp path (F3-02) |
 
 ### Behaviour
 
 - `_ready` instances the HUD first (so every menu, overlays included, draws above it), then each menu, all hidden, connects each `MenuController.action_requested` to one handler, reports any menu screen no scene provides, and connects the router's two signals. Nothing is shown until the Session calls `show_home`.
-- A menu action other than `back` is re-emitted unchanged as `action_requested(action, payload)`. `back` never leaves `Interface`: it is resolved like `ui_cancel` below.
+- Since F3-02 `_ready` first builds the one `Settings` from `settings_path` and reads the file once (its messages are `push_warning`s), and after the menus it adds an `OptionsScreen` under the Options root, which binds the eight widgets and applies the buses and the display ([settings.md](settings.md) "Options binding").
+- A menu action other than `back` and `restore_defaults` is re-emitted unchanged as `action_requested(action, payload)`. `back` never leaves `Interface`: it is resolved like `ui_cancel` below. `restore_defaults` (Options' Defaults) never leaves it either: `OptionsScreen.restore_defaults()` restores and saves once (F3-02).
 - `ui_cancel` (Escape, gamepad B) in `_unhandled_input`, while a menu is on top: on Pause it emits `action_requested(&"resume", {})` and leaves Pause up for the Session to remove, because the router's `back()` cannot unpause the tree; elsewhere it calls `back()`, and when that returns false (main menu, Defeat, Results) it emits `action_requested(&"back_refused", {})`. Either way the event is marked handled, so the same Escape press cannot also reach the Session as `pause`.
 - `ui_cancel` with the HUD on top (running gameplay), or before the first `show_home`, is left unhandled: over gameplay Escape is the Session's `pause`.
 - Focus follows the router's memory: see "Focus memory" above.
@@ -126,6 +128,7 @@ The adapter wiring (`Interface`, F2-02): on `screen_hidden(id)`, `router.remembe
 | `current_screen() -> StringName` | Session, tests | `router.current()`. |
 | `is_gameplay_covered() -> bool` | Session | `router.is_gameplay_covered()`. |
 | `get_hud() -> Control` | Session (F4 binds it) | The HUD instance. |
+| `get_settings() -> Settings` | F3-03, F3-04, tests | The one `Settings`, loaded at boot (F3-02). Null only when the exports failed validation. |
 
 ## MenuController contract
 
@@ -268,7 +271,7 @@ A missing required export is reported with `Main`'s path and the node stops proc
 | `return_to_menu` | Pause (Defeat and Results in F11) | Unpause, unload, `run_state.end_run(false)`, `show_home(MAIN_MENU)`. |
 | `quit` | main menu | `get_tree().quit()`. |
 | `back_refused` | main menu, Defeat, Results | Nothing. |
-| anything else (`restore_defaults`, `retry`, `continue_campaign`, `replay_stage`) | Options, Defeat, Results | A warning naming the action; F3 and F11 implement them. |
+| anything else (`retry`, `continue_campaign`, `replay_stage`) | Defeat, Results | A warning naming the action; F11 implements them. `restore_defaults` no longer arrives: `Interface` resolves it (F3-02). |
 
 ### Starting a stage
 

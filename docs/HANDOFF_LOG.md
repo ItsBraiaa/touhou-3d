@@ -19,9 +19,70 @@ Action required by <other agent>: <what they must do, or "none">
 State: SCENE_READY
 Files: scenes/stages/stage_01.tscn, scenes/stages/stage_02.tscn, assets/environment/stage_01/gate_veil.gdshader, Stage 1 and Stage 2 validation captures and handoffs, ROADMAP, local issue.
 Change: Stage 1 has a navy night palette, moon, warm sparse lanterns, textured forest detail and low blue gate veils; both stages have visible side rails along every route terrace. Stage 1 rails sit on the bank tops. No runtime node names, markers, gate collision, collision layers, masks or script wiring changed.
+Merge note: scenes/stages/stage_01.tscn overlapped with trunk F10-01 Stage Director attachment; the merge keeps both resource declarations and the Director script exports.
 Why: User review requested a stronger Stage 1 night presentation, removal of the pink sky column, and readable out-of-bounds edges on both stages.
 Action required by Claude: preserve Environment/BoundaryRails and the authored lighting/veil when attaching Stage Director and stage actors. The existing FlightBounds walls continue to provide physical containment; include them in the integrated flight pass. No wiring change is required for the rails.
 
+## 2026-09-23 22:40 — Claude (trunk) — F10-01: StageDirector attached to Stage 1 [shared]
+State: CODE_READY
+Files:
+- New: `scripts/progression/stage_director.gd` (`StageDirector`), `docs/engineering/stage-director.md`, `docs/validation/stage-director.md` with `stage-director-s1-02.png` and `stage-director-rewards.png`.
+- Edited: `scripts/session/game_session.gd` (Director pre-check, `setup`, `start_attempt`, stage clear, threats).
+- `scenes/stages/stage_01.tscn` **[shared]**: only nine `ext_resource` lines at the top, and on the `Stage` root the script and its exports:
+  - `stage_definition` = `content/stages/stage_01/stage_01.tres`;
+  - `actor_scenes`: `spirit` → `scenes/dev/spirit.tscn`; `sentry` and `lantern_guardian` → `scenes/dev/sentry.tscn`;
+  - `enemy_definitions`: `spirit` → `content/enemies/spirit.tres`; `sentry` and `lantern_guardian` → `content/enemies/sentry.tres`;
+  - `power_pickup_scene` and `shield_pickup_scene` = the F7-03 dev prefabs.
+
+  No node, marker, geometry or `monitoring` flag changed.
+- `scripts/progression/encounter_machine.gd` (F8-02, lane oc-b), commit `be64081`: two parameters renamed, a compile fix with no behavior change.
+- Docs: `docs/GUIDE.md` (the Section 6 `stage_director.gd` and `game_session.gd` rows, the Section 7 "Enemy defeated" and "Stage completed" rows, the Section 10 "Stage 1 progression" row), `docs/engineering/README.md`, the ROADMAP F10-01 row, and the ticket.
+
+Change:
+- **Stage 1's Encounters play.** Stage Entry begins S1-01. The Entry and Exit volumes are armed (deferred `body_entered`), and out-of-order entry and re-entry do nothing. Waves spawn at their markers under `RuntimeActors` and fire. Each defeat scores 100 once. S1-02 drops five Power Pickups at `RewardOrigin`, and S1-03 one Shield Pickup at `ShieldPickup`. Stage clear completes the stage.
+- **Bad setup refuses the stage.** Bad content or a missing node is caught before the stage loads, and the menu stays.
+- **Where the route stops.** Stage 1 still stops at the closed `Gate_S1_02` until F10-02.
+- **EncounterMachine never compiled.** Its parameter `enemy_id` shadowed its static `enemy_id()`, which is a warning-as-error here, and nothing had loaded the class before today. Oc-b: no action; the fix is in.
+- **Tests.** None added (sprint rule). A verifier agent drove the real game, headless and windowed; a reviewer agent's one finding, enemy definitions not validated up front, is fixed.
+
+Why: F10-01, the first ticket of the Stage 1 route; F10-02, F10-03 and F12-03 build on it.
+Action required by Astra:
+1. `tools/validate_stage_01.gd:39` now fails its "Static stage unexpectedly contains runtime script" check, because Stage 1 has its Director by design. Update or drop that check.
+2. Never rerun `tools/build_stage_01.py` over the wiring.
+3. Keep the `Encounters/<ID>/{EntryVolume,ExitVolume,Spawns,RewardOrigin,ShieldPickup}` and `RuntimeActors` names. `check_setup()` refuses the stage if one goes missing.
+4. `scenes/enemies/visuals/spirit_lume.tscn` and `sentry_lantern.tscn` declare `CharacterArmature`, `Skeleton3D`, the mesh and `AnimationPlayer` again as new typed nodes under the instanced glTF `Model`. Each enemy then holds duplicate children, leaks them at exit (`… RID allocations … leaked at exit`), and probably draws its model twice. Re-save them so those children are overrides with no `type=`.
+## 2026-09-24 — OpenCode (oc-b) — F14-02 part 1b: acceptance draft
+
+State: docs
+Files: New `docs/validation/acceptance.md`.
+Change:
+- **Part 1b of F14-02** (SPRINT.md "Split tickets"). Drafts `docs/validation/acceptance.md`
+  as two tables: all 18 acceptance checks of PLANEJAMENTO Section 12 (lines 300-317) and
+  all 14 checks of STAGE_DESIGN "Acceptance checks for stage progression" (lines 147-160),
+  32 rows in total.
+- Every row gives the check text, its source file and line, the ticket(s) from
+  `docs/engineering/ROADMAP.md` that deliver it, and the status `not yet verified`, as part 1b
+  specifies. The header and summary sections are stubs for F14-02 part 2.
+- No code and no tests; F14-02 stays `todo`.
+Why: F14-02 part 1b (SPRINT.md oc-b queue row 9b); part 2 fills in the results after F14-01.
+Action required by other agent: none. F14-02 part 2 (lane oc-b, after F14-01) fills in the
+header, each row's status and evidence, the credits coverage and the summary.
+
+## 2026-09-24 00:20 — Claude (path) — F3-02: Options bound to Settings, buses and window
+State: CODE_READY
+Files: New `scripts/ui/options_screen.gd`. Edited `scripts/ui/interface.gd` (`settings_path`, `get_settings()`, the Options binding, `restore_defaults` resolved). Docs: `docs/engineering/settings.md` ("Options binding"), `docs/engineering/menus-session.md` (the Interface contract and the Session actions row), `docs/GUIDE.md` (Section 6 `interface.gd`, Section 14 "State and verification"), and the ROADMAP F3-02 row.
+Change:
+- **`Interface`** owns the one `Settings`. It reads `settings_path` (default `user://settings.cfg`) once at boot; a bad file is a warning and the defaults are used. `get_settings()` exposes it.
+- **A code-built `OptionsScreen` under the Options root** does the binding:
+  - it fills the eight Section 14 widgets without signals, then connects them;
+  - it applies Master, Music and SFX (0 mutes only that bus) and the window (Janela at the chosen resolution, stepped down to fit the screen; Tela cheia keeps the resolution for Janela);
+  - it saves after each explicit change, and Defaults restores, refreshes and saves once.
+- **Defaults** (`restore_defaults`) no longer reaches the Session.
+- **Stored but not yet applied:** camera sensitivity, invert vertical and the input device.
+- **Checks.** Tests: none (sprint rule). A scripted headless check of every behavior the ticket lists is recorded in `settings.md`.
+Why: F3-02 (moved to path).
+Action required by Astra: the eight widget paths, the item order of Janela/Tela cheia, the three resolutions and Automático/Teclado/Controle, and the slider ranges are load-bearing. A mismatch is reported at boot and leaves that field unbound. Values authored in `options.tscn` are now overwritten at boot by the saved values or the defaults.
+Action required by Claude (trunk): F3-04 reads `interface.get_settings()` for `camera_sensitivity` and `invert_vertical`, listening to `Settings.changed` for live changes. `game_session.gd` needed no edit. The windowed display pass is owed to F3-04 part 1 (path).
 
 ## 2026-09-23 23:40 — Claude (path) — F6-04: Aim Assist follows the Target Lock under lock framing
 State: CODE_READY
