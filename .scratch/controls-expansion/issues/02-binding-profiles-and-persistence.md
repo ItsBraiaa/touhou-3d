@@ -13,6 +13,18 @@ Parallel-safe: yes, only within the orchestration plan's disjoint file boundarie
 - [Execution plan](../../../docs/engineering/controls-expansion-plan.md): ownership, task steps and review focus.
 - docs/engineering/SPRINT.md in the worktree: no-new-tests rule and lane loop.
 
+## Parts (routing, 2026-09-24, Claude)
+
+- **Part 1 (landed by lane plan, commit "(F16-02 part 1)"):** the three new `project.godot` action defaults, so path's F16-04 and rescue's F16-05 could start at once:
+  - `camera_recenter`: R (physical), Mouse 3 (middle) and RS/R3 (joypad button 8);
+  - `dash_left`: Q (physical) and D-pad left (13);
+  - `dash_right`: E (physical) and D-pad right (14).
+
+  None was bound before; no script hardcodes a key.
+- **Part 2 (lane trunk):** everything else in this ticket. Edit `project.godot` only to correct these defaults.
+- **Must not touch while part 2 runs:** these belong to the parallel F16 lanes: `game_session.gd`, `player_controller.gd`, `combat_state.gd`, `hud.*` and `player_ship.tscn` (rescue F16-05); `camera_rig.gd` (path F16-04); `input_device_state.gd` and `binding_labels.gd` (oc-a F16-08).
+- **Docs:** fill only the pre-made settings.md section "F16 binding profiles and persistence (F16-02)" and the F16-02 section of `docs/validation/controls-expansion.md`.
+
 ## Goal
 
 Provide validated editable action profiles and robust local persistence before UI/camera consumers start.

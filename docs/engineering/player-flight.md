@@ -253,6 +253,14 @@ Manual and measured results, with screenshots, are in [docs/validation/player-fl
 - The rig sets `top_level` on itself at run time, which is why the camera does not roll with the banking ship. Do not clear it.
 - `tools/build_scene_handoff.py` is retired (2026-09-22). Its unchanged contents are reference text at `docs/archive/build_scene_handoff.py.txt`. Edit the integrated scenes in Godot; do not run the archive. Retirement resolves the generator divergence without rewriting any scene or wiring.
 
+## F16 mouse camera and recenter (F16-04)
+
+Pending (lane path).
+
+## F16 lateral dash (F16-05)
+
+Pending (lane rescue).
+
 ## Open issues
 
 ### Astra design decisions — 2026-09-22, F1-05

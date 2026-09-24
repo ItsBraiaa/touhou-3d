@@ -27,12 +27,20 @@
 | F16-01 | Astra / sol | Controls layout, modal/row templates, cooldown and dash visual components | F16-00 |
 | F16-02 | Claude / trunk | Catalog, profiles, persistence/migration and InputMap adapter | F16-00 |
 | F16-03 | Claude / trunk | Functional rebinding UI, conflict/capture flow and dynamic prompts | F16-01, F16-02 |
-| F16-04 | Claude / path | Mouse orbit and free/locked recenter behavior | F16-02 |
-| F16-05 | Claude / trunk | Dash timing/movement, combat protection, cooldown and VFX integration | F16-03 |
+| F16-04 | Claude / path | Mouse orbit and free/locked recenter behavior | F16-00 (routing below) |
+| F16-05 | Claude / rescue | Dash timing/movement, combat protection, cooldown and VFX integration | part 1 F16-00; part 2 F16-01 (routing below) |
 | F16-06 | Claude / trunk | Camera settings/input lifecycle integration and complete return flows | F16-03, F16-04, F16-05 |
 | F16-07 | Astra / sol; Claude coordinates engineering fixes | Visual/device acceptance and final record | F16-06 |
+| F16-08 | OpenCode / oc-a | Binding labels, glyph ids and controller-family detection (carved out of F16-03) | F16-00 |
 
-F16-01 and F16-02 can run concurrently on disjoint files. After F16-02 lands, F16-04 can run alongside trunk's F16-03 then F16-05; it does not touch Session, Interface, settings schema or player_ship.tscn. F16-06 is the serialized convergence. F16-07 follows the integrated result, not a static mockup.
+**Routing (2026-09-24, Claude, as orchestrator):**
+
+- **F16-02 part 1:** lane plan landed the three new action defaults first, so no other lane waits on `project.godot`.
+- **F16-04** starts at once, because CameraRig reads no Settings.
+- **F16-05** moves to a third Claude lane, `rescue`. Part 1 (mechanics and protection) starts at once; part 2 (Astra's components) follows F16-01. Its files are disjoint from trunk's 02 and 03, and trunk gets Session and `player_ship.tscn` back for F16-06.
+- **F16-08 (OpenCode):** takes the labels and prompt-family work out of F16-03.
+
+Shared docs have one pre-made section per ticket. Earlier text: F16-01 and F16-02 can run concurrently on disjoint files. After F16-02 lands, F16-04 can run alongside trunk's F16-03 then F16-05; it does not touch Session, Interface, settings schema or player_ship.tscn. F16-06 is the serialized convergence. F16-07 follows the integrated result, not a static mockup.
 
 No new agent is launched by this planning ticket. Claude uses the kickoff to dispatch implementation only when requested. If sol/path is occupied, wait or execute the ticket later in its named lane; never share a worktree.
 

@@ -1,5 +1,22 @@
 # Handoff Log
 
+## 2026-09-24 — Claude (plan) — F16 routing: five lanes at once; F16-02 part 1 action defaults; F16-08 carved out [shared]
+State: PLANNED
+Files: `project.godot` (`camera_recenter`, `dash_left` and `dash_right` defaults only); `.scratch/controls-expansion/issues/02-*`, `03-*`, `04-*`, `05-*`, `06-*` (routing notes and dependencies) and `08-binding-labels-and-prompt-family.md` (new); `docs/engineering/controls-expansion-plan.md` [shared] (ownership table and routing paragraph); `docs/engineering/SPRINT.md` ("After delivery: F16"); `docs/engineering/ROADMAP.md` (F16 rows); `docs/validation/controls-expansion.md` (new, one pending section per ticket); `docs/engineering/settings.md` and `docs/engineering/player-flight.md` (pending F16 sections).
+Change:
+- **F16-02 part 1.** These defaults are live in `project.godot`:
+  - `camera_recenter`: R, Mouse 3 and RS/R3;
+  - `dash_left`: Q and D-pad left;
+  - `dash_right`: E and D-pad right.
+
+  None was bound before.
+- **Routing.** F16-04 no longer waits for F16-02. F16-05 moves to lane rescue, in two parts: part 1 now, part 2 after F16-01. The new OpenCode ticket F16-08 takes the binding labels, the glyph ids and the controller-family detection out of F16-03.
+- **Glyph files.** Name them `res://assets/ui/controls/glyphs/<glyph_id>.png`, using the id list in F16-08 (for example `xbox_a`, `ps_cross`, `dpad_left`, `stick_right_up`). A missing file falls back to text.
+
+Why: trunk's 02 → 03 → 05 → 06 chain was the whole critical path, although the dash, the camera and the labels share no files with it.
+
+Action required by Astra: in F16-01, name the controller glyphs by the F16-08 ids above, and fill only the F16-01 section of `docs/validation/controls-expansion.md`. The plan table in `controls-expansion-plan.md` now shows the new lanes.
+
 ## 2026-09-24 — OpenCode (oc-b) — F15-07: ship and menu cues
 State: DELIVERED
 Files: `scripts/player/player_controller.gd`; `scripts/ui/menu_controller.gd`; `docs/engineering/ROADMAP.md`.
