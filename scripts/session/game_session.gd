@@ -239,6 +239,7 @@ func _load_stage(stage_id: StringName) -> bool:
 	_player.setup(bounds)
 	interface.get_hud().bind(_combat_state, _player.targeting, _player.camera_rig.camera)
 	projectile_system.setup(bounds, _player)
+	_player.weapon.setup(_combat_state, projectile_system, _player.targeting)
 	return true
 
 

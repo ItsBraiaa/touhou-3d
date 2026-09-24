@@ -15,6 +15,31 @@ Action required by <other agent>: <what they must do, or "none">
 
 ---
 
+## 2026-09-23 21:07 — Claude (trunk) — F6-03 part 2: PlayerWeapon, Familiars, target dummies; closes F6-03 [shared]
+State: CODE_READY
+Files:
+- `scripts/combat/player_weapon.gd` (Astra's placeholder replaced by `PlayerWeapon`), `scripts/player/player_controller.gd`, `scripts/session/game_session.gd`.
+- `scenes/player/player_ship.tscn` **[shared]**: only the `PlayerShip` `weapon` reference and the `Weapon` exports `muzzle`, `familiar_anchors`, `camera_rig`, `familiar_scene`; no transform, mesh, shape, layer or monitoring change.
+- New: `scenes/dev/familiar.tscn`, `scenes/dev/target_dummy.gd` and `.tscn`, `docs/validation/weapon-rendering-familiars.png`.
+- Edited: `scenes/dev/arena_harness.gd` and `.tscn`.
+- Docs: `docs/engineering/weapon-rendering.md` ("WeaponModel", "PlayerWeapon contract", "TargetDummy"), `docs/validation/weapon-rendering.md`, `docs/GUIDE.md` (Section 5 Weapon line; Section 6 `player_weapon.gd` and `player_controller.gd` rows; Section 13 "Familiar anchors"), and the ROADMAP F6-03 row.
+
+Change:
+- **The ship shoots.** Holding `fire` spawns player Projectiles at the `WeaponModel` cadence (oc-a's part 1) from `Muzzle`, and from Power Level 2 also from both Familiar anchors, rotated by the camera yaw.
+- **Aim Assist.** Shots aim at the view's center point at the lock's depth and are bent onto the locked `HitVolume` inside each shot's cone.
+- **Familiars.** Two dev Familiars orbit the anchors from Power Level 2.
+- **Bomb button.** It is tracked from events and fed to `CombatState.update_bomb_input()`: one press spends one Bomb.
+- **Controls.** `PlayerController` gains the required `weapon` export, and `set_controls_enabled()` also turns fire off and on, so pause and Defeat stop firing.
+- **Dev harness.** Three `TargetDummy`s count hits and flash; keys 1 to 3 set the Power Level.
+- **Tests.** None were changed or added (sprint rule). A harness run gave `WEAPONCHECK_OK` headless and windowed.
+
+Why: F6-03 part 2, which closes the ticket.
+
+Action required by Astra:
+- **Tuning.** Shot values, cadences and Aim Assist cones are Inspector exports on `PlayerShip/Weapon`, Claude's proposals.
+- **Swap pending: D-02.** A final Familiar scene must have a `Node3D` root and no `CollisionObject3D` anywhere (the weapon refuses one that does).
+- **HitVolume placement.** Keep each target's `HitVolume` centered on its visible body, because Aim Assist aims at it.
+
 ## 2026-09-23 20:32 — OpenCode (oc-a) — F6-03 part 1 WeaponModel
 State: CODE_READY
 Files: `scripts/combat/weapon_model.gd`, `.scratch/weapon-rendering/issues/03-weapon-model-and-player-weapon.md`

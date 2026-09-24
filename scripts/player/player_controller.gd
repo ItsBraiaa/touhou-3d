@@ -54,6 +54,9 @@ signal focus_changed(active: bool)
 ## Target Lock selection. Not driven from here — it reads its own actions — but the ship
 ## owns it and its camera, so this is where the one connection between them is made.
 @export var targeting: Targeting
+## The ship's weapon. Not driven from here, but [method set_controls_enabled] stops and
+## restarts its fire with the controls, so pause, defeat and transitions need one call.
+@export var weapon: PlayerWeapon
 
 var _model: FlightModel
 var _controls_enabled: bool = true
@@ -117,8 +120,11 @@ func setup(bounds: AABB) -> void:
 
 ## Hands the ship back to the player, or takes it away: while [param enabled] is false
 ## the input is not read, the velocity is zero, Focus is released and the bank eases
-## back to level. Used by pause, defeat and stage transitions.
+## back to level, and [member weapon] stops firing. Used by pause, defeat and stage
+## transitions.
 func set_controls_enabled(enabled: bool) -> void:
+	if weapon != null:
+		weapon.set_fire_enabled(enabled)
 	if _controls_enabled == enabled:
 		return
 	_controls_enabled = enabled
@@ -180,6 +186,8 @@ func _validate_exports() -> bool:
 		missing.append("graze_volume")
 	if targeting == null:
 		missing.append("targeting")
+	if weapon == null:
+		missing.append("weapon")
 	for field: String in missing:
 		push_error("%s: required export '%s' is not set" % [get_path(), field])
 	return missing.is_empty()

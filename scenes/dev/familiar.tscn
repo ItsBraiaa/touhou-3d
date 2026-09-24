@@ -1,0 +1,20 @@
+[gd_scene load_steps=3 format=3]
+
+[sub_resource type="StandardMaterial3D" id="FamiliarGlow"]
+shading_mode = 0
+albedo_color = Color(0.7, 1, 0.95, 1)
+emission_enabled = true
+emission = Color(0.7, 1, 0.95, 1)
+
+[sub_resource type="SphereMesh" id="FamiliarMesh"]
+material = SubResource("FamiliarGlow")
+radius = 0.2
+height = 0.4
+radial_segments = 12
+rings = 6
+
+[node name="Familiar" type="Node3D"]
+
+[node name="Orb" type="MeshInstance3D" parent="."]
+mesh = SubResource("FamiliarMesh")
+cast_shadow = 0
