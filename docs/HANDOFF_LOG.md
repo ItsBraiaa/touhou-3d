@@ -1,5 +1,23 @@
 # Handoff Log
 
+## 2026-09-24 — Claude (path) — F16-04: mouse camera and recenter
+State: DELIVERED
+Files: `scripts/player/camera_rig.gd`; `docs/engineering/player-flight.md` (section "F16 mouse camera and recenter (F16-04)" only); `docs/validation/controls-expansion.md` (F16-04 section only); `.scratch/controls-expansion/issues/04-mouse-camera-and-recenter.md` (Outcome); `docs/engineering/ROADMAP.md` (F16-04 row).
+Change:
+- **New API.** `apply_control_settings(p_mode, p_mouse_sensitivity, p_mouse_invert, p_deadzone)`, `set_mouse_capture_active(active)`, `clear_pending_look()`, `request_recenter()`, and the constants `MODE_KEYS` and `MODE_MOUSE`. `apply_settings` is unchanged; it now covers the `camera_*` actions only.
+- **Mouse look.** Active only in mouse mode with capture on. Motion comes from `screen_relative` in `_input` and is never marked handled. It is spent once per physics tick as pixels × 0.12 degrees, never times delta. Keys and stick keep their rate and a radial deadzone, `stick_deadzone` 0.2, which is today's value. Each source has its own vertical inversion.
+- **Locked look.** Deliberate mouse motion holds the lock pull off: faster than `mouse_jitter_speed`, 60 px/s, measured over the real time since the previous tick so the split does not move with the frame rate. After 0.25 s idle the pull fades back in at `lock_blend_speed`. The lock is never released.
+- **Recenter.** Free: the ship's own -Z at -9°. Locked: the ship-and-target framing, lock kept. The move lasts 0.25 s, eased with smoothstep, and takes the shortest way round with `lerp_angle`. For its first 0.1 s (`recenter_grace_seconds`) camera input is dropped, so the Mouse 3 or R3 press that asked for it cannot cancel it; after that, actions or deliberate mouse motion interrupt it. A new request restarts it from the current pose; nothing queues. While it runs it is the tick's only aim writer. Pitch limits and the obstruction ray still apply.
+- **Defaults and scene.** Default Teclas behaves exactly as before. The new exports keep their script defaults, and `player_ship.tscn` is untouched.
+Verification: `tools/test.ps1` passed 225 tests, 0 failed, including the eleven camera rig contract cases. `check_resources.gd --strict-validate` failed nothing. Yaw wrap, pitch limits, lock preservation and obstruction were checked by reading, and the reasoning is in the validation record. The Session lifecycle is pending F16-06, not passed. Physical device feel is not verified, nor whether 0.1 s of grace covers a real wheel click (F16-07). No tests (sprint rule). The jitter speed and the grace came from review; `tools/lane.ps1 land` gates the review-fix commit.
+Why: F16-04 needs mouse orbit and recenter confined to CameraRig, so F16-06 can wire Settings and pointer capture without a second camera writer.
+Action required by trunk (F16-06):
+- Call `apply_control_settings` with the F16-02 Settings getters wherever `_apply_camera_settings` runs: at every spawn and on every change. A Retry's new rig starts in keys mode with capture off.
+- Own `Input.mouse_mode`. Call `set_mouse_capture_active` on every capture or release, and `clear_pending_look` on focus changes and on Resume.
+- Read `camera_recenter` during gameplay only and call `request_recenter`.
+- In mouse mode the arrow-key `camera_*` bindings still orbit, because keys and the stick share those actions. If that should change, it is a binding decision for F16-02/03, not a rig change.
+
+Action required by Astra: none. The new values are exports on `PlayerShip/CameraRig`, in the groups Orbit, Mouse look and Recenter, if you want to tune them in F16-07.
 ## 2026-09-24 — Astra (sol) — F16-01 controls layout, glyphs and dash visuals [shared]
 State: INTEGRATED_VERIFIED. The landing gate passed the existing suite (225 passed), 300-frame boot and resource check; `lane/sol` landed on `dev-01`.
 Files: `scenes/ui/controls.tscn`, `scenes/ui/components/binding_row.tscn`, `scenes/ui/components/dash_cooldown.tscn`, `scenes/player/visuals/dash_visual.tscn`, `assets/ui/controls/glyphs/*.png` and import sidecars, `docs/ASSET_CREDITS.md`, F16-01 section of `docs/validation/controls-expansion.md`, ticket Outcome and ROADMAP row. No scripts, InputMap, camera or dash rules changed.

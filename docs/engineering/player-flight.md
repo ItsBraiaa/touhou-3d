@@ -255,7 +255,71 @@ Manual and measured results, with screenshots, are in [docs/validation/player-fl
 
 ## F16 mouse camera and recenter (F16-04)
 
-Pending (lane path).
+Implemented in `scripts/player/camera_rig.gd` (lane path, 2026-09-24). The rig only stores values and applies them; nothing calls the new methods until F16-06 wires them. The "Camera contract" above still holds. This section adds to it.
+
+### Methods (F16-04)
+
+| Method | Called by | Effect |
+| --- | --- | --- |
+| `apply_control_settings(p_mode: StringName, p_mouse_sensitivity: float, p_mouse_invert: bool, p_deadzone: float) -> void` | F16-06, from `Settings`, at every spawn and on every change | Stores four values. `p_mode` is `CameraRig.MODE_KEYS` (`&"keys"`) or `MODE_MOUSE` (`&"mouse"`); any other value reads as keys. `p_mouse_sensitivity` is in degrees per screen pixel. `p_mouse_invert` inverts the mouse's vertical axis only. `p_deadzone` is the radial deadzone of the `camera_*` actions. The call also drops pending mouse motion. |
+| `apply_settings(p_sensitivity: float, p_invert_vertical: bool) -> void` | `GameSession._apply_camera_settings`, unchanged | Now documented as applying to the `camera_*` actions (keys and right stick) only. |
+| `set_mouse_capture_active(active: bool) -> void` | F16-06, whenever it captures or releases the pointer | Opens or closes the mouse-look gate. Every call drops pending motion. The rig never touches `Input.mouse_mode`. |
+| `clear_pending_look() -> void` | F16-06, on focus changes, on Resume, and after a capture warp | Drops the mouse motion collected since the last physics tick. |
+| `request_recenter() -> void` | F16-06, on `camera_recenter` just pressed during gameplay | Starts a recenter, or restarts one already running (see below). The rig does not read the action itself. |
+
+### Exports (F16-04)
+
+None of these is authored in `player_ship.tscn`, so the defaults apply. The spec supplies the two 0.25 s values, the 0.12 sensitivity and the 0.2 deadzone. The jitter speed and the recenter grace are Claude's proposals for Astra's playtest.
+
+| Export | Group | Default | Meaning |
+| --- | --- | --- | --- |
+| `stick_deadzone` | Orbit | 0.2 | Radial deadzone passed to `Input.get_vector` for the `camera_*` actions. 0.2 equals the actions' own deadzone, which was the old implicit value, so orbit is unchanged. |
+| `camera_input_mode` | Mouse look | `&"keys"` | `MODE_KEYS` or `MODE_MOUSE`. |
+| `mouse_sensitivity` | Mouse look | 0.12 | Degrees per screen pixel. |
+| `mouse_invert_vertical` | Mouse look | false | When true, mouse up looks down. |
+| `mouse_jitter_speed` | Mouse look | 60.0 | Fastest mouse motion, in screen pixels per second of real time, that still counts as jitter. 60 is one pixel per tick at 60 Hz. |
+| `mouse_look_hold_seconds` | Mouse look | 0.25 | How long the lock framing stays off after the last deliberate mouse motion. |
+| `recenter_seconds` | Recenter | 0.25 | Length of a recenter. 0 snaps on the next tick. |
+| `recenter_grace_seconds` | Recenter | 0.1 | Start of a recenter during which camera input is dropped instead of interrupting it. |
+
+### Rules and timing
+
+- **Collection.** Mouse motion is collected in `_input`, but only while the mode is mouse and capture is active. The rig uses `_input`, not `_unhandled_input`, so no Control under the hidden cursor can take the motion first; the capture gate decides. The rig never marks the event handled, so `Interface`'s device tracking still sees it. A paused tree does not deliver `_input` to the rig.
+- **`screen_relative`, not `relative`.** The project stretches with `canvas_items`, and `relative` is divided by that stretch factor. In a 1920×1080 window the same hand movement would read 1.5× smaller than at 1280×720. `screen_relative` is in unscaled screen pixels at every window size.
+- **Application.** Pending motion is spent once, in the first physics tick after it arrives, as `degrees = pixels × mouse_sensitivity`. It is never multiplied by delta. The total turn therefore does not depend on the render rate or the tick rate. At 30 fps the first of two ticks in a frame takes it all; at 144 fps one tick takes about 2.4 frames of motion.
+- **Keys and stick.** They keep turning at a rate: `orbit_speed_degrees × sensitivity × delta`, after the radial deadzone.
+- **Directions.** Mouse right turns the view right, which lowers the yaw. Mouse up raises the view unless `mouse_invert_vertical` is on. Each source has its own inversion.
+- **Both modes.** The `camera_*` actions orbit in either mode, keys included. Keys and the right stick share those actions, and F16-02/03 give the bindings to the player, so the rig does not split an action by device. Mouse mode adds the mouse on top of them.
+- **Locked look.**
+  - Motion counts as deliberate when its speed is above `mouse_jitter_speed`. The speed is the tick's motion divided by the real time since the previous tick (`Time.get_ticks_usec`, clamped to 1–100 ms). That interval is what the motion was collected over at any frame rate; the tick's delta is not, because at 30 fps the first of two ticks spends a whole frame's motion. So the split between jitter and look does not move with the frame rate.
+  - Deliberate motion turns the lock pull fully off at once and sets a 0.25 s hold.
+  - When the hold runs out, the override fades back to 0 at `lock_blend_speed`, which takes 0.25 s at 4.0. The usual `rotation_damping` pull then returns the view to the ship-and-target framing.
+  - The lock is never released by any of this.
+  - The `camera_*` actions do not trigger the override; they push against the pull, as before F16.
+  - The override also runs while no lock is held, so a lock taken mid-look does not yank the view.
+- **Recenter goal.**
+  - Free: the ship body's own -Z, flattened onto the horizontal plane (yaw 0 for an unrotated ship, the Respawn marker's heading otherwise), at `default_pitch_degrees`, with the normal follow offset. The goal is not the last movement direction.
+  - Locked: `_framing_yaw` and `_framing_pitch`, the same ship-and-target framing the lock pull aims at. The lock is kept.
+  - The goal is recomputed every tick, so a moving target, a lock gained or a lock lost mid-recenter all switch the goal cleanly.
+- **Recenter motion.**
+  - The move lasts `recenter_seconds`, eased with smoothstep.
+  - Each tick moves the pose by the share of the remaining angle that the curve assigns to that tick. The goal is met exactly when the time ends, even if it moved.
+  - Yaw moves with `lerp_angle`, which takes the shorter way round.
+  - A new request resets the elapsed time: the curve starts again from the current pose, and nothing queues.
+  - A request also ends any mouse-look hold, so the lock pull resumes the tick the recenter ends, from the framing it has just reached.
+- **Interruption.** Two things interrupt a recenter: a non-zero `camera_*` vector after the deadzone, or deliberate mouse motion. Motion below the jitter speed is dropped while a recenter runs.
+- **Grace.** For the first `recenter_grace_seconds` (0.1 s) of a recenter, all camera input is dropped instead of interrupting it. Without it the press that asked for the recenter could cancel it: a Mouse 3 click nudges the mouse, and an R3 click can tilt the stick past a low deadzone. A repeated request restarts the grace along with the curve. Dropped motion does not arm the mouse-look hold. A camera key held through the request takes over when the grace ends.
+- **One writer.** While a recenter runs, it replaces the lock pull for that tick. The yaw is written only through `_place_rig`, with the value `_advance_aim` returns, and the pitch only inside `_advance_aim` and `_advance_recenter`. The camera transform is written only by `_apply_camera_transform`. There are no tweens.
+- **Pitch limits and obstruction.** Both still win. Every pitch write is clamped or interpolates between two clamped values. The obstruction ray still runs every tick against the desired position computed from the new angles.
+- **Rotation rate.** The aim, mouse included, changes at the physics rate: 60 Hz by default. On a faster display the view turns in 60 Hz steps, as the stick orbit always has. F16-07 judges whether that is visible.
+
+### What F16-06 owns
+
+- **Settings.** Reading `Settings.get_camera_input_mode`, `get_mouse_sensitivity`, `get_mouse_invert_vertical` and `get_camera_deadzone` (F16-02). Calling `apply_control_settings` next to `_apply_camera_settings` at every spawn and on every change, Options over Pause included.
+- **New ships.** Retry and Restart spawn a new ship whose rig starts in keys mode with capture off, so F16-06 must set both again.
+- **Pointer capture.** `Input.mouse_mode`: capture only during active gameplay; release it for menus, Pause, focus loss, controller disconnect and leaving a Run. Every change must be matched by `set_mouse_capture_active`, and `clear_pending_look` must be called on focus changes and on Resume.
+- **Capture warp.** Some backends deliver the warp that capturing causes as a motion in the next frame. If a jump shows after capture, clear once more on the frame after the mode change.
+- **`camera_recenter`.** Reading it only during gameplay, never under the capture dialog, and calling `request_recenter`.
 
 ## F16 lateral dash (F16-05)
 
