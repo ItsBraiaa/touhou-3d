@@ -60,6 +60,9 @@ const VICTORY_BEAT_SECONDS := 2.5
 ## tree running and the ship frozen (F15-10). Claude's proposal: long enough to register
 ## the hit, short enough not to feel like lag.
 const DEFEAT_BEAT_SECONDS := 1.0
+## Seconds of Invulnerability, with the ship's usual blink, for the ship a Checkpoint Retry
+## respawns (F15-12). Claude's proposal, Astra tunes it; a Restart gets none.
+const RETRY_INVULNERABILITY_SECONDS := 2.0
 ## Menu actions that only open a full screen, which Back returns from.
 const SCREEN_BY_ACTION: Dictionary[StringName, StringName] = {
 	&"open_stage_select": ScreenRouter.STAGE_SELECT,
@@ -469,7 +472,9 @@ func _on_setting_changed(key: StringName, _value: Variant) -> void:
 ## a new ship at its `Respawn` and nothing incoming; the Director removes the failed
 ## Attempt's actors and Pickups, restores the cores and rebuilds its Gates and links.
 ## Before any Checkpoint, or on a stage without a Director, Retry is Restart (PLANEJAMENTO
-## Section 6). A beat in progress is cancelled first.
+## Section 6). A beat in progress is cancelled first. Since F15-12 the respawned ship gets
+## [constant RETRY_INVULNERABILITY_SECONDS] of Invulnerability with its blink; a Restart
+## gets none.
 func _retry() -> void:
 	if not _is_in_stage():
 		return
@@ -485,6 +490,8 @@ func _retry() -> void:
 	_director.retry_from_checkpoint(_player, _attempt_seed(_run_state.get_attempt_index() + 1))
 	# After the restore, which puts back the committed statistics (F8-03).
 	_run_state.begin_attempt()
+	# After the restore too, which ends any window; the new ship blinks through the signal.
+	_combat_state.grant_invulnerability(RETRY_INVULNERABILITY_SECONDS)
 	# The Director removed any boss mid-fight; as on Restart, its panel goes explicitly.
 	interface.get_hud().hide_boss()
 	interface.show_home(ScreenRouter.HUD)

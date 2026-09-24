@@ -1,5 +1,19 @@
 # Handoff Log
 
+## 2026-09-24 13:55 — Claude (trunk) — F15-12: 2 s of Invulnerability after a Checkpoint Retry
+State: INTEGRATED_VERIFIED
+Files: `scripts/combat/combat_state.gd` (`grant_invulnerability`, header); `scripts/session/game_session.gd` (`RETRY_INVULNERABILITY_SECONDS`, `_retry`); `docs/engineering/ROADMAP.md` (the F15-12 row).
+Change: the user said yes to respawn Invulnerability.
+- **The grant.** `CombatState.grant_invulnerability(seconds)` starts a window with no hit and no Bomb, and keeps a longer one that is already running. It is ignored unless the core is live, so never while paused or defeated.
+- **Retry.** A Checkpoint Retry grants 2.0 s right after the restore, which ends any window. The field's pass-through and the new ship's usual blink follow through `invulnerability_changed`.
+- **Restart.** A Restart, and a Retry before any Checkpoint (which is a Restart), get none.
+Verification: a headless `main.tscn` driver (throwaway, not in the repo).
+- Retry from CP1-A was invulnerable at once in the core, the field and the ship's blink. The ship was hidden on blink frames, and the window ended after 2.03 s, with everything off and the ship shown.
+- Restart and a pre-Checkpoint Retry were not invulnerable.
+- All four trunk F15 scenarios (01, 10, 11, 12) passed in one run on this build.
+No tests (sprint rule).
+Action required by Astra: tune `RETRY_INVULNERABILITY_SECONDS` (2.0 s is Claude's proposal).
+
 ## 2026-09-24 13:50 — Claude (trunk) — F15-11: Power Progress carries into Campaign Stage 2
 State: INTEGRATED_VERIFIED
 Files:
