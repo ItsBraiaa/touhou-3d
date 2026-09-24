@@ -1,6 +1,6 @@
 # F16-09 targeting-ignores-the-resume-press
 
-Status: todo
+Status: done
 Type: adapter
 Owner: OpenCode
 Lane: oc-a
@@ -61,4 +61,6 @@ Model: DeepSeek V4.1 Flash. You are lane oc-a. Work only in C:\Users\Braia\Docum
 
 ## Outcome
 
-Not started.
+Done 2026-09-24 (oc-a). `targeting.gd` now holds `var _input_armed: bool = false` with a doc comment in the style of `_dash_input_armed`, plus a public `require_release()` that clears it. At the top of `_physics_process`, while disarmed, a tick sets `_input_armed` from `not Input.is_action_pressed(&"lock_target") and not Input.is_action_pressed(&"next_target")` and forces this tick's `lock_pressed` and `next_pressed` to false; the rest of the tick runs unchanged, so a held lock is still validated and released. `player_controller.gd` calls `targeting.require_release()` at the `if enabled:` branch of `set_controls_enabled()`, next to `_dash_input_armed = false` and guarded by `if targeting != null:`, and its doc comment now says the resume press reaches neither the dash nor targeting. Docs: one bullet in player-flight.md "Targeting contract" and one Open issues line in menus-session.md.
+
+Checked by reading: the latch mirrors the dash's exactly; both polls are `is_action_pressed` (held), so the tick after the resume still treats a pressed B as unarmed; the current lock's `validate` path and the `lock_target`/`next_target` branches are untouched. No tests or drivers (F16 rule). The gate ran at land: the existing suite (its targeting contract tests included), the boot smoke and the resource check. The physical check is F16-07's: remap Lock to B, pause, resume with B, and nothing gets locked.

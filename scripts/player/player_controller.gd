@@ -213,9 +213,9 @@ func setup(bounds: AABB) -> void:
 ## transitions. Taking the controls away while the tree is paused freezes a dash with the
 ## ship, its cooldown included, and it resumes with the controls; taking them away with
 ## the tree running (a beat, defeat, a stage clear) cancels the dash and clears its
-## cooldown. Giving them back ignores the dash actions until both are released, so the press
-## that resumed play cannot dash (F16-06). Emits [signal controls_enabled_changed] on a
-## change.
+## cooldown. Giving them back ignores the dash and targeting actions until they are
+## released, so the press that resumed play can reach neither (F16-06, F16-09). Emits
+## [signal controls_enabled_changed] on a change.
 func set_controls_enabled(enabled: bool) -> void:
 	if weapon != null:
 		weapon.set_fire_enabled(enabled)
@@ -225,6 +225,8 @@ func set_controls_enabled(enabled: bool) -> void:
 	controls_enabled_changed.emit(enabled)
 	if enabled:
 		_dash_input_armed = false
+		if targeting != null:
+			targeting.require_release()
 		return
 	velocity = Vector3.ZERO
 	_set_focus_active(false)
