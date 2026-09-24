@@ -31,7 +31,7 @@ shield_pickup_scene = ExtResource("10_shield_pickup")
 offset_left = 16.0
 offset_top = 16.0
 offset_right = 452.0
-offset_bottom = 440.0
+offset_bottom = 500.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 6
@@ -71,3 +71,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 9, -12)
 
 [node name="Sentry" type="Marker3D" parent="EnemySpawns"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 10, -16)
+
+[node name="DevBoss" type="Marker3D" parent="EnemySpawns"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 13, -26)
