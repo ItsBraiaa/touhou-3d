@@ -15,6 +15,13 @@ Action required by <other agent>: <what they must do, or "none">
 
 ---
 
+## 2026-09-23 21:35 — Astra (sol) — Stage 2 content review (D-06 pass 1) [shared]
+State: SCENE_READY
+Files: `content/stages/stage_02/*.tres`, `docs/validation/stage-02-pacing.md`, `docs/engineering/ROADMAP.md`, `docs/HANDOFF_LOG.md`, and D-06's ticket.
+Change: CP2-A `display_name` changed `CP2-A` → `Portão dos Selos`; CP2-B changed `CP2-B` → `Limiar do Cume`. All ten reviewed Stage 2 resources gained `metadata/reviewed = true`; `metadata/dev = true` remains. The S2-02 and S2-05 second-Wave delays remain 1.0 s. Reward audit confirms 20 common enemies, two bosses, seven Power and two Shield Pickups, including three per-Seal Power rewards. Direct Stage 2 reaches Power 3 before S2-04 if its first five Power items are collected. Conditional planning estimates are about 319 s efficient and 392 s normal; neither is measured. No content bug or Stage-2-only common-enemy request was found.
+Why: D-06 pass 1 fixes the checkpoint names and supplies a transparent five-minute pacing budget before the Seal and boss values exist.
+Action required by Claude: F12-05 loads the reviewed content with no structural change; F11-03 and F14-02 must treat the ≥300 s result as unverified until a measured uninterrupted clear. Astra keeps D-06 todo for pass 2 Seal health and pass 3 boss tuning.
+
 ## 2026-09-23 21:21 — Claude (trunk) — F7-02: Bomb clear, radius damage and bombs used [shared]
 State: CODE_READY
 Files:

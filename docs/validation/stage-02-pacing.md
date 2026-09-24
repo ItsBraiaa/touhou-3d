@@ -1,0 +1,32 @@
+# Stage 2 pacing review — D-06 pass 1
+
+2026-09-23. This is a **planning estimate, not a measured clear**. F12-04's Stage 2 content is present and structurally reviewed, but F9-02's Spirit/Sentry definitions, F12-05's Director and Seals, F12-06/F12-07's boss content, and F11-01's Results flow have not all landed. The academic claim of at least 300 active seconds remains **not verified** until an uninterrupted strong-play run is measured.
+
+## Content and reward audit
+
+The seven Encounter files preserve F12-04's approved order, completion conditions, Wave markers and kinds, gates, objectives, and checkpoint resume points. They contain 20 common enemies and two boss markers. S2-02 has two Power and one Shield; S2-03 has one Power reward under each Seal; S2-04 has one Shield; S2-05 has two Power. That is exactly seven Power and two Shield Pickups, with no reward in S2-01, S2-06 or S2-07. S2-03's rewards point to `Seals/SealN/RewardOrigin`, so F12-05 can deliver each when its Seal breaks. No content mismatch was found.
+
+A Direct Stage 2 starts at Power Level 2. If the player collects both S2-02 Power items and all three Seal rewards, the five pickups reach Power Level 3 before S2-04. S2-05's two then award excess-pickup score. A Campaign player already at Power 3 treats all seven as excess. Pickups are optional, so neither the upgrade nor this timing is guaranteed in a playthrough.
+
+CP2-A is now `Portão dos Selos` (was `CP2-A`), and CP2-B is `Limiar do Cume` (was `CP2-B`). The 1.0 s second-Wave delays in S2-02 and S2-05 stay unchanged: they separate sequential combat rather than create a long wait. Every Stage 2 `.tres` reviewed here has `metadata/reviewed = true`; `metadata/dev = true` remains until runtime verification.
+
+## Estimate and assumptions
+
+`base_speed` is 12 units/s. The straight Z spans total 658 units, or 54.8 s at that speed before climbs, lateral Seal visits, alignment, combat movement or dodging. The floor and Seal heights (43, 65, 86) make the straight-line figure a lower bound. The encounter target column is STAGE_DESIGN's 25/35/65/50/45/10/130 s, totaling 360 s.
+
+Provisional common-enemy health is 20 per Spirit and 30 per Sentry, following F9-02's proposal of about 2 and 3 seconds of Power 1 fire at the current 10 main shots/s. Provisional Seal health is 10. These are **assumptions**, not the later authored values. Current weapon exports yield at most 18 shots/s at Power 2 (10 main + two Familiars at 4 each) and 23.3 at Power 3 (10 + two at 6.67); each deals 1 damage. For the efficient estimate, 75% hits give about 13.5 and 17.5 effective damage/s. For normal play, 60% hits give about 10.8 and 14.0. Boss Phase durations use the STAGE_DESIGN targets (20/30 and 40/40/50 s) pending F12-06/F12-07 health; normal-play boss times scale by 75/60. Transitions use D-07's 0.75 s cap per Phase change, never invulnerability padding.
+
+| Segment | Target | Z span / straight flight | Efficient working estimate | Normal working estimate | Main time sources |
+| --- | ---: | ---: | ---: | ---: | --- |
+| S2-01 | 25 s | 111 / 9.3 s | 19 s | 22 s | 40 assumed Spirit health, first Anticipation, climb. |
+| S2-02 | 35 s | 93 / 7.8 s | 29 s | 35 s | 140 assumed enemy health, 1 s Wave delay, two Anticipations, height changes. |
+| S2-03 | 65 s | 123 / 10.3 s | 42 s | 53 s | 180 guard health, three brief Seals, lateral approaches and climb; efficient case uses two Bombs on guards before CP2-A. |
+| S2-04 | 50 s | 70 / 5.8 s | 54 s | 68 s | 20 + 30 s provisional boss combat, one transition; CP2-A refills two Bombs. |
+| S2-05 | 45 s | 108 / 9.0 s | 28 s | 33 s | 140 assumed enemy health, 1 s Wave delay, two Anticipations, ascent. |
+| S2-06 | 10 s | 28 / 2.3 s | 7 s | 8 s | Safe climb and arch alignment; no mandatory wait. |
+| S2-07 | 130 s | 125 / 10.4 s | 140 s | 173 s | 40 + 40 + 50 s provisional boss combat, two transitions; CP2-B refills two Bombs. |
+| **Total** | **360 s** | **658 / 54.8 s** | **about 319 s** | **about 392 s** | Both figures are conditional estimates. |
+
+The efficient budget includes about 45 s of route detours, climbing, aim alignment and dodging above straight flight; normal play adds about 15 s. It assumes six Bombs are used across the stage's entry and two checkpoint refills, with 20 damage each, and normal play uses three. It counts the two 1 s Wave delays and Anticipation, and subtracts only damage time Bombs plausibly save. The estimate sits about 19 s above the 300 s floor, a thin margin. Final boss health and measured hit rates can easily change it.
+
+No measured Results Clear Time, Retry count or Bomb count is available. F11-03 and the human pass must record a Direct Stage 2 clear with no deaths, starting Power 2, the Bombs used, and whether the player retried a checkpoint. If the efficient measured clear falls below 300 s, D-06 pass 3 should first tune boss Phase health and attack patterns; increasing the 1 s Wave delays into forced waits would violate STAGE_DESIGN.

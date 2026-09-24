@@ -8,5 +8,6 @@ id = &"CP2-A"
 after_encounter_id = &"S2-03"
 resume_encounter_id = &"S2-04"
 node_path = NodePath("Checkpoints/CP2-A")
-display_name = "CP2-A"
+display_name = "Portão dos Selos"
 metadata/dev = true
+metadata/reviewed = true

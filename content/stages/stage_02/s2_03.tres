@@ -41,3 +41,4 @@ rewards = Array[ExtResource("1_e2sgi")]([SubResource("Resource_bm7vg"), SubResou
 gate_id = &"Gate_S2_03"
 required_objective_ids = Array[StringName]([&"S2-03-Seal1", &"S2-03-Seal2", &"S2-03-Seal3"])
 metadata/dev = true
+metadata/reviewed = true

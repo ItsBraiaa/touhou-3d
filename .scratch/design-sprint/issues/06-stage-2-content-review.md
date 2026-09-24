@@ -112,6 +112,10 @@ Consumers:
 - F14-02: the acceptance line "Stage 2 ≥ 300 s", marked measured or not verified.
 - The user, at the SPRINT checkpoint, if the efficient estimate is under 300 s.
 
+## Pass 1 outcome
+
+Reviewed all ten F12-04 Stage 2 resources, retained their approved structure and 1.0 s second-Wave delays, and added `metadata/reviewed = true` while preserving `metadata/dev = true`. Named CP2-A `Portão dos Selos` and CP2-B `Limiar do Cume`. The reward audit confirms seven Power and two Shield Pickups, including one per Seal, and Direct Stage 2 can reach Power 3 before S2-04 if all five early Power items are collected. `docs/validation/stage-02-pacing.md` gives conditional estimates of about 319 s efficient and 392 s normal, based on the current weapon cadence and explicit provisional enemy, Seal and boss assumptions. No clear was measured; the five-minute requirement remains unverified. F12-05 Seal health and F12-06/F12-07 boss values remain for passes 2 and 3. No content bug or Stage-2-only common-enemy request was found. Ticket status stays todo until pass 3.
+
 ## Kickoff prompt
 
 ```

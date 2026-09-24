@@ -9,3 +9,4 @@ script = ExtResource("2_p22cc")
 id = &"S2-06"
 next_id = &"S2-07"
 metadata/dev = true
+metadata/reviewed = true

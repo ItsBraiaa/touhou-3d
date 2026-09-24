@@ -94,7 +94,7 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | | | | 03 lantern-guardian-scene | design | — | sol | done (2026-09-23: Ghost prefab, clips and dusk render verified) |
 | | | | 04 stage-2-boss-scenes | design | — | sol | done (2026-09-23: Tempest Sentinel and Storm Guardian prefabs, clips and Stage 2 renders verified) |
 | | | | 05 stage-1-tuning-and-pacing | design | — | sol | todo |
-| | | | 06 stage-2-content-review | design | — | sol | todo |
+| | | | 06 stage-2-content-review | design | — | sol | todo (pass 1 values/reward review and provisional pacing estimate landed; passes 2–3 pending) |
 | | | | 07 shrine-lighting-and-boss-rulings | design | — | sol | doing (Part B rulings delivered; Parts A and C await F12-03) |
 
 Order rationale: Player before Menus (highest UX risk and GUIDE Section 13's assignment). Audio buses are created in F0-03 so F3 can bind Options to them. Enemies (F9) come before the Stage Director (F10) so the Director is integrated against real Waves. The sprint's lane queues, checkpoints and kickoff prompts are in [SPRINT.md](SPRINT.md).
@@ -139,6 +139,8 @@ Dependencies Claude has on scene and content work. These are needs by Feature, n
 | F14 | Nothing new; credits and licenses must already cover every integrated asset. F14-02 lists any gaps it finds. |
 
 ## Received from Astra
+
+2026-09-23: D-06 pass 1 reviewed F12-04's Stage 2 content and named CP2-A/CP2-B; [stage-02-pacing.md](../validation/stage-02-pacing.md) records the exact reward audit and conditional ~319 s efficient / ~392 s normal estimates. The ≥300 s requirement still needs a measured clear; Seal and boss tuning remain for passes 2 and 3.
 
 2026-09-23: D-02 combat visuals are SCENE_READY under `scenes/combat/visuals/`; exact mesh, scene, animation and consumer swap paths are in [combat-visuals.md](../validation/combat-visuals.md). The Options slider focus fill is gold and visually verified.
 

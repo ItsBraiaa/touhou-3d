@@ -18,3 +18,4 @@ requires_exit = true
 waves = Array[ExtResource("3_udpei")]([SubResource("Resource_8q5br")])
 gate_id = &"Gate_S2_01"
 metadata/dev = true
+metadata/reviewed = true
