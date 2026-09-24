@@ -15,6 +15,13 @@ Action required by <other agent>: <what they must do, or "none">
 
 ---
 
+## 2026-09-23 23:23 — Astra (sol) — Stage 1 tuning and pacing (D-05) [shared]
+State: SCENE_READY
+Files: `content/stages/stage_01/*.tres`, `content/enemies/spirit.tres`, `content/enemies/sentry.tres`, `content/patterns/spirit_aimed_burst.tres`, `content/patterns/sentry_fan.tres`, four `scenes/enemies/visuals/{spirit_*,sentry_*}.tscn`, `docs/validation/stage-01-pacing.md`, `docs/validation/stage-01-anticipation.png`, the D-05 ticket, and the D-05 ROADMAP row plus one Received from Astra row. The dev enemy scenes were reviewed but not changed: their spheres still cover the visible bodies.
+Change: Spirit health 20 → 30 and attack interval 1.5 → 1.4 s; Sentry health 30 → 45 and interval 2.0 → 1.8 s; Spirit spread 12 → 14° and Sentry spread 70 → 78°. CP1-A `CP1-A` → `Portal Selado`; CP1-B `CP1-B` → `Entrada do Santuário`. The 1.0 s second-Wave delays, Spirit/Sentry hit radii 1.0/0.9 at the root origin, movement and other pattern numbers stay as drafted. All 14 reviewed Resources gained `metadata/reviewed = true`; none lost `metadata/dev = true`. The four visual roots gained `metadata/anticipation_clip`: `Yes` for Spirits, `Punch` for Sentries. Both are 1.167 s source clips; about 1.17× playback would fit the one-second cue. The candidate mid-poses were rendered and inspected, and the existing visual validator reported zero failures.
+Why: The common enemies were falling quickly at the measured weapon cadence; the modest health increase lets their aimed and fan patterns appear without turning the route into a forced wait. `docs/validation/stage-01-pacing.md` gives an **estimated** efficient clear of about 221 s against the 240 s target. No clear was measured, and its Lantern Guardian 85 s is provisional. Its separate five-minute fallback is a proposal for the user, not applied.
+Action required by Claude (trunk): F10-01/F10-04 consume the content as is. F11-01 shows the new checkpoint names; F11-03 measures the actual Clear Time and F14-02 marks it unverified until measured. `EnemyActor` has no `anticipation_clip` export and still pulses scale, so a later trunk change must read or wire the chosen clips if the cast animation should replace that cue. No `PlayerShip/Weapon` export change is requested: keep the measured 25° lock assist and Bomb radius 10/damage 20; D-07 Part C keeps every boss Phase health above 20. D-06 pass 1 used provisional Spirit/Sentry health 20/30, so its Stage 2 estimate must be recomputed in pass 2 or 3. At the sprint checkpoint, the user decides whether to apply the Stage 1 five-minute fallback if Stage 2 slips.
+
 ## 2026-09-23 23:05 — Claude (trunk) — F10-02: Gate and Checkpoint adapters on Stage 1 [shared]
 State: CODE_READY
 Files:

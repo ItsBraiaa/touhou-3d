@@ -13,5 +13,6 @@ speed = 10.0
 lifetime = 6.0
 projectile_radius = 0.3
 damage = 10
-spread_degrees = 12.0
+spread_degrees = 14.0
 metadata/dev = true
+metadata/reviewed = true

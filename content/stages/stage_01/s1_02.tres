@@ -30,3 +30,4 @@ waves = Array[ExtResource("3_2eiwr")]([SubResource("Resource_ekho3"), SubResourc
 rewards = Array[ExtResource("1_vakrq")]([SubResource("Resource_vygny")])
 gate_id = &"Gate_S1_02"
 metadata/dev = true
+metadata/reviewed = true

@@ -6,12 +6,13 @@
 [resource]
 script = ExtResource("1_enemy")
 kind = &"sentry"
-health = 30
+health = 45
 score = 100
 anticipation_seconds = 1.0
 pattern = ExtResource("2_pattern")
-attack_interval = 2.0
+attack_interval = 1.8
 movement = 1
 move_speed = 1.0
 move_range = 1.5
 metadata/dev = true
+metadata/reviewed = true
