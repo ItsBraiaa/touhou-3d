@@ -1,6 +1,7 @@
 # F11-01 Defeat, Results, Retry and Restart screens
 
-Status: todo
+Status: done
+Outcome (2026-09-24, trunk): Done. `GameSession._on_stage_completed` freezes the stage (`_set_paused(true)`), drops any overlay (a same-step Defeat), pushes Results with `_results_params(result)` (`campaign_stage_1`, `direct_stage` or `final_victory`), calls `RunState.advance()` on a final stage for its one `run_ended(true)`, and prints `STAGE_RESULT ...`; the `run_ended` handler that returned to the menu is gone. `MenuController` binds `RESULTS_VALUE_PATHS` (Clear Time `M:SS`, seconds floored after a millisecond snap so 180 ticks read `0:03`; integers; `—` when absent; a missing label reported once). No new tests (sprint rule); `tools/validate_run_flow.gd` was replaced by a scratchpad driver of `main.tscn`, headless and windowed (`docs/validation/run-flow.md`, `run-flow-results.png`, `run-flow-defeat.png`); `test_a_completed_stage_returns_to_the_menu_until_results_exist` was minimally adjusted to `test_a_completed_stage_shows_results`. The real Campaign final victory waits for F11-02's Continuar; its layout was checked through `_results_params`.
 Type: integration
 parallel-safe: no
 Depends on: F10-03

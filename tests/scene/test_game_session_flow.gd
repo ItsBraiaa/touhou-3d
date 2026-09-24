@@ -383,14 +383,16 @@ func test_a_stage_without_player_start_or_flight_volume_is_refused() -> void:
 	assert_eq(_main.get_run_state().get_phase(), RunState.Phase.IDLE, "and no Run started")
 
 
-## Until F11 builds Results, a completed stage ends the Run at the main menu.
-func test_a_completed_stage_returns_to_the_menu_until_results_exist() -> void:
+## Since F11-01 a completed stage freezes under Results; a Direct Stage is the last of its
+## order, so the Run ends with its victory.
+func test_a_completed_stage_shows_results() -> void:
 	if not assert_not_null(_main, "GameSession"):
 		return
 	_request(&"start_direct_stage", {"stage": &"stage_01"})
 	_main.get_run_state().complete_stage()
-	assert_eq(_world_root.get_child_count(), 0)
-	assert_eq(_interface.current_screen(), ScreenRouter.MAIN_MENU)
+	assert_true(_world_root.get_child_count() > 0, "the stage stays loaded under Results")
+	assert_eq(_interface.current_screen(), ScreenRouter.RESULTS)
+	assert_true(tree.paused, "the world is frozen under Results")
 	assert_eq(_main.get_run_state().get_phase(), RunState.Phase.RUN_ENDED)
 
 

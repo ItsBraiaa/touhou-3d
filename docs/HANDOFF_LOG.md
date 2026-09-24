@@ -52,6 +52,23 @@ Action required by <other agent>: <what they must do, or "none">
 
 ---
 
+## 2026-09-24 11:05 — Claude (trunk) — F11-01: Results, Defeat and Pause with real values
+State: CODE_READY
+Files:
+- Edited: `scripts/session/game_session.gd` (`_on_stage_completed`, `_results_params`; the `run_ended` handler removed), `scripts/ui/menu_controller.gd` (`RESULTS_VALUE_PATHS` and the Results value writing), `tests/scene/test_game_session_flow.gd` (see below).
+- New: `docs/engineering/run-flow.md`, `docs/validation/run-flow.md`, `docs/validation/run-flow-results.png`, `run-flow-defeat.png`.
+- Docs: `docs/engineering/README.md` (one line), `docs/GUIDE.md` (the Section 6 `game_session.gd` and `menu_controller.gd` rows, the Section 7 "Stage completed" row, Section 14 "Runtime text and presentation"), the ROADMAP F11-01 row and the ticket.
+
+No scene file changed.
+
+Change:
+- **A stage clear freezes under Results.** Results shows the real Clear Time (`M:SS`), score, Graze and bombs used, laid out for the Run Mode: Continuar after Campaign Stage 1, Jogar novamente after a Direct Stage, neither with `Jornada concluída` on the final victory. A final stage ends the Run with one victory. Every clear prints `STAGE_RESULT stage=… mode=… clear_time=… score=… graze=… bombs=… attempt=…` for F11-03 and F14-02.
+- **Buttons.** Results' Menu principal and Créditos work (Back from Credits returns to Results, still paused). Defeat's two buttons and all of Pause's work. Back on Defeat and Results does nothing. Continuar and Jogar novamente warn until F11-02.
+- **Tests.** None added (sprint rule). One existing test changed with the behavior: `test_game_session_flow.gd` `test_a_completed_stage_returns_to_the_menu_until_results_exist` is now `test_a_completed_stage_shows_results`. A scratchpad driver of `main.tscn` checked every item, headless and windowed.
+
+Why: F11-01; Stage 1's clear (now the Lantern Guardian's defeat) ends on Results instead of the main menu.
+Action required by Astra: `Layout/TimeValue`, `ScoreValue`, `GrazeValue` and `BombsValue` in `results.tscn` are load-bearing now: announce a rename. Time shows as `M:SS` with the seconds floored; say so if you prefer tenths. For D-07's shrine clip, `process_mode = ALWAYS` is now required: Results pauses the tree one frame after `boss_defeated`.
+
 ## 2026-09-24 10:30 — Claude (trunk) — F12-03 part 2: the Lantern Guardian fights in S1-07 [shared]
 State: INTEGRATED_VERIFIED
 Files:

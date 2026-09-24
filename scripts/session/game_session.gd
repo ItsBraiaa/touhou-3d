@@ -21,7 +21,8 @@ extends Node
 ## boss's defeat, on Retry and on Restart (F12-03).
 ##
 ## Nothing here decides gameplay: movement, targeting, progression and the Run's
-## accounting belong to their cores. Results arrive with F11.
+## accounting belong to their cores. A stage clear freezes the stage under Results, and
+## the last stage of the order ends the Run with its victory (F11-01).
 
 
 ## Marker every stage root has, where the player enters (GUIDE Section 5 "Stages").
@@ -84,7 +85,6 @@ func _ready() -> void:
 		process_mode = Node.PROCESS_MODE_DISABLED
 		return
 	_run_state.stage_completed.connect(_on_stage_completed)
-	_run_state.run_ended.connect(_on_run_ended)
 	# The Session, the CombatState and the ProjectileSystem live as long as each other, so
 	# these are made once and a Restart can never double them. The handlers read _player
 	# when they run.
@@ -197,7 +197,7 @@ func _restart_stage() -> void:
 	interface.show_home(ScreenRouter.HUD)
 
 
-## Leaves the Run for the main menu, from Pause and Defeat today and from Results in F11.
+## Leaves the Run for the main menu, from Pause, Defeat and Results.
 func _return_to_menu() -> void:
 	_set_paused(false)
 	_unload_stage()
@@ -481,16 +481,42 @@ func _on_player_defeated() -> void:
 	interface.push_overlay(ScreenRouter.DEFEAT, {"checkpoint": location})
 
 
-func _on_stage_completed(_result: Dictionary) -> void:
-	# TODO(F11): show Results with the result and wait for Continue, Replay or Menu.
-	_return_to_menu()
+## A stage clear, reached from the Director's `stage_cleared` deferred, never inside a
+## physics flush (F11-01): freezes the stage under Results with [param result] in the
+## layout for the Run Mode, and ends the Run with its one victory when the stage was the
+## last of the order. Results' buttons leave from the overlay: Menu principal, Créditos,
+## and Continuar or Jogar novamente (F11-02). Active Time already stopped, because the
+## Run is past `IN_STAGE`.
+func _on_stage_completed(result: Dictionary) -> void:
+	_set_paused(true)
+	# Results replaces any overlay: a Defeat raised in the physics step of the last kill.
+	if interface.current_screen() != ScreenRouter.HUD:
+		interface.show_home(ScreenRouter.HUD)
+	interface.push_overlay(ScreenRouter.RESULTS, _results_params(result))
+	if result["is_final"]:
+		# Emits run_ended(true) once; a later Menu press's end_run(false) is ignored.
+		_run_state.advance(_combat_state.get_power_level())
+	# Quoted by F11-03's clear-time protocol and F14-02's acceptance record.
+	print("STAGE_RESULT stage=%s mode=%s clear_time=%.2f score=%d graze=%d bombs=%d attempt=%d" % [
+		result["stage"], RunState.RunMode.keys()[result["mode"]], result["clear_time"],
+		result["score"], result["graze"], result["bombs_used"], _run_state.get_attempt_index(),
+	])
 
 
-## [method _return_to_menu] ends the Run itself, so only a victory needs handling here.
-func _on_run_ended(victory: bool) -> void:
-	# TODO(F11): a victory shows Results in its final_victory mode instead.
-	if victory:
-		_return_to_menu()
+## The Results params of [param result] ([method RunState.stage_result]): its four
+## statistics, and the `mode` that picks Continue, Replay or neither
+## (MenuController's `RESULTS_*` constants).
+func _results_params(result: Dictionary) -> Dictionary:
+	var mode := MenuController.RESULTS_CAMPAIGN_STAGE
+	if result["is_final"]:
+		mode = MenuController.RESULTS_DIRECT_STAGE if result["mode"] == RunState.RunMode.DIRECT_STAGE else MenuController.RESULTS_FINAL_VICTORY
+	return {
+		"mode": mode,
+		"clear_time": result["clear_time"],
+		"score": result["score"],
+		"graze": result["graze"],
+		"bombs_used": result["bombs_used"],
+	}
 
 
 ## Reports every unset export with this node's path (CONVENTIONS "Setup errors are loud").

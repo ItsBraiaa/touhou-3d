@@ -86,6 +86,14 @@ const LABEL_BY_SCREEN: Dictionary[StringName, String] = {
 	ScreenRouter.DEFEAT: "Layout/RetryLocation",
 	ScreenRouter.RESULTS: "Layout/Heading",
 }
+## Results' four statistics (GUIDE Section 14 "Runtime text and presentation"): each
+## [method enter] param, by name, and the Label it fills. Load-bearing since F11-01.
+const RESULTS_VALUE_PATHS: Dictionary[String, String] = {
+	"clear_time": "Layout/TimeValue",
+	"score": "Layout/ScoreValue",
+	"graze": "Layout/GrazeValue",
+	"bombs_used": "Layout/BombsValue",
+}
 ## The keyboard hint at the bottom of the five full screens. Pause, Defeat and Results
 ## are authored without one.
 const FOOTER_PATH := ^"Layout/NavigationHint"
@@ -104,6 +112,8 @@ var _label: Label
 ## [member _label]'s authored text, restored when a screen is entered without the
 ## param that replaces it.
 var _authored_label_text: String = ""
+## Results' value Labels found in the scene, by param name; a missing one was reported.
+var _results_values: Dictionary[String, Label] = {}
 var _footer: Control
 
 
@@ -120,6 +130,8 @@ func _ready() -> void:
 			push_error("%s: screen %s has no Label at '%s'; its runtime text is skipped" % [get_path(), _screen, LABEL_BY_SCREEN[_screen]])
 		else:
 			_authored_label_text = _label.text
+	if _screen == ScreenRouter.RESULTS:
+		_find_results_values()
 	_footer = get_node_or_null(FOOTER_PATH) as Control
 
 
@@ -142,12 +154,13 @@ func get_screen_id() -> StringName:
 ## control at [param focus_path] (relative to this root) when it can take it, else to
 ## the first visible focusable control in tree order. Params by screen:
 ## [br]- Pause: `score` and `graze` (ints) fill `Layout/Score`; a missing one shows a dash.
-## [br]- Defeat: `checkpoint` (the latest Checkpoint's id) names the retry location;
-## absent or empty means the stage entry.
+## [br]- Defeat: `checkpoint` (the latest Checkpoint's `display_name`) names the retry
+## location; absent or empty means the stage entry.
 ## [br]- Results: `mode`, one of [constant RESULTS_CAMPAIGN_STAGE],
 ## [constant RESULTS_DIRECT_STAGE] or [constant RESULTS_FINAL_VICTORY], picks which of
 ## Continue and Replay is shown and the heading, and rebuilds the focus loop without
-## the hidden buttons.
+## the hidden buttons. `clear_time` (seconds) shows as `M:SS`, seconds floored, and
+## `score`, `graze` and `bombs_used` as integers; a missing one shows a dash.
 func enter(params: Dictionary, focus_path: NodePath) -> void:
 	show()
 	if _label != null:
@@ -158,6 +171,7 @@ func enter(params: Dictionary, focus_path: NodePath) -> void:
 			_label.text = "Início da fase" if checkpoint.is_empty() else "Último checkpoint · %s" % checkpoint
 	if _screen == ScreenRouter.RESULTS:
 		_apply_results_mode(StringName(params.get("mode", RESULTS_CAMPAIGN_STAGE)))
+		_write_results_values(params)
 	var target: Control = null
 	if not focus_path.is_empty():
 		target = get_node_or_null(focus_path) as Control
@@ -202,6 +216,32 @@ func _apply_results_mode(mode: StringName) -> void:
 		if button.visible:
 			loop.append(button)
 	_link_focus_loop(loop)
+
+
+## Finds Results' four value Labels, reporting each missing one once, here.
+func _find_results_values() -> void:
+	for key: String in RESULTS_VALUE_PATHS:
+		var value_label := get_node_or_null(RESULTS_VALUE_PATHS[key]) as Label
+		if value_label == null:
+			push_error("%s: screen %s has no Label at '%s'; its '%s' value is skipped" % [get_path(), _screen, RESULTS_VALUE_PATHS[key], key])
+			continue
+		_results_values[key] = value_label
+
+
+func _write_results_values(params: Dictionary) -> void:
+	for key: String in _results_values:
+		var text := "—"
+		if key in params:
+			text = _format_clear_time(float(params[key])) if key == "clear_time" else str(int(params[key]))
+		_results_values[key].text = text
+
+
+## [param seconds] as `M:SS`, the seconds floored: 125.9 is `2:05`. Claude's proposal.
+## Snapped to the millisecond first, so 180 ticks of 1/60 s, which sum to 2.99999, read
+## `0:03`.
+static func _format_clear_time(seconds: float) -> String:
+	var whole := floori(snappedf(maxf(seconds, 0.0), 0.001))
+	return "%d:%02d" % [floori(whole / 60.0), whole % 60]
 
 
 func _set_button_visible(path: String, shown: bool) -> void:
