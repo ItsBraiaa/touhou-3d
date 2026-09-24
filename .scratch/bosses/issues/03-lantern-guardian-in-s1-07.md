@@ -1,6 +1,7 @@
 # F12-03 Lantern Guardian in S1-07
 
 Status: todo
+Outcome (F12-03 part 1): Created the four dev-flagged Lantern Guardian content resources: three reusable patterns and the three-phase BossDefinition. Part 2 still owns all runtime integration and closes this ticket; no tests were added under the sprint rule.
 Type: integration
 parallel-safe: no
 Depends on: F12-02, F10-03
