@@ -79,14 +79,14 @@ func retry_into(combat: CombatState, run: RunState, encounters: EncounterMachine
 ## Begins the Restart flow from the stage-entry values, with no Checkpoint left:
 ## forgets every [Snapshot] with [method reset], returns [param run]'s statistics to
 ## the stage entry with [method RunState.restart_stage], restarts [param combat] at
-## the stage's entry Power Level with [method CombatState.start], and returns
-## [param encounters] to its setup state with [method EncounterMachine.reset]. F10
+## the stage's entry Power Level and Power Progress with [method CombatState.start],
+## and returns [param encounters] to its setup state with [method EncounterMachine.reset]. F10
 ## never calls this: Restart keeps F2-04's full stage reload. It is the core-level
 ## proof that Restart differs from Retry, and the reload-free Restart for later.
 func restart_into(combat: CombatState, run: RunState, encounters: EncounterMachine) -> void:
 	reset()
 	run.restart_stage()
-	combat.start(run.starting_power_level())
+	combat.start(run.starting_power_level(), run.starting_power_progress())
 	encounters.reset()
 
 

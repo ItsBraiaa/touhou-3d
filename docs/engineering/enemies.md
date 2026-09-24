@@ -2,7 +2,7 @@
 
 ## Purpose
 
-The enemy module separates authored common-Enemy values from the Node-free `EnemyModel` rules core. It owns health, exactly-once defeat, bounded Spirit/Sentry movement, a visible Anticipation cadence and sampled-aim attacks through `PatternEmitter`. Since F9-02 the `EnemyActor` adapter puts a model in the world: position, hostile spawns to the `ProjectileSystem`, the registered hit sphere, `targetable`, a dev Anticipation cue, the off-screen warning and the one defeat report. Spawning from Encounters and score application are the Director's (F10-01).
+The enemy module separates authored common-Enemy values from the Node-free `EnemyModel` rules core. It owns health, exactly-once defeat, bounded Spirit/Sentry movement, a visible Anticipation cadence and sampled-aim attacks through `PatternEmitter`. Since F9-02 the `EnemyActor` adapter puts a model in the world: position, hostile spawns to the `ProjectileSystem`, the registered hit sphere, `targetable`, the off-screen warning and the one defeat report. Since F15-02 it also plays the visual's Anticipation clip, flashes on each hit, turns toward the player and plays `Death` before freeing itself. Spawning from Encounters and score application are the Director's (F10-01).
 
 ## Files
 
@@ -63,7 +63,7 @@ At the end of Anticipation the model samples `player_position` once, starts its 
 
 | Export | Type | Required | Meaning |
 | --- | --- | --- | --- |
-| `visual_root` | `Node3D` | yes | `VisualRoot`, Astra's visual scene instance. Its scale is pulsed during Anticipation and restored after. |
+| `visual_root` | `Node3D` | yes | `VisualRoot`, Astra's visual scene instance. Since F15-02 the actor turns it (yaw only) toward the player, plays clips on its `Model/AnimationPlayer` and flashes its meshes; see "Presentation" below. |
 | `hit_volume` | `Area3D` | yes | `HitVolume`: layer 5 (bit 16), mask 0, monitoring and monitorable off. Its **node position is the hit center** (what `Targeting`, the HUD marker, Aim Assist and the registered sphere use), and the radius of the `SphereShape3D` in its first `CollisionShape3D` child is the hit radius. Node scale is ignored. |
 | `emitter` | `Marker3D` | yes | `Emitters/Main`, where the pattern leaves from. |
 
@@ -73,15 +73,15 @@ At the end of Anticipation the model samples `player_position` once, starts its 
 
 | Signal | Payload | Emitted when |
 | --- | --- | --- |
-| `threat_reported` | `side: int` | An Anticipation starts while the actor's origin is outside the current camera's frustum: -1 when it is left of the camera (against the camera's local +X), +1 otherwise. The owner forwards it to `Hud.show_threat(side, seconds)`. |
-| `defeated` | `enemy_id: StringName`, `encounter_id: StringName` | The model's health first reaches 0. Emitted once, after the actor left `targetable` and stopped physics, just before `queue_free()`. |
+| `threat_reported` | `side: int` | An Anticipation starts while the actor's origin is outside the current camera's frustum: -1 when it is left of the camera (against the camera's local +X), +1 otherwise. Since F15-02 at most once per Enemy, so a threat is warned when it is new, not on every attack (Astra's coalescing rule, `sound_effects/README.md`). The owner forwards it to `Hud.show_threat(side, seconds)`. |
+| `defeated` | `enemy_id: StringName`, `encounter_id: StringName` | The model's health first reaches 0. Emitted once and at once, on the lethal hit, after the actor left `targetable` and stopped physics (so it registers no hit sphere from the next tick). Since F15-02 the `Death` clip then plays and the actor frees itself when it ends (0.667 s); without the clip it frees at once. |
 
 ### Methods
 
 | Method | Called by | Effect |
 | --- | --- | --- |
 | `spawn_setup(definition: EnemyDefinition, enemy_id: StringName, encounter_id: StringName, rng: RandomNumberGenerator, projectile_system: ProjectileSystem, player: Node3D, bounds: AABB) -> bool` | The Director (F10-01), the arena harness | Call once, after `add_child` under `RuntimeActors` and with the actor at its spawn marker's global transform. Returns true when the Enemy started. Returns false and refuses with one `push_error` per problem (the actor stays inert, out of `targetable`, registering nothing, and the caller frees it): an actor outside the tree (one error, naming the node), a scene that failed its own check, a second call, a null or invalid definition (its `validate()` messages), an empty id, a null `rng` or `projectile_system`, a player null or outside the tree, bounds with no volume. Otherwise builds the `EnemyModel` from `global_position` (clamped into `bounds`), connects `anticipation_started` and `defeated` once, joins `targetable` and starts physics. |
-| `take_damage(damage: int)` | The `ProjectileSystem`, as the registered `on_damage` (player shots, and the Bomb through `damage_targets_in_radius`) | Forwards to the model. Ignored before `spawn_setup`, after defeat (the model's exactly-once rule), while the tree is paused, and for `damage <= 0`. |
+| `take_damage(damage: int)` | The `ProjectileSystem`, as the registered `on_damage` (player shots, and the Bomb through `damage_targets_in_radius`) | Forwards to the model and flashes the visual. Ignored before `spawn_setup`, after defeat (the model's exactly-once rule), while the tree is paused, and for `damage <= 0`. |
 | `get_health() -> int` | The harness readout, the Director | Remaining health, 0 before `spawn_setup`. |
 | `static threat_side(camera_transform: Transform3D, point: Vector3) -> int` | `_on_anticipation_started`, dev tools | -1 when `point` is left of the camera and +1 otherwise, straight ahead and behind included. |
 
@@ -93,11 +93,19 @@ Priority 0 (the default), so before `PlayerWeapon` (50) and the `ProjectileSyste
 2. `model.tick(delta, player_position, emitter.global_position - global_position)`.
 3. `global_position = model.get_position()`.
 4. `projectile_system.spawn()` for every returned hostile `ProjectileSpawn`.
-5. `projectile_system.register_target(get_instance_id(), hit_volume.global_position, radius, take_damage)`: the sphere lasts one tick, so a defeated actor, which stops physics, drops out on the next.
+5. `VisualRoot` turns toward the player (below).
+6. `projectile_system.register_target(get_instance_id(), hit_volume.global_position, radius, take_damage)`: the sphere lasts one tick, so a defeated actor, which stops physics, drops out on the next.
 
-### Anticipation cue and defeat
+### Presentation (F15-02)
 
-On every `anticipation_started` the actor kills its previous Tween and pulses `VisualRoot`'s scale to 1.3 times its authored scale and back, twice, over `anticipation_seconds` (the constants `ANTICIPATION_PULSES` and `ANTICIPATION_PULSE_SCALE`; Claude's placeholder until Astra picks a clip). The Tween is created by the actor, so it stops while the tree is paused. `Flying_Idle` keeps autoplaying on the visual's own `Model/AnimationPlayer`; no clip is played on defeat (Death playback is out of scope). Score is not the actor's: the Director reads `definition.score` when it receives `defeated`.
+`_ready` finds the visual's player at `VisualRoot/Model/AnimationPlayer` (ENEMY_VISUAL_HANDOFF) and checks three clips: its `autoplay` (`Flying_Idle`, the idle), the clip named by `VisualRoot`'s `metadata/anticipation_clip` (D-05: `Yes` for Spirits, `Punch` for Sentries) and `Death`. A missing player or a named clip it lacks is warned once with `push_warning` and that cue is skipped; an empty metadata value means no Anticipation clip.
+
+- **Anticipation.** On every `anticipation_started` the Anticipation clip plays once at `clip length / anticipation_seconds` speed, so it spans exactly the Anticipation (1.167 s over 1.0 s, speed 1.167), then the idle is queued at normal speed. It replaced F9-02's dev scale pulse.
+- **Hit flash.** Each accepted hit sets an additive, unshaded, fog-free overlay on every `MeshInstance3D` under `VisualRoot` and fades it from `HIT_FLASH_COLOR` (0.85 grey) to black over `HIT_FLASH_SECONDS` (0.12 s), then removes it, so an Enemy nobody is shooting draws no extra pass. Each actor builds its own material, so one Enemy's flash never lights another with the same visual. Held fire restarts the fade on every hit. `HitReact` is not played: it would restart on every shot.
+- **Facing.** Every tick `VisualRoot`'s local yaw eases toward the player about the actor's up axis, `1 - exp(-TURN_RATE * delta)` of the remaining angle with `TURN_RATE` 6 per second; `spawn_setup` snaps it. The visuals face their local +Z. Pitch and roll are never touched. A dying actor stops turning.
+- **Defeat.** `defeated` is emitted on the lethal hit, as before, so the Director scores and the Encounter advances at once. Then `Death` plays and a Tween of the actor frees it when the clip ends; the Tween stops while the tree is paused. A Retry removes every child of `RuntimeActors` and frees it, dying actors included, and their Tweens go with them. Checked headless: `retry_from_checkpoint` called while three enemies were mid-Death removed all three at once and freed them two frames later. Since F15-10's 1 s defeat beat, a 0.667 s Death has already ended when the Defeat overlay opens.
+
+All Tweens are the actor's own, so they stop while the tree is paused. Score is not the actor's: the Director reads `definition.score` when it receives `defeated`.
 
 ## Dependencies
 
@@ -126,7 +134,7 @@ Your final `scenes/enemies/spirit.tscn` and `sentry.tscn` can copy the dev tree 
 - `Emitters/Main` (`Marker3D`), where shots leave; at the hit center for now.
 - No `AnimationPlayer` of the prefab's own: the visual's `Model/AnimationPlayer` autoplays `Flying_Idle`.
 
-Tune the values in `content/enemies/*.tres` and `content/patterns/*.tres` and drop `metadata/dev` when reviewed (D-05). The health proposals follow F6-03's recorded fire: 1 damage every 0.1 s at Power Level 1, so 20 is about 2 s for a Spirit and 30 about 3 s for a Sentry (measured: a locked Spirit at 30 units falls in 2.35 s). Pick an Anticipation gesture if one of the clips reads well; the scale pulse is a placeholder.
+Tune the values in `content/enemies/*.tres` and `content/patterns/*.tres` and drop `metadata/dev` when reviewed (D-05). The health proposals follow F6-03's recorded fire: 1 damage every 0.1 s at Power Level 1, so 20 is about 2 s for a Spirit and 30 about 3 s for a Sentry (measured: a locked Spirit at 30 units falls in 2.35 s). The Anticipation gesture is your `metadata/anticipation_clip` on the visual's `VisualRoot` (D-05); change it there. The hit-flash colour and length and the turn rate are Claude's proposals (constants in `enemy_actor.gd`); send Claude new values to change them.
 
 ## Open issues
 
@@ -156,8 +164,7 @@ registration, hides the dev core visual, and emits `seal_destroyed` once.
 
 - The lateral figure-eight for DRIFT and vertical sine bob for HOVER are initial engineering proposals. Tune speed and range against authored Spirit and Sentry movement in the running arena; the model clamps movement to bounds but does not implement steering or collision avoidance.
 - **Locked shots miss close enemies (for trunk, F6-03).** From 10 to 16 units, once `CameraRig`'s lock framing blends in, the weapon's shots pass about 3.5 units from a Spirit's center, just outside the 10° main Aim Assist cone; from about 30 units they hit steadily. See [validation/enemies.md](../validation/enemies.md) "Finding for another lane".
-- The enemies never turn: a visual faces its authored +Z, toward a ship flying the Stage 1 route (−Z). Facing the player is not in F9-02.
-- No Death or HitReact playback and no hit flash; defeat frees the actor at once.
+- Facing, the hit flash and Death playback were added in F15-02 ("Presentation"). `HitReact` stays unused.
 - The off-screen test uses the actor's origin and the frustum only: an enemy hidden behind scenery but inside the frustum reports nothing, and vertical warnings are out of scope (GUIDE Section 15).
 
 ## Dormant Guards (F12-05)

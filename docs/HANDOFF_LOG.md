@@ -6,6 +6,130 @@ Files: `scripts/player/player_controller.gd`; `scripts/ui/menu_controller.gd`; `
 Change: The ship's Core now duplicates its authored material at runtime, pulses gently while idle, and raises its emission while Focus is active via `focus_changed`. Existing menu device updates now keep footers visible and switch them between keyboard and explicit gamepad text (`Analógico`, `A`, `B`), without glyph art. No tests added (sprint rule).
 Verification: A short headless run completed without script or error output. The existing menu contract assertion was minimally updated because F15-07 intentionally changes gamepad prompts from hidden to visible text; no new test was added. `tools/lane.ps1 land` is the remaining gate.
 Action required by trunk: none.
+## 2026-09-24 — Claude (path) — F15-03: boss feedback [shared]
+State: INTEGRATED_VERIFIED
+Files: `scripts/enemies/boss_controller.gd`; `scenes/enemies/storm_guardian.tscn` [shared] (one line on the `Enemy` root: `ring_cue = true`); `docs/engineering/bosses.md` (new "Presentation (F15-03)", export and wiring rows, Setup for Astra); `docs/engineering/enemies.md` (F15-02's Retry sentence corrected for F15-10's defeat beat); `docs/GUIDE.md` (the `boss_controller.gd` row); `docs/engineering/ROADMAP.md` (the F15-03 row).
+Change:
+- **Facing.** Every boss turns `VisualRoot` toward the player. The turn is yaw only, eased at rate 4 per second, and snapped at spawn. `Emitters/Main` and `HitVolume` do not turn. The Lantern and Storm rotation tracks animate `VisualRoot`'s children, not `VisualRoot`, so nothing fights the turn.
+- **Ring cue.** A new `ring_cue` export (group Cues, default off) is set only on the Storm Guardian. With it on, `spawn_setup` builds a hidden `RingCue` under the boss root, so it is freed with the boss. The cue is a flat torus, 1.5 × the hit radius (7.5), additive, unshaded, fog-free, and casts no shadow. Before each step whose Pattern is a RING at a fixed height, the cue appears at `Emitters/Main` + `height_offset` and grows from 0.3 to full size over the Anticipation. It hides when the rings fire, on the next step, and on a Phase's depletion. On the Storm Guardian only Círculos do Trovão qualifies, with cues at +8 and -8.
+Verification: a headless throwaway driver through `main.tscn`, run after syncing F15-01 and F15-10. Every check passed:
+- The yaw hits its target and eases.
+- No cue appears in Phases 0 and 2.
+- The high cue sits at emitter + 8 and the low cue at emitter - 8.
+- The cue grows from 0.33 to 0.92, stays frozen under Pause, and hides as the rings fire and at once on a mid-cue depletion.
+- The boss and its cue are freed with the stage after the victory, and by a Retry during a cue.
+- The Lantern Guardian faces the ship and has no cue.
+- Both stages clear.
+F15-02's driver was rerun on the same tree and passed: `retry_from_checkpoint` called while three enemies were mid-Death removed them at once. No tests (sprint rule).
+Action required by Astra: none required. `storm_guardian.tscn` gained only `ring_cue = true`. Set it on another boss to give its fixed-height rings the same cue. The cue's size, colour and growth and both turn rates are Claude's proposals; send Claude values to change them.
+Action required by trunk: none.
+## 2026-09-24 13:55 — Claude (trunk) — F15-12: 2 s of Invulnerability after a Checkpoint Retry
+State: INTEGRATED_VERIFIED
+Files: `scripts/combat/combat_state.gd` (`grant_invulnerability`, header); `scripts/session/game_session.gd` (`RETRY_INVULNERABILITY_SECONDS`, `_retry`); `docs/engineering/ROADMAP.md` (the F15-12 row).
+Change: the user said yes to respawn Invulnerability.
+- **The grant.** `CombatState.grant_invulnerability(seconds)` starts a window with no hit and no Bomb, and keeps a longer one that is already running. It is ignored unless the core is live, so never while paused or defeated.
+- **Retry.** A Checkpoint Retry grants 2.0 s right after the restore, which ends any window. The field's pass-through and the new ship's usual blink follow through `invulnerability_changed`.
+- **Restart.** A Restart, and a Retry before any Checkpoint (which is a Restart), get none.
+Verification: a headless `main.tscn` driver (throwaway, not in the repo).
+- Retry from CP1-A was invulnerable at once in the core, the field and the ship's blink. The ship was hidden on blink frames, and the window ended after 2.03 s, with everything off and the ship shown.
+- Restart and a pre-Checkpoint Retry were not invulnerable.
+- All four trunk F15 scenarios (01, 10, 11, 12) passed in one run on this build.
+No tests (sprint rule).
+Action required by Astra: tune `RETRY_INVULNERABILITY_SECONDS` (2.0 s is Claude's proposal).
+
+## 2026-09-24 — Astra (sol) — F16 controls/camera/dash plan and Claude orchestration [shared]
+State: PLANNED
+Files: `.scratch/controls-expansion/spec.md`, `CLAUDE_KICKOFF.md`, `issues/00` through `07`; `docs/engineering/controls-expansion-plan.md`, `ROADMAP.md` (new F16 section and Received row), `README.md` (plan pointer); `docs/HANDOFF_LOG.md`.
+Change: Wrote the user's requested plan for all gameplay/menu keyboard and controller bindings, Xbox/PlayStation labels, keyboard/mouse camera selection, recenter, and short lateral dashes. The user explicitly chose invulnerability: 3 units in 0.15 s, protected for 0.15 s, shared 0.8 s cooldown from activation; no Graze, no wall phasing, preserve longer hit/Bomb protection. Spec fixes capture/neutral/conflict/rollback/persistence rules, old-settings migration, mouse focus/pause lifecycle and first/last protection-tick ordering. Astra owns the exact Controls widget layout plus reusable row/cooldown/dash visual components; Claude owns scripts, persistence, InputMap and integration. Seven implementation tickets name dependencies, file boundaries and manual acceptance. F16-01/02 and later F16-04 versus 03/05 can overlap; trunk integration is serialized. A copyable kickoff tells Claude how to schedule the lanes and request Astra's work. No runtime file or test was edited and no implementation session was launched.
+Why: The user asked for a written plan for Astra's screen/layout work and for Claude to orchestrate the complete feature, after approving dash invulnerability. Existing F3 settings work is retained; its earlier no-remapping/no-glyph/no-migration exclusions are superseded only by this planned feature. The current export/package is not represented as containing F16.
+Validation: Planning self-review covers each requested feature, named dependencies, relative links, file ownership, proposed interfaces and the no-new-tests constraint. Existing `tools/lane.ps1 land` is the landing gate; final result is reported with the session's commit. Physical keyboard/controller and gameplay acceptance belong to F16-07 and are not claimed by this document work.
+Action required by Claude: Read `docs/engineering/controls-expansion-plan.md` and `.scratch/controls-expansion/CLAUDE_KICKOFF.md`; after implementation is requested, check lane availability and run the stated ticket sequence. Do not edit Astra's component geometry while she is authoring it, and never dispatch two writers into one worktree. Do not write tests or disposable test drivers. Physical Xbox, DualShock and DualSense results must be recorded individually; unavailable devices remain not verified.
+## 2026-09-24 13:50 — Claude (trunk) — F15-11: Power Progress carries into Campaign Stage 2
+State: INTEGRATED_VERIFIED
+Files:
+- `scripts/session/run_state.gd`: `_entry_power_progress`, `advance(power_level, power_progress = 0)`, `starting_power_progress()`, and `entry_power_progress` in `capture()` and `restore()`.
+- `scripts/session/game_session.gd`: `_continue_campaign`, `_begin_first_attempt`, `_restart_stage`.
+- `scripts/progression/checkpoint_store.gd`: `restart_into`.
+- Docs: `docs/engineering/run-flow.md` (the Continuar section; the open issue is closed), `docs/GUIDE.md` (one phrase in the GameSession row), `docs/engineering/ROADMAP.md` (the F15-11 row).
+Change: the user said yes to carrying Power Progress.
+- Results' Continuar passes the Power Level and the Power Progress Stage 1 ended with to `RunState.advance`, which keeps both as Stage 2's entry values.
+- Stage 2's first Attempt, a Restart, and a Retry before any Checkpoint start `CombatState` from both.
+- A Checkpoint Snapshot keeps the entry Progress, so a Restart after a Retry still returns to it.
+- A Direct Stage 2 still enters at Power Level 2 with 0.
+Verification: a headless `main.tscn` driver (throwaway, not in the repo).
+- Stage 1 ended at 2 with 2 of 5, and Campaign Stage 2 entered at 2 with 2.
+- A Pickup took it to 2/3, and Restart returned to 2/2. A defeat, then Retry before any Checkpoint, also returned to 2/2.
+- A Direct Stage 2 entered at 2/0.
+- A Stage 1 finished at level 3 entered Stage 2 at 3/0.
+No tests (sprint rule).
+Action required by Astra: none. PLANEJAMENTO Section 6's carry line may want "and the Power Progress".
+
+## 2026-09-24 13:45 — Claude (trunk) — F15-10: defeat beat before the Defeat overlay
+State: INTEGRATED_VERIFIED
+Files: `scripts/session/game_session.gd` (`DEFEAT_BEAT_SECONDS`, `_on_player_defeated`, new `_show_defeat`, the `_on_stage_completed` doc); `docs/engineering/ROADMAP.md` (the F15-10 row; the F15-01 row moved beside the other lanes' F15 rows, in their format).
+Change:
+- **Defeat beat.** The defeating hit plays `player_defeated` and starts a 1.0 s beat through F15-01's `_begin_beat`. The tree keeps running, and the ship's controls, the CombatState and Active Time are frozen. Hostile fire is cleared (safe inside the field's step, which reports its events after its sweep), and Pause is refused. Then the tree pauses under the Defeat overlay, as before.
+- **A clear during the beat.** A stage clear during the beat starts the victory beat, which cancels the defeat beat's finish, so Results follows and never Defeat. Before, a Defeat raised in the step of the last kill already gave way to Results.
+Verification: a headless `main.tscn` driver (throwaway, not in the repo).
+- Defeat showed 1.02 s after the hit. The tree was never paused and the controls were never on before it, and Clear Time did not move.
+- Pause pressed in the beat was refused.
+- Retry returned to the HUD with the tree running and the controls on.
+- A clear 10 ticks into the beat showed Results after the 2.5 s victory beat, and Defeat never appeared.
+- The F15-01 S1-07 scenario passed again on the same build, with path's F15-02 merged.
+No tests (sprint rule).
+Action required by Astra: none. 1.0 s is Claude's proposal; tune `DEFEAT_BEAT_SECONDS`.
+
+## 2026-09-24 13:45 — Claude (trunk) — F15-01: victory beat, and a silent Bomb clear
+State: INTEGRATED_VERIFIED
+Files: `scripts/session/game_session.gd` (`VICTORY_BEAT_SECONDS`, `_begin_beat`, `_cancel_beat`, `_show_results`, `_in_beat`, `_beat_serial`, `_bomb_clearing`); `tests/scene/test_game_session_flow.gd` (`test_a_completed_stage_shows_results` now waits out the beat before its three unchanged asserts: the sprint rule's minimal adjustment of a test the ticket broke on purpose); `docs/engineering/audio.md` (Open issues); `docs/engineering/ROADMAP.md` (the F15-01 row).
+Change:
+- **Victory beat.** A stage clear still completes the stage at once, so Clear Time stops at the kill. Then, for 2.5 s, the tree keeps running:
+  - the ship's controls and fire are off, and the CombatState is paused, so no hit, Bomb or Pickup is taken;
+  - hostile fire is cleared, and Grazes are ignored;
+  - Pause is refused.
+  After the beat the tree pauses and Results shows, with `stage_cleared` and the `STAGE_RESULT` line as before. A Defeat raised in the physics step of the last kill still gets Results at once, with no beat.
+- **Reuse.** `_begin_beat(seconds, finish)` and `_cancel_beat()` are the mechanism F15-10 reuses. An unload (Restart, Menu, Continuar, Jogar novamente) or a Retry cancels a beat in progress.
+- **Bomb clear.** Enemies killed by a Bomb's damage play no `enemy_defeated`; its `bomb_used` covers them. A boss it kills still rings `boss_defeated` once.
+Verification: implementer and reviewer agents, then a headless `main.tscn` driver through the real Stage 1 route to S1-07 (throwaway, not in the repo):
+- Results came 2.52 s (151 ticks) after the Lantern Guardian's defeat. The tree was never paused, the screen stayed on the HUD, controls were off and the CombatState paused on every tick, and Clear Time was frozen at the kill.
+- Pause pressed 1 s into the beat was refused.
+- The boss `Death` clip (0.67 s) and the shrine's `corrupted_to_calm` (2.4 s) both played to the end before Results.
+- A Bomb kill in S1-05 left 0 `enemy_defeated` voices and 1 `bomb_used`; an ordinary kill right after still sounded.
+No tests (sprint rule).
+Action required by Astra: none. 2.5 s is Claude's proposal (the shrine clip is 2.4 s); retune `VICTORY_BEAT_SECONDS` if F15-04's storm calm is longer.
+Action required by path: in F15-02, keep `EnemyActor`'s `defeated` report inside its damage call, before the Death clip ("report `defeated` at once"). The Bomb-clear flag is only set during that call.
+## 2026-09-24 — Claude (path) — F15-02: enemy feedback
+State: INTEGRATED_VERIFIED
+Files: `scripts/enemies/enemy_actor.gd`; `docs/engineering/enemies.md` (new "Presentation (F15-02)", signal and export rows, Setup for Astra, Open issues); `docs/GUIDE.md` (the `enemy_actor.gd` row); `docs/engineering/ROADMAP.md` (the F15-02 row).
+Change:
+- **Anticipation clip.** Each Anticipation plays the clip named by `VisualRoot`'s `metadata/anticipation_clip` (`Yes` for Spirits, `Punch` for Sentries) on `VisualRoot/Model/AnimationPlayer`, stretched to the Anticipation (1.167 s clip over 1.0 s, speed 1.167), then returns to `Flying_Idle`. The dev scale pulse is gone.
+- **Hit flash.** Each accepted hit flashes the meshes under `VisualRoot`. The flash is an additive, unshaded, fog-free overlay that fades from 0.85 grey to black in 0.12 s and is then removed. Each actor has its own material, so no other enemy lights up. `HitReact` is not used, because held fire would restart it on every shot.
+- **Death.** `defeated` still fires at once on the lethal hit. The actor leaves `targetable` and stops registering its hit sphere, and the Director scores and the Encounter advances. Then `Death` plays for 0.667 s, and the actor frees itself.
+- **Facing.** `VisualRoot` turns toward the player (yaw only, eased at rate 6 per second, snapped at spawn).
+- **Threats.** An Enemy warns once, on its first off-screen Anticipation. This is Astra's "new threat" rule.
+- A visual that lacks the player or a named clip gets one `push_warning`, and that cue is skipped.
+Verification: a headless throwaway driver (not in the repo), run after syncing F15-08's twilight and seal prefabs. Every check passed:
+- Arena harness: the clips and their speeds, the flash rising and then removed while the other enemy stays dark, the yaw target and the eased turn, one warning from three off-screen Anticipations, and a lethal hit. After that hit, `defeated` fired once at once, the actor was out of `targetable`, a Bomb at its center found 0 targets, it was still dying at 0.53 s and was freed by 0.73 s.
+- Retry: Stage 1 from CP1-A. Three S1-05 enemies were killed and died mid-Death; the score rose at once. A Defeat followed, all three were still dying under the pause, and after Retry none was left in the tree. The stage then cleared.
+- A Direct Stage 2 clear.
+- No `SCRIPT ERROR` and no clip warning.
+No tests (sprint rule).
+Action required by Astra: none required. To change the Anticipation gesture, edit `metadata/anticipation_clip` on a visual. The flash colour and length and the turn rate are Claude's proposals; send Claude values to change them.
+Action required by trunk: none. F15-01's victory beat will show a common enemy's `Death` too, since the actor now outlives its report by 0.667 s.
+
+## 2026-09-24 — OpenCode (oc-a) — F15-09 HUD edge cues
+State: DELIVERED
+Files: `scripts/ui/hud.gd`, `tests/scene/test_hud_contract.gd` (obsolete expectation only), `docs/engineering/ROADMAP.md`.
+Change: The locked target marker now remains visible when its projection is off-screen or behind the camera, clamped inside the screen edge and rotated toward the target. Hud builds a subtle full-screen boundary vignette in code and connects the bound ship's `edge_proximity_changed` through `Targeting`'s parent, with a short fade tween. No `hud.tscn` or Session edit.
+Verification: The existing HUD contract expectation for behind-camera hiding was minimally updated because F15-09 intentionally replaces it with an edge marker; no new test was added. `tools/lane.ps1 land` is the gate.
+Action required by trunk: the pre-existing behind-camera marker expectation is superseded by F15-09 behavior if an acceptance test still asserts hiding it.
+## 2026-09-24 — Astra (sol) — F15-08 enemy colour variants [shared]
+State: DELIVERED
+Files: `scenes/dev/spirit_twilight.tscn`, `scenes/dev/sentry_seal.tscn`, `scenes/stages/stage_01.tscn`, `scenes/stages/stage_02.tscn`, `content/stages/stage_01/s1_02.tres`, `s1_04.tres`, `s1_05.tres`, `content/stages/stage_02/s2_01.tres`, `s2_02.tres`, `s2_03.tres`, `s2_05.tres`, `docs/engineering/ROADMAP.md`.
+Change: New actor prefabs instance Astra's Twilight Spirit and seal Sentry visual roots with the original actor script, HitVolume radius, and emitter. Stage 1 assigns Lume to S1-02 wave 1, Twilight to wave 2, seal Sentries to S1-04, and mixed Spirit colors with lantern Sentries to S1-05. Stage 2's ordinary Spirit/Sentry waves use the violet pair. Each new kind maps to the same Spirit or Sentry EnemyDefinition resource, so health, score, pattern, collision and rewards remain unchanged. No tests added (sprint rule).
+Action required by Claude: none; scene wiring is declared here because it is Claude-owned under GUIDE Section 3.
+
+
 ## 2026-09-24 — OpenCode (oc-a) — F15-06 checkpoint glow and Gate fade
 State: DELIVERED
 Files: `scripts/progression/checkpoint.gd`, `scripts/progression/gate.gd`, `scripts/progression/stage_director.gd`, `docs/engineering/ROADMAP.md`.

@@ -94,7 +94,15 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | F15-05 | Delivery-day polish: UI truth | — | — | scene | no | sol | done (2026-09-24: Controls says Setas, without a mouse-camera promise; Results keeps Menu principal and Créditos in the first two slots so final victory has no empty button slot; no new tests) |
 | F15-07 | Delivery-day polish: ship and menu cues | — | — | adapter | no | oc-b | done (2026-09-24: the Core gets a gentle idle pulse and brighter Focus state through `focus_changed`; menu footers switch to explicit gamepad text from the existing input-device callback; no new tests) |
 | F15-06 | Delivery-day polish: checkpoint glow and Gate fade | — | — | adapter | no | oc-a | done (2026-09-24: Checkpoint activation blooms a code-built light and restored progression applies it instantly; Gate opening fades ClosedVisual while Retry/Restart restoration is instant and idempotent; no new tests) |
+| F15-09 | Delivery-day polish: HUD edge cues | — | — | adapter | no | oc-a | done (2026-09-24: locked targets now clamp to an edge marker with directional rotation, and a code-built boundary vignette follows `edge_proximity_changed` through `Hud.bind`; no scene or Session edit, no new tests) |
 | F15-04 | Delivery-day polish: storm resolution | — | — | scene+adapter | no | sol | done (2026-09-24: keyed boss-defeat presentation; Storm Guardian calms Stage 2 fog, sky energy and light, Tempest Sentinel leaves it unchanged; Stage 1 shrine keyed to Lantern Guardian; Retry rewinds presentation; no new tests) |
+| F15-08 | Delivery-day polish: enemy colour variants | — | — | scene+content | no | sol | done (2026-09-24: Twilight Spirits in S1-02 wave 2 and mixed S1-05; seal Sentries in S1-04; violet Spirit/Sentry pair throughout Stage 2; identical Spirit/Sentry definitions and counts; no new tests) |
+| F15-02 | Delivery-day polish: enemy feedback | — | — | adapter | no | path | done (2026-09-24: `EnemyActor` plays the visual's `metadata/anticipation_clip` stretched over the Anticipation, replacing the dev pulse; an additive 0.12 s overlay flash on each accepted hit, per-actor material; `defeated` still at once on the lethal hit, then `Death` (0.667 s) before freeing; `VisualRoot` yaw eased toward the player; one threat warning per Enemy; headless arena and Stage 1 + Stage 2 clears green, and a Retry over three mid-Death enemies frees them all; no tests per the sprint rule) |
+| F15-03 | Delivery-day polish: boss feedback | — | — | adapter | no | path | done (2026-09-24: `BossController` turns `VisualRoot` (yaw only, eased, rate 4) toward the player; new `ring_cue` export, on in `storm_guardian.tscn` [shared], shows a code-built additive ring at emitter + `height_offset` over each fixed-height RING step's Anticipation, so Círculos do Trovão warns at +8 and -8; hidden on a Phase's depletion, frozen under Pause, a child of the boss freed with it; headless Storm Guardian fight, Retry mid-cue and both stage clears green; no tests per the sprint rule) |
+| F15-01 | Delivery-day polish: victory beat | — | — | integration | no | trunk | done (2026-09-24: a stage clear holds a 2.5 s beat with the tree running, ship controls and CombatState frozen, Active Time stopped, hostile fire cleared and Pause refused, then Results; Bomb-clear kills play no `enemy_defeated`; headless S1-07 driver: Results 2.52 s after the kill, the boss Death clip (0.67 s) and the shrine calm (2.4 s) play in full first; one scene test waits out the beat; no new tests per the sprint rule) |
+| F15-10 | Delivery-day polish: defeat beat | — | — | integration | no | trunk | done (2026-09-24: the defeating hit holds a 1.0 s beat through F15-01's mechanism (tree running, ship, CombatState and Active Time frozen, hostile fire cleared, Pause refused), then the Defeat overlay over a paused tree; a stage clear inside it gives Results, never Defeat; headless driver: Defeat 1.02 s after the hit, Retry resumes with controls on; no tests per the sprint rule) |
+| F15-11 | Delivery-day polish: Power Progress carries into Campaign Stage 2 | — | — | core+integration | no | trunk | done (2026-09-24, the user said yes: `RunState.advance(power_level, power_progress)` keeps both as entry values (`starting_power_progress()`, `entry_power_progress` in the capture); Continuar, Restart and `CheckpointStore.restart_into` start `CombatState` from both; headless driver: Stage 1 at 2/2 enters Stage 2 at 2/2, Restart and a pre-Checkpoint Retry return to 2/2, Direct Stage 2 enters at 2/0, Stage 1 at level 3 enters at 3/0; no tests per the sprint rule) |
+| F15-12 | Delivery-day polish: Invulnerability after Retry | — | — | core+integration | no | trunk | done (2026-09-24, the user said yes: `CombatState.grant_invulnerability(seconds)`, ignored unless live; `_retry` grants `RETRY_INVULNERABILITY_SECONDS` 2.0 (Claude's proposal) after the Checkpoint restore, so the field and the ship's blink follow the usual signal; headless driver: Retry from CP1-A invulnerable 2.03 s with the flicker, then off; Restart and a pre-Checkpoint Retry get none; all four F15 trunk scenarios green together; no tests per the sprint rule) |
 | F14 | Delivery | `delivery` | 00 plan | docs | no | — | done (one-pass planning) |
 | | | | 01 export-and-run-outside-editor | integration | no | trunk | done (2026-09-24: swap step applied D-02 meshes, Familiar and blast and D-07 shrine exports; release build of `8061d77` exported and run outside the repo: D3D12 Forward+, RX 9070 XT, no fallback, 1280 × 720, V-Sync 60; Storm Guardian and Lantern Guardian 59–60 FPS, over 1,100 uncapped; no ERROR or WARNING; `validation/export.md`. Presentation computer not verified) |
 | | | | 02 package-and-acceptance-record | tooling | no | oc-b | done (2026-09-24: `tools/package.ps1` builds `build/package/Touhou-3D-<yyyyMMdd>.zip` and verifies the extracted copy — project import, the suite, and a 300-frame boot — `PACKAGE_OK`; fixed the part-1 archive root so the zip carries its `Touhou-3D/` folder; re-exported byte-identical to F14-01; `validation/acceptance.md` fills all 32 checks with no fails and the human-pass items marked owed; three credit gaps requested from Astra; no tests per the sprint rule) |
@@ -108,6 +116,23 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | | | | 08 enemy-visuals-duplicate-parts | design | — | oc-a | done (2026-09-24: Part 1 confirmed duplicate glTF and embedded model parts in all four visuals; Part 2 removed the instance links, post-fix counts and validator clean) |
 
 Order rationale: Player before Menus (highest UX risk and GUIDE Section 13's assignment). Audio buses are created in F0-03 so F3 can bind Options to them. Enemies (F9) come before the Stage Director (F10) so the Director is integrated against real Waves. The sprint's lane queues, checkpoints and kickoff prompts are in [SPRINT.md](SPRINT.md).
+
+## F16 — Controls, camera and dash expansion
+
+User-requested on 2026-09-24; implementation is planned, not part of the already exported build. [Execution plan](controls-expansion-plan.md), [design spec](../../.scratch/controls-expansion/spec.md), [Claude orchestration kickoff](../../.scratch/controls-expansion/CLAUDE_KICKOFF.md). The user explicitly selected dash invulnerability. No new tests; use the existing lane gate and manual acceptance.
+
+| Ticket | Owner / lane | Depends on | Status |
+| --- | --- | --- | --- |
+| F16-00 plan-and-orchestration | Astra / sol | F3-04, F7-02 | done (spec, seven implementation tickets, layout contract and Claude kickoff) |
+| F16-01 controls-layout-and-dash-visuals | Astra / sol | F16-00 | todo |
+| F16-02 binding-profiles-and-persistence | Claude / trunk | F16-00 | todo |
+| F16-03 rebind-workflow-and-prompts | Claude / trunk | F16-01, F16-02 | todo |
+| F16-04 mouse-camera-and-recenter | Claude / path | F16-02 | todo |
+| F16-05 invulnerable-lateral-dash | Claude / trunk | F16-03 | todo |
+| F16-06 session-camera-and-controls-integration | Claude / trunk | F16-03, F16-04, F16-05 | todo |
+| F16-07 controls-visual-and-device-acceptance | Astra / sol; Claude engineering fixes | F16-06 | todo |
+
+Claude schedules this feature around existing lane occupancy. F16-01/02 may overlap; F16-04 may overlap 03/05. Session, InputMap, player ship and integration edits are serialized in trunk. This section does not dispatch or interrupt another lane.
 
 ## Risk
 
@@ -177,6 +202,7 @@ Stage 2 scene ticket: `.scratch/stage-02-area/issues/01-mountain-route.md` — *
 
 | Date | Deliverable | Where | State |
 | --- | --- | --- | --- |
+| 2026-09-24 | F16 controls/settings screen, mouse camera, recenter and invulnerable dash plan; Astra/Claude file boundaries and orchestration tickets | `.scratch/controls-expansion/`, `docs/engineering/controls-expansion-plan.md` | PLANNED |
 | 2026-09-22 | F1 design decisions, retired generator, lossless enemy atlas imports; Inspector flight tuning blocked by stopped Computer Use | `.scratch/player-flight/issues/05-astra-design-pass.md`, `docs/engineering/player-flight.md` Open issues | PARTIAL / BLOCKED |
 | 2026-09-21 | Stage 2 textured mountain route, vegetation, ambient motion, seven encounters, seals and checkpoints | `scenes/stages/stage_02.tscn`, `docs/STAGE_02_HANDOFF.md` | SCENE_READY_STATIC |
 | 2026-09-20 | Player ship and static arena | `scenes/player/player_ship.tscn`, `scenes/tests/combat_arena.tscn`, GUIDE Section 13 | SCENE_READY |

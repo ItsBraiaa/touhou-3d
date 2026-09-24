@@ -11,7 +11,9 @@ extends Node3D
 ## Phase is depleted, plays cues only by clip names the assigned [AnimationPlayer] really
 ## has, warns when a step starts off-screen, and reports the fight through signals shaped
 ## for the HUD boss panel ([method Hud.show_boss] and its siblings), which the owner
-## connects (F12-03). The score is the Director's, through [method get_score].
+## connects (F12-03). Since F15-03 it turns `VisualRoot` toward the player and, with
+## [member ring_cue] on, shows a ring at the height of each coming ring. The score is the
+## Director's, through [method get_score].
 
 
 ## The fight began: [param display_name] (Portuguese, from the Definition) and its
@@ -41,9 +43,19 @@ const TARGETABLE_GROUP := &"targetable"
 ## seconds per cycle.
 const HOVER_AMPLITUDE := 0.6
 const HOVER_PERIOD := 4.0
+## How fast `VisualRoot` turns toward the player, per second (exponential ease; slower
+## than a common Enemy's, for the bigger body). The visuals face their local +Z.
+const TURN_RATE := 4.0
+## The ring cue: its radius as a multiple of the hit radius, the scale it grows from over
+## the Anticipation, its tube thickness in world units and its additive colour.
+const RING_CUE_RADIUS_FACTOR := 1.5
+const RING_CUE_START_SCALE := 0.3
+const RING_CUE_THICKNESS := 0.3
+const RING_CUE_COLOR := Color(0.55, 0.8, 1.0)
 
 @export_group("Scene references")
-## The presentation: Astra's boss visual (the dev prefab uses a primitive mesh).
+## The presentation: Astra's boss visual (the dev prefab uses a primitive mesh), turned
+## (yaw only) toward the player.
 @export var visual_root: Node3D
 ## The hit volume: an [Area3D] on layer 5 (bit 16) with monitoring off, whose first
 ## [CollisionShape3D] child holds a [SphereShape3D]. Its node position is the hit center
@@ -65,7 +77,16 @@ const HOVER_PERIOD := 4.0
 ## Played on defeat; the boss is freed when it ends. Empty means freed at once.
 @export var defeat_clip: StringName
 
+@export_group("Cues")
+## Círculos do Trovão's cue (STAGE_DESIGN, Stage 2 final boss): before each step whose
+## Pattern is a RING at a fixed height (not [member AttackStepDefinition.follow_player_height]),
+## a code-built ring appears at the height the rings will leave from and grows over the
+## step's Anticipation. It is a child of this node, so it is freed with the boss. Only the
+## Storm Guardian sets it.
+@export var ring_cue: bool = false
+
 var _machine: BossMachine
+var _definition: BossDefinition
 var _projectile_system: ProjectileSystem
 var _player: Node3D
 var _player_position := Vector3.ZERO
@@ -78,6 +99,9 @@ var _idle: StringName = &""
 var _step: StringName = &""
 var _phase_cue: StringName = &""
 var _defeat: StringName = &""
+## Built in [method spawn_setup] when [member ring_cue] is on; hidden between cues.
+var _ring_cue: MeshInstance3D
+var _ring_cue_tween: Tween
 
 
 func _ready() -> void:
@@ -95,6 +119,7 @@ func _physics_process(delta: float) -> void:
 	global_position = (_anchor + bob).clamp(_bounds.position, _bounds.end)
 	for request: ProjectileSpawn in _machine.tick(delta, emitter.global_position, _player_position):
 		_projectile_system.spawn(request)
+	_turn_visual(1.0 - exp(-TURN_RATE * delta))
 	_projectile_system.register_target(get_instance_id(), hit_volume.global_position, _hit_radius, take_damage)
 
 
@@ -129,6 +154,10 @@ func spawn_setup(
 	_step = _checked_clip(step_clip, "step_clip")
 	_phase_cue = _checked_clip(phase_clip, "phase_clip")
 	_defeat = _checked_clip(defeat_clip, "defeat_clip")
+	_turn_visual(1.0)
+	if ring_cue:
+		_ring_cue = _build_ring_cue()
+	_definition = definition
 	_machine = BossMachine.new()
 	_machine.setup(definition, enemy_id, encounter_id, rng)
 	_machine.phase_changed.connect(_on_machine_phase_changed)
@@ -166,15 +195,18 @@ func _on_machine_phase_changed(phase_index: int, attack_name: String) -> void:
 	phase_changed.emit(phase_index, attack_name)
 
 
-func _on_machine_step_started(_step_index: int) -> void:
+func _on_machine_step_started(step_index: int) -> void:
 	_play(_step)
+	_show_ring_cue(_definition.phases[_machine.get_phase_index()].attack.steps[step_index])
 	var camera := get_viewport().get_camera_3d()
 	var center := hit_volume.global_position
 	if camera != null and not camera.is_position_in_frustum(center):
 		threat_reported.emit(EnemyActor.threat_side(camera.global_transform, center))
 
 
+## A depleted Phase: its coming ring is cancelled with the hostile fire.
 func _on_machine_hostile_clear_requested() -> void:
+	_hide_ring_cue()
 	_projectile_system.clear_hostile_all()
 
 
@@ -200,6 +232,71 @@ func _play(clip: StringName) -> void:
 	animation_player.play(clip)
 	if clip != _idle and _idle != &"":
 		animation_player.queue(_idle)
+
+
+## Turns `VisualRoot` about the boss's up axis toward the player by [param weight] of
+## the remaining angle (1.0 snaps). Yaw only: the visual never tilts. A defeated boss,
+## which stops physics, stops turning.
+func _turn_visual(weight: float) -> void:
+	var local_offset := global_transform.basis.inverse() * (_player_position - global_position)
+	if is_zero_approx(local_offset.x) and is_zero_approx(local_offset.z):
+		return
+	var target_yaw := atan2(local_offset.x, local_offset.z)
+	visual_root.rotation.y = lerp_angle(visual_root.rotation.y, target_yaw, weight)
+
+
+## The hidden ring cue: a flat [TorusMesh] around the boss's vertical axis, additive,
+## unshaded and fog-free so it reads through the storm, casting no shadow.
+func _build_ring_cue() -> MeshInstance3D:
+	var radius := _hit_radius * RING_CUE_RADIUS_FACTOR
+	var material := StandardMaterial3D.new()
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	material.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	material.albedo_color = RING_CUE_COLOR
+	material.disable_fog = true
+	var torus := TorusMesh.new()
+	torus.inner_radius = radius - RING_CUE_THICKNESS
+	torus.outer_radius = radius
+	torus.rings = 64
+	torus.ring_segments = 8
+	torus.material = material
+	var cue := MeshInstance3D.new()
+	cue.name = "RingCue"
+	cue.mesh = torus
+	cue.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	cue.visible = false
+	add_child(cue)
+	return cue
+
+
+## Shows the ring cue for [param step] when it is a RING at a fixed height: at
+## `Emitters/Main` raised by the step's `height_offset`, where the machine will emit it
+## (the Pattern's own per-volley `height_offsets` are not shown), growing to full size
+## over the Anticipation and hidden when it ends. A child of this node, so it rides the
+## hover with the emission origin. Any other step hides a cue still showing.
+func _show_ring_cue(step: AttackStepDefinition) -> void:
+	if _ring_cue == null:
+		return
+	_hide_ring_cue()
+	if step.pattern.shape != PatternDefinition.Shape.RING or step.follow_player_height:
+		return
+	_ring_cue.global_position = emitter.global_position + Vector3.UP * step.height_offset
+	_ring_cue.scale = Vector3.ONE * RING_CUE_START_SCALE
+	_ring_cue.visible = true
+	# A Tween of this node on the physics clock, so it keeps pace with the machine and
+	# stops while the tree is paused.
+	_ring_cue_tween = create_tween().set_process_mode(Tween.TWEEN_PROCESS_PHYSICS)
+	_ring_cue_tween.tween_property(_ring_cue, ^"scale", Vector3.ONE, step.anticipation_seconds) \
+			.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	_ring_cue_tween.tween_callback(_ring_cue.hide)
+
+
+func _hide_ring_cue() -> void:
+	if _ring_cue == null:
+		return
+	if _ring_cue_tween != null:
+		_ring_cue_tween.kill()
+	_ring_cue.hide()
 
 
 ## [param clip] when it can be played, otherwise &"" after one warning naming

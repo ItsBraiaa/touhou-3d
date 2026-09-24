@@ -50,6 +50,7 @@ const MAX_PHASES := 3
 var _combat_state: CombatState
 var _targeting: Targeting
 var _camera: Camera3D
+var _player: PlayerController
 ## Node the marker projects: the locked target's `HitVolume`, as [Targeting] measures
 ## it, or the target itself when it has none. Null while nothing is locked; a freed
 ## target leaves it invalid, never null.
@@ -68,6 +69,8 @@ var _bomb_2: CanvasItem
 var _power_value: Label
 var _power_progress: ProgressBar
 var _target_marker: Control
+var _boundary_vignette: ColorRect
+var _vignette_tween: Tween
 var _boss_status: CanvasItem
 var _boss_name: Label
 var _phase_bars: Array[ProgressBar] = []
@@ -88,6 +91,7 @@ func _ready() -> void:
 	_power_value = _require(POWER_VALUE_PATH) as Label
 	_power_progress = _require(POWER_PROGRESS_PATH) as ProgressBar
 	_target_marker = _require(TARGET_MARKER_PATH) as Control
+	_create_boundary_vignette()
 	_boss_status = _require(BOSS_STATUS_PATH) as CanvasItem
 	_boss_name = _require(BOSS_NAME_PATH) as Label
 	for path: NodePath in PHASE_BAR_PATHS:
@@ -140,6 +144,9 @@ func bind(combat_state: CombatState, targeting: Targeting, camera: Camera3D) -> 
 	_combat_state.bombs_changed.connect(_on_bombs_changed)
 	_combat_state.power_changed.connect(_on_power_changed)
 	_targeting.target_changed.connect(_on_target_changed)
+	_player = _targeting.get_parent() as PlayerController
+	if _player != null:
+		_player.edge_proximity_changed.connect(_on_edge_proximity_changed)
 	_on_health_changed(_combat_state.get_health())
 	_on_shield_changed(_combat_state.has_shield())
 	_on_bombs_changed(_combat_state.get_bombs())
@@ -159,9 +166,12 @@ func unbind() -> void:
 	# The HUD outlives every ship; a freed Targeting has already dropped its connections.
 	if is_instance_valid(_targeting):
 		_targeting.target_changed.disconnect(_on_target_changed)
+	if is_instance_valid(_player):
+		_player.edge_proximity_changed.disconnect(_on_edge_proximity_changed)
 	_combat_state = null
 	_targeting = null
 	_camera = null
+	_player = null
 	_marker_point = null
 	if not _configured:
 		return
@@ -169,6 +179,7 @@ func unbind() -> void:
 	hide_boss()
 	for index: int in _threats.size():
 		_hide_threat(index)
+	_set_vignette_strength(0.0)
 
 
 ## Shows the boss bar named [param display_name] (already in Portuguese, from the boss
@@ -250,18 +261,66 @@ func show_threat(side: int, seconds: float) -> void:
 	_threats[index].show()
 
 
-## The marker is centered on the projected point, and hidden unless bound, locked on a
-## live target and that target is in front of the camera.
+## The marker follows an on-screen target, or clamps to the nearest screen edge and points
+## toward a locked target that is off-screen or behind the camera.
 func _update_target_marker() -> void:
 	if not is_instance_valid(_marker_point) or not is_instance_valid(_camera):
 		_target_marker.hide()
 		return
 	var point := _marker_point.global_position
-	if _camera.is_position_behind(point):
-		_target_marker.hide()
-		return
-	_target_marker.position = _camera.unproject_position(point) - _target_marker.size * 0.5
+	var projected := _camera.unproject_position(point)
+	var viewport_size := get_viewport_rect().size
+	var center := viewport_size * 0.5
+	var direction := projected - center
+	var margin := maxf(_target_marker.size.x, _target_marker.size.y) * 0.5 + 12.0
+	var bounds := Rect2(Vector2(margin, margin), viewport_size - Vector2.ONE * margin * 2.0)
+	var on_screen := not _camera.is_position_behind(point) and bounds.has_point(projected)
+	if on_screen:
+		_target_marker.position = projected - _target_marker.size * 0.5
+		_target_marker.rotation = 0.0
+	else:
+		if direction.length_squared() < 0.01:
+			direction = Vector2.UP
+		var scale := minf(bounds.size.x / (absf(direction.x) * 2.0), bounds.size.y / (absf(direction.y) * 2.0))
+		if is_inf(scale) or is_nan(scale):
+			scale = 1.0
+		var edge := center + direction * scale
+		edge.x = clampf(edge.x, bounds.position.x, bounds.end.x)
+		edge.y = clampf(edge.y, bounds.position.y, bounds.end.y)
+		_target_marker.position = edge - _target_marker.size * 0.5
+		_target_marker.rotation = direction.angle() + PI * 0.5
 	_target_marker.show()
+
+
+func _create_boundary_vignette() -> void:
+	_boundary_vignette = ColorRect.new()
+	_boundary_vignette.name = "BoundaryVignette"
+	_boundary_vignette.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_boundary_vignette.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_boundary_vignette.modulate.a = 0.0
+	var shader := Shader.new()
+	shader.code = "shader_type canvas_item;\n" + \
+		"void fragment() { vec2 edge = min(UV, vec2(1.0) - UV); " + \
+		"float amount = 1.0 - smoothstep(0.0, 0.2, min(edge.x, edge.y)); " + \
+		"COLOR = vec4(0.12, 0.62, 0.68, amount * 0.42); }"
+	var material := ShaderMaterial.new()
+	material.shader = shader
+	_boundary_vignette.material = material
+	add_child(_boundary_vignette)
+	move_child(_boundary_vignette, 0)
+
+
+func _on_edge_proximity_changed(value: float) -> void:
+	_set_vignette_strength(clampf(value, 0.0, 1.0))
+
+
+func _set_vignette_strength(value: float) -> void:
+	if _boundary_vignette == null:
+		return
+	if _vignette_tween != null:
+		_vignette_tween.kill()
+	_vignette_tween = create_tween()
+	_vignette_tween.tween_property(_boundary_vignette, ^"modulate:a", value, 0.18)
 
 
 func _reset_phase_bar(index: int) -> void:

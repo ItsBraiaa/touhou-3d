@@ -174,5 +174,5 @@ No scene attachment is required from Astra: `Main/Audio` is in Claude's `main.ts
 - The listening pass on Astra's revised selection is owed by the human pass (F14-02).
 - Music ships silent: D-01 found no permitted track, so `music_tracks` is empty and every music call is a no-op by design. A cleared track only needs a `music_tracks` entry in `main.tscn`.
 - Bursts are capped by design (ENGINEERING_BRIEF 4.E): a Wave killed in one tick or five Power Pickups magnetized together play one or two sounds, not one per emission (see [validation/audio.md](../validation/audio.md)).
-- Two of Astra's producer-coalescing rules are not built: a warning only for a new threat, and no ordinary death sounds during a Bomb clear. (Each ending once and `stage_cleared` after the bell are built; see "Transitions".)
+- One of Astra's producer-coalescing rules is not built: a warning only for a new threat (F15-02's). Since F15-01 the kills of a Bomb's clear play no `enemy_defeated`, only its `bomb_used` (a boss it kills still rings `boss_defeated`). Each ending once and `stage_cleared` after the bell are built; see "Transitions". Since F15-01 `stage_cleared` plays when Results shows, 2.5 s after the kill, after the victory beat.
 - No pitch variation, no 3D audio, no distinct Back sound (ticket out of scope).

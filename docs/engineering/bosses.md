@@ -87,7 +87,7 @@ Each has `validate() -> PackedStringArray`. `BossDefinition.validate()` reports 
 
 | Export | Type | Required | Meaning |
 | --- | --- | --- | --- |
-| `visual_root` | `Node3D` | yes | `VisualRoot`, the boss visual. |
+| `visual_root` | `Node3D` | yes | `VisualRoot`, the boss visual. Since F15-03 turned (yaw only) toward the player; see "Presentation (F15-03)". |
 | `hit_volume` | `Area3D` | yes | `HitVolume`: layer 5 (bit 16), mask 0, monitoring and monitorable off. Its **node position is the hit center** (Target Lock, the HUD marker, Aim Assist, the registered sphere and the off-screen test all use it), and the `SphereShape3D` in its first `CollisionShape3D` child gives the radius. Astra's boss scenes already place the `HitVolume` node itself at the center. |
 | `emitter` | `Marker3D` | yes | `Emitters/Main`, the emission origin handed to `BossMachine.tick` (a step's `height_offset` or `follow_player_height` then applies). |
 | `animation_player` | `AnimationPlayer` | no | Usually `VisualRoot/Model/AnimationPlayer`. Without it no clip plays. |
@@ -95,6 +95,7 @@ Each has `validate() -> PackedStringArray`. `BossDefinition.validate()` reports 
 | `step_clip` | `StringName` | no | Played when each step's Anticipation begins. |
 | `phase_clip` | `StringName` | no | Played when a Phase after the first begins (the D-03 and D-04 sprint note). |
 | `defeat_clip` | `StringName` | no | Played on defeat; the boss is freed when its length has elapsed. |
+| `ring_cue` | `bool` | no | F15-03, group **Cues**, default off: the Círculos do Trovão ring cue before every RING step at a fixed height. Only `storm_guardian.tscn` sets it. |
 
 An empty clip means no cue. At `spawn_setup` each configured clip is checked with `animation_player.has_animation()`: one missing (or set without a player) is reported once with `push_warning` naming the field and skipped. `_ready` reports a missing reference or a first `CollisionShape3D` without a positive-radius sphere with `push_error` and disables the node; physics stays off until `spawn_setup`.
 
@@ -120,14 +121,20 @@ Shaped for the HUD boss panel (F4-03); the owner connects them (F12-03, the harn
 
 ### Each physics tick (after `spawn_setup`)
 
-Priority 0, before `PlayerWeapon` (50) and the `ProjectileSystem` (100): read the player's position while it is valid and in the tree (the last one otherwise); hover (`anchor + (0, HOVER_AMPLITUDE × sin(2π t / HOVER_PERIOD), 0)`, 0.6 units over 4 s, clamped into `bounds`; Claude's placeholder); `machine.tick(delta, emitter.global_position, player_position)`; spawn every request; `register_target(get_instance_id(), hit_volume.global_position, radius, take_damage)`.
+Priority 0, before `PlayerWeapon` (50) and the `ProjectileSystem` (100): read the player's position while it is valid and in the tree (the last one otherwise); hover (`anchor + (0, HOVER_AMPLITUDE × sin(2π t / HOVER_PERIOD), 0)`, 0.6 units over 4 s, clamped into `bounds`; Claude's placeholder); `machine.tick(delta, emitter.global_position, player_position)`; spawn every request; turn `VisualRoot` toward the player; `register_target(get_instance_id(), hit_volume.global_position, radius, take_damage)`.
 
 ### Machine wiring
 
-- `hostile_clear_requested` → `projectile_system.clear_hostile_all()` (safe inside the field's event dispatch: it only removes Projectiles).
-- `step_started` → `step_clip`, then the off-screen check.
+- `hostile_clear_requested` → hide the ring cue, then `projectile_system.clear_hostile_all()` (safe inside the field's event dispatch: it only removes Projectiles).
+- `step_started` → `step_clip`, the ring cue for that step, then the off-screen check.
 - `phase_changed` → `phase_clip` for an index above 0, then re-emitted; `phase_health_changed` re-emitted unchanged.
 - `defeated` → leave `targetable`, stop physics (no more registration), emit `defeated` once, then `queue_free()` at once, or after `defeat_clip` through a Tween of the boss (so the wait stands still while the tree is paused).
+
+### Presentation (F15-03)
+
+- **Facing.** Every tick `VisualRoot`'s local yaw eases toward the player about the boss's up axis, `1 - exp(-TURN_RATE * delta)` of the remaining angle with `TURN_RATE` 4 per second (a common Enemy's is 6); `spawn_setup` snaps it. The visuals face their local +Z, and the boss markers have no rotation. Pitch and roll are never touched, and `Emitters/Main` and `HitVolume` do not turn. The Lantern Guardian's `LanternMotion` and the Storm Guardian's rotation tracks animate `VisualRoot`'s children, not `VisualRoot`, so nothing fights the turn. A defeated boss stops turning.
+- **Ring cue** (with `ring_cue` on; STAGE_DESIGN "Círculos do Trovão: show a brief ring-shaped cue at the next attack height"). `spawn_setup` builds one hidden `RingCue` (`MeshInstance3D` with a flat `TorusMesh`) as a child of the boss root, so it is freed with the boss, Retry included. Its radius is 1.5 × the hit radius (7.5 for the Storm Guardian), its tube 0.3, and it is additive, unshaded, fog-free and casts no shadow, in `RING_CUE_COLOR` (0.55, 0.8, 1.0). On each `step_started` whose Pattern is a RING and does not follow the player's height, it appears at `Emitters/Main` + (0, `height_offset`, 0), where the machine emits that ring, and grows from 0.3 to full scale over the step's Anticipation on a physics-clock Tween of the boss, which stops while paused. It hides when the Anticipation ends, on another step, and on a Phase's depletion (with the hostile clear). A Pattern's own per-volley `height_offsets` are not shown. On the Storm Guardian only Círculos do Trovão's two steps qualify: +8 and -8; Espiral da Tempestade follows the player's height and Olho da Tormenta has no RING steps.
+- **Checked headless** (a throwaway driver, not in the repo): yaw on target, eased; no cue in Phases 0 and 2; the high cue at emitter + 8 and the low cue at emitter - 8, growing from 0.33 to 0.92 and frozen under Pause; hidden as the rings fire, and at once when the Phase is depleted mid-cue; the boss and its cue freed with the stage after the final Results, and by a Retry during a cue; the Lantern Guardian faces the ship and has no cue; Stage 1 and Stage 2 clear.
 
 ## Lantern Guardian (F12-03)
 
@@ -175,6 +182,7 @@ S2-07 maps kind `storm_guardian` to the D-04 prefab and `content/bosses/storm_gu
 - **Definitions.** The Lantern Guardian's `.tres` (F12-03 part 1) and the Stage 2 bosses' (F12-06, F12-07) fill these Definitions; Attack names are Portuguese literals there. Keep `transition_seconds` at or below 0.75, and keep every Attack's cycle above zero seconds. In a hand-written `.tres`, declare every `[sub_resource]` before the first one that references it: Godot's parser refuses a forward `SubResource(...)` and the whole file fails to load.
 - **Boss scenes.** Your three boss prefabs already have the tree `BossController` needs: an `Enemy` root, `VisualRoot`, `HitVolume` (node at the hit center) and `Emitters/Main` outside the scaled model. The attaching ticket (F12-03, F12-06, F12-07) sets `visual_root`, `hit_volume`, `emitter`, `animation_player` → `VisualRoot/Model/AnimationPlayer`, and the clips you chose: `idle_clip` `Flying_Idle`, `step_clip` `Punch`, `phase_clip` `Yes`, `defeat_clip` `Death`. All four exist in the Lantern Guardian's player (checked at runtime); a name the player lacks is reported, never silently ignored.
 - **Hover.** A 0.6-unit, 4-second bob around the spawn marker is Claude's placeholder; retreat containment is out of scope.
+- **Ring cue and turn (F15-03).** `ring_cue = true` on `storm_guardian.tscn`'s `Enemy` root is Claude's wiring [shared]; set it on another boss to give its fixed-height rings the same cue. The cue's size, colour and growth and the turn rate are Claude's proposals (constants in `boss_controller.gd`); send Claude new values to change them.
 
 ## Open issues
 
