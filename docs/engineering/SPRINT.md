@@ -206,7 +206,7 @@ Ticket files: `.scratch/<feature>/issues/NN-slug.md`, found by ID with `tools/la
 
 A sweep of every "Out of scope", "Open issues" and design line against the code (2026-09-24, about 13:00) found the items below still missing, and worth adding before the 18:00 delivery. There are no ticket files: each lane gets its item in its kickoff prompt, adds a ROADMAP row `F15-0N`, and writes one handoff entry. No tests, as always.
 
-**Freeze at 15:30.** Anything not landed by 15:30 stays on its lane branch and is not shipped. At 15:30 trunk re-exports (F14-01 again) and oc-b re-packages (F14-02 again), and the user's human pass runs on that zip from 16:30.
+**Delivery moved to 19:00 (the user). Freeze at 16:30.** Anything not landed by 16:30 stays on its lane branch and is not shipped. At 16:30 trunk re-exports (F14-01 again), and oc-b re-packages (F14-02 again) by 17:30. The user's human pass runs on that zip from 17:30 to 18:30, and the upload is by 19:00.
 
 | ID | Lane | What | Files |
 | --- | --- | --- | --- |
@@ -217,7 +217,9 @@ A sweep of every "Out of scope", "Open issues" and design line against the code 
 | F15-05 | sol, first | **UI truth.** The Controls screen stops promising a mouse camera that does not exist. Final-victory Results closes its empty button slot. | `scenes/ui/controls.tscn`, `scenes/ui/results.tscn` |
 | F15-06 | oc-a | **Checkpoint glow and Gate fade.** A code-built glow (a light plus a tween) when a Checkpoint activates, restored on Retry and Restart. A Gate fades its `ClosedVisual` out when it opens, instead of hiding it; the restore stays instant and idempotent. | `scripts/progression/checkpoint.gd`, `scripts/progression/gate.gd`, the small call sites in `stage_director.gd` |
 | F15-07 | oc-b | **Ship and menu cues.** Focus brightens the Core, and the Core pulses gently at idle. The menu footers show gamepad text while a gamepad is in use (no glyph art). | `scripts/player/player_controller.gd`, `scripts/ui/menu_controller.gd` |
-| F15-08 | sol, last, only if time before 15:30 | **Enemy colour variants.** Twilight Spirits and seal Sentries, per ENEMY_VISUAL_HANDOFF's suggested assignment, and the violet pair in Stage 2. Same definitions. | new `scenes/dev/` prefabs, the stage `actor_scenes` exports, the content `enemy_kinds` |
+| F15-08 | sol, last, only if time before 16:30 | **Enemy colour variants.** Twilight Spirits and seal Sentries, per ENEMY_VISUAL_HANDOFF's suggested assignment, and the violet pair in Stage 2. Same definitions. | new `scenes/dev/` prefabs, the stage `actor_scenes` exports, the content `enemy_kinds` |
+| F15-09 | oc-a, after F15-06 | **HUD cues.** A locked target that goes off-screen shows an edge marker, clamped to the screen edge and pointing toward it, instead of being hidden. A subtle edge vignette fades in as the ship nears the Flight Volume boundary, driven by `edge_proximity_changed`. It is built in code, with no `hud.tscn` edit. | `scripts/ui/hud.gd` (the proximity connection goes through `Hud.bind`, so no Session edit) |
+| F15-10 | trunk, after F15-01 | **Defeat beat.** A short non-pausing beat (about 1 s, controls off) before the Defeat overlay, reusing F15-01's mechanism. Pause is refused during it. | `scripts/session/game_session.gd` |
 
 **Shared files today.** `stage_director.gd` is edited by F15-04 and F15-06, and `game_session.gd` by F15-01 only. The same rule as always: sync right before you start, keep your additions in their own functions, and the second lander merges both.
 
