@@ -226,7 +226,7 @@ Minimum audio events: route/boss music; menu navigation/confirm/back; shots; imp
 
 ### Asset acquisition status
 
-Downloaded models were found in `C:/Users/Braia/Documents/touhou-3d/All models`; the four recommended sound packs were found in `all-sounds/`, and five named music files were found in `Music/`. Downloaded files still require detailed inventory, visual/audio review, animation inspection, and Godot import checks. Download status does not imply that any specific model, clip, or sound has been selected or cleared for distribution.
+Downloaded models were found in `C:/Users/Braia/Documents/touhou-3d/All models`; the four recommended sound packs were found in `all-sounds/`, and five named music files were found in `music/`. Downloaded files still require detailed inventory, visual/audio review, animation inspection, and Godot import checks. Download status does not imply that any specific model, clip, or sound has been selected or cleared for distribution.
 
 ### Sources checked on 2026-09-20
 

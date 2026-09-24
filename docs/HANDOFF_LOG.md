@@ -1,5 +1,12 @@
 # Handoff Log
 
+## 2026-09-24 — Astra (sol) — D-01 selected sound folder and music path casing
+State: done
+Files: `sound_effects/` (17 original Ogg clips, four pack licenses, selection.json, README.md, .gdignore); `.gitignore`; folder references in design, audio, foundation, delivery and project documentation.
+Change: User requested the measured 17-event shortlist in `sound_effects/`, and lowercase `music` folder references. The folder is a curated source selection, excluded from Godot discovery via .gdignore; runtime copies and audio event wiring remain as delivered. Gains and repetition settings in the manifest remain proposals pending listening. Documentation and ignore rules now use `music/`. The Godot bus named `Music` is unchanged. Earlier handoff entries are historical and retain their original wording; their `Music/` source-folder references mean `music/` today.
+Verification: all 17 copied clips match the reviewed selection byte for byte; four source licenses included. No new tests. The lane landing gate records automated validation.
+Action required by audio owner: use this selection for the next approved runtime mapping/mix pass; do not interpret the folder move as a completed listening pass.
+
 ## 2026-09-24 — Astra (sol) — Stage 2 content review (D-06 pass 3) [shared]
 State: SCENE_READY
 Files: `content/bosses/tempest_sentinel.tres`; `content/bosses/storm_guardian.tres`; five `content/patterns/{sentinel,storm}_*.tres`; `docs/validation/stage-02-pacing.md`; ROADMAP; D-06 ticket.

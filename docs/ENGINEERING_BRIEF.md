@@ -32,7 +32,7 @@ Observed on September 20, 2026:
 - A `.git` directory was not visible at the workspace root. Verify repository status before assuming branches, worktrees, or commits are available.
 - Models are in `All models/kenney_space-kit`, `All models/Ultimate Monsters`, and `All models/Ultimate nature`.
 - Sound packs are in `all-sounds/kenney_digital-audio`, `all-sounds/kenney_impact-sounds`, `all-sounds/kenney_interface-sounds`, and `all-sounds/kenney_sci-fi-sounds`.
-- Five MP3 files exist in `Music/`, named after the suggested Touhou compositions. Their recording provenance and permission to distribute are not established by the filenames.
+- Five MP3 files exist in `music/`, named after the suggested Touhou compositions. Their recording provenance and permission to distribute are not established by the filenames.
 - Asset packs contain duplicate formats and source files. Select only runtime assets and their dependencies for integration. Preserve the downloaded originals.
 
 Approved models: `craft_speederA.glb` for the player ship, `Ghost.gltf` for the Lantern Guardian, and `Dragon_Evolved.gltf` for the Storm Guardian. Read [MODEL_SELECTION.md](MODEL_SELECTION.md) before importing or adapting these assets; it provides exact source paths, art direction, and inspected animation metadata. Preserve these approved choices. Runtime import and animation playback still require validation.

@@ -7,4 +7,4 @@
 # Raw asset download packs (kept on disk, each has a .gdignore; selected copies live in assets/)
 /All models/
 /all-sounds/
-/Music/
+/music/

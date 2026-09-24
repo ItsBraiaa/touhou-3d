@@ -54,7 +54,7 @@ The [event-to-file table](validation/audio-selection.md) records every selected 
 
 ## Music
 
-No music ships in this delivery. The five files in the ignored `Music/` source folder have *Touhou 10* composition titles, but their source and redistribution permission are not documented. They remain references only and were not copied to runtime assets. A new permitted track requires a separate selection and credit decision.
+No music ships in this delivery. The five files in the ignored `music/` source folder have *Touhou 10* composition titles, but their source and redistribution permission are not documented. They remain references only and were not copied to runtime assets. A new permitted track requires a separate selection and credit decision.
 
 ## Stage 2 mountain environment
 

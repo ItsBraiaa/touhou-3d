@@ -62,7 +62,7 @@ Global cap: 12 sound-effect voices (proposal). CombatState has no hit or pickup 
 - **New producer signals** (F13-03, one declaration and one emit each): `StageDirector.enemy_defeated(enemy_id: StringName, encounter_id: StringName)` on a first report, `PlayerWeapon.shots_fired(count: int)` once per physics tick that fired at least one shot, and `ProjectileSystem.target_hit(target_id: int, damage: int)` beside the stored `on_damage` call.
 - **Music track ids**: `menu`, `stage_01_route`, `stage_01_boss`, `stage_02_route`, `stage_02_boss`. PLANEJAMENTO allows route and boss tracks to be shared, so two ids may hold the same stream, and `play_music` does not restart a stream that is already playing.
 - **Buses.** `Master`, `Music` and `SFX` stay as F0-03 made them (`tests/unit/project/test_audio_buses.gd`). The controller only picks a bus per player. Bus volumes are F3-02's Options, applied on `AudioServer`, so the controller never sets a bus volume.
-- **Assets** (D-01): runtime copies under `assets/audio/sfx/<pack>/<original file name>`, with `<pack>` one of `interface`, `digital`, `scifi` or `impact`. Every sound effect is non-looping. The originals in `all-sounds/` and `Music/` are never edited (GUIDE Section 3).
+- **Assets** (D-01): runtime copies under `assets/audio/sfx/<pack>/<original file name>`, with `<pack>` one of `interface`, `digital`, `scifi` or `impact`. Every sound effect is non-looping. The originals in `all-sounds/` and `music/` are never edited (GUIDE Section 3).
 
 ## Done when
 
