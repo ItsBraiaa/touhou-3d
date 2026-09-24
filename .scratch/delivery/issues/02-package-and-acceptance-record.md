@@ -1,6 +1,6 @@
 # F14-02 Package and acceptance record
 
-Status: todo
+Status: done
 Type: tooling
 parallel-safe: no
 Depends on: F14-01
@@ -103,7 +103,33 @@ This is tooling, so no unit test. The evidence is one full `tools/package.ps1` r
 
 ## Handoff notes for Astra
 
-`acceptance.md` lists any asset missing from `ASSET_CREDITS.md` or the Créditos screen. Please add those entries; Claude does not edit either.
+`acceptance.md` lists any asset missing from `ASSET_CREDITS.md` or the Créditos screen. Please add those entries; Claude does not edit either. F14-02 part 2 found three: the five original D-02 materials under `assets/combat/`, the original `assets/environment/stage_01/gate_veil.gdshader`, and the Quaternius enemy/boss models, which `ASSET_CREDITS.md` credits but the in-game Créditos text does not.
+
+## Outcome
+
+Part 1 (GPT 5.6 Luna) wrote `tools/package.ps1`; part 1b (DeepSeek V4.1 Flash) drafted the
+acceptance table; part 2 (DeepSeek V4.1 Flash) finished the ticket.
+
+- **Re-export.** After `tools/lane.ps1 sync`, F14-01's export command was rerun from the synced
+  tree: `tools/test.ps1` green (225 passed, 0 failed), `--import` once, then
+  `--export-release "Windows Desktop" build/Touhou-3D.exe` — exit 0, no `ERROR:` or `WARNING:`
+  line, `Touhou-3D.exe` 129,258,616 bytes and `Touhou-3D.console.exe` 91,136 bytes,
+  byte-identical to F14-01's build. A fresh worktree needs `build/` created first, or the
+  export aborts with "the export path does not exist"; recorded in `export.md` "Package".
+- **Fix.** Part 1's `Compress-Archive` archived `build/package/Touhou-3D/*`, so the zip had no
+  `Touhou-3D/` root and the verify step failed with `Invalid project path specified`. It now
+  archives the `Touhou-3D` folder itself. No gameplay, scene or content file changed.
+- **Package.** `tools/package.ps1` on a clean tree printed `PACKAGE_ARCHIVE … bytes, 743
+  staged files` and `PACKAGE_OK`: the extracted project imported, its suite passed, and
+  `game/Touhou-3D.console.exe --headless --quit-after 300` booted with no `ERROR:` line. The
+  two refusal paths were run once: a missing executable exits 2, a dirty tree exits 3.
+  Evidence: `docs/validation/export.md` "Package".
+- **Acceptance.** `docs/validation/acceptance.md` fills all 32 checks. No **fail**. P3 and S13
+  (the five-minute Stage 2 clear) and P18 (instructor approval, the user's) are **not
+  verified**; every physical, listening, played-time and presentation-computer item is marked
+  **owed by the human pass**. Nothing is cut (SPRINT reinstates F3, F13 and Stage 2). Credits
+  coverage was recorded; the three gaps above are an Astra request.
+- **No tests** of any kind (SPRINT rule). `tools/lane.ps1 land` is the gate.
 
 ## Kickoff prompt
 

@@ -93,6 +93,7 @@ F14-01, 2026-09-24. Evidence, FPS readings and the presentation-computer protoco
 - **Result on the development PC.** It boots outside the repository and plays both stages. D3D12 Forward+ on an RX 9070 XT, no fallback, 1280 × 720, V-Sync capped at 60. The Storm Guardian and the Lantern Guardian held 59 to 60 FPS, with over 1,100 FPS uncapped. The build printed no `ERROR:` or `WARNING:` line.
 - **Scripting the build.** The exported build (release or debug) ignores `--script`. An autoload named in an `override.cfg` beside the exe runs, so a scratch driver can be loaded that way; do not ship such a file.
 - `user://` is `%APPDATA%\Godot\app_userdata\Touhou-3D`, shared with source runs.
+- **Package.** `tools/package.ps1` builds the academic submission zip under `build/package/` (git-ignored) and verifies the extracted copy: project import, the suite, and a 300-frame boot of `game/Touhou-3D.console.exe`, ending in `PACKAGE_OK`. Call it as `powershell -NoProfile -ExecutionPolicy Bypass -File tools\package.ps1`. It exits 2 without the executable and 3 on a dirty tree, so the package always equals a commit. F14-02 part 2; output and the acceptance record are in [validation/export.md](../validation/export.md) "Package" and [validation/acceptance.md](../validation/acceptance.md).
 
 ## Open issues
 

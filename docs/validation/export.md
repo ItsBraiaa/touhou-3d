@@ -113,3 +113,35 @@ Not verified: nobody has run it yet.
    - the lowest `Project FPS` value in S1-01, in S1-02, and in each boss fight;
    - every `ERROR:` or `WARNING:` line.
 5. Add the results as a new section on this page. If the build will not start, run `Touhou-3D.console.exe --rendering-driver vulkan` once, and record which driver works.
+
+## Package — F14-02 part 2
+
+`tools/package.ps1` stages every tracked file into `Touhou-3D/project/`, adds the two
+executables under `Touhou-3D/game/` and a Portuguese `LEIA-ME.txt`, writes
+`build/package/Touhou-3D-<yyyyMMdd>.zip`, then extracts the zip to `build/package/verify/`
+and checks the copy independently. The zip is git-ignored and never committed.
+
+- **Re-export.** F14-02 part 2 reran F14-01's command from the synced tree
+  (`tools/test.ps1` → `--import` → `--export-release "Windows Desktop" build/Touhou-3D.exe`):
+  exit 0, no `ERROR:` or `WARNING:` line, `Touhou-3D.exe` 129,258,616 bytes and
+  `Touhou-3D.console.exe` 91,136 bytes — byte-identical to the F14-01 build above. The
+  build/ folder must exist first: a fresh worktree needs `New-Item -ItemType Directory build`,
+  or the export fails with "the export path does not exist".
+- **Command:** `powershell -NoProfile -ExecutionPolicy Bypass -File tools\package.ps1`.
+- **Refusals, run once each:** a missing executable exits 2
+  (`package: executable 'build\no_such_exe.exe' is missing; run F14-01's export first.`); a
+  dirty tree exits 3 (`package: working tree is dirty: tools/package.ps1`).
+- **Fix in this ticket.** The part-1 script archived `build/package/Touhou-3D/*`, so the zip
+  held `project/`, `game/` and `LEIA-ME.txt` at its root, and the `--import` check on
+  `verify/Touhou-3D/project` failed with `Invalid project path specified`. It now archives the
+  `Touhou-3D` folder itself, so the zip has the documented `Touhou-3D/` root. No gameplay,
+  scene or content file changed.
+- **Output** (run on the clean tree at this ticket's commit):
+
+  ```
+  PENDING PACKAGE RUN
+  ```
+
+  The three checks on the extracted copy are: the project `--import` exits 0, the extracted
+  `tests/run_tests.gd` exits 0 with no `SCRIPT ERROR`, and
+  `game/Touhou-3D.console.exe --headless --quit-after 300` exits 0 with no `ERROR:` line.

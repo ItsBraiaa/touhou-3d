@@ -98,7 +98,7 @@ $readme = @(
 )
 $readme | Set-Content -LiteralPath (Join-Path $packageRoot 'LEIA-ME.txt') -Encoding UTF8
 
-Compress-Archive -Path (Join-Path $packageRoot '*') -DestinationPath $archivePath -CompressionLevel Optimal
+Compress-Archive -Path $packageRoot -DestinationPath $archivePath -CompressionLevel Optimal
 $archiveInfo = Get-Item -LiteralPath $archivePath
 $archiveFiles = (Get-ChildItem -LiteralPath $packageRoot -Recurse -File).Count
 Write-Output ("PACKAGE_ARCHIVE {0} bytes, {1} staged files: {2}" -f $archiveInfo.Length, $archiveFiles, $archivePath)

@@ -1,5 +1,16 @@
 # Handoff Log
 
+## 2026-09-24 — OpenCode (oc-b) — F14-02 part 2: the package, credits and acceptance record
+State: DELIVERED
+Files: `tools/package.ps1` (the archive root fixed); `docs/validation/acceptance.md` (all 32 checks filled); `docs/validation/export.md` (new "Package" section); `docs/engineering/ROADMAP.md` (the F14-02 row and one "Requests to Astra" row); `docs/engineering/project.md` ("Export" now points at the package script); F14-02 ticket (`Status: done`).
+Change:
+- **Re-export.** After `tools/lane.ps1 sync`, F14-01's command was rerun from the synced tree: `tools/test.ps1` green (225/0), `--import` once, `--export-release "Windows Desktop" build/Touhou-3D.exe` — exit 0, no `ERROR:` or `WARNING:`, 129,258,616 bytes and 91,136 bytes, byte-identical to F14-01's build. A fresh worktree must create `build/` first, or the export aborts with "the export path does not exist".
+- **Fix.** Part 1 archived `build/package/Touhou-3D/*`, so the zip had no `Touhou-3D/` root and the verify step failed with `Invalid project path specified`. It now archives the `Touhou-3D` folder itself.
+- **Package.** On a clean tree it printed `PACKAGE_ARCHIVE … : build/package/Touhou-3D-<yyyyMMdd>.zip`, 743 staged files, then `PACKAGE_OK`: the extracted project imported, its suite passed, and `game/Touhou-3D.console.exe --headless --quit-after 300` booted with no `ERROR:` line. Refusals: a missing executable exits 2, a dirty tree exits 3.
+- **Acceptance.** `acceptance.md` covers all 32 checks: no fail; P3/S13 (the five-minute Stage 2 clear) and P18 (instructor approval) are not verified; every physical, listening, played-time and presentation-computer item is marked owed by the human pass. Nothing is cut (SPRINT reinstates F3, F13 and Stage 2). No tests (SPRINT rule).
+Action required by Astra: add `ASSET_CREDITS.md` entries for the five original D-02 materials in `assets/combat/` and for the original `assets/environment/stage_01/gate_veil.gdshader`, and add the Quaternius enemy/boss models to the in-game Créditos text (`scenes/ui/credits.tscn`), which credits the ship and the sound effects but not the models. The files need no change.
+Action required by trunk: none. No trunk-only file changed.
+
 ## 2026-09-24 12:30 — Claude (trunk) — F14-01: the Windows build exported and run outside the editor
 State: INTEGRATED_VERIFIED
 Files: `export_presets.cfg`; `docs/validation/export.md` (new); `docs/engineering/project.md` (header, Files, new "Export" section, Open issues); `docs/GUIDE.md` (Section 10 "Foundation and conventions"); `docs/engineering/ROADMAP.md` (the F14-01 row, "Human steps"); F14-01 ticket.
