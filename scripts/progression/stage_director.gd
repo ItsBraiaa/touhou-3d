@@ -77,12 +77,13 @@ const EXIT_VOLUME_NAME := ^"ExitVolume"
 ## The [BossDefinition] of every Wave kind that is a boss, keyed by its
 ## [member BossDefinition.kind]. A kind is an enemy or a boss, never both (F12-03).
 @export var boss_definitions: Dictionary[StringName, BossDefinition] = {}
-## Optional: the stage's [AnimationPlayer] that presents a boss defeat, such as the shrine
-## lighting turning from corrupted to calm. Set together with [member defeat_animation],
-## or neither; empty until Astra authors it (F12-03, F14-01).
+## Optional: the stage's [AnimationPlayer] for the boss named by
+## [member defeat_presentation_boss_id]. Set all three presentation exports together.
 @export var defeat_presentation: AnimationPlayer
 ## The clip of [member defeat_presentation] played on [signal boss_defeated].
 @export var defeat_animation: StringName
+## Only this boss's defeat plays the presentation; other bosses leave it untouched.
+@export var defeat_presentation_boss_id: StringName
 ## A [Pickup] scene of kind POWER. Required.
 @export var power_pickup_scene: PackedScene
 ## A [Pickup] scene of kind SHIELD. Required.
@@ -257,6 +258,7 @@ func retry_from_checkpoint(player: PlayerController, attempt_seed: int) -> bool:
 	_rng.seed = attempt_seed
 	_restore_checkpoint_pickups()
 	_apply_progress()
+	_reset_defeat_presentation()
 	return true
 
 
@@ -472,9 +474,21 @@ func _on_boss_defeated(enemy_id: StringName, encounter_id: StringName, boss_id: 
 	if not _live_enemies.has(enemy_id):
 		return
 	boss_defeated.emit(boss_id)
-	if defeat_presentation != null:
-		defeat_presentation.play(defeat_animation)
+	_play_defeat_presentation(boss_id)
 	_on_enemy_defeated(enemy_id, encounter_id)
+
+
+func _play_defeat_presentation(boss_id: StringName) -> void:
+	if defeat_presentation != null and boss_id == defeat_presentation_boss_id:
+		defeat_presentation.play(defeat_animation)
+
+
+func _reset_defeat_presentation() -> void:
+	if defeat_presentation == null:
+		return
+	defeat_presentation.play(defeat_animation)
+	defeat_presentation.seek(0.0, true)
+	defeat_presentation.stop(true)
 
 
 ## An Encounter's ExitVolume and the next EntryVolume can overlap, and a volume the ship
@@ -549,12 +563,14 @@ func _check_bosses() -> PackedStringArray:
 			errors.append("stage '%s': boss_definitions '%s': %s" % [stage_id, kind, message])
 		if definition.kind != kind:
 			errors.append("stage '%s': boss_definitions '%s' holds the BossDefinition of kind '%s'" % [stage_id, kind, definition.kind])
-	if defeat_presentation != null and defeat_animation == &"":
-		errors.append("stage '%s': 'defeat_presentation' is set but 'defeat_animation' is not" % stage_id)
-	elif defeat_presentation == null and defeat_animation != &"":
-		errors.append("stage '%s': 'defeat_animation' '%s' is set but 'defeat_presentation' is not" % [stage_id, defeat_animation])
-	elif defeat_presentation != null and not defeat_presentation.has_animation(defeat_animation):
-		errors.append("stage '%s': 'defeat_animation' '%s' is not an animation of '%s'" % [stage_id, defeat_animation, get_path_to(defeat_presentation)])
+	if defeat_presentation == null:
+		if defeat_animation != &"" or defeat_presentation_boss_id != &"":
+			errors.append("stage '%s': defeat animation and boss id need 'defeat_presentation'" % stage_id)
+	else:
+		if defeat_animation == &"" or not defeat_presentation.has_animation(defeat_animation):
+			errors.append("stage '%s': defeat presentation needs a valid animation" % stage_id)
+		if not boss_definitions.has(defeat_presentation_boss_id):
+			errors.append("stage '%s': defeat presentation boss '%s' is not in boss_definitions" % [stage_id, defeat_presentation_boss_id])
 	return errors
 
 

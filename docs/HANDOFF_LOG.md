@@ -6,6 +6,12 @@ Files: `scripts/progression/checkpoint.gd`, `scripts/progression/gate.gd`, `scri
 Change: Checkpoints create an activation OmniLight3D and bloom it on first activation; `_apply_progress()` restores each glow immediately from the machine state for Retry and Restart. Gates now tween `ClosedVisual` transparency when opening, while `restore_open()` cancels presentation tweens and restores collision, visibility and transparency immediately and idempotently. Stage Director call sites remain in small private presentation/restore functions for the shared-file merge.
 Verification: `tools/lane.ps1 land` and the short headless boot are the gate; no tests added (sprint rule).
 Action required by sol: merge the small F15-06 additions in `stage_director.gd` when landing F15-04.
+## 2026-09-24 — Astra (sol) — F15-04 storm resolution [shared]
+State: DELIVERED
+Files: `scenes/stages/stage_02.tscn`, `scenes/stages/stage_01.tscn` (one export), `scripts/progression/stage_director.gd`, `docs/engineering/ROADMAP.md`.
+Change: Stage 2's `Environment/StormResolution` plays `storm_to_calm` for 2.4 s with `process_mode = 3`, easing fog density 0.0012 → 0.00025, sky background energy 1.0 → 1.45, and StormLight energy 1.0 → 0.62. The Director plays a defeat presentation only for `defeat_presentation_boss_id`: `storm_guardian` in Stage 2 and `lantern_guardian` in Stage 1. Retry rewinds the presentation to its storm or corrupted state. Tempest Sentinel defeat leaves Stage 2 weather untouched. No tests added (sprint rule).
+Action required by oc-a: keep F15-06's checkpoint and Gate call sites in their own functions when merging `stage_director.gd`; retain the keyed presentation and Retry rewind.
+
 
 ## 2026-09-24 — Astra (sol) — F15-05 UI truth [shared]
 State: DELIVERED

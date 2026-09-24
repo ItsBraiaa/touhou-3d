@@ -185,6 +185,7 @@ sky_material = SubResource("MountainSkyMaterial")
 [sub_resource type="Environment" id="MountainEnvironment"]
 background_mode = 2
 sky = SubResource("MountainSky")
+background_energy_multiplier = 1.0
 ambient_light_source = 3
 ambient_light_color = Color(0.72, 0.79, 0.76, 1)
 ambient_light_energy = 0.55
@@ -193,6 +194,51 @@ fog_enabled = true
 fog_density = 0.0012
 fog_light_color = Color(0.48, 0.57, 0.54, 1)
 glow_enabled = true
+
+[sub_resource type="Animation" id="StormCalm"]
+resource_name = "storm_to_calm"
+length = 2.4
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("WorldEnvironment:environment:fog_density")
+tracks/0/interp = 1
+tracks/0/loop_wrap = false
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 2.4),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [0.0012, 0.00025]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("WorldEnvironment:environment:background_energy_multiplier")
+tracks/1/interp = 1
+tracks/1/loop_wrap = false
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 2.4),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [1.0, 1.45]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("StormLight:light_energy")
+tracks/2/interp = 1
+tracks/2/loop_wrap = false
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 2.4),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [1.0, 0.62]
+}
+
+[sub_resource type="AnimationLibrary" id="StormResolutionLibrary"]
+_data = {
+&"storm_to_calm": SubResource("StormCalm")
+}
 
 [sub_resource type="BoxShape3D" id="Shape24"]
 size = Vector3(110, 90, 130)
@@ -1053,7 +1099,7 @@ material = SubResource("BoundaryRailWood")
 size = Vector3(0.94, 0.22, 0.94)
 material = SubResource("BoundaryRailCap")
 
-[node name="Stage" type="Node3D"]
+[node name="Stage" type="Node3D" node_paths=PackedStringArray("defeat_presentation")]
 script = ExtResource("1_director")
 stage_definition = ExtResource("2_stage_definition")
 actor_scenes = Dictionary[StringName, PackedScene]({
@@ -1079,10 +1125,17 @@ portal_lights = Dictionary[StringName, NodePath]({
 })
 resolved_light_material = ExtResource("13_resolved")
 activate_checkpoint_on_entry = true
+defeat_presentation = NodePath("Environment/StormResolution")
+defeat_animation = &"storm_to_calm"
+defeat_presentation_boss_id = &"storm_guardian"
 metadata/stage_id = "stage_02"
 metadata/handoff_state = "SCENE_READY_STATIC"
 
 [node name="Environment" type="Node3D" parent="."]
+
+[node name="StormResolution" type="AnimationPlayer" parent="Environment"]
+process_mode = 3
+libraries/ = SubResource("StormResolutionLibrary")
 
 
 [node name="Geometry" type="Node3D" parent="."]

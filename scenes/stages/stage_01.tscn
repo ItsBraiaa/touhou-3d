@@ -828,6 +828,7 @@ guard_links = Dictionary[StringName, NodePath]({
 })
 defeat_presentation = NodePath("Environment/ShrineLighting")
 defeat_animation = &"corrupted_to_calm"
+defeat_presentation_boss_id = &"lantern_guardian"
 metadata/stage_id = "stage_01"
 metadata/handoff_state = "SCENE_READY_STATIC"
 
