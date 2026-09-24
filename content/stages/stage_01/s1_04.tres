@@ -7,7 +7,7 @@
 [sub_resource type="Resource" id="Resource_t3veu"]
 script = ExtResource("3_cgupt")
 spawn_markers = Array[NodePath]([NodePath("Spawns/Wave1_Sentry1"), NodePath("Spawns/Wave1_Sentry2"), NodePath("Spawns/Wave1_Sentry3")])
-enemy_kinds = Array[StringName]([&"sentry", &"sentry", &"sentry"])
+enemy_kinds = Array[StringName]([&"sentry_seal", &"sentry_seal", &"sentry_seal"])
 
 [resource]
 script = ExtResource("2_y1sn5")

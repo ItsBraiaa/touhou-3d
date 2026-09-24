@@ -6,6 +6,12 @@ Files: `scripts/ui/hud.gd`, `tests/scene/test_hud_contract.gd` (obsolete expecta
 Change: The locked target marker now remains visible when its projection is off-screen or behind the camera, clamped inside the screen edge and rotated toward the target. Hud builds a subtle full-screen boundary vignette in code and connects the bound ship's `edge_proximity_changed` through `Targeting`'s parent, with a short fade tween. No `hud.tscn` or Session edit.
 Verification: The existing HUD contract expectation for behind-camera hiding was minimally updated because F15-09 intentionally replaces it with an edge marker; no new test was added. `tools/lane.ps1 land` is the gate.
 Action required by trunk: the pre-existing behind-camera marker expectation is superseded by F15-09 behavior if an acceptance test still asserts hiding it.
+## 2026-09-24 — Astra (sol) — F15-08 enemy colour variants [shared]
+State: DELIVERED
+Files: `scenes/dev/spirit_twilight.tscn`, `scenes/dev/sentry_seal.tscn`, `scenes/stages/stage_01.tscn`, `scenes/stages/stage_02.tscn`, `content/stages/stage_01/s1_02.tres`, `s1_04.tres`, `s1_05.tres`, `content/stages/stage_02/s2_01.tres`, `s2_02.tres`, `s2_03.tres`, `s2_05.tres`, `docs/engineering/ROADMAP.md`.
+Change: New actor prefabs instance Astra's Twilight Spirit and seal Sentry visual roots with the original actor script, HitVolume radius, and emitter. Stage 1 assigns Lume to S1-02 wave 1, Twilight to wave 2, seal Sentries to S1-04, and mixed Spirit colors with lantern Sentries to S1-05. Stage 2's ordinary Spirit/Sentry waves use the violet pair. Each new kind maps to the same Spirit or Sentry EnemyDefinition resource, so health, score, pattern, collision and rewards remain unchanged. No tests added (sprint rule).
+Action required by Claude: none; scene wiring is declared here because it is Claude-owned under GUIDE Section 3.
+
 
 ## 2026-09-24 — OpenCode (oc-a) — F15-06 checkpoint glow and Gate fade
 State: DELIVERED
