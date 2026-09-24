@@ -109,6 +109,23 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 
 Order rationale: Player before Menus (highest UX risk and GUIDE Section 13's assignment). Audio buses are created in F0-03 so F3 can bind Options to them. Enemies (F9) come before the Stage Director (F10) so the Director is integrated against real Waves. The sprint's lane queues, checkpoints and kickoff prompts are in [SPRINT.md](SPRINT.md).
 
+## F16 — Controls, camera and dash expansion
+
+User-requested on 2026-09-24; implementation is planned, not part of the already exported build. [Execution plan](controls-expansion-plan.md), [design spec](../../.scratch/controls-expansion/spec.md), [Claude orchestration kickoff](../../.scratch/controls-expansion/CLAUDE_KICKOFF.md). The user explicitly selected dash invulnerability. No new tests; use the existing lane gate and manual acceptance.
+
+| Ticket | Owner / lane | Depends on | Status |
+| --- | --- | --- | --- |
+| F16-00 plan-and-orchestration | Astra / sol | F3-04, F7-02 | done (spec, seven implementation tickets, layout contract and Claude kickoff) |
+| F16-01 controls-layout-and-dash-visuals | Astra / sol | F16-00 | todo |
+| F16-02 binding-profiles-and-persistence | Claude / trunk | F16-00 | todo |
+| F16-03 rebind-workflow-and-prompts | Claude / trunk | F16-01, F16-02 | todo |
+| F16-04 mouse-camera-and-recenter | Claude / path | F16-02 | todo |
+| F16-05 invulnerable-lateral-dash | Claude / trunk | F16-03 | todo |
+| F16-06 session-camera-and-controls-integration | Claude / trunk | F16-03, F16-04, F16-05 | todo |
+| F16-07 controls-visual-and-device-acceptance | Astra / sol; Claude engineering fixes | F16-06 | todo |
+
+Claude schedules this feature around existing lane occupancy. F16-01/02 may overlap; F16-04 may overlap 03/05. Session, InputMap, player ship and integration edits are serialized in trunk. This section does not dispatch or interrupt another lane.
+
 ## Risk
 
 48 tickets are `todo` for about one day across five standing lanes (trunk 15, path 8, oc-a 6, oc-b 9, sol 10), with rescue on demand. OpenCode tickets carry a per-ticket `Model:` line (SPRINT.md "Model budgets"). The trunk lane is the critical path, because every `game_session.gd` edit is serialized there.
@@ -177,6 +194,7 @@ Stage 2 scene ticket: `.scratch/stage-02-area/issues/01-mountain-route.md` — *
 
 | Date | Deliverable | Where | State |
 | --- | --- | --- | --- |
+| 2026-09-24 | F16 controls/settings screen, mouse camera, recenter and invulnerable dash plan; Astra/Claude file boundaries and orchestration tickets | `.scratch/controls-expansion/`, `docs/engineering/controls-expansion-plan.md` | PLANNED |
 | 2026-09-22 | F1 design decisions, retired generator, lossless enemy atlas imports; Inspector flight tuning blocked by stopped Computer Use | `.scratch/player-flight/issues/05-astra-design-pass.md`, `docs/engineering/player-flight.md` Open issues | PARTIAL / BLOCKED |
 | 2026-09-21 | Stage 2 textured mountain route, vegetation, ambient motion, seven encounters, seals and checkpoints | `scenes/stages/stage_02.tscn`, `docs/STAGE_02_HANDOFF.md` | SCENE_READY_STATIC |
 | 2026-09-20 | Player ship and static arena | `scenes/player/player_ship.tscn`, `scenes/tests/combat_arena.tscn`, GUIDE Section 13 | SCENE_READY |
