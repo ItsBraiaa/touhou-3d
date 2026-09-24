@@ -453,7 +453,110 @@ Static only, no state, never asserts. It reads the F16 primitive descriptor `{ki
 
 ## F16 capture workflow and prompts (F16-03)
 
-Pending (lane trunk).
+Delivered by trunk on 2026-09-24. Opções → Controles is now a working editor for both binding profiles and the F16 camera values, and every menu footer names the live bindings in the current prompt family. It consumes F16-01's layout, F16-02's `InputBindings`, `Settings` and `InputBindingAdapter`, and F16-08's `BindingLabels` and prompt family. Applying the camera values to the live rig stays F16-06's job.
+
+### Files
+
+- `scripts/ui/controls_screen.gd`: `ControlsScreen`, Adapter (`Node`). New.
+- `scripts/ui/interface.gd`: creates it, routes modal input and Back through it, pushes the prompts, applies the glyph override.
+- `scripts/ui/menu_controller.gd`: `set_prompts`, `prompt_for`, `describe_binding`; footers from the bindings.
+- `scripts/ui/input_device_state.gd`: `get_controller_family` and `controller_family_changed`.
+- `scripts/ui/options_screen.gd`: doc comments only (global Defaults already covers F16, below).
+- `scenes/ui/controls.tscn` [shared]: wiring only. The six `Preview*` rows and their `binding_row.tscn` reference are gone, `CaptureDialog/Buttons/UseButton` ("Usar", hidden) and `ConflictDialog/Buttons/ReplaceButton` ("Substituir") are new, `ConflictDialog/Buttons/CancelButton` reads "Cancelar" (was "Escolher outro") and `ConfirmBindingsDialog/Buttons/ConfirmButton` reads "Manter controles" (was "Manter"), as the spec names them. No geometry, style or other text changed.
+
+### `ControlsScreen` contract
+
+| Member | Meaning |
+| --- | --- |
+| `signal leave_requested` | The draft is settled (Descartar, or an Aplicar that was kept) after a refused Back; `Interface` goes back. |
+| `setup(root, settings, bindings, adapter)` | Once. Resolves every spec path (a missing or mistyped one is reported with its path and the whole screen stays inert), builds the rows, gives the camera sliders the `Settings` ranges, connects everything. `bindings` is the live `InputBindings`, read only. |
+| `set_prompt_families(prompt_family, controller_family)` | From `Interface`: the menus' family (`keyboard_mouse`, `xbox`, `playstation`) and the Controle tab's glyph family. |
+| `consume_modal_input(event) -> bool` | From `Interface._input`, for every event, before the GUI. True when an open dialog consumed it. |
+| `request_leave() -> bool` | From `Interface._go_back` on Controls. False while a dialog is open, or when the draft is dirty (it opens the Dirty dialog). |
+| `note_joypad_connection(connected)` | From `Interface`'s `joy_connection_changed`. A disconnect during the confirmation reverts. |
+
+`Interface._bind_controls` creates it as `Controls/ControlsScreen`, after `OptionsScreen` and before the device tracking, and connects `leave_requested` to `_go_back`. The menu scene registry is unchanged: `Layout/BackButton` still requests `back`, and `_go_back` asks `request_leave` first, for both the button and `ui_cancel`.
+
+### Rows, tabs and focus
+
+- **Rows.** `BindingScroll/Rows` is filled by code only (anything authored there is removed): a heading per `InputBindings.CATEGORIES` entry (Movimento, Combate, Câmera, Menus), then one `binding_row.tscn` instance per catalog action, named `<Action>Row` with `action_id` metadata. The same 27 rows serve both binding tabs; they show the current tab's profile.
+- **A slot** shows `BindingLabels.glyph_path(glyph_id)` as its icon when the file exists (32 px wide), else `describe()` text. The tooltip is the text plus Astra's tooltip. The keyboard tab never has glyphs; the Controle tab uses the controller family (the Ícones override, else the last pad, else Xbox), whichever device is in use.
+- **Changed rows** show `• ` before the label and `state` metadata `changed`; Aplicar is disabled while the draft equals the live profiles.
+- **Tabs** are toggle buttons (the theme's pressed style marks the active one) and switch on press. KeyboardMouse and Gamepad show the column headings and the rows; Camera shows `CameraSettings`, and `SectionTitle` reads "AJUSTES DA CÂMERA". Entering the screen picks Controle when the menus show controller prompts, else Teclado e mouse.
+- **Focus order** (`focus_next`/`focus_previous`, wrapping): the three tabs, Ícones (`DeviceFamily`), the content (each row Principal → Alternativo → Redefinir; on Câmera the six widgets), Restaurar esta aba, Aplicar, Voltar. Up and down move by row in the same column, left and right within a row; up from the first row reaches the active tab, down from the last row reaches Restaurar esta aba, up from the tabs reaches Voltar, down from the footer the active tab. Down from the tabs and up from the footer enter the content at that tab's last focused control. Only controls of the shown tab are ever linked, and the scroll bar never takes focus.
+- **Entry focus** stays on Voltar, the menu contract the existing tests pin (F16-01's gate note); Tab or down leads to the tabs.
+- **Scrolling.** A focused row is kept visible with `ScrollContainer.ensure_control_visible`, together with its category heading when it is the category's first row.
+- **ActionHelp** shows the focused control's help (a slot: action, slot, binding, "obrigatória" when required, and the live accept prompt to change it; Redefinir: the defaults; a camera widget: its meaning and value). Above it, the last operation's outcome, or "Há alterações não aplicadas." while the draft is dirty.
+
+### Capture (CaptureDialog)
+
+A slot's press opens the dialog; the pressed slot gets focus back when it closes. The deadline is 10 s (`CAPTURE_MSEC`) and restarts for the review; a timeout changes nothing.
+
+1. **Waiting for release.** Until no key, mouse button or joypad button is held. Keys are tracked from events while the screen is shown, since `Input` cannot list them; mouse buttons and pad buttons are polled.
+2. **Listening.** Every event is consumed. Echoes, releases, `InputEventAction`, mouse motion and gestures are ignored.
+   - A key or mouse button proposes itself; a modifier held with it makes a chord (Shift+Tab). A modifier pressed alone waits: its release with no other press proposes it alone (Left Shift, Left Ctrl, with their location).
+   - A joypad button proposes itself.
+   - An axis must be seen centred (pull below 0.2, `AXIS_NEUTRAL`) during this capture, and then pass 0.6 (`AXIS_DELIBERATE`): it proposes its axis and sign. Axes centred when listening starts are armed at once, so a stick held from the menus or drifting above 0.2 never binds, and other inputs still work. A trigger's pull is its 0 to 1 value; a backend that reports −1 at rest is recognised by its first reading below −0.2 and rescaled, and a trigger only ever proposes +1.
+   - Keys are named through `describe_event(event, action)`, so gameplay actions and `pause` get physical keys and menu-only actions layout keys.
+   - A press of the other tab's device is refused with a hint ("Esta aba só aceita o controle." / "… teclado e mouse."), except that device's `ui_cancel` (Escape on the Controle tab, B on the keyboard tab), which cancels: it can never be a candidate there.
+   - A left click on Cancelar cancels. Every other input, Escape and the current accept and cancel included, is a candidate.
+3. **Review, after release.** The candidate is shown, and the dialog waits until every key and button is released and an axis candidate is centred again. Only then do Usar and Cancelar take input, with the old (live) menu bindings, so a captured key's own release never confirms it.
+4. **Usar.** With no conflict the candidate goes into the draft (`assign` with no resolution); a refusal (the binding is already in the action's other slot or its fixed Numpad Enter) is reported in ActionHelp. With a conflict, ConflictDialog opens.
+
+**Consuming input.** While a dialog is open `Interface._input` offers it every event first and marks it handled when `consume_modal_input` says so: during steps 1 to 3, and for every dialog until the keys and buttons held when it opened are released. Nothing reaches the GUI, `Interface`'s `ui_cancel`, the Session's `pause` or a row behind it. After that the dialog's buttons are driven by the GUI with the live bindings: focus is trapped among its shown, enabled buttons (Tab, Shift+Tab, left and right cycle them; up and down stay), `ui_cancel` is consumed as the dialog's cancel, and `Overlays` stops the mouse (`MOUSE_FILTER_STOP`) so nothing behind can be clicked or scrolled. Losing the window during a capture cancels it (key releases are lost with it).
+
+### Conflicts (ConflictDialog)
+
+- The conflicts are `InputBindings.find_conflicts` in the draft, plus the layout-only ones below. The message names the candidate and the holders.
+- **Trocar** and **Substituir** are `assign` with `RESOLUTION_SWAP` and `RESOLUTION_REPLACE` on a copy of the draft, committed only when it succeeds. Each button is enabled only when a trial on another copy succeeds, so Substituir is disabled (and the message says why) when it would leave a required action unbound. A disabled button cannot take focus. **Cancelar** (and `ui_cancel`) changes nothing.
+- **F16-02's layout limit, resolved here.** `pause` takes physical keys and the menu-only actions layout keys, and the core compares them by code. For a character key (below `KEY_SPECIAL`) on the keyboard tab the screen also compares `pause` with the menu-only actions in the active layout's space (`DisplayServer.keyboard_get_keycode_from_physical`), so AZERTY's physical Q on `pause` meets layout A on `ui_accept`. Such a layout-only conflict can only be replaced: Trocar is disabled, and Substituir first clears the matching slots, which fails for a required action's last binding. The core's own same-code matches stay; they are conservative, never unsafe. On the headless display server, which has no layout, a physical code is its own keycode.
+
+### Draft, Aplicar and confirmation
+
+- **The draft** is `InputBindings.new()` + `restore(live.capture())`, taken each time the screen is shown. Every edit is an `InputBindings` transaction, so the draft is always valid. Nothing is saved or installed before Aplicar.
+- **Redefinir** is `restore_action_defaults` into the draft; a refusal names the action holding the default. **Restaurar esta aba** is `restore_profile_defaults` for a binding tab, and on Câmera it stores and saves the six camera defaults at once.
+- **Aplicar** calls `Settings.apply_input_bindings(draft, needs_confirmation)`, which validates both profiles, saves, and only then makes them live (`Interface` installs them and refreshes every prompt). `needs_confirmation` is true when the draft changes, in either profile, an action read by the menus: `pause` and the eight `ui_*` actions.
+  - **On failure** ActionHelp shows "Não foi possível salvar os controles."; the draft, the file and the live map are unchanged. An invalid draft (`ERR_INVALID_DATA`) is a programming error and is reported with `push_error`.
+  - **ConfirmBindingsDialog** runs on the new bindings: "Os novos comandos já estão valendo. Mantê-los?" with a 10 s countdown (`CONFIRM_MSEC`). Focus starts on Reverter, so keeping proves the new bindings can move focus and confirm. **Manter controles** is `confirm_input_bindings()`. **Reverter**, `ui_cancel`, the timeout, a controller disconnect, the window losing focus (`NOTIFICATION_APPLICATION_FOCUS_OUT`) and the screen being hidden are `revert_input_bindings()`: the previous profiles are live at once and ActionHelp says why. The draft keeps the reverted change, so it can be fixed and applied again. A crash during the countdown is F16-02's pending marker: the next boot uses the confirmed profiles.
+  - A failed save on Manter keeps the change live and shows the failure text; the file's marker brings the previous controls back at the next boot. A failed save on revert only warns: the previous controls are live, and the marker restores them at boot too.
+- **Voltar with a dirty draft** opens DirtyDialog. Continuar editando (and `ui_cancel`) closes it. Descartar resets the draft and leaves. Aplicar applies: a failed save stays with the failure text; a change needing confirmation leaves only after Manter controles; otherwise it leaves at once. The leave is deferred one frame, so the screen is not left inside the pressed button's own signal.
+
+### Câmera tab and Ícones do controle
+
+These are ordinary settings, not part of the draft: each edit is stored (`set_value`, sanitised) and saved at once, as on the Options screen, and `Settings.changed` rewrites the widget.
+
+| Widget | Key | Range or items |
+| --- | --- | --- |
+| `CameraSettings/Mode` | `camera_input_mode` | item 0 Teclas (`keys`), 1 Mouse (`mouse`) |
+| `CameraSettings/MouseSensitivity` | `mouse_sensitivity` | 0.02 to 0.50, step 0.01 |
+| `CameraSettings/OrbitSensitivity` | `camera_sensitivity` | 0.2 to 2.0, step 0.05 (the Options slider's key) |
+| `CameraSettings/MouseInvert` | `mouse_invert_vertical` | toggle |
+| `CameraSettings/OrbitInvert` | `invert_vertical` | toggle (the Options toggle's key) |
+| `CameraSettings/Deadzone` | `camera_deadzone` | 0.05 to 0.5, step 0.01 |
+| `ControlsPanel/DeviceFamily` | `controller_glyph_family` | item 0 Automático, 1 Xbox, 2 PlayStation |
+
+- The sliders' ranges are set from the `Settings` constants in `setup` (the authored 0.1 to 3.0 ranges are overridden), so they cannot drift.
+- `Interface._on_settings_changed` passes `controller_glyph_family` to `InputDeviceState.set_glyph_override`, and `_start_device_tracking` seeds it from the saved value. So the Ícones choice, global Defaults and a boot all apply it the same way.
+- The camera values reach the ship only in F16-06 (`CameraRig.apply_control_settings`); today they are stored and saved.
+
+### Prompts everywhere in menus
+
+- **`MenuController.set_prompts(family, bindings)`** writes `Layout/NavigationHint` on the five full screens: `<ui_up>/<ui_down>  Navegar     <ui_accept>  Confirmar     <ui_cancel>  Voltar`, without Voltar on the main menu (nothing to go back to). Each prompt is the action's first bound slot in the family's profile (`MenuController.prompt_for`), named by `BindingLabels`; a shared first word is merged (`Seta ↑/↓`, `D-pad ↑/↓`). Defaults: `Seta ↑/↓  Navegar     Enter  Confirmar     Esc  Voltar`, `D-pad ↑/↓  Navegar     A  Confirmar     B  Voltar`, and PlayStation's `✕` and `○`.
+- **`Interface._push_prompts`** calls it on every menu, and `ControlsScreen.set_prompt_families`, at boot and on `prompt_family_changed`, `controller_family_changed` and every `BINDING_PROFILES` change. This replaces the old `prompts_changed` → `set_keyboard_prompts` link. The device policy (Automático, Teclado, Controle, the 8 px mouse threshold, disconnect pause) is unchanged.
+- **`set_keyboard_prompts(shown)`** stays for a menu on its own: before `set_prompts` it shows F15-07's texts for the default bindings (the existing contract test pins the gamepad one); the running game never shows them.
+- **`MenuController.describe_binding(binding, family)`** is `BindingLabels.describe`, except on the headless display server, where `keyboard_get_label_from_physical` is unsupported and prints an ERROR for every physical key: there a physical key is named by its code. Every prompt and row goes through it, which keeps the boot smoke and the suite free of that error.
+- **`InputDeviceState.get_controller_family()`** is the override, else the last pad's family, else `xbox`, whichever prompts show; `get_prompt_family()` is `keyboard_mouse` or it. **`controller_family_changed`** fires on a change.
+- **The HUD** shows no control hints today, so it is unchanged. A hint added later (for example beside F16-05's Impulso indicator) should use `MenuController.prompt_for` with the prompt family.
+
+### Global Defaults
+
+`OptionsScreen.restore_defaults` → `Settings.restore_defaults` already resets the five F16 values and both profiles (F16-02) and saves once. Through `Settings.changed`, `Interface` now reinstalls the profiles, refreshes every prompt and reapplies the glyph override, and the Câmera tab and Ícones widgets rewrite themselves. The Controls draft is taken again on the next visit.
+
+### Verification (no tests: the F16 rule)
+
+- The existing suite passed (225, 0 failed; no script, parse or compile error). The 300-frame headless boot printed no ERROR or WARNING line. `check_resources.gd --strict-validate`: 85 resources, 85 scripts, none failed.
+- The suite enters Controls through `main.tscn` (Options → Controls → Back → Back), so `setup`, the rows, the tabs, the focus links and a clean Back ran there without an error.
+- Capture, conflicts, the dialogs, the confirmation and the camera widgets were checked by reading only. The walkthrough for the human pass is in [validation/controls-expansion.md](../validation/controls-expansion.md) "Rebinding workflow and prompts".
 
 ## Open issues
 

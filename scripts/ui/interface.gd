@@ -15,14 +15,20 @@ extends CanvasLayer
 ## (`restore_defaults`) is resolved here and never reaches the Session.
 ##
 ## And it owns the one [InputDeviceState] (F3-03): every input event and joypad
-## connection change is noted there, every menu's keyboard hint follows its
-## [signal InputDeviceState.prompts_changed], and a controller leaving while the HUD is
-## on top pauses the game through the ordinary `pause` action.
+## connection change is noted there, every menu's navigation hint names the live bindings
+## in its prompt family (F16-03), and a controller leaving while the HUD is on top pauses
+## the game through the ordinary `pause` action. The saved Ícones do controle choice is its
+## glyph override.
 ##
 ## And the one [InputBindingAdapter] (F16-02), the only [InputMap] writer for the
 ## catalog actions: the saved binding profiles are installed right after the settings
 ## load, before any menu exists, and again whenever [Settings] changes them. On leaving
 ## the tree the catalog actions go back to their `project.godot` events.
+##
+## And the Controls screen's [ControlsScreen] (F16-03), created under the Controls root
+## like the [OptionsScreen]: its open dialogs see every input event first
+## ([method ControlsScreen.consume_modal_input]), and Back from Controls asks it first
+## ([method ControlsScreen.request_leave]), so an unapplied draft is never lost silently.
 
 
 ## The Session should act on [param action]: every [signal MenuController.action_requested]
@@ -45,6 +51,8 @@ var _hud: Hud
 var _settings: Settings
 ## Null when the Options screen is missing (already reported).
 var _options_screen: OptionsScreen
+## Null when the Controls screen is missing (already reported).
+var _controls_screen: ControlsScreen
 var _device_state := InputDeviceState.new()
 var _binding_adapter := InputBindingAdapter.new()
 
@@ -74,6 +82,7 @@ func _ready() -> void:
 		if id not in _menus:
 			push_error("%s: no scene in 'menu_scenes' has the %s screen" % [get_path(), id])
 	_bind_options()
+	_bind_controls()
 	_start_device_tracking()
 	_router.screen_hidden.connect(_on_screen_hidden)
 	_router.screen_shown.connect(_on_screen_shown)
@@ -86,10 +95,13 @@ func _exit_tree() -> void:
 
 
 ## Notes the device behind every event for the prompts. [method _input] rather than
-## unhandled input, because a focused button consumes the gamepad's accept press; the
-## event is never handled here.
+## unhandled input, because a focused button consumes the gamepad's accept press. The
+## event is handled here only when a Controls dialog consumes it, before the GUI and every
+## other handler see it (F16-03).
 func _input(event: InputEvent) -> void:
 	_device_state.note_event(event)
+	if _controls_screen != null and _controls_screen.consume_modal_input(event):
+		get_viewport().set_input_as_handled()
 
 
 ## `ui_cancel` belongs to the menus only while one is on top. Over running gameplay the
@@ -194,7 +206,11 @@ func _add_menu(scene: PackedScene) -> void:
 	_menus[menu.get_screen_id()] = menu
 
 
+## Back from Controls waits while [ControlsScreen] settles an unapplied draft; it emits
+## [signal ControlsScreen.leave_requested] once the player chose.
 func _go_back() -> void:
+	if _router.current() == ScreenRouter.CONTROLS and _controls_screen != null and not _controls_screen.request_leave():
+		return
 	if _router.current() == ScreenRouter.PAUSE:
 		action_requested.emit(&"resume", {})
 	elif not _router.back():
@@ -213,28 +229,55 @@ func _bind_options() -> void:
 	_options_screen.setup(options, _settings)
 
 
-## Seeds the [InputDeviceState] with the saved mode and the pads already connected,
-## connects its three sources once, and pushes the first prompt state to every menu.
+## The Controls root gets a [ControlsScreen] child the same way (F16-03), bound to the live
+## bindings and the adapter that names captured events.
+func _bind_controls() -> void:
+	var controls: MenuController = _menus.get(ScreenRouter.CONTROLS)
+	if controls == null:
+		return
+	_controls_screen = ControlsScreen.new()
+	_controls_screen.name = &"ControlsScreen"
+	controls.add_child(_controls_screen)
+	_controls_screen.setup(controls, _settings, _settings.get_input_bindings(), _binding_adapter)
+	_controls_screen.leave_requested.connect(_go_back)
+
+
+## Seeds the [InputDeviceState] with the saved mode, the saved glyph override and the pads
+## already connected, connects its sources once, and pushes the first prompts to every menu.
 func _start_device_tracking() -> void:
 	_device_state.set_mode(_settings.get_input_device())
+	_device_state.set_glyph_override(_settings.get_controller_glyph_family())
 	for device: int in Input.get_connected_joypads():
 		_device_state.note_joypad(device, true)
-	_device_state.prompts_changed.connect(_on_prompts_changed)
+	_device_state.prompt_family_changed.connect(_on_prompt_family_changed)
+	_device_state.controller_family_changed.connect(_on_prompt_family_changed)
 	_settings.changed.connect(_on_settings_changed)
 	Input.joy_connection_changed.connect(_on_joy_connection_changed)
-	_on_prompts_changed(_device_state.shows_keyboard_prompts())
+	_push_prompts()
 
 
-func _on_prompts_changed(keyboard: bool) -> void:
+func _on_prompt_family_changed(_family: StringName) -> void:
+	_push_prompts()
+
+
+## Every menu's footer and the Controls screen follow the live bindings and families.
+func _push_prompts() -> void:
+	var family := _device_state.get_prompt_family()
+	var bindings := _settings.get_input_bindings()
 	for menu: MenuController in _menus.values():
-		menu.set_keyboard_prompts(keyboard)
+		menu.set_prompts(family, bindings)
+	if _controls_screen != null:
+		_controls_screen.set_prompt_families(family, _device_state.get_controller_family())
 
 
 func _on_settings_changed(key: StringName, value: Variant) -> void:
 	if key == Settings.INPUT_DEVICE:
 		_device_state.set_mode(value)
+	elif key == Settings.CONTROLLER_GLYPH_FAMILY:
+		_device_state.set_glyph_override(value)
 	elif key == Settings.BINDING_PROFILES:
 		_apply_bindings()
+		_push_prompts()
 
 
 ## Installs the saved binding profiles (F16-02), before any menu exists, so the first
@@ -258,6 +301,8 @@ func _apply_bindings() -> void:
 ## alone, so nothing is ever resumed or toggled by an unplug.
 func _on_joy_connection_changed(device: int, connected: bool) -> void:
 	_device_state.note_joypad(device, connected)
+	if _controls_screen != null:
+		_controls_screen.note_joypad_connection(connected)
 	if not connected and _device_state.pauses_on_disconnect() and _router.current() == ScreenRouter.HUD:
 		_request_pause()
 

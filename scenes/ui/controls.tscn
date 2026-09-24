@@ -4,7 +4,6 @@
 [ext_resource type="Texture2D" path="res://assets/ui/menu_forest.svg" id="2_forest"]
 [ext_resource type="Texture2D" path="res://assets/ui/wind_emblem.svg" id="3_emblem"]
 [ext_resource type="Script" path="res://scripts/ui/menu_controller.gd" id="4_controller"]
-[ext_resource type="PackedScene" path="res://scenes/ui/components/binding_row.tscn" id="5_row"]
 
 [sub_resource type="StyleBoxFlat" id="ContentPanel"]
 bg_color = Color(0.025, 0.055, 0.08, 0.98)
@@ -189,63 +188,6 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 4
 
-[node name="PreviewForward" parent="Layout/ControlsPanel/BindingScroll/Rows" instance=ExtResource("5_row")]
-layout_mode = 2
-metadata/action_id = "move_forward"
-
-[node name="PreviewDash" parent="Layout/ControlsPanel/BindingScroll/Rows" instance=ExtResource("5_row")]
-layout_mode = 2
-metadata/action_id = "dash_left"
-
-[node name="ActionLabel" parent="Layout/ControlsPanel/BindingScroll/Rows/PreviewDash" index="0"]
-text = "Impulso à esquerda"
-
-[node name="PrimaryButton" parent="Layout/ControlsPanel/BindingScroll/Rows/PreviewDash" index="1"]
-text = "Q"
-
-[node name="PreviewRecenter" parent="Layout/ControlsPanel/BindingScroll/Rows" instance=ExtResource("5_row")]
-layout_mode = 2
-metadata/action_id = "camera_recenter"
-
-[node name="ActionLabel" parent="Layout/ControlsPanel/BindingScroll/Rows/PreviewRecenter" index="0"]
-text = "Centralizar câmera"
-
-[node name="PrimaryButton" parent="Layout/ControlsPanel/BindingScroll/Rows/PreviewRecenter" index="1"]
-text = "R"
-
-[node name="SecondaryButton" parent="Layout/ControlsPanel/BindingScroll/Rows/PreviewRecenter" index="2"]
-text = "Mouse 3"
-
-[node name="PreviewDashRight" parent="Layout/ControlsPanel/BindingScroll/Rows" instance=ExtResource("5_row")]
-layout_mode = 2
-metadata/action_id = "dash_right"
-
-[node name="ActionLabel" parent="Layout/ControlsPanel/BindingScroll/Rows/PreviewDashRight" index="0"]
-text = "Impulso à direita"
-
-[node name="PrimaryButton" parent="Layout/ControlsPanel/BindingScroll/Rows/PreviewDashRight" index="1"]
-text = "E"
-
-[node name="PreviewFire" parent="Layout/ControlsPanel/BindingScroll/Rows" instance=ExtResource("5_row")]
-layout_mode = 2
-metadata/action_id = "fire"
-
-[node name="ActionLabel" parent="Layout/ControlsPanel/BindingScroll/Rows/PreviewFire" index="0"]
-text = "Disparar"
-
-[node name="PrimaryButton" parent="Layout/ControlsPanel/BindingScroll/Rows/PreviewFire" index="1"]
-text = "J"
-
-[node name="PreviewPause" parent="Layout/ControlsPanel/BindingScroll/Rows" instance=ExtResource("5_row")]
-layout_mode = 2
-metadata/action_id = "pause"
-
-[node name="ActionLabel" parent="Layout/ControlsPanel/BindingScroll/Rows/PreviewPause" index="0"]
-text = "Pausar"
-
-[node name="PrimaryButton" parent="Layout/ControlsPanel/BindingScroll/Rows/PreviewPause" index="1"]
-text = "Esc"
-
 [node name="ActionHelp" type="Label" parent="Layout/ControlsPanel"]
 offset_left = 24.0
 offset_top = 382.0
@@ -387,6 +329,11 @@ alignment = 2
 layout_mode = 2
 text = "Cancelar"
 
+[node name="UseButton" type="Button" parent="Overlays/CaptureDialog/Buttons"]
+visible = false
+layout_mode = 2
+text = "Usar"
+
 [node name="ConflictDialog" type="Panel" parent="Overlays"]
 visible = false
 anchors_preset = 8
@@ -427,11 +374,15 @@ theme_override_constants/separation = 8
 
 [node name="CancelButton" type="Button" parent="Overlays/ConflictDialog/Buttons"]
 layout_mode = 2
-text = "Escolher outro"
+text = "Cancelar"
 
 [node name="SwapButton" type="Button" parent="Overlays/ConflictDialog/Buttons"]
 layout_mode = 2
 text = "Trocar"
+
+[node name="ReplaceButton" type="Button" parent="Overlays/ConflictDialog/Buttons"]
+layout_mode = 2
+text = "Substituir"
 
 [node name="DirtyDialog" type="Panel" parent="Overlays"]
 visible = false
@@ -527,4 +478,4 @@ text = "Reverter"
 
 [node name="ConfirmButton" type="Button" parent="Overlays/ConfirmBindingsDialog/Buttons"]
 layout_mode = 2
-text = "Manter"
+text = "Manter controles"

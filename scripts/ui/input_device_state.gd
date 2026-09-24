@@ -20,6 +20,10 @@ signal prompts_changed(keyboard: bool)
 ## only on a change.
 signal prompt_family_changed(family: StringName)
 
+## The controller family changed: `&"xbox"` or `&"playstation"`, from the override or the
+## last pad used, whichever prompts show (F16-03). Emitted only on a change.
+signal controller_family_changed(family: StringName)
+
 ## A stick has to pass this far before it counts as gamepad use, so drift near the center
 ## does not switch the prompts. Godot's default for the `ui_*` actions.
 const JOYPAD_AXIS_THRESHOLD := 0.5
@@ -48,6 +52,7 @@ var _last_pad_device: int = -1
 ## Relative mouse motion accumulated since the last gamepad event (F16-08).
 var _mouse_motion_accum: float = 0.0
 var _prompt_family: StringName = &"keyboard_mouse"
+var _controller_family: StringName = &"xbox"
 
 
 ## Sets the preference from Options. The last device used is kept.
@@ -69,13 +74,22 @@ func set_glyph_override(family: StringName) -> void:
 
 
 ## The prompt family to show: `&"keyboard_mouse"` while [method shows_keyboard_prompts] is
-## true; otherwise the override when one is set; otherwise, for `&"auto"`, the family of the
-## last pad that sent an event, read from [method Input.get_joy_name] (F16-08).
+## true, otherwise [method get_controller_family] (F16-08).
 func get_prompt_family() -> StringName:
 	if shows_keyboard_prompts():
 		return &"keyboard_mouse"
+	return get_controller_family()
+
+
+## The controller glyph family, whichever prompts show, for the Controls screen's Controle
+## tab (F16-03): the override when one is set; otherwise, for `&"auto"`, `&"playstation"`
+## when the last pad that sent an event reads as one in [method Input.get_joy_name], else
+## `&"xbox"`, also before any pad did.
+func get_controller_family() -> StringName:
 	if _glyph_override != &"auto":
 		return _glyph_override
+	if _last_pad_device < 0:
+		return &"xbox"
 	var joy_name := Input.get_joy_name(_last_pad_device).to_lower()
 	for token: String in PLAYSTATION_NAME_TOKENS:
 		if joy_name.contains(token):
@@ -146,6 +160,10 @@ func _refresh() -> void:
 	if keyboard != _keyboard_prompts:
 		_keyboard_prompts = keyboard
 		prompts_changed.emit(keyboard)
+	var controller := get_controller_family()
+	if controller != _controller_family:
+		_controller_family = controller
+		controller_family_changed.emit(controller)
 	var family := get_prompt_family()
 	if family != _prompt_family:
 		_prompt_family = family

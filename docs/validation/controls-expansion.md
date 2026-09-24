@@ -81,7 +81,63 @@ No test or driver script: the ticket forbids them. Verified on 2026-09-24 by rea
 
 ## Rebinding workflow and prompts (F16-03, trunk)
 
-Pending.
+2026-09-24, Claude (trunk). Windows 11, Godot 4.7.2 editor binary headless, no physical device. The contract is in [settings.md "F16 capture workflow and prompts"](../engineering/settings.md#f16-capture-workflow-and-prompts-f16-03). No test or driver was written (F16 rule).
+
+**Run (existing gate pieces only).**
+
+| Check | Result |
+| --- | --- |
+| `tools/test.ps1`, the existing suite | pass: 225 passed, 0 failed, no script, parse or compile error |
+| 300-frame headless boot of `main.tscn` | pass: no ERROR or WARNING line |
+| `check_resources.gd --strict-validate` | pass: 85 resources, 85 scripts, none failed |
+| `ControlsScreen.setup` at every boot (paths, rows, camera ranges, focus links) | pass: runs in the boot and the suite without an error |
+| Options → Controls → Back → Back through `main.tscn` (existing `test_interface_contract`) | pass: the screen is entered and left; entry focus stays on Voltar and Options gets its focus back |
+| The standalone menu footer contract (`test_set_keyboard_prompts_shows_and_hides_the_footer`) | pass: a menu with no bindings still shows F15-07's texts |
+
+A first boot showed that `BindingLabels`' physical-key lookup prints `ERROR: Not supported by this display server` on the headless display server. Every prompt now goes through `MenuController.describe_binding`, which names a physical key by its code there, and hidden rows are not written; the boot then printed nothing.
+
+**Checked by reading (not executed).**
+
+| Rule | Where it holds | Result |
+| --- | --- | --- |
+| The opener never binds | The slot's `pressed` fires on release, and capture waits until no key, mouse button or pad button is held before listening | pass (reading) |
+| Echo, `InputEventAction`, mouse motion ignored | `_candidate_from` returns nothing for them; every event is consumed while listening | pass (reading) |
+| Drift and held sticks never bind | An axis must read below 0.2 during the capture before a pull past 0.6 counts; axes off-centre at the start stay unarmed | pass (reading); feel not verified |
+| Triggers | Pull is the 0 to 1 value; a −1-at-rest backend is detected and rescaled; only +1 is proposed | pass (reading); no such backend exercised |
+| Escape, accept and cancel can be captured | While listening nothing is treated as cancel except a click on Cancelar and the other device's `ui_cancel` | pass (reading) |
+| A candidate's release never confirms it | Review buttons take input only after every key and button is released and an axis candidate is centred; the GUI activates on a fresh press/release | pass (reading) |
+| Chords and standalone modifiers | A modifier waits: the next key or button makes a chord (Shift+Tab); its release alone binds it (Left Shift, with location) | pass (reading) |
+| 10 s timeout returns unchanged | Deadline per capture and per review; the draft is only changed by Usar, Trocar or Substituir | pass (reading) |
+| Nothing leaks behind a dialog | `Interface._input` marks consumed events handled before the GUI, `Interface._unhandled_input` and the Session; `ui_cancel` is consumed as the dialog's cancel; `Overlays` blocks the mouse; focus is trapped among the dialog's buttons | pass (reading) |
+| Focus returns to the invoker | The first dialog of a chain remembers the focused control; closing gives it focus back, or the active tab | pass (reading) |
+| Substituir disabled when a required action would lose its last binding | Trial `assign(RESOLUTION_REPLACE)` on a copy; disabled buttons also lose focus mode | pass (reading) |
+| Layout-space conflicts (F16-02's limit) | `pause` versus menu-only actions compared through `keyboard_get_keycode_from_physical` for character keys; Substituir only | pass (reading); non-QWERTY not exercised |
+| Draft until Aplicar; failure keeps the draft and the live map | Every edit is on the draft; `Settings.apply_input_bindings` saves before installing and changes nothing on failure; ActionHelp shows "Não foi possível salvar os controles." | pass (reading); failure path not exercised |
+| Confirmation on the new bindings; timeout, disconnect, focus loss and hiding revert | `ConfirmBindingsDialog` opens after the profiles are live; `_process`, `note_joypad_connection`, `NOTIFICATION_APPLICATION_FOCUS_OUT` and the hide handler call `revert_input_bindings` | pass (reading) |
+| Dirty Back | `Interface._go_back` asks `request_leave` for both Voltar and `ui_cancel` | pass (reading); the clean case passes in the suite |
+| Focus order and scrolling | Tabs → Ícones → rows (Principal → Alternativo → Redefinir) → Restaurar → Aplicar → Voltar, wrapping; only the shown tab is linked; `ensure_control_visible` on focus; per-tab memory | pass (reading); controller walk not done |
+| Footers from bindings | `MenuController.set_prompts` from `Interface` at boot and on every family or binding change | pass (reading) |
+| Global Defaults | `Settings.restore_defaults` covers the F16 values and profiles; `Interface` now reapplies the glyph override on its change | pass (reading) |
+
+**Manual walkthrough for the human pass (not verified).** Record the device and backend for each line; an unavailable device stays not verified.
+
+1. Keyboard only: Opções → Controles. Tab and the arrows reach every tab, Ícones, each row's three buttons, Restaurar esta aba, Aplicar and Voltar, and wrap. The list scrolls with the focus, the category heading shows above each category's first row, and ActionHelp names the focused action.
+2. Controller only (Xbox, DualShock, DualSense each): the same walk with the D-pad and the stick; A/✕ opens a capture, B/○ goes back. Entering Controles while using the pad opens the Controle tab, with the pad's glyphs.
+3. Capture ordinary keys, Escape, Enter, Space, Left Shift and Left Ctrl alone, Shift+Tab, Mouse 1 to 5, the wheel, D-pad, face buttons, RB/LB, both sticks in each direction and both triggers. Each shows its review, then its name or glyph in the row.
+4. Hold the opening button, hold a trigger, and rest a drifting stick while a capture opens: none of them binds. Let a capture run out: after 10 s nothing changed.
+5. Cancel a capture with Cancelar (mouse), with Escape on the Controle tab and with B on the keyboard tab; while listening, Escape on the keyboard tab is captured, not a cancel.
+6. Conflicts: K on Bomba (Trocar gives Fixar alvo the L; Substituir leaves Fixar alvo blank), Escape on Bomba and W on Recuar (Substituir disabled: Pausa and Avançar are required). Cancelar changes nothing.
+7. Redefinir on a remapped row, and on a row whose default another action now holds (refused, with the holder named). Restaurar esta aba on each tab.
+8. Change Confirmar on the controller to X and press Aplicar: the confirmation runs on X; navigate to Manter controles and press X. Repeat and press nothing: after 10 s the previous controls return without a restart.
+9. During the confirmation: unplug the controller, and Alt+Tab away. Both revert.
+10. Make a change and press Voltar, and Escape: the Dirty dialog offers Aplicar, Descartar and Continuar editando; each does what it says.
+11. Save failure: make `settings.cfg` read-only, press Aplicar: "Não foi possível salvar os controles."; the old controls stay live and the draft stays.
+12. Save, quit and relaunch: the exact bindings and the Ícones choice return. Kill the game during a confirmation: the previous controls return, with one boot warning.
+13. Câmera tab: every widget changes and saves its value; Opções shows the same orbit sensitivity and inversion. Restaurar esta aba resets them.
+14. Menu footers on the main menu, Selecionar fase, Opções, Controles and Créditos name the live bindings: keyboard text, then Xbox text after pad use, PlayStation text with a DualSense or with Ícones: PlayStation. Remap Confirmar and see every footer follow.
+15. Opções → Restaurar padrões: bindings, camera values and Ícones return to the defaults, and the footers follow.
+16. With a non-US layout (AZERTY if available): put a letter key (for example A) on Confirmar's Alternativo, then capture the same key for Pausa's Alternativo. The conflict is reported and only Substituir is offered.
+17. Open Controles from Pause during a stage: nothing fires, dashes, pauses or resumes while capturing; Voltar returns to Opções and then to Pause.
 
 ## Mouse camera and recenter (F16-04, path)
 
