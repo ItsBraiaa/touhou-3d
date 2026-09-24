@@ -38,7 +38,7 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | | | | 01 settings-core-and-configfile | core | yes | oc-b | done (2026-09-23: `Settings` core and explicit ConfigFile persistence landed; no tests per sprint rule) |
 | | | | 02 options-screen-binding | adapter | no | path | done (2026-09-23: `Interface` owns the one `Settings`; `OptionsScreen` binds the eight widgets, applies buses and window, saves on change and Defaults; no new tests, by the sprint rule; windowed display pass owed to F3-04 part 1) |
 | | | | 03 input-device-mode-and-controller-disconnect | adapter | no | path | done (2026-09-23: one `InputDeviceState` in `Interface` drives every menu footer; a controller unplugged over the HUD pauses through `pause`; no new tests, by the sprint rule; physical unplug owed to the human pass) |
-| | | | 04 settings-to-camera-wiring | integration | no | trunk (part 1: path) | todo (part 1 landed 2026-09-24: the windowed F3 pass in `docs/validation/settings.md`; part 2, the Session camera wiring, closes it) |
+| | | | 04 settings-to-camera-wiring | integration | no | path | done (2026-09-24: part 1 the windowed F3 pass; part 2 the Session applies camera sensitivity and invert at every spawn and on change, also from Pause; verified headless and in a short windowed run, no new tests per the sprint rule; physical-device pass owed) |
 | F4 | Combat state and HUD | `combat-hud` | 00 plan | docs | no | — | done (one-pass planning, 2026-09-23; 01 was written and delivered separately) |
 | | | | 01 combat-state-core | core | yes | — | done |
 | | | | 02 hud-binding-and-target-marker | adapter | no | trunk | done (2026-09-23: `Hud` bound to the Session's `CombatState` and each ship's `Targeting`; marker verified in the harness) |
@@ -71,6 +71,8 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | | | | 02 gate-and-checkpoint-adapters | adapter | no | trunk | done (2026-09-23: `Gate` and `Checkpoint` on Stage 1; the whole route flown from the menu, Gates open as Encounters clear, CP1-A and CP1-B refill once; no new tests per the sprint rule) |
 | | | | 03 retry-restart-flow | integration | no | trunk | done (2026-09-23: Retry resumes in place from the latest Checkpoint, Restart reloads, Defeat names the Checkpoint; verified in the running game, no new tests per the sprint rule) |
 | | | | 04 stage-01-contract-smoke-test | test | yes (one new test file) | — | cut (the user's no-tests rule, 2026-09-23) |
+| | | | 05 retry-restores-checkpoint-pickups | adapter | no | path | todo |
+| | | | 06 stage-validators-accept-the-director | tooling | yes | oc-a | done (2026-09-24: Stage 1 validator accepts no root script or the StageDirector script; all three validators passed headless, no new tests per sprint rule) |
 | F11 | Run flow | `run-flow` | 00 plan | docs | no | — | done (one-pass planning) |
 | | | | 01 defeat-results-retry-restart-screens | integration | no | trunk | todo |
 | | | | 02 campaign-continuation-and-direct-stage | integration | no | trunk | todo |
@@ -80,13 +82,13 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | | | | 02 boss-controller-adapter | adapter | no | path | done (2026-09-23: `BossController` and the dev boss run three Phases, clears and the HUD panel in the arena harness; no new tests, by the sprint rule; `lantern_guardian.tres` load failure reported for F12-03) |
 | | | | 03 lantern-guardian-in-s1-07 | integration | no | trunk (part 1: oc-a) | done (2026-09-24: the Lantern Guardian fights in S1-07 through `boss_definitions`, with the HUD panel and cues, +1000 and one stage clear from its final Phase; D-03's prefab attached; verified in the running game, no new tests per the sprint rule; Phase health about 2.7× the pacing target, noted for D-07 Part C) |
 | | | | 04 stage-02-content-draft | content | yes | oc-b | done (2026-09-23: dev draft of `content/stages/stage_02/` landed, validates and matches the scene; Astra tunes values in D-06) |
-| | | | 05 stage-02-director-integration | adapter | no | sol | todo |
+| | | | 05 stage-02-director-integration | adapter | no | sol | done (2026-09-24: Stage 2 Director, Seals, Guards, Gates and checkpoint fallback; both route orders and retries observed) |
 | | | | 06 tempest-sentinel-miniboss | integration | no | sol (part 1: oc-a) | todo |
 | | | | 07 storm-guardian | integration | no | sol (part 1: oc-a) | todo |
 | F13 | Audio | `audio` | 00 plan | docs | no | — | done (cut, then reinstated by the sprint plan, 2026-09-23) |
 | | | | 01 audio-limiter-core | core | yes | oc-a | done |
 | | | | 02 audio-controller-adapter | adapter | no | oc-a | done (no new tests, by the sprint rule; headless Dummy-driver check recorded in audio.md) |
-| | | | 03 audio-event-wiring | integration | no | trunk | todo |
+| | | | 03 audio-event-wiring | integration | no | path | todo |
 | F14 | Delivery | `delivery` | 00 plan | docs | no | — | done (one-pass planning) |
 | | | | 01 export-and-run-outside-editor | integration | no | trunk | todo (blocks itself until the user installs the Godot 4.7.2 export templates) |
 | | | | 02 package-and-acceptance-record | tooling | no | oc-b | todo |
@@ -95,8 +97,9 @@ A lane edits only its own rows (SPRINT.md "Shared files").
 | | | | 03 lantern-guardian-scene | design | — | sol | done (2026-09-23: Ghost prefab, clips and dusk render verified) |
 | | | | 04 stage-2-boss-scenes | design | — | sol | done (2026-09-23: Tempest Sentinel and Storm Guardian prefabs, clips and Stage 2 renders verified) |
 | | | | 05 stage-1-tuning-and-pacing | design | — | sol | done (2026-09-23: content values, names, clip candidates and provisional 221 s estimate) |
-| | | | 06 stage-2-content-review | design | — | sol | todo (pass 1 values/reward review and provisional pacing estimate landed; passes 2–3 pending) |
+| | | | 06 stage-2-content-review | design | — | sol | todo (passes 1–2 landed: values/rewards and explicit Seal health 10; pass 3 boss tuning pending) |
 | | | | 07 shrine-lighting-and-boss-rulings | design | — | sol | doing (Part B rulings delivered; Parts A and C await F12-03) |
+| | | | 08 enemy-visuals-duplicate-parts | design | — | oc-a | done (2026-09-24: Part 1 confirmed duplicate glTF and embedded model parts in all four visuals; Part 2 removed the instance links, post-fix counts and validator clean) |
 
 Order rationale: Player before Menus (highest UX risk and GUIDE Section 13's assignment). Audio buses are created in F0-03 so F3 can bind Options to them. Enemies (F9) come before the Stage Director (F10) so the Director is integrated against real Waves. The sprint's lane queues, checkpoints and kickoff prompts are in [SPRINT.md](SPRINT.md).
 
@@ -141,6 +144,8 @@ Dependencies Claude has on scene and content work. These are needs by Feature, n
 
 ## Received from Astra
 
+2026-09-24: D-08 confirmed duplicate embedded and instanced enemy model parts in all four Stage 1 visual scenes, then removed the duplicate instance links. Post-fix counts are one mesh/surface/skeleton/player with zero detached or left nodes; `validate_enemy_visuals.gd` passed. See [enemy-visuals.md](../validation/enemy-visuals.md).
+
 2026-09-23: D-05 reviewed Stage 1 content and shared Spirit/Sentry values, named both checkpoints and selected candidate Anticipation clips. [stage-01-pacing.md](../validation/stage-01-pacing.md) estimates an efficient clear at about 221 s against the 240 s design target; it is not a measured result. Trunk owns clip playback and any PlayerShip value follow-up; D-06 must recompute its Stage 2 estimate from the revised shared enemy health.
 
 2026-09-23: D-06 pass 1 reviewed F12-04's Stage 2 content and named CP2-A/CP2-B; [stage-02-pacing.md](../validation/stage-02-pacing.md) records the exact reward audit and conditional ~319 s efficient / ~392 s normal estimates. The ≥300 s requirement still needs a measured clear; Seal and boss tuning remain for passes 2 and 3.
@@ -174,3 +179,5 @@ Stage 2 scene ticket: `.scratch/stage-02-area/issues/01-mountain-route.md` — *
 ## Decision log
 
 Architecture and style decisions are not repeated here. See `docs/adr/` and `CONVENTIONS.md`. Gameplay rules stay in `docs/PLANEJAMENTO.md` and `docs/STAGE_DESIGN.md`.
+
+2026-09-24: D-06 pass 2 explicitly authors Seal health 10 on all three Seals (unchanged from the verified default). Updated conditional Stage 2 estimates with D-05 enemy health: ~336 s efficient / ~414 s normal; boss review and measured clear remain pending.

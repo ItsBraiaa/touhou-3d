@@ -1,5 +1,42 @@
 # Handoff Log
 
+## 2026-09-24 — OpenCode (oc-a) — D-08 enemy visual duplicate parts [shared]
+State: dev
+Files: `scenes/enemies/visuals/spirit_lume.tscn`; `spirit_twilight.tscn`; `sentry_lantern.tscn`; `sentry_seal.tscn`; `tools/build_enemy_visuals.gd`; `docs/ENEMY_VISUAL_HANDOFF.md`; `docs/validation/enemy-visuals.md`; `docs/engineering/ROADMAP.md`; D-08 ticket.
+
+Change: Part 1 confirmed that every visual scene loaded both its glTF instance subtree and its embedded tinted subtree: two meshes, surfaces, skeletons and animation players, four detached nodes and four left nodes. The arena harness also leaked visual classes at exit. Part 2 removed exactly the glTF ext_resource and `instance=ExtResource(...)` from each `Model`, leaving the embedded tinted/looping set. The generator now clears `scene_file_path` before packing and warns that reruns drop D-05's anticipation metadata; it was not run.
+Verification: post-fix counts match both controls at 1/1/1/1/0/0; `validate_enemy_visuals.gd` passed with `failures=0`; the short windowed launch reached Forward+ and was closed after ten seconds. No new tests.
+Action required by Astra: inspect the four-scene diff and confirm the single tinted body in a normal arena run; do not rerun the generator over these integrated scenes.
+Action required by trunk: the enemy visual leak note in `docs/engineering/stage-director.md` is resolved for these four scenes.
+
+## 2026-09-24 — OpenCode (oc-a) — Stage validators accept the Director
+State: dev
+Files: `tools/validate_stage_01.gd`; `docs/engineering/ROADMAP.md`; F10-06 ticket.
+
+Change: The Stage 1 validator now accepts exactly no root script or `res://scripts/progression/stage_director.gd`; other root scripts still fail. Stage 2 and scene-handoff validators were unchanged.
+Verification: `validate_stage_01.gd` ended `STAGE_01_QA_COMPLETE failures=0 encounters=7 spawns=18 checkpoints=2 gates=4` (exit 0); `validate_stage_02.gd` ended `STAGE_02_PREVIEW_LOAD_OK (no rendered evidence in headless mode)` (exit 0; no F12-05 commit was present in `dev-01`); `validate_scene_handoff.gd` ended `SCENE_CONTRACT_OK: 10 required nodes; targets=3` (exit 0).
+Action required by Astra: none. Trunk may remove the resolved validator bullet from `docs/engineering/stage-director.md` in its next doc pass.
+
+## 2026-09-24 — Astra (sol) — Stage 2 content review (D-06 pass 2) [shared]
+State: SCENE_READY
+Files: scenes/stages/stage_02.tscn; docs/validation/stage-02-pacing.md; docs/engineering/ROADMAP.md; D-06 ticket.
+
+Seal1, Seal2 and Seal3 health: inherited default 10 → explicit authored 10. No behavior or other scene value changed; F12-05's game walkthrough already exercised that health. Estimated exposed destruction is 0.74 s efficient / 0.93 s normal at Power 2, keeping it a brief confirmation after the Guards. Rewards remain seven Power and two Shield; five early Power pickups can reach Power 3 before the miniboss.
+
+Updated the conditional estimates for D-05's shared Spirit 30/Sentry 45 health: about 336 s efficient and 414 s normal, neither measured. Boss budgets are provisional until pass 3. No content bug or Stage-2-only request found. F12-05 passed land (main-scene boot clean; 80 resources and 81 scripts, zero failed/invalid); D-06 pass 2 uses the same sprint gate and writes no tests. Ticket stays todo for pass 3.
+
+
+## 2026-09-24 — Astra (sol) — Stage 2 Director integration (F12-05) [shared]
+State: CODE_READY
+Files: scenes/stages/stage_02.tscn; scenes/dev/portal_light_resolved.tres; scripts/progression/stage_director.gd; scripts/progression/gate.gd; scripts/enemies/enemy_actor.gd; tests/scene/test_stage_02_contract.gd; module docs, GUIDE, validation, ROADMAP and ticket.
+
+Stage 2 now has its Director, five Gates, CP2-A/CP2-B and three Seals. Scripts/exports only: geometry, metadata and authored monitoring preserved. Seal health remains default 10 for D-06 pass 2. Bosses remain dev Sentries for F12-06/F12-07. The green resolved portal-light material is a dev placeholder.
+
+EnemyActor adds set_engaged and damaged; dormant Guards stay targetable/damageable but hold their attack/movement clocks. Director additions use private helpers and minimal call sites: setup/validation, guard callbacks, per-Seal rewards, light restoration and checkpoint entry fallback. Stage 1 keeps arch-only checkpoints. Gate optionally shows OpenVisual while open. Preserve authored Seal children, GuardLinks metadata, portal lights, marker and checkpoint paths.
+
+No new tests. Minimally adjusted test_stage_02_spatial_contract's static-root assertion, intentionally obsolete now. Windowed menu entry and two accelerated full routes (Seal orders 123 and 312), checkpoint bypass entry and both Retry destinations were observed; details in docs/validation/stage-02-progression.md. Known enemy-visual exit leaks remain outside scope. Read-only code review found no critical/important issues. No Director merge conflict encountered during implementation; land performs the final sync and gate.
+
+
 Append-only, newest entry first. One entry per change set that another agent must know about. Both agents write here. Never rewrite or delete an earlier entry; add a new one that supersedes it.
 
 Entry format:
@@ -33,6 +70,33 @@ Action required by Astra:
 1. **Boss health is about 2.7× the pacing target.** Measured with the real weapon: 22.1 damage/s at Power Level 3 (17.1 at Power Level 2). Part 1's Phases of 1500 / 1500 / 2100 therefore last about 68 / 68 / 95 s, against STAGE_DESIGN's ~25 / 25 / 35 s; about 550 / 550 / 775 would fit (then about 32 / 32 / 45 s at Power Level 2). Values are yours: `content/bosses/lantern_guardian.tres` (D-07 Part C). Your 221 s Stage 1 estimate assumed an 85 s boss.
 2. **Shrine lighting (D-07 Part A).** Author the corrupted-to-calm `AnimationPlayer` in `stage_01.tscn` with `process_mode = ALWAYS` (sprint note 4), and send its path and clip name; F14-01's swap step sets `defeat_presentation` and `defeat_animation`.
 3. Boss-arena retreat containment is still open.
+## 2026-09-24 09:45 — Claude (plan) — Delivery day: Retry pickups, validators, duplicate visuals; F13-03 and F3-04 part 2 to path
+State: PLANNED
+Files: `.scratch/stage-director/issues/05-retry-restores-checkpoint-pickups.md`, `06-stage-validators-accept-the-director.md` and `.scratch/design-sprint/issues/08-enemy-visuals-duplicate-parts.md` (new); `docs/engineering/SPRINT.md`, `docs/engineering/ROADMAP.md`; the Lane and Model lines of F13-03 and F3-04.
+Change:
+- **F10-05** carries Astra's Retry rule in lane path. The pickups that existed when the Checkpoint was activated come back on Retry: those collected before it stay collected, those available at it reappear, and those generated after it are removed and return through the replayed encounters' rewards.
+- **F10-06** (oc-a) makes `tools/validate_stage_01.gd` accept the Stage's Director.
+- **D-08** (oc-a) first confirms the duplicate model parts trunk reported in the four enemy visual scenes, and fixes them only if confirmed.
+- **Queue moves.** To shorten trunk's serial chain, F13-03 and F3-04 part 2 move to path. `game_session.gd` and `main.tscn` are edited by two lanes today, under the sync-first, separate-functions, second-lander-merges rule.
+- **Checkpoint names.** CP1-A and CP1-B already have their Portuguese names (Portal Selado, Entrada do Santuário); the report of ids on Defeat was stale.
+
+Why: Astra's design answer, and delivery-day throughput.
+
+Action required by Astra: review D-08's result when it lands; it edits your four visual scenes [shared].
+## 2026-09-24 09:40 — Claude (path) — F3-04 part 2: camera settings reach every ship; F3-04 done
+State: CODE_READY
+Files: `scripts/session/game_session.gd` (trunk's file, by the 2026-09-24 exception in the path queue), `docs/engineering/settings.md`, `docs/validation/settings.md`, `docs/GUIDE.md` (the `game_session.gd` and `camera_rig.gd` rows), `docs/engineering/ROADMAP.md` (F3-04 row), `.scratch/settings/issues/04-settings-to-camera-wiring.md`.
+
+Change:
+- **Part 2 (it closes F3-04).** The Session applies the camera sensitivity and invert vertical through `CameraRig.apply_settings()` at every spawn, right after `setup`, and on every change of either value, even from Options over Pause.
+- **Four additions, each in its own function.** `_connect_camera_settings()` (one call in `_ready`, one `Settings.changed` connection for the Session's life), `_apply_camera_settings()`, one call in `_spawn_player`, and `_on_setting_changed()`. Nothing else in `game_session.gd` changed.
+- **Verified** headless by a throwaway script (the ticket's six cases, 16 checks), and by one short windowed run: 2.0 swings the view up, 0.2 barely moves it, and invert swings it down. Recorded in `docs/validation/settings.md` "Camera wiring". No new tests (the sprint rule), so `tests/scene/test_settings_camera_wiring.gd` was not created. No existing test changed.
+
+Why: F3-04 part 2, moved from trunk to path on 2026-09-24.
+
+Action required by trunk: when you land after this, keep the one-line `_connect_camera_settings()` call in `_ready`, the `_apply_camera_settings()` call after `_player.setup(_flight_volume)` in `_spawn_player`, and the three new functions after `_spawn_player`.
+Action required by Astra: `CameraRig.sensitivity` and `invert_vertical` in `player_ship.tscn` are now overwritten by the player's settings at every spawn. Tune the orbit rate with `orbit_speed_degrees` instead.
+Owed to a person: the physical keyboard and DualSense pass over Options and the camera orbit, and a real controller unplug in flight.
 
 ## 2026-09-23 23:36 — Claude (path) — F14-01 pre-flight: dev-01 exported and run outside the repository
 State: docs

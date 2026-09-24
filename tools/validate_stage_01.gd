@@ -1,6 +1,8 @@
 extends SceneTree
 ## Offline static-scene QA. Does not implement stage progression or player movement.
 var failures := 0
+## The only script a Stage root may carry: the StageDirector (F10-01 on Stage 1, F12-05 on Stage 2).
+const DIRECTOR_SCRIPT_PATH := "res://scripts/progression/stage_director.gd"
 
 func check(condition: bool, message: String) -> void:
 	if not condition:
@@ -36,7 +38,8 @@ func run() -> void:
 	for gate in stage.get_node("Gates").get_children():
 		var shape: BoxShape3D = gate.get_node("BarrierBody/Collision").shape
 		check(shape.size.x == 90 and shape.size.y == 75, "Gate does not span allowed flight cross-section")
-	check(stage.get_script() == null, "Static stage unexpectedly contains runtime script")
+	var stage_script: Script = stage.get_script() as Script
+	check(stage_script == null or stage_script.resource_path == DIRECTOR_SCRIPT_PATH, "Stage root carries a script other than the StageDirector")
 	if DisplayServer.get_name() != "headless" and failures == 0:
 		var camera: Camera3D = scene.get_node("PreviewCamera")
 		var views := [

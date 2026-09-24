@@ -121,3 +121,7 @@ Reviewed all ten F12-04 Stage 2 resources, retained their approved structure and
 ```
 Read AGENTS.md, docs/engineering/SPRINT.md (lane sol), docs/GUIDE.md Sections 3 and 5 and .scratch/design-sprint/issues/06-stage-2-content-review.md, then deliver it in your worktree, log it in docs/HANDOFF_LOG.md, commit, and run tools/lane.ps1 land.
 ```
+
+## Pass 2 outcome
+
+2026-09-24, Astra (sol): all three Seal health exports are explicitly 10 (default 10 → authored 10), preserving the value verified by F12-05. Estimated exposed confirmation is 0.74 s efficient / 0.93 s normal at Power 2, without extending the Guard fight through Seal padding. No other scene property changed. The pacing record incorporates D-05's landed common-enemy health in its estimate: about 336 s efficient / 414 s normal, conditional on the still-provisional boss budgets and not a measured clear. Seven Power/two Shield rewards remain exact. No content bug or Stage-2-only enemy request. Status stays todo until pass 3 after F12-07. Commit uses (D-06 pass 2); sprint land is the gate.

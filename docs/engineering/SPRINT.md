@@ -65,7 +65,8 @@ No two agents ever share a working tree or a branch.
 
 | File | Who edits it | Rule |
 | --- | --- | --- |
-| `scripts/progression/stage_director.gd` | trunk F10-01, F10-02, F10-03, F12-03 part 2, F13-03; sol F12-05, F12-06, F12-07 | Unordered pairs: F12-03 with F12-05, and F13-03 with F12-06 and F12-07. Sync right before starting, put every addition in its own private function with a one-line call site, and the second lander merges both. If sol hits a conflict inside one function, it stops and `rescue` resolves it on `lane/sol`. |
+| `scripts/progression/stage_director.gd` | trunk F10-01, F10-02, F10-03, F12-03 part 2; path F13-03, F10-05; sol F12-05, F12-06, F12-07 | Unordered pairs: F12-03 with F12-05, and F13-03 with F12-06 and F12-07. Sync right before starting, put every addition in its own private function with a one-line call site, and the second lander merges both. If sol hits a conflict inside one function, it stops and `rescue` resolves it on `lane/sol`. |
+| `scripts/session/game_session.gd`, `scenes/main.tscn` (delivery-day exception to "trunk only") | trunk F12-03 part 2, F11-01, F11-02, F14-01; path F3-04 part 2, F13-03 | Two lanes edit them today. Sync right before each ticket, keep additions in their own functions and nodes, and the second lander merges both. `main.tscn` is edited only by F13-03. |
 | `tests/scene/test_stage_director.gd` | trunk F12-03; sol F12-05 | Each edits only its named functions; the second lander keeps both. |
 | `tests/scene/test_game_session_flow.gd`, `test_game_session_combat.gd`, F10 and F11 scene tests | trunk | Sol F12-05 may change only a case that breaks because Stage 2 now has a Director, and names it in its handoff. Trunk syncs before F11-01 and keeps the change. |
 | `scripts/ui/menu_controller.gd`, `tests/scene/test_menu_registry_contract.gd` | path F3-03; trunk F11-01 | Whichever starts second syncs first and keeps the other's hunks. They overlap only at the tail of `_ready`. |
@@ -112,8 +113,8 @@ Run top to bottom. When the next ticket's dependencies are not done, take the fi
 | 10 | F12-03 part 2: Director boss branch, Session wiring, `stage_01.tscn` exports, integration test; closes the ticket. Runs straight after F10-03 so Stage 2 unblocks about 2.7 h sooner | 3 agents | F12-02, F10-03, F12-03 part 1 (oc-a) |
 | 11 | F11-01 defeat-results-retry-restart-screens | solo | F10-03 |
 | 12 | F11-02 campaign-continuation-and-direct-stage | solo | F11-01 |
-| 13 | F13-03 audio-event-wiring | 2 agents | F13-02, F12-03, F7-03, D-01 |
-| 14 | F3-04 part 2: the Session additions; closes the ticket | solo | F10-03, F3-02, F3-04 part 1 (path) |
+| 13 | ~~F13-03~~: moved to path on delivery day | — | — |
+| 14 | ~~F3-04 part 2~~: moved to path on delivery day | — | — |
 | 15 | F14-01 export-and-run-outside-editor, starting with the swap step | solo | F11-03, F12-03 |
 
 Slip rule: if F11-02 has not landed by T0 + 19.5 h, run F14-01 straight after F11-03 (before F13-03 and F3-04), and F14-02 re-exports at the end.
@@ -134,6 +135,9 @@ Slip rule: if F11-02 has not landed by T0 + 19.5 h, run F14-01 straight after F1
 | 7c | F3-03 input-device-mode-and-controller-disconnect (moved from oc-b) | solo | F3-02 |
 | 8 | F3-04 part 1: the windowed F3 pass for F3-02 and F3-03, `docs/validation/settings.md` and screenshots | solo | F3-02, F3-03 |
 | 9 | F14-01 pre-flight: export `dev-01` in this worktree, run it, and record export-only errors in a handoff entry (no other file edits) | solo | F10-02 |
+| 9a | F3-04 part 2: the Session additions (moved from trunk); closes the ticket | solo | F10-03, F3-02, F3-04 part 1 |
+| 9b | F13-03 audio-event-wiring (moved from trunk) | 2 agents | F13-02, F12-03, F7-03, D-01 |
+| 9c | F10-05 retry-restores-checkpoint-pickups (Astra's Retry rule) | solo | F10-03, F12-03 |
 | 10 | F11-03 active-and-clear-time-verification, as the manual protocol and `docs/validation/clear-time.md` only (no tests). It never edits `game_session.gd`; a Session defect goes to trunk as a blocker. | solo | F11-02 |
 
 Expected gaps (stop the session): about T0 + 4.0 to 5.9 h, T0 + 10.7 to 12.4 h, and T0 + 13.2 to 19.5 h.
@@ -153,6 +157,8 @@ Expected gaps (stop the session): about T0 + 4.0 to 5.9 h, T0 + 10.7 to 12.4 h, 
 | 9 | F9-03 part 2: the Seal adapter; closes the ticket | GPT 5.6 Luna (MiMo-V2.6-Pro) | F9-03 part 1 |
 | 10 | F12-06 part 1: `content/bosses/tempest_sentinel.tres` and its two patterns only (content, no tests) | GPT 5.6 Luna (DeepSeek V4.1 Flash) | F12-01, F5-04, D-04 |
 | 11 | F12-07 part 1: `content/bosses/storm_guardian.tres` and its three patterns only (content, no tests) | GPT 5.6 Luna (DeepSeek V4.1 Flash) | F12-01, F5-04, D-04 |
+| 12 | F10-06 stage-validators-accept-the-director | GPT 5.6 Luna (DeepSeek V4.1 Flash) | F10-01 |
+| 13 | D-08 enemy-visuals-duplicate-parts: part 1 confirms, part 2 fixes only if confirmed | GPT 5.6 Luna (DeepSeek V4.1 Flash) | none |
 
 ### oc-b (OpenCode; model per ticket)
 

@@ -95,6 +95,7 @@ func _ready() -> void:
 	_combat_state.defeated.connect(_on_player_defeated)
 	_combat_state.bomb_activated.connect(_on_bomb_activated)
 	interface.action_requested.connect(_on_action_requested)
+	_connect_camera_settings()
 	interface.show_home(ScreenRouter.MAIN_MENU)
 
 
@@ -292,9 +293,35 @@ func _spawn_player(ship: PlayerController, at: Transform3D) -> void:
 	_player.transform = at
 	world_root.add_child(_player)
 	_player.setup(_flight_volume)
+	_apply_camera_settings()
 	interface.get_hud().bind(_combat_state, _player.targeting, _player.camera_rig.camera)
 	projectile_system.setup(_flight_volume, _player)
 	_player.weapon.setup(_combat_state, projectile_system, _player.targeting)
+
+
+## Listens to the player's settings once for the Session's life, so a Restart or a Retry
+## never doubles it. Skipped when [Interface] has no [Settings]: it disabled itself and
+## reported why.
+func _connect_camera_settings() -> void:
+	var settings := interface.get_settings()
+	if settings != null:
+		settings.changed.connect(_on_setting_changed)
+
+
+## Gives the ship in play the player's camera sensitivity and invert vertical. Called at
+## every spawn, after `setup` and before the ship's first physics tick, and on every
+## change of either value, even from Options over Pause: the rig only stores them, so
+## they take effect on the first tick the tree runs.
+func _apply_camera_settings() -> void:
+	var settings := interface.get_settings()
+	if _player == null or settings == null:
+		return
+	_player.camera_rig.apply_settings(settings.get_camera_sensitivity(), settings.get_invert_vertical())
+
+
+func _on_setting_changed(key: StringName, _value: Variant) -> void:
+	if key == Settings.CAMERA_SENSITIVITY or key == Settings.INVERT_VERTICAL:
+		_apply_camera_settings()
 
 
 ## Defeat's Retry: resumes from the latest activated Checkpoint's Snapshot in place, with

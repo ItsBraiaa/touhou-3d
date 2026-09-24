@@ -1,5 +1,19 @@
 [gd_scene format=3]
 
+[ext_resource type="Script" path="res://scripts/progression/stage_director.gd" id="1_director"]
+[ext_resource type="Resource" path="res://content/stages/stage_02/stage_02.tres" id="2_stage_definition"]
+[ext_resource type="PackedScene" path="res://scenes/dev/spirit.tscn" id="3_spirit"]
+[ext_resource type="PackedScene" path="res://scenes/dev/sentry.tscn" id="4_sentry"]
+[ext_resource type="Script" path="res://scripts/definitions/enemy_definition.gd" id="5_enemy_definition"]
+[ext_resource type="Resource" path="res://content/enemies/spirit.tres" id="6_spirit_definition"]
+[ext_resource type="Resource" path="res://content/enemies/sentry.tres" id="7_sentry_definition"]
+[ext_resource type="PackedScene" path="res://scenes/dev/power_pickup.tscn" id="8_power_pickup"]
+[ext_resource type="PackedScene" path="res://scenes/dev/shield_pickup.tscn" id="9_shield_pickup"]
+[ext_resource type="Script" path="res://scripts/progression/gate.gd" id="10_gate"]
+[ext_resource type="Script" path="res://scripts/progression/checkpoint.gd" id="11_checkpoint"]
+[ext_resource type="Script" path="res://scripts/progression/seal.gd" id="12_seal"]
+[ext_resource type="Material" path="res://scenes/dev/portal_light_resolved.tres" id="13_resolved"]
+
 [ext_resource type="Shader" path="res://assets/environment/stage_02/terrain.gdshader" id="terrain_shader"]
 
 [ext_resource type="Shader" path="res://assets/environment/stage_02/wind.gdshader" id="wind_shader"]
@@ -1036,6 +1050,29 @@ size = Vector3(0.94, 0.22, 0.94)
 material = SubResource("BoundaryRailCap")
 
 [node name="Stage" type="Node3D"]
+script = ExtResource("1_director")
+stage_definition = ExtResource("2_stage_definition")
+actor_scenes = Dictionary[StringName, PackedScene]({
+&"spirit": ExtResource("3_spirit"),
+&"sentry": ExtResource("4_sentry"),
+&"tempest_sentinel": ExtResource("4_sentry"),
+&"storm_guardian": ExtResource("4_sentry")
+})
+enemy_definitions = Dictionary[StringName, ExtResource("5_enemy_definition")]({
+&"spirit": ExtResource("6_spirit_definition"),
+&"sentry": ExtResource("7_sentry_definition"),
+&"tempest_sentinel": ExtResource("7_sentry_definition"),
+&"storm_guardian": ExtResource("7_sentry_definition")
+})
+power_pickup_scene = ExtResource("8_power_pickup")
+shield_pickup_scene = ExtResource("9_shield_pickup")
+portal_lights = Dictionary[StringName, NodePath]({
+&"S2-03-Seal1": NodePath("Gates/Gate_S2_03/PortalLights/Seal1"),
+&"S2-03-Seal2": NodePath("Gates/Gate_S2_03/PortalLights/Seal2"),
+&"S2-03-Seal3": NodePath("Gates/Gate_S2_03/PortalLights/Seal3")
+})
+resolved_light_material = ExtResource("13_resolved")
+activate_checkpoint_on_entry = true
 metadata/stage_id = "stage_02"
 metadata/handoff_state = "SCENE_READY_STATIC"
 
@@ -6597,6 +6634,7 @@ mesh = SubResource("WindShard")
 
 
 [node name="Gate_S2_01" type="Node3D" parent="Gates"]
+script = ExtResource("10_gate")
 metadata/encounter_id = "S2-01"
 
 [node name="BarrierBody" type="StaticBody3D" parent="Gates/Gate_S2_01"]
@@ -6698,6 +6736,7 @@ mesh = SubResource("WindShard")
 
 
 [node name="Gate_S2_02" type="Node3D" parent="Gates"]
+script = ExtResource("10_gate")
 metadata/encounter_id = "S2-02"
 
 [node name="BarrierBody" type="StaticBody3D" parent="Gates/Gate_S2_02"]
@@ -6799,6 +6838,7 @@ mesh = SubResource("WindShard")
 
 
 [node name="Gate_S2_03" type="Node3D" parent="Gates"]
+script = ExtResource("10_gate")
 metadata/encounter_id = "S2-03"
 
 [node name="BarrierBody" type="StaticBody3D" parent="Gates/Gate_S2_03"]
@@ -6900,6 +6940,7 @@ mesh = SubResource("WindShard")
 
 
 [node name="Gate_S2_04" type="Node3D" parent="Gates"]
+script = ExtResource("10_gate")
 metadata/encounter_id = "S2-04"
 
 [node name="BarrierBody" type="StaticBody3D" parent="Gates/Gate_S2_04"]
@@ -7001,6 +7042,7 @@ mesh = SubResource("WindShard")
 
 
 [node name="Gate_S2_05" type="Node3D" parent="Gates"]
+script = ExtResource("10_gate")
 metadata/encounter_id = "S2-05"
 
 [node name="BarrierBody" type="StaticBody3D" parent="Gates/Gate_S2_05"]
@@ -7389,7 +7431,15 @@ position = Vector3(0, 96, -737)
 [node name="PortalLights" type="Node3D" parent="Gates/Gate_S2_03"]
 
 
-[node name="Seal1" type="Node3D" parent="Encounters/S2-03/Seals"]
+[node name="Seal1" type="Node3D" parent="Encounters/S2-03/Seals" node_paths=PackedStringArray("shield_visual", "core_visual", "hit_volume", "approach_volume", "guard_links")]
+script = ExtResource("12_seal")
+seal_id = &"S2-03-Seal1"
+health = 10
+shield_visual = NodePath("ShieldVisual")
+core_visual = NodePath("Core")
+hit_volume = NodePath("HitVolume")
+approach_volume = NodePath("ApproachVolume")
+guard_links = NodePath("GuardLinks")
 position = Vector3(-29, 43, -256)
 metadata/seal_id = "S2-03-Seal1"
 
@@ -7459,7 +7509,15 @@ position = Vector3(-8, 58, -329)
 mesh = SubResource("SealRing")
 rotation_degrees = Vector3(90, 0, 0)
 
-[node name="Seal2" type="Node3D" parent="Encounters/S2-03/Seals"]
+[node name="Seal2" type="Node3D" parent="Encounters/S2-03/Seals" node_paths=PackedStringArray("shield_visual", "core_visual", "hit_volume", "approach_volume", "guard_links")]
+script = ExtResource("12_seal")
+seal_id = &"S2-03-Seal2"
+health = 10
+shield_visual = NodePath("ShieldVisual")
+core_visual = NodePath("Core")
+hit_volume = NodePath("HitVolume")
+approach_volume = NodePath("ApproachVolume")
+guard_links = NodePath("GuardLinks")
 position = Vector3(0, 65, -285)
 metadata/seal_id = "S2-03-Seal2"
 
@@ -7529,7 +7587,15 @@ position = Vector3(0, 58, -329)
 mesh = SubResource("SealRing")
 rotation_degrees = Vector3(90, 0, 0)
 
-[node name="Seal3" type="Node3D" parent="Encounters/S2-03/Seals"]
+[node name="Seal3" type="Node3D" parent="Encounters/S2-03/Seals" node_paths=PackedStringArray("shield_visual", "core_visual", "hit_volume", "approach_volume", "guard_links")]
+script = ExtResource("12_seal")
+seal_id = &"S2-03-Seal3"
+health = 10
+shield_visual = NodePath("ShieldVisual")
+core_visual = NodePath("Core")
+hit_volume = NodePath("HitVolume")
+approach_volume = NodePath("ApproachVolume")
+guard_links = NodePath("GuardLinks")
 position = Vector3(29, 86, -267)
 metadata/seal_id = "S2-03-Seal3"
 
@@ -7600,6 +7666,8 @@ mesh = SubResource("SealRing")
 rotation_degrees = Vector3(90, 0, 0)
 
 [node name="CP2-A" type="Area3D" parent="Checkpoints"]
+script = ExtResource("11_checkpoint")
+checkpoint_id = &"CP2-A"
 position = Vector3(0, 62, -354)
 collision_layer = 0
 collision_mask = 2
@@ -7692,6 +7760,8 @@ mesh = SubResource("CP2_AArchCloth")
 rotation_degrees = Vector3(90, 0, 0)
 
 [node name="CP2-B" type="Area3D" parent="Checkpoints"]
+script = ExtResource("11_checkpoint")
+checkpoint_id = &"CP2-B"
 position = Vector3(0, 98, -596)
 collision_layer = 0
 collision_mask = 2

@@ -225,3 +225,15 @@ The sprint's no-new-tests rule (2026-09-23) replaced the ticket's fifteen scene 
 - **`tools/validate_stage_01.gd` (Astra's) now fails** its "static stage has no runtime script" check, by design: Stage 1 has its Director. Its owner updates the check; `tools/build_stage_01.py` must never be rerun over the wiring.
 - **Exit-time leaks from the enemy visuals** (`spirit_lume.tscn`, `sentry_lantern.tscn` duplicate their glTF children): Astra's, recorded in validation/stage-director.md.
 - **EncounterMachine compile fix.** F10-01 found that `encounter_machine.gd` never compiled (two parameters named `enemy_id` shadowed its static `enemy_id()`); commit `be64081` renamed them, with no behavior change.
+
+## Stage 2 (F12-05)
+
+Stage 2 now attaches the same Director, five Gates, CP2-A/CP2-B and three Seal adapters. Its spirit/sentry and pickup mappings match Stage 1; tempest_sentinel and storm_guardian remain dev Sentries until F12-06/F12-07. Scene edits are scripts and exports only; authored monitoring stays false.
+
+`portal_lights: Dictionary[StringName, NodePath]` resolves each Seal's stage-relative GeometryInstance3D to `resolved_light_material: Material`. `activate_checkpoint_on_entry: bool` defaults false; Stage 2 sets true. If the first incomplete Encounter is refused behind an inactive prerequisite checkpoint, entry activates that checkpoint through the existing store before trying again. An early or out-of-order entry cannot bypass progression. Stage 1 retains arch-only activation.
+
+The Director collects each OBJECTIVES Encounter's Seals during setup and derives Guard ids from GuardLinks metadata with EncounterMachine.enemy_id. Spawned Guards retain hit registration and targeting while dormant; their movement/attack clocks stop. Approach or an accepted hit engages that Seal's live pair. First Guard defeat reaches both the ordinary score/machine path and Seal rules. Each destroyed Seal resolves its portal light, spawns its own rewards under RuntimeActors with `<seal_id>/power_<n>` ids, and then reports the objective. Encounter completion skips those rewards. The third objective opens the Gate and shows its optional OpenVisual beacon.
+
+Setup validation rejects missing or unnamed Seals, unmatched Guard spawns, orphaned per-Seal rewards, invalid portal-light ids/paths and a missing resolved material. Progress application resolves recorded objective lights. Retry after CP2-A or CP2-B keeps the authored destroyed Seals; no checkpoint lies inside S2-03, and earlier Retry fully reloads the stage. Guard actor references are cleared on in-place Retry.
+
+Verification: [Stage 2 progression](../validation/stage-02-progression.md). No new tests; the existing spatial contract's obsolete static-root assertion now expects StageDirector.

@@ -1,5 +1,5 @@
 extends SceneTree
-## Offline visual authoring only. Never rerun over integrated scene edits.
+## Offline visual authoring only. Never rerun over integrated scene edits; a rerun also drops D-05's `metadata/anticipation_clip`.
 
 func _initialize() -> void:
 	build.call_deferred()
@@ -22,6 +22,8 @@ func build() -> void:
 		root.add_child(visual_root)
 		var model := (load("res://assets/models/enemies/" + variant[1] + ".gltf") as PackedScene).instantiate() as Node3D
 		model.name = "Model"
+		# A scene instance lets own_nodes re-own its children, so pack saves them a second time (D-08).
+		model.scene_file_path = ""
 		visual_root.add_child(model)
 		var meshes: Array[Node] = model.find_children("*", "MeshInstance3D", true, false)
 		var bounds := AABB()

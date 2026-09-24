@@ -91,6 +91,15 @@ const EXIT_VOLUME_NAME := ^"ExitVolume"
 ## stage root. A link hides when its guard dies and shows again while its Encounter is
 ## not complete.
 @export var guard_links: Dictionary[StringName, NodePath] = {}
+## Stage-relative portal light paths keyed by Seal id.
+@export var portal_lights: Dictionary[StringName, NodePath] = {}
+@export var resolved_light_material: Material
+## Stage 2 commits the prerequisite Checkpoint even when the ship misses its arch.
+@export var activate_checkpoint_on_entry: bool = false
+
+var _seals: Dictionary[StringName, Seal] = {}
+var _guard_seals: Dictionary[StringName, Seal] = {}
+var _guard_actors: Dictionary[StringName, EnemyActor] = {}
 
 var _machine: EncounterMachine
 ## One per Director, so a new stage load or a Restart starts at Stage Entry with no
@@ -141,6 +150,7 @@ func check_setup() -> PackedStringArray:
 	for encounter: EncounterDefinition in stage_definition.encounters:
 		errors.append_array(_check_encounter(encounter))
 	errors.append_array(_check_gates_checkpoints_and_links())
+	errors.append_array(_check_seals())
 	# An enemy refuses a definition that does not validate, and a Wave that never spawns
 	# never completes: refuse the stage instead.
 	for kind: StringName in enemy_definitions:
@@ -179,6 +189,7 @@ func setup(run_state: RunState, combat_state: CombatState, projectile_system: Pr
 		_arm(root.get_node(ENTRY_VOLUME_NAME) as Area3D, _on_entry_body_entered.bind(encounter.id))
 		_arm(root.get_node(EXIT_VOLUME_NAME) as Area3D, _on_exit_body_entered.bind(encounter.id))
 	_setup_checkpoints()
+	_setup_seals()
 	_apply_progress()
 
 
@@ -228,6 +239,7 @@ func retry_from_checkpoint(player: PlayerController, attempt_seed: int) -> bool:
 		_runtime_actors.remove_child(child)
 		child.queue_free()
 	_live_enemies.clear()
+	_guard_actors.clear()
 	_checkpoint_store.retry_into(_combat_state, _run_state, _machine)
 	_player = player
 	_rng = RandomNumberGenerator.new()
@@ -296,7 +308,7 @@ func _arm(volume: Area3D, handler: Callable) -> void:
 
 func _on_entry_body_entered(body: Node3D, encounter_id: StringName) -> void:
 	if is_instance_valid(body) and body == _player:
-		_machine.notify_entered(encounter_id)
+		_enter_with_checkpoint(encounter_id)
 
 
 func _on_exit_body_entered(body: Node3D, encounter_id: StringName) -> void:
@@ -332,6 +344,7 @@ func _on_wave_requested(encounter_id: StringName, wave_index: int) -> void:
 		actor.defeated.connect(_on_enemy_defeated)
 		actor.threat_reported.connect(threat_reported.emit)
 		_live_enemies[enemy_id] = definition.score
+		_setup_guard(actor, enemy_id)
 
 
 ## The first report of [param enemy_id] scores its definition's value and reaches the
@@ -344,6 +357,7 @@ func _on_enemy_defeated(enemy_id: StringName, encounter_id: StringName) -> void:
 	_hide_guard_link(enemy_id)
 	_run_state.add_score(score)
 	_machine.notify_enemy_defeated(enemy_id, encounter_id)
+	_report_guard_defeat(enemy_id)
 
 
 ## Spawns every reward of the Encounter: `count` Pickups of its kind at its marker, on a
@@ -354,6 +368,8 @@ func _on_rewards_requested(encounter_id: StringName) -> void:
 	var root := _encounter_root(encounter_id)
 	var numbers: Dictionary[int, int] = {RewardDefinition.Kind.POWER: 0, RewardDefinition.Kind.SHIELD: 0}
 	for reward: RewardDefinition in encounter.rewards:
+		if _reward_seal(encounter, reward) != null:
+			continue
 		var origin := (root.get_node(reward.origin_marker) as Node3D).global_position
 		var is_power := reward.kind == RewardDefinition.Kind.POWER
 		for index: int in reward.count:
@@ -434,7 +450,7 @@ func _enter_if_inside(encounter_id: StringName) -> void:
 		return
 	var entry := _encounter_root(encounter_id).get_node(ENTRY_VOLUME_NAME) as Area3D
 	if entry.overlaps_body(_player):
-		_machine.notify_entered(encounter_id)
+		_enter_with_checkpoint(encounter_id)
 
 
 ## Every Gate the route names must be a [Gate] with its barrier collision and closed
@@ -539,6 +555,7 @@ func _on_gate_opened(gate_id: StringName) -> void:
 ## shows while its Encounter is not complete. Called at the end of [method setup], and
 ## by [method retry_from_checkpoint] after a restore.
 func _apply_progress() -> void:
+	_apply_seal_progress()
 	var open_ids := _machine.get_open_gate_ids()
 	for encounter: EncounterDefinition in stage_definition.encounters:
 		if not encounter.gate_id.is_empty():
@@ -580,3 +597,156 @@ func _box_shape(volume: Area3D) -> CollisionShape3D:
 
 func _stage_id() -> StringName:
 	return stage_definition.id if stage_definition != null else StringName(name)
+
+
+func _encounter_seals(encounter: EncounterDefinition) -> Array[Seal]:
+	var seals: Array[Seal] = []
+	var root := _encounter_root(encounter.id).get_node_or_null(^"Seals")
+	if root != null:
+		for child: Node in root.get_children():
+			if child is Seal:
+				seals.append(child as Seal)
+	return seals
+
+
+func _reward_seal(encounter: EncounterDefinition, reward: RewardDefinition) -> Seal:
+	var root := _encounter_root(encounter.id)
+	var origin := root.get_node_or_null(reward.origin_marker)
+	if encounter.completion == EncounterDefinition.Completion.OBJECTIVES and origin != null:
+		for seal: Seal in _encounter_seals(encounter):
+			if seal.is_ancestor_of(origin):
+				return seal
+	return null
+
+
+func _check_seals() -> PackedStringArray:
+	var errors: PackedStringArray = []
+	var known: Dictionary[StringName, Seal] = {}
+	for encounter: EncounterDefinition in stage_definition.encounters:
+		if encounter.completion != EncounterDefinition.Completion.OBJECTIVES:
+			continue
+		if _encounter_root(encounter.id) == null:
+			continue # The ordinary Encounter check already names the missing root.
+		var objective_seals: Dictionary[StringName, Seal] = {}
+		var guard_ids: Array[StringName] = []
+		for wave: WaveDefinition in encounter.waves:
+			for marker: NodePath in wave.spawn_markers:
+				guard_ids.append(EncounterMachine.enemy_id(encounter.id, marker))
+		for seal: Seal in _encounter_seals(encounter):
+			if known.has(seal.seal_id) or seal.seal_id not in encounter.required_objective_ids:
+				errors.append("stage '%s': Seal '%s' has duplicate or unnamed objective '%s'" % [_stage_id(), seal.name, seal.seal_id])
+			known[seal.seal_id] = seal
+			objective_seals[seal.seal_id] = seal
+			if seal.guard_links == null:
+				errors.append("stage '%s': Seal '%s' has no guard_links" % [_stage_id(), seal.seal_id])
+				continue
+			for link: Node in seal.guard_links.get_children():
+				var marker: NodePath = link.get_meta(&"guard_spawn", NodePath())
+				if EncounterMachine.enemy_id(encounter.id, marker) not in guard_ids:
+					errors.append("stage '%s': Seal '%s' guard '%s' names no Wave marker" % [_stage_id(), seal.seal_id, marker])
+		for objective_id: StringName in encounter.required_objective_ids:
+			if not objective_seals.has(objective_id):
+				errors.append("stage '%s': objective '%s' has no Seal" % [_stage_id(), objective_id])
+		for reward: RewardDefinition in encounter.rewards:
+			if String(reward.origin_marker).begins_with("Seals/") and _reward_seal(encounter, reward) == null:
+				errors.append("stage '%s': per-Seal reward '%s' has no Seal" % [_stage_id(), reward.origin_marker])
+	for seal_id: StringName in portal_lights:
+		if not known.has(seal_id):
+			errors.append("stage '%s': portal_lights key '%s' names no Seal" % [_stage_id(), seal_id])
+		if not get_node_or_null(portal_lights[seal_id]) is GeometryInstance3D:
+			errors.append("stage '%s': portal light '%s' is not a GeometryInstance3D" % [_stage_id(), portal_lights[seal_id]])
+	if not portal_lights.is_empty() and resolved_light_material == null:
+		errors.append("stage '%s': portal_lights requires resolved_light_material" % _stage_id())
+	return errors
+
+
+func _setup_seals() -> void:
+	for encounter: EncounterDefinition in stage_definition.encounters:
+		if encounter.completion != EncounterDefinition.Completion.OBJECTIVES:
+			continue
+		for seal: Seal in _encounter_seals(encounter):
+			_seals[seal.seal_id] = seal
+			seal.setup(_projectile_system, encounter.id)
+			seal.seal_destroyed.connect(_on_seal_destroyed.bind(encounter.id))
+			seal.guards_activated.connect(_on_seal_guards_activated)
+			for link: Node in seal.guard_links.get_children():
+				var marker: NodePath = link.get_meta(&"guard_spawn")
+				_guard_seals[EncounterMachine.enemy_id(encounter.id, marker)] = seal
+
+
+func _setup_guard(actor: EnemyActor, enemy_id: StringName) -> void:
+	if not _guard_seals.has(enemy_id):
+		return
+	var seal := _guard_seals[enemy_id]
+	_guard_actors[enemy_id] = actor
+	actor.set_engaged(int(seal.capture()["state"]) != SealRules.State.DORMANT)
+	actor.damaged.connect(seal.notify_guard_shot)
+
+
+func _on_seal_guards_activated(seal_id: StringName) -> void:
+	for guard_id: StringName in _guard_actors:
+		if _guard_seals[guard_id].seal_id == seal_id and is_instance_valid(_guard_actors[guard_id]):
+			_guard_actors[guard_id].set_engaged(true)
+
+
+func _report_guard_defeat(enemy_id: StringName) -> void:
+	if _guard_seals.has(enemy_id):
+		_guard_actors.erase(enemy_id)
+		_guard_seals[enemy_id].notify_guard_defeated(enemy_id)
+
+
+func _on_seal_destroyed(seal_id: StringName, encounter_id: StringName) -> void:
+	_resolve_portal_light(seal_id)
+	_spawn_seal_rewards(seal_id, encounter_id)
+	_machine.notify_objective(seal_id)
+
+
+func _spawn_seal_rewards(seal_id: StringName, encounter_id: StringName) -> void:
+	var encounter := stage_definition.find_encounter(encounter_id)
+	var numbers: Dictionary[int, int] = {RewardDefinition.Kind.POWER: 0, RewardDefinition.Kind.SHIELD: 0}
+	for reward: RewardDefinition in encounter.rewards:
+		if _reward_seal(encounter, reward) != _seals[seal_id]:
+			continue
+		var origin := (_encounter_root(encounter_id).get_node(reward.origin_marker) as Node3D).global_position
+		var is_power := reward.kind == RewardDefinition.Kind.POWER
+		for index: int in reward.count:
+			numbers[reward.kind] += 1
+			var pickup_id := StringName("%s/%s_%d" % [seal_id, "power" if is_power else "shield", numbers[reward.kind]])
+			var offset := Vector3.ZERO
+			if reward.count > 1:
+				var angle := TAU * index / reward.count
+				offset = Vector3(cos(angle), 0.0, sin(angle)) * reward_spread
+			_spawn_pickup(power_pickup_scene if is_power else shield_pickup_scene, pickup_id, origin + offset)
+
+
+func _resolve_portal_light(seal_id: StringName) -> void:
+	if portal_lights.has(seal_id):
+		(get_node(portal_lights[seal_id]) as GeometryInstance3D).material_override = resolved_light_material
+
+
+func _apply_seal_progress() -> void:
+	# Every Stage 2 Checkpoint follows the entire Seal encounter. Before CP2-A the
+	# Session reloads the stage; after it all three authored Seals stay destroyed.
+	var progress: Dictionary = _machine.capture()
+	var objectives: PackedStringArray = progress["objectives"]
+	for objective_id: String in objectives:
+		_resolve_portal_light(StringName(objective_id))
+
+
+func _enter_with_checkpoint(encounter_id: StringName) -> void:
+	if _machine.notify_entered(encounter_id) or not activate_checkpoint_on_entry:
+		return
+	var encounter := stage_definition.find_encounter(encounter_id)
+	if encounter == null or encounter.checkpoint_id.is_empty():
+		return
+	var checkpoint := stage_definition.find_checkpoint(encounter.checkpoint_id)
+	if _machine.is_checkpoint_activated(checkpoint.id) or not _machine.is_completed(checkpoint.after_encounter_id):
+		return
+	# Only the first incomplete route entry may activate its prerequisite.
+	for preceding: EncounterDefinition in stage_definition.encounters:
+		if preceding.id == encounter_id:
+			_on_checkpoint_entered(checkpoint.id)
+			_machine.notify_entered(encounter_id)
+			return
+		if not _machine.is_completed(preceding.id):
+			return
