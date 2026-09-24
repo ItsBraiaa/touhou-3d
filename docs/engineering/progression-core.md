@@ -12,6 +12,7 @@ The progression module owns the authored Stage route as typed Resources and the 
 - `scripts/definitions/checkpoint_definition.gd` (`CheckpointDefinition` Resource)
 - `scripts/definitions/stage_definition.gd` (`StageDefinition` Resource)
 - `scripts/progression/encounter_machine.gd` (`EncounterMachine` Rules Core, ADR-0001)
+- `content/stages/stage_01/*.tres` (Stage 1 dev draft; values are Astra's)
 
 ## Public contract
 
@@ -79,6 +80,10 @@ Each Definition is plain Resource data: relative `NodePath`s, no Nodes, no scene
 Create `.tres` Resources of the appropriate Definition class. Use spawn-marker `NodePath`s relative to `Encounters/<ID>` and checkpoint paths relative to the Stage root. Set `next_id` to the following route entry (empty on the final Encounter); set a resume Encounter's `checkpoint_id` to the Checkpoint ID. Encounter completion and one-time reward behavior remain runtime responsibilities of the Director.
 
 For trunk's F10-01: call `setup` in the Director's `setup()`, connect the six signals there, tick from `_physics_process` while the tree runs, and report `enemy_id` values built from the Definition markers. CP1-B sits inside S1-06, so a Retry from CP1-B restores S1-06 as completed; if `PlayerStart` lies inside S1-01's EntryVolume, call `notify_entered(&"S1-01")` in `start_attempt()` rather than waiting for a `body_entered`.
+
+## Stage 1 content
+
+`content/stages/stage_01/` holds the dev draft (F8-04), every file flagged `metadata/dev = true`: `stage_01.tres` (`StageDefinition`, id `stage_01`), `s1_01.tres` to `s1_07.tres` (one `EncounterDefinition` each, Waves and Rewards as sub-resources) and `cp1_a.tres` / `cp1_b.tres` (`CheckpointDefinition`). The route follows STAGE_DESIGN: S1-01 traversal → S1-02 two waves of three Spirits (`Gate_S1_02`, 5 POWER at `RewardOrigin`) → S1-03 two Sentries with `requires_exit` (`Gate_S1_03`, 1 SHIELD at `ShieldPickup`) → S1-04 three Sentries (`Gate_S1_04`) → S1-05 two mixed waves behind CP1-A (`Gate_S1_05`, 5 POWER) → S1-06 traversal → S1-07 `lantern_guardian` behind CP1-B. Spawn markers are relative to `Encounters/<ID>` and match the scene. Totals: 17 common-enemy markers plus one boss, 10 POWER pickups (exactly Power Level 1 → 3 at 5 per level) and 1 SHIELD. Astra owns the values — the 1.0 s `AFTER_PREVIOUS_WAVE` delay and the checkpoint `display_name`s (`"CP1-A"`, `"CP1-B"`) are the draft's proposals; the structure is the approved design. The draft was produced by a one-off headless script that is not committed: no generator may ever overwrite Astra's tuning.
 
 ## Open issues
 

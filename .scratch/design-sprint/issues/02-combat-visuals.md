@@ -1,6 +1,6 @@
 # D-02 Combat visuals
 
-Status: todo
+Status: done
 Type: design
 Owner: Astra (GPT Sol)
 Lane: sol
@@ -122,6 +122,10 @@ One `docs/HANDOFF_LOG.md` entry, `— Astra (sol) — Combat visuals (D-02)`, St
 | F7-03 (glm-b) | `power_pickup.tscn` and `shield_pickup.tscn` instance the visuals as `Visual`, held by `pickup.gd` as a `Node3D` |
 
 A consumer that starts after this lands uses the final file directly. For one that already landed, the late-swap rule in `.scratch/design-sprint/spec.md` applies.
+
+## Outcome
+
+Delivered the two unit-radius Projectile meshes, Familiar, Power and Shield Pickup visuals, Bomb blast visual, five original materials, offline validator, and inspected gallery. Headless and windowed `COMBAT_VISUALS_QA` reported zero failures. The player and hostile meshes use 6 and 54 vertices versus 104 in their dev spheres. The Bomb clip lasts 0.4 s and hides both rings at its end. The focused Options slider now has a gold highlight; `MENU_QA_COMPLETE failures=0` and the recaptured focused screen was inspected. No integrated gameplay scene was edited. Consumer swaps are documented in `docs/validation/combat-visuals.md` and the handoff log.
 
 ## Kickoff prompt
 

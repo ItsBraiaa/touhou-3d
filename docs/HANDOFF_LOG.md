@@ -39,6 +39,37 @@ Action required by Astra:
 - **Tuning.** Shot values, cadences and Aim Assist cones are Inspector exports on `PlayerShip/Weapon`, Claude's proposals.
 - **Swap pending: D-02.** A final Familiar scene must have a `Node3D` root and no `CollisionObject3D` anywhere (the weapon refuses one that does).
 - **HitVolume placement.** Keep each target's `HitVolume` centered on its visible body, because Aim Assist aims at it.
+## 2026-09-23 21:05 — Astra (sol) — Combat visuals (D-02) [shared]
+State: SCENE_READY
+Files: `scenes/combat/visuals/*`, `assets/combat/*`, `assets/ui/menu_theme.tres`, `tools/validate_combat_visuals.gd`, `docs/validation/combat-visuals.md`, `docs/validation/combat-visuals.log`, `docs/validation/combat-visuals.png`, `docs/validation/menus-options-entry.png`, D-02's ticket, and the D-02 ROADMAP row.
+Change: Player Projectile is a cyan unit octahedron (6 vertices); hostile Projectile is a coral unit sphere (54 vertices); the dev sphere uses 104 vertices. `familiar.tscn` is a cyan/gold star of radius 0.58 with looping `hover`; `power_pickup_visual.tscn` is a gold crystal of radius 0.78; `shield_pickup_visual.tscn` is a blue orb of radius 0.76; each Pickup loops `float`. `bomb_blast_visual.tscn` uses see-through cyan rings with a unit outer edge and a non-looping/autoplay `blast` clip of 0.4 s that hides them. All scenes have no script or collision. Offline QA passed headless and windowed; the gallery was inspected. The Options slider focus fill is gold, distinct from unfocused teal, and its focused screenshot was recaptured.
+Why: Friendly shots, hostile patterns, Familiars and Pickups have distinct silhouettes while the Bomb shows its clear radius without hiding the next pattern.
+Action required by Claude: Trunk F6-02 sets `Main/ProjectileRoot`'s `player_projectile_mesh` and `hostile_projectile_mesh` exports to the two resources; trunk F6-03 sets `PlayerShip/Weapon.familiar_scene` to `familiar.tscn`; trunk F7-02 instances `bomb_blast_visual.tscn` inside its Bomb wrapper, scales it by `bomb_radius`, and frees it after `blast`; path F7-03 instances the Power and Shield scenes as `Visual` under its existing `Pickup` roots. Full paths are in `docs/validation/combat-visuals.md`.
+## 2026-09-23 20:56 — OpenCode (oc-b) — F8-04 Stage 1 content draft (dev) [shared]
+State: dev
+Files: `content/stages/stage_01/stage_01.tres`, `s1_01.tres` … `s1_07.tres`, `cp1_a.tres`, `cp1_b.tres`, `docs/engineering/progression-core.md`, `docs/engineering/ROADMAP.md`, `.scratch/progression-core/issues/04-stage-01-content-draft.md`, `docs/HANDOFF_LOG.md`
+Change: Transcribed STAGE_DESIGN's Stage 1 table into typed `.tres` Definitions that validate: seven Encounters in route order with the `next_id` chain, completion conditions (S1-03 with `requires_exit`), waves whose markers match `scenes/stages/stage_01.tscn` exactly (17 common enemies plus `Wave1_Boss1`), gates `Gate_S1_02` to `Gate_S1_05`, CP1-A guarding S1-05 and CP1-B guarding S1-07, and rewards of 5 + 5 POWER at `RewardOrigin` plus one SHIELD at `ShieldPickup`. Every file is flagged `metadata/dev = true`. Created once with a headless scratch script that is not committed; no generator may ever overwrite Astra's tuning. No tests were written per the sprint rule.
+Why: The Director (F10-01) loads `stage_01.tres`; Astra tunes the values while the approved structure stays.
+Action required by Astra: these files are yours. Free to change: the AFTER_PREVIOUS_WAVE delay (draft proposal 1.0 s) and the checkpoint `display_name`s (currently `"CP1-A"`/`"CP1-B"`, matching MenuController's `Último checkpoint · <id>`; Portuguese place names welcome). Must stay: the route order and completion conditions, wave counts and markers, 5 + 5 Power Pickups, one Shield Pickup, the gates and the resume points. Delete `metadata/dev` from a file once you have reviewed it.
+
+## 2026-09-23 20:56 — Claude (path) — F12-01 BossMachine core and boss Definitions
+State: CODE_READY
+Files:
+- New: `scripts/definitions/boss_definition.gd`, `boss_phase_definition.gd`, `attack_definition.gd`, `attack_step_definition.gd`, `scripts/enemies/boss_machine.gd` (and their `.uid`), `docs/engineering/bosses.md`.
+- Edited: `docs/engineering/README.md` (one line), `docs/engineering/ROADMAP.md` (the F12-01 row, and the F5-02 row now says ruling 5 is confirmed), `docs/engineering/projectile-field.md` (ruling 5 confirmed), `.scratch/bosses/issues/01-boss-machine-core.md` (Status, Outcome).
+
+Change:
+- **Definitions.** `BossDefinition` has 2 or 3 `BossPhaseDefinition`s. Each Phase has health, an `AttackDefinition` and `transition_seconds`, which is capped at 0.75 by `validate()` (D-07 ruling 1). An `AttackDefinition` is a Portuguese name, cycling `AttackStepDefinition`s and `reposition_seconds`. A step is a Pattern, its Anticipation, its height or `follow_player_height`, and `pause_after`.
+- **`BossMachine`** runs, in order:
+  - the entry window;
+  - each step: `step_started`, then its Anticipation, then an aim and altitude sample at fire time, then the Pattern, then the pause;
+  - the reposition window, then the steps again.
+  - A hit is capped at the Phase's remaining health, and damage is refused only during the transition. A depleted Phase emits `phase_health_changed(i, 0.0)`, `hostile_clear_requested`, then `phase_changed(i + 1, name)`, or `defeated` exactly once for the last Phase.
+- **No unit tests,** by the sprint rule. The five scripts pass `--check-only` with warnings as errors.
+
+Why: F12-01 unblocks F12-02 (path) and F12-03 part 1 (oc-a).
+
+Action required by Astra: when writing boss `.tres` content (D-07 Part C, D-06), keep each `transition_seconds` at or below 0.75, and keep every Attack's cycle above zero seconds; `validate()` enforces both. Attack names are Portuguese literals in the Definitions.
 
 ## 2026-09-23 20:32 — OpenCode (oc-a) — F6-03 part 1 WeaponModel
 State: CODE_READY
