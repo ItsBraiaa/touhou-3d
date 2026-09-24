@@ -24,11 +24,14 @@ extends Node
 ## accounting belong to their cores. A stage clear freezes the stage under Results, and
 ## the last stage of the order ends the Run with its victory (F11-01); Results' Continuar
 ## enters the next Campaign stage and Jogar novamente replays a Direct Stage (F11-02).
+## Since F15-01 a clear first holds a victory beat, the tree running under a frozen ship,
+## so the boss's Death clip and the stage's defeat presentation are seen before Results.
 ##
 ## The game is heard through [member audio] (F13-03): each catalogue producer is connected
 ## once, where the Session owns its lifetime (itself in `_ready`, the Director in
 ## `_load_stage`, the ship in `_spawn_player`), every unload and every Retry silences the
-## sound effects in flight, and the music follows the menu, the route and the boss.
+## sound effects in flight, and the music follows the menu, the route and the boss. The
+## kills of a Bomb's clear play no ordinary enemy-death sound (F15-01).
 
 
 ## Marker every stage root has, where the player enters (GUIDE Section 5 "Stages").
@@ -48,6 +51,10 @@ const ATTACK_CUE_SECONDS := 3.0
 ## releases every stopped playback first. Claude's proposal: several mix buffers, and
 ## too short to notice.
 const QUIT_SILENCE_SECONDS := 0.1
+## Seconds of the victory beat between a stage's clear and Results, with the tree running
+## so the boss's Death clip and the stage's defeat presentation play (F15-01). Claude's
+## proposal: the Stage 1 shrine calm clip `corrupted_to_calm` is 2.4 s.
+const VICTORY_BEAT_SECONDS := 2.5
 ## Menu actions that only open a full screen, which Back returns from.
 const SCREEN_BY_ACTION: Dictionary[StringName, StringName] = {
 	&"open_stage_select": ScreenRouter.STAGE_SELECT,
@@ -94,6 +101,15 @@ var _flight_volume := AABB()
 ## `enemy_defeated` right after, in the same call, and that report plays no sound of its
 ## own (Astra's "Trigger each ending once").
 var _boss_defeat_heard: bool = false
+## Counts the beats begun and cancelled, so a beat's end runs only while it is still the
+## latest: an unload or a Retry during it drops its end (F15-01).
+var _beat_serial: int = 0
+## True from a beat's start to its end or cancellation: the ship is frozen with the tree
+## running, Pause is refused and Grazes are ignored (F15-01).
+var _in_beat: bool = false
+## True only inside the Bomb's damage call, while the kills it causes report their
+## defeats, which then play no ordinary death sound (F15-01).
+var _bomb_clearing: bool = false
 
 
 func _ready() -> void:
@@ -131,9 +147,10 @@ func _physics_process(delta: float) -> void:
 ## `pause` (Escape, gamepad Start) pauses a stage in play from the HUD and resumes it from
 ## Pause. Any other screen on top ignores it: with Options open from Pause, Start must
 ## not resume under Options. Escape on Pause is `ui_cancel` as well, which [Interface]
-## consumes first and turns into `resume`.
+## consumes first and turns into `resume`. A beat refuses it too, whatever the Run's
+## phase (F15-01).
 func _unhandled_input(event: InputEvent) -> void:
-	if not event.is_action_pressed(&"pause") or not _is_in_stage():
+	if _in_beat or not event.is_action_pressed(&"pause") or not _is_in_stage():
 		return
 	var screen := interface.current_screen()
 	if screen == ScreenRouter.HUD:
@@ -317,6 +334,35 @@ func _set_paused(paused: bool) -> void:
 		_player.set_controls_enabled(not paused)
 
 
+## Holds a beat of [param seconds] with the tree running, then calls [param finish]
+## (F15-01). Meanwhile the ship's controls and fire are off, the [CombatState] is paused,
+## so no hit, Bomb or Pickup is accepted and Invulnerability does not count, Active Time
+## stops, and every hostile Projectile is removed so nothing crosses the frozen ship. The
+## wait counts only while the tree runs. A later beat or [method _cancel_beat] supersedes
+## this one, whose [param finish] then never runs.
+func _begin_beat(seconds: float, finish: Callable) -> void:
+	_beat_serial += 1
+	var serial := _beat_serial
+	_in_beat = true
+	_run_state.set_paused(true)
+	_combat_state.set_paused(true)
+	if _player != null:
+		_player.set_controls_enabled(false)
+	projectile_system.clear_hostile_all()
+	await get_tree().create_timer(seconds, false).timeout
+	if serial != _beat_serial:
+		return
+	_in_beat = false
+	finish.call()
+
+
+## Ends any beat in progress without its finish, so a stale beat never shows its screen
+## over a new stage or Attempt. The caller releases what the beat froze.
+func _cancel_beat() -> void:
+	_beat_serial += 1
+	_in_beat = false
+
+
 ## Replaces whatever is loaded with the stage [param stage_id] and a new ship at its
 ## `PlayerStart`, kept inside its Flight Volume, and sets up the stage's [StageDirector]
 ## when its root is one. When the stage has no scene, no `PlayerStart` or no Flight
@@ -416,10 +462,11 @@ func _on_setting_changed(key: StringName, _value: Variant) -> void:
 ## a new ship at its `Respawn` and nothing incoming; the Director removes the failed
 ## Attempt's actors and Pickups, restores the cores and rebuilds its Gates and links.
 ## Before any Checkpoint, or on a stage without a Director, Retry is Restart (PLANEJAMENTO
-## Section 6).
+## Section 6). A beat in progress is cancelled first.
 func _retry() -> void:
 	if not _is_in_stage():
 		return
+	_cancel_beat()
 	if _director == null or _director.retry_location_name().is_empty():
 		_restart_stage()
 		return
@@ -436,10 +483,11 @@ func _retry() -> void:
 	interface.show_home(ScreenRouter.HUD)
 
 
-## Silences every sound effect in flight, takes the stage and the ship out of the tree at
-## once, so a stage loaded in the same frame never shares it with them, frees them at the
-## end of the frame, and removes every Projectile.
+## Cancels any beat in progress, silences every sound effect in flight, takes the stage
+## and the ship out of the tree at once, so a stage loaded in the same frame never shares
+## it with them, frees them at the end of the frame, and removes every Projectile.
 func _unload_stage() -> void:
+	_cancel_beat()
 	audio.stop_all()
 	interface.get_hud().unbind()
 	for child: Node in world_root.get_children():
@@ -550,10 +598,13 @@ func _on_pickup_accepted(_pickup_id: StringName, kind: Pickup.Kind, _score_award
 
 
 ## A boss's defeat reaches here right after [method _on_boss_defeated], which already
-## played its ending.
+## played its ending; its flag is consumed first, even when the Bomb killed it. The kills
+## of a Bomb's clear play nothing: its `bomb_used` covers them (F15-01).
 func _on_enemy_defeated(_enemy_id: StringName, _encounter_id: StringName) -> void:
 	if _boss_defeat_heard:
 		_boss_defeat_heard = false
+		return
+	if _bomb_clearing:
 		return
 	audio.play_event(&"enemy_defeated")
 
@@ -574,8 +625,11 @@ func _on_player_hit(_projectile_id: int, damage: int) -> void:
 			audio.play_event(&"player_hit")
 
 
-## The field awards no Graze during Invulnerability, so nothing is filtered here.
+## The field awards no Graze during Invulnerability. A beat ignores the rest: no Graze,
+## score or sound while the ship is frozen (F15-01).
 func _on_grazed(_projectile_id: int) -> void:
+	if _in_beat:
+		return
 	_run_state.add_graze(1)
 	_run_state.add_score(GRAZE_SCORE)
 	audio.play_event(&"graze")
@@ -590,7 +644,9 @@ func _on_invulnerability_changed(invulnerable: bool) -> void:
 ## A Bomb went off, its edge and its 2 s of Invulnerability already the core's. Clears
 ## the hostile fire within the weapon's radius of the Core (awarding nothing), counts the
 ## Bomb in the Attempt, shows the blast, and last damages every enemy registered in range
-## once: a kill may end the stage (F10), so nothing may follow it. The weapon feeds the
+## once. Its kills report their defeats inside that call, under [member _bomb_clearing], so
+## they play no ordinary death sound (F15-01). A kill may end the stage (F10), but the
+## clear arrives deferred, so only the flag's reset follows the call. The weapon feeds the
 ## button after every actor has registered, so this tick's spheres count.
 func _on_bomb_activated() -> void:
 	if _player == null:
@@ -601,7 +657,9 @@ func _on_bomb_activated() -> void:
 	_run_state.note_bomb_used()
 	audio.play_event(&"bomb_used")
 	_show_bomb_blast(weapon, center)
+	_bomb_clearing = true
 	projectile_system.damage_targets_in_radius(center, weapon.bomb_radius, weapon.bomb_damage)
+	_bomb_clearing = false
 
 
 ## Instances the weapon's blast visual at [param center], if it has one.
@@ -636,14 +694,25 @@ func _on_player_defeated() -> void:
 
 
 ## A stage clear, reached from the Director's `stage_cleared` deferred, never inside a
-## physics flush (F11-01): freezes the stage under Results with [param result] in the
-## layout for the Run Mode, and ends the Run with its one victory when the stage was the
-## last of the order. Results' buttons leave from the overlay: Menu principal, Créditos,
-## and Continuar or Jogar novamente (F11-02). Active Time already stopped, because the
-## Run is past `IN_STAGE`.
+## physics flush (F11-01). Clear Time froze at the kill, because the Run is past
+## `IN_STAGE`. Holds the victory beat of [constant VICTORY_BEAT_SECONDS] first, so the
+## boss's Death clip and the stage's defeat presentation are seen, then shows
+## [method _show_results] (F15-01). When the tree is already paused, by a Defeat raised in
+## the physics step of the last kill, Results replaces that Defeat at once, with no beat.
 func _on_stage_completed(result: Dictionary) -> void:
+	if get_tree().paused:
+		_show_results(result)
+		return
+	_begin_beat(VICTORY_BEAT_SECONDS, _show_results.bind(result))
+
+
+## Freezes the stage under Results with [param result] in the layout for the Run Mode,
+## and ends the Run with its one victory when the stage was the last of the order.
+## Results' buttons leave from the overlay: Menu principal, Créditos, and Continuar or
+## Jogar novamente (F11-02).
+func _show_results(result: Dictionary) -> void:
 	_set_paused(true)
-	# After the boss bell of the same kill, not over it.
+	# After the boss bell of the same kill, not over it, should it still ring.
 	audio.play_event_after(&"stage_cleared", &"boss_defeated")
 	# Results replaces any overlay: a Defeat raised in the physics step of the last kill.
 	if interface.current_screen() != ScreenRouter.HUD:

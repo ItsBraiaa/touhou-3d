@@ -1,5 +1,25 @@
 # Handoff Log
 
+## 2026-09-24 13:45 — Claude (trunk) — F15-01: victory beat, and a silent Bomb clear
+State: INTEGRATED_VERIFIED
+Files: `scripts/session/game_session.gd` (`VICTORY_BEAT_SECONDS`, `_begin_beat`, `_cancel_beat`, `_show_results`, `_in_beat`, `_beat_serial`, `_bomb_clearing`); `tests/scene/test_game_session_flow.gd` (`test_a_completed_stage_shows_results` now waits out the beat before its three unchanged asserts: the sprint rule's minimal adjustment of a test the ticket broke on purpose); `docs/engineering/audio.md` (Open issues); `docs/engineering/ROADMAP.md` (the F15-01 row).
+Change:
+- **Victory beat.** A stage clear still completes the stage at once, so Clear Time stops at the kill. Then, for 2.5 s, the tree keeps running:
+  - the ship's controls and fire are off, and the CombatState is paused, so no hit, Bomb or Pickup is taken;
+  - hostile fire is cleared, and Grazes are ignored;
+  - Pause is refused.
+  After the beat the tree pauses and Results shows, with `stage_cleared` and the `STAGE_RESULT` line as before. A Defeat raised in the physics step of the last kill still gets Results at once, with no beat.
+- **Reuse.** `_begin_beat(seconds, finish)` and `_cancel_beat()` are the mechanism F15-10 reuses. An unload (Restart, Menu, Continuar, Jogar novamente) or a Retry cancels a beat in progress.
+- **Bomb clear.** Enemies killed by a Bomb's damage play no `enemy_defeated`; its `bomb_used` covers them. A boss it kills still rings `boss_defeated` once.
+Verification: implementer and reviewer agents, then a headless `main.tscn` driver through the real Stage 1 route to S1-07 (throwaway, not in the repo):
+- Results came 2.52 s (151 ticks) after the Lantern Guardian's defeat. The tree was never paused, the screen stayed on the HUD, controls were off and the CombatState paused on every tick, and Clear Time was frozen at the kill.
+- Pause pressed 1 s into the beat was refused.
+- The boss `Death` clip (0.67 s) and the shrine's `corrupted_to_calm` (2.4 s) both played to the end before Results.
+- A Bomb kill in S1-05 left 0 `enemy_defeated` voices and 1 `bomb_used`; an ordinary kill right after still sounded.
+No tests (sprint rule).
+Action required by Astra: none. 2.5 s is Claude's proposal (the shrine clip is 2.4 s); retune `VICTORY_BEAT_SECONDS` if F15-04's storm calm is longer.
+Action required by path: in F15-02, keep `EnemyActor`'s `defeated` report inside its damage call, before the Death clip ("report `defeated` at once"). The Bomb-clear flag is only set during that call.
+
 ## 2026-09-24 — Claude (path) — Audio endings: boss and stage endings each play once, in order
 State: INTEGRATED_VERIFIED
 Files: `scripts/audio/audio_controller.gd` (`play_event_after`, `silence`, `stop_all` drops the waiting event); `scripts/session/game_session.gd` (`_boss_defeat_heard`, `_quit`, `_notification`, `QUIT_SILENCE_SECONDS`, `auto_accept_quit` off); `docs/engineering/audio.md`, `menus-session.md` (the `quit` row), `project.md` (open issue closed), `ROADMAP.md` (F13 row 05); `docs/validation/audio.md`.
